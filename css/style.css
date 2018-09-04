@@ -93,20 +93,16 @@ header {
 	border-bottom: 4px solid #000;
 }
 
-/* #menubar li a {
-  display: block;
+#menubar li a {
   width: 150px;
   height: 40px;
-  text-align: center;
-  color: #fff;
   font-size: 14px;
   line-height: 2.8;
-  background: #9fb7d4;
   transition: 0.5s;
   text-decoration: none;
-  border-right: 1px solid #eee;
   box-sizing: border-box;
-} */
+}
+
 #menubar > li:hover > a {/*layer-1*/
   color: orange;
   background: #afc6e2;
