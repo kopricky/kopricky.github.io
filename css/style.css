@@ -97,6 +97,10 @@ header {
 	text-align: center;
 }
 
+.dropline li{
+	margin-bottom: 40px;
+}
+
 /*メニュー１個あたりの設定*/
 
 .dropmenu li a{
