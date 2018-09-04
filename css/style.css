@@ -97,11 +97,6 @@ header {
 	text-align: center;
 }
 
-.dropline {
-	margin-bottom: 0px;
-	margin: 0;
-}
-
 /*メニュー１個あたりの設定*/
 
 .dropmenu li a{
@@ -129,6 +124,8 @@ header {
 
 .dropmenu li ul li{
 	width: 100%;
+	margin-bottom: 0px;
+	margin: 0;
 }
 
 .dropmenu li ul li a{
@@ -138,44 +135,22 @@ header {
 	text-align: left;
 }
 
-#flip3 ul {
-  visibility: hidden;
-  perspective: 400px;
+/* #menubar li ul{
+  display: none;
 }
-#flip3 li:hover ul{
-  visibility: visible;
+
+#menubar li:hover ul{
+  display: block;
+} */
+
+.dropmenu li ul li{
+  overflow: hidden;
+  height: 0;
+  transition: .2s;
 }
-#flip3 ul li{
-  transform: rotateX(-90deg);
-  transform-origin: 50% 0;
-  transition: .1s;
-}
-#flip3 li:hover ul li{
-  transform: rotateX(0);
-}
-#flip3 li:hover ul li:nth-child(1) {
-  transition-delay: 0s;
-}
-#flip3 li:hover ul li:nth-child(2) {
-  transition-delay: .1s;
-}
-#flip3 li:hover ul li:nth-child(3) {
-  transition-delay: .2s;
-}
-#flip3 li:hover ul li:nth-child(4) {
-  transition-delay: .3s;
-}
-#flip3 li ul li:nth-last-of-type(1) {
-  transition-delay: 0s;
-}
-#flip3 li ul li:nth-last-of-type(2) {
-  transition-delay: .1s;
-}
-#flip3 li ul li:nth-last-of-type(3) {
-  transition-delay: .2s;
-}
-#flip3 li ul li:nth-last-of-type(4) {
-  transition-delay: .3s;
+.dropmenu li:hover ul li{
+  overflow: visible;
+  height: 38px;
 }
 
 /*コンテンツ（見出しバーや文字などが入っているブロック）
