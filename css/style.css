@@ -97,8 +97,14 @@ header {
 	text-align: center;
 }
 
-.dropline li{
+.dropline {
 	margin-bottom: 0px;
+	margin 0;
+}
+
+.dropline li {
+	margin-bottom: 0px;
+	margin 0;
 }
 
 /*メニュー１個あたりの設定*/
