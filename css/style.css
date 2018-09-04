@@ -98,7 +98,11 @@ header {
 	text-align: center;
 }
 
-.dropline li{
+.dropline{
+	margin: 0;
+}
+
+.dropline li {
 	margin: 0;
 }
 
