@@ -87,13 +87,13 @@ header {
 }
 /*マウスオン時、現在表示中、の設定*/
 
-/* #menubar li a:hover,
+#menubar li a:hover,
 #menubar li.current a {
 	color: #000;
 	border-bottom: 4px solid #000;
-} */
+}
 
-#menubar li a {
+/* #menubar li a {
   display: block;
   width: 150px;
   height: 40px;
@@ -106,7 +106,7 @@ header {
   text-decoration: none;
   border-right: 1px solid #eee;
   box-sizing: border-box;
-}
+} */
 #menubar > li:hover > a {/*layer-1*/
   color: orange;
   background: #afc6e2;
