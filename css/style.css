@@ -72,24 +72,14 @@ header {
 /*メニュー
 ---------------------------------------------------------------------------*/
 /*メニュー全体を囲むブロック*/
-#menubar {
-	text-align: center;	/*文字をセンタリング*/
-	font-size: 18px;	/*文字サイズ*/
+
+#menubar li {
 	margin-bottom: 40px;	/*メニューの下に空けるスペース*/
 }
-/*メニュー１個あたりの設定*/
-#menubar li {
-	display: inline;	/*横並びにする設定*/
-}
-#menubar li a {
-	text-decoration: none;
-	padding: 15px 30px;	/*各メニュー内の余白。上下に15px、左右に30pxあけるという意味。*/
-}
-/*マウスオン時、現在表示中、の設定*/
-#menubar li a:hover,
-#menubar li.current a {
-	color: #000;
-	border-bottom: 4px solid #000;
+
+.dropmenu {
+	text-align: center;	/*文字をセンタリング*/
+	font-size: 18px;	/*文字サイズ*/
 }
 
 .dropmenu:before, .dropmenu:after{
@@ -102,6 +92,7 @@ header {
 }
 
 .dropmenu li{
+	display: inline;	/*横並びにする設定*/
 	position: relative;
 	width: 20%;
 	float: left;
@@ -110,9 +101,20 @@ header {
 	text-align: center;
 }
 
+/*メニュー１個あたりの設定*/
+
 .dropmenu li a{
+	text-decoration: none;
+	padding: 15px 30px;	/*各メニュー内の余白。上下に15px、左右に30pxあけるという意味。*/
 	display: block;
 	line-height: 1;
+}
+
+/*マウスオン時、現在表示中、の設定*/
+.dropmenu li a:hover,
+.dropmenu li.current a {
+	color: #000;
+	border-bottom: 4px solid #000;
 }
 
 .dropmenu li ul{
