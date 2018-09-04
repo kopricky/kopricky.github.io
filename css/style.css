@@ -79,88 +79,18 @@ header {
 }
 /*メニュー１個あたりの設定*/
 #menubar li {
-	display: inline;
+	display: inline;	/*横並びにする設定*/
 }
 #menubar li a {
 	text-decoration: none;
 	padding: 15px 30px;	/*各メニュー内の余白。上下に15px、左右に30pxあけるという意味。*/
 }
 /*マウスオン時、現在表示中、の設定*/
-
 #menubar li a:hover,
 #menubar li.current a {
-	color: #000;
-	border-bottom: 4px solid #000;
+	color: #000;	/*文字色*/
+	border-bottom: 4px solid #000;	/*下線の幅、線種、色*/
 }
-
-#menubar li a {
-  transition: 0.5s;
-  text-decoration: none;
-  box-sizing: border-box;
-}
-
-#menubar > li:hover > a {/*layer-1*/
-  color: orange;
-  background: #afc6e2;
-}
-#menubar > li li:hover > a {/*layer-2*/
-  color: olive;
-  background: #afc6e2;
-}
-#menubar li ul {
-  top: 40px;
-  left: -40px;
-  position: absolute;
-}
-#menubar li ul li {
-  overflow: hidden;
-  height: 0;
-  transition: 0.2s;
-}
-#menubar li ul li a {
-  border-top: 1px solid #eee;
-}
-#menubar li:hover > ul > li {
-  overflow: visible;
-  height: 40px;
-}
-  #menubar li ul li ul {
-    top: 0;
-    left: 110px;
-  }
-  #menubar li ul li ul:before {/*layer-2▷*/
-    position: absolute;
-    content: "";
-    top: 15px;
-    left: 30px;
-    border: 5px solid transparent;
-    border-left: 5px solid #fff;
-  }
-  #menubar li ul li ul li:hover > a {/*layer-3*/
-    color: pink;
-    background: #afc6e2;
-  }
-  #menubar li ul li ul.left {
-    top: 0;
-    left: -190px;
-  }
-  #menubar li ul li ul.left:before,/*layer-2-left▷*/
-  #menubar li ul li ul li ul.left:before {/*layer-3-left▷*/
-    position: absolute;
-    content: "";
-    top: 15px;
-    left: 190px;
-    border: 5px solid transparent;
-    border-right: 5px solid #fff;
-  }
-  #menubar li ul li ul.left li:hover > a {/*layer-2-left*/
-    color: pink;
-    background: #afc6e2;
-  }
-  #menubar li ul li ul li ul.left li:hover > a {/*layer-3-left*/
-    color: purple;
-    background: #afc6e2;
-  }
 
 /*コンテンツ（見出しバーや文字などが入っているブロック）
 ---------------------------------------------------------------------------*/
