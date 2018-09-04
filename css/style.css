@@ -94,10 +94,7 @@ header {
 }
 
 #menubar li a {
-  width: 150px;
-  height: 40px;
-  font-size: 14px;
-  line-height: 2.8;
+  display: block;
   transition: 0.5s;
   text-decoration: none;
   box-sizing: border-box;
