@@ -73,10 +73,6 @@ header {
 ---------------------------------------------------------------------------*/
 /*メニュー全体を囲むブロック*/
 
-#menubar {
-	margin-bottom: 40px;	/*メニューの下に空けるスペース*/
-}
-
 .dropmenu {
 	text-align: center;	/*文字をセンタリング*/
 	font-size: 18px;	/*文字サイズ*/
@@ -99,6 +95,10 @@ header {
 	margin-bottom: 40px;
 	padding: 0;
 	text-align: center;
+}
+
+.dropline li{
+	margin-bottom: 40px;	/*下に空けるスペース*/
 }
 
 /*メニュー１個あたりの設定*/
