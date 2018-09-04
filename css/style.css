@@ -135,6 +135,14 @@ header {
 	text-align: left;
 }
 
+.dropmenu li ul li:hover > a{
+	background: #6e7c0c;
+}
+
+.dropmenu li ul li a:hover{
+	background: #616d0b;
+}
+
 /* #menubar li ul{
   display: none;
 }
@@ -153,13 +161,13 @@ header {
   height: 38px;
 } */
 
-.dropmenu li ul{
+.dropmenu li ul li{
   opacity: 0;
   top: 50%;
   visibility: hidden;
   transition: .5s;
 }
-.dropmenu li:hover ul{
+.dropmenu li:hover ul li{
   top: 100%;
   visibility: visible;
   opacity: 1;
