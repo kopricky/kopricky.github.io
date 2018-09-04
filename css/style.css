@@ -143,7 +143,7 @@ header {
   display: block;
 } */
 
-.dropmenu li ul li{
+/* .dropmenu li ul li{
   overflow: hidden;
   height: 0;
   transition: .2s;
@@ -151,6 +151,18 @@ header {
 .dropmenu li:hover ul li{
   overflow: visible;
   height: 38px;
+} */
+
+.dropmenu li ul{
+  opacity: 0;
+  top: 50%;
+  visibility: hidden;
+  transition: .5s;
+}
+.dropmenu li:hover ul{
+  top: 100%;
+  visibility: visible;
+  opacity: 1;
 }
 
 /*コンテンツ（見出しバーや文字などが入っているブロック）
