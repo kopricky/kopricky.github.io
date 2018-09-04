@@ -86,10 +86,55 @@ header {
 	padding: 15px 30px;	/*各メニュー内の余白。上下に15px、左右に30pxあけるという意味。*/
 }
 /*マウスオン時、現在表示中、の設定*/
-#menubar li a:hover,
+/* #menubar li a:hover,
 #menubar li.current a {
-	color: #000;	/*文字色*/
-	border-bottom: 4px solid #000;	/*下線の幅、線種、色*/
+	color: #000;
+	border-bottom: 4px solid #000;
+} */
+
+.dropmenu:before, .dropmenu:after{
+	content: "",
+	display; table;
+}
+
+.dropmenu:after{
+	clear: both;
+}
+
+.dropmenu li{
+	position: relative;
+	width: 20%;
+	float: left;
+	margin: 0;
+	padding: 0;
+	text-align: center;
+}
+
+.dropmenu li a{
+	display: block;
+	margin: 0;
+	line-height: 1;
+}
+
+.dropmenu li ul{
+	line-height: none;
+	position: absolute;
+	z-index: 9999;
+	top: 100%;
+	left: 0;
+	margin: 0;
+	padding: 0;
+}
+
+.dropmenu li ul li{
+	width: 100%;
+}
+
+.dropmenu li ul li a{
+	padding: 13px 15px;
+	border-top: 1px solid #7c8c0e;
+	background: #6e7c0c;
+	text-align: left;
 }
 
 /*コンテンツ（見出しバーや文字などが入っているブロック）
