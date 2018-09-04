@@ -76,6 +76,7 @@ header {
 .dropmenu {
 	text-align: center;	/*文字をセンタリング*/
 	font-size: 18px;	/*文字サイズ*/
+	margin-bottom: 40px; /*下に空けるスペース*/
 }
 
 .dropmenu:before, .dropmenu:after{
@@ -98,7 +99,7 @@ header {
 }
 
 .dropline li{
-	margin-bottom: 40px;	/*下に空けるスペース*/
+	margin: 0;
 }
 
 /*メニュー１個あたりの設定*/
