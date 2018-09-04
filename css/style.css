@@ -78,9 +78,9 @@ header {
 	margin-bottom: 40px;	/*メニューの下に空けるスペース*/
 }
 /*メニュー１個あたりの設定*/
-/* #menubar li {
+#menubar li {
 	display: inline;
-} */
+}
 #menubar li a {
 	text-decoration: none;
 	padding: 15px 30px;	/*各メニュー内の余白。上下に15px、左右に30pxあけるという意味。*/
@@ -94,7 +94,6 @@ header {
 }
 
 #menubar li a {
-  display: block;
   transition: 0.5s;
   text-decoration: none;
   box-sizing: border-box;
