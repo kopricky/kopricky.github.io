@@ -303,10 +303,9 @@ footer .pr {
 .accbox label {
     display: block;
     margin: 1.5px 0;
-    padding : 8px 12px;
+    padding : 6px 12px;
     color: #333;
-    font-weight: bold;
-    background: #ebebeb;
+    background: #d9d9d9;
     cursor :pointer;
     transition: all 0.5s;
 }
@@ -315,6 +314,7 @@ footer .pr {
 .accbox label:before {
     content: '\f054';
     font-family: 'Font Awesome 5 Free';
+	font-weight: bold;
     padding-right: 18px;
 }
 
@@ -341,12 +341,15 @@ footer .pr {
 .cssacc:checked + label + .accshow {
     height: auto;
     padding: 5px;
-    background: #fff5eb;
+    background: #f3f3f3;
     opacity: 1;
 }
 
-.accbox .accshow p {
-    margin: 15px 10px}
+.accbox .accshow p a {
+	cursor :pointer;
+	font-weight: bold;
+	color: #444;
+}
 
 /*アイコンを入れ替える*/
 .cssacc:checked + label:before {
