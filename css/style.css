@@ -60,6 +60,10 @@ header {
 	z-index: 1;
 }
 
+#translate {
+	margin-bottom: 0px;	/*下に空けるスペース*/
+}
+
 /*トップページのメイン画像
 ---------------------------------------------------------------------------*/
 /*画像ブロック*/
@@ -73,9 +77,30 @@ header {
 ---------------------------------------------------------------------------*/
 /*メニュー全体を囲むブロック*/
 
-.dropmenu {
+#menubar {
 	text-align: center;	/*文字をセンタリング*/
 	font-size: 18px;	/*文字サイズ*/
+	margin-bottom: 40px;	/*メニューの下に空けるスペース*/
+}
+/*メニュー１個あたりの設定*/
+#menubar li {
+	display: inline;	/*横並びにする設定*/
+}
+#menubar li a {
+	text-decoration: none;
+	padding: 15px 30px;	/*各メニュー内の余白。上下に15px、左右に30pxあけるという意味。*/
+}
+/*マウスオン時、現在表示中、の設定*/
+#menubar li a:hover,
+#menubar li.current a {
+	color: #3d2d21;	/*文字色*/
+	border-bottom: 4px solid #3d2d21;	/*下線の幅、線種、色*/
+}
+
+
+/* .dropmenu {
+	text-align: center;
+	font-size: 18px;
 }
 
 .dropmenu:before, .dropmenu:after{
@@ -88,26 +113,26 @@ header {
 }
 
 .dropmenu li{
-	display: inline;	/*横並びにする設定*/
+	display: inline;
 	position: relative;
 	width: 20%;
 	float: left;
-	margin-bottom: 40px;
+	margin-bottom: 20px;
 	padding: 0;
 	text-align: center;
-}
+} */
 
 /*メニュー１個あたりの設定*/
 
-.dropmenu li a{
+/* .dropmenu li a{
 	text-decoration: none;
-	padding: 15px 30px;	/*各メニュー内の余白。上下に15px、左右に30pxあけるという意味。*/
+	padding: 15px 30px;
 	display: block;
 	line-height: 1;
-}
+} */
 
 /*マウスオン時、現在表示中、の設定*/
-.dropmenu li a:hover,
+/* .dropmenu li a:hover,
 .dropmenu li.current a {
 	color: #000;
 	border-bottom: 4px solid #000;
@@ -143,24 +168,6 @@ header {
 	background: #616d0b;
 }
 
-/* #menubar li ul{
-  display: none;
-}
-
-#menubar li:hover ul{
-  display: block;
-} */
-
-/* .dropmenu li ul li{
-  overflow: hidden;
-  height: 0;
-  transition: .2s;
-}
-.dropmenu li:hover ul li{
-  overflow: visible;
-  height: 38px;
-} */
-
 .dropmenu li ul li{
   opacity: 0;
   top: 50%;
@@ -171,7 +178,7 @@ header {
   top: 100%;
   visibility: visible;
   opacity: 1;
-}
+} */
 
 /*コンテンツ（見出しバーや文字などが入っているブロック）
 ---------------------------------------------------------------------------*/
