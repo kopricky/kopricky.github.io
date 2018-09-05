@@ -362,6 +362,14 @@ footer .pr {
     transition: 0.8s;
 }
 
+.accbox .accshow_ {
+    height: 0;
+    padding: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: 0.8s;
+}
+
 .accbox .accshow .accshow{
     height: 0;
     padding: 0;
@@ -376,6 +384,13 @@ footer .pr {
     padding: 5px;
     background: #f3f3f3;
     opacity: 1;
+}
+
+.cssacc:checked + label + .accshow_ {
+    height: auto;
+    padding: 5px;
+    background: #fff;
+	opacity: 1;
 }
 
 .accbox .accshow p a {
