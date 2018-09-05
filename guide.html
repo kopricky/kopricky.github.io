@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="ここにサイト説明を入れます">
+<meta name="keywords" content="キーワード１,キーワード２,キーワード３,キーワード４,キーワード５">
+<link rel="stylesheet" href="css/style.css">
+<script type="text/javascript" src="js/openclose.js"></script>
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body id="top">
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="index.html"><img src="images/logo_top.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+<p><img src="images/code_pic_re.png" alt="kopricky アルゴリズムライブラリ" id="mainimg"></p>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="index.html">Home</a></li>
+<li class="current"><a href="guide.html">Guide</a></li>
+<li><a href="code.html">Code</a></li>
+<li><a href="link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section id="about">
+
+<h2>概要</h2>
+<h3>Academic</h3>
+<p> 研究関連で実装したものおよび競技プログラミングよりも学問よりと思われるコードを置いています <br>
+(例) </p>
+<h3>BinarySearchTree</h3>
+<p> 平衡二分探索木関連のコードを置いています. すべて RBST で実装しているので乱択アルゴリズムです. 決定的なものが欲しい方は他の人の赤黒木の実装を参考にしてください. <br>
+(例) </p>
+<h3>ClassicProblem</h3>
+<p> いくつかの有名問題のコードを置いています. 有名問題は挙げればキリがないので、そのうちの一部を適当に並べてみたという感じです. <br>
+(例) </p>
+<h3>Computation (Basic)</h3>
+<p> 計算系(雑) のアルゴリズムのうち基本的なもののコードを置いています. <br>
+(例)</p>
+<h3>Computation (Advanced)</h3>
+<p> 計算系のアルゴリズムのうち発展的なもののコードを置いています. <br>
+(例)</p>
+<h3>DataStructure (Basic)</h3>
+<p> データ構造のアルゴリズムのうち基本的なもののコードを置いています. なお SegmentTree は SegmentTrees に、 永続系は PersistentDataStructure に置いています. <br>
+(例)</p>
+<h3>DataStructure (Advanced)</h3>
+<p> データ構造のアルゴリズムのうち発展的なもののコードを置いています. <br>
+(例)</p>
+<h3>DataStructure (OnGraph)</h3>
+<p> グラフを対象としたデータ構造のアルゴリズムのコードを置いています. <br>
+(例)</p>
+<h3>FFTs</h3>
+<p> FFT(高速フーリエ変換)関連のコードを置いています. <br>
+(例)</p>
+<h3>Geometry</h3>
+<p> 計算幾何の有名なアルゴリズムのコードを置いています. ここに関しては all_in  <br>
+(例)</p>
+<h3>GraphDecomposition</h3>
+
+<h3>Graph (SP, MST)</h3>
+<p>グラフの最短距離および最小全域木を求めるアルゴリズムを置いています.<br>
+(例)</p>
+<h3>Misc</h3>
+<p> 計算幾何の有名なアルゴリズムのコードを置いています. ここに関しては all_in  <br>
+(例)</p>
+<h3>MultiPrecitionIntegar</h3>
+<p> 計算幾何の有名なアルゴリズムのコードを置いています. ここに関しては all_in  <br>
+(例)</p>
+<h3>NetworkFlow</h3>
+<p> 計算幾何の有名なアルゴリズムのコードを置いています. ここに関しては all_in  <br>
+(例)</p>
+<h3>PersistentDataStructure</h3>
+<p> 計算幾何の有名なアルゴリズムのコードを置いています. ここに関しては all_in  <br>
+(例)</p>
+<h3>String</h3>
+<p> 計算幾何の有名なアルゴリズムのコードを置いています. ここに関しては all_in  <br>
+(例)</p>
+<h3>SyntaxAnalysis</h3>
+<p> 計算幾何の有名なアルゴリズムのコードを置いています. ここに関しては all_in  <br>
+(例)</p>
+<h3>Viewer</h3>
+<p> 計算幾何の有名なアルゴリズムのコードを置いています. ここに関しては all_in  <br>
+(例)</p>
+<h3>For Python</h3>
+<p> 主要なコードの一部を Python に移植したものを置いています. <br>
+</p>
+</section>
+
+<section>
+<h2>ファイルの階層構造</h2>
+<p>
+.<br>
+├── Academic<br>
+│   ├── Arbolescence.hpp<br>
+│   ├── BIT_2D_RangeAdd_RangeSum.hpp<br>
+│   ├── DominatorTree.hpp<br>
+│   ├── PolynomialSolver.hpp<br>
+│   ├── SA_IS.hpp<br>
+│   ├── SteinerTree.hpp<br>
+│   ├── UndirectedMinCut.hpp<br>
+│   ├── exact_treewidth_*O(2^n).cpp<br>
+│   ├── exact_treewidth_pspace.cpp<br>
+│   ├── header.hpp<br>
+│   ├── lineartime_RMQ.hpp<br>
+│   ├── lineartime_superbubble.hpp<br>
+│   ├── max_flow_PushRelabel.hpp<br>
+│   ├── pollard_prime_factorize.hpp<br>
+│   └── runge_kutta.hpp<br>
+├── Competitive_Programming<br>
+│   ├── BinarySearchTree<br>
+│   │   ├── RBST_Array.hpp<br>
+│   │   ├── RBST_Set.hpp<br>
+│   │   ├── RBST_lazy.hpp<br>
+│   │   ├── RBST_query.hpp<br>
+│   │   └── ordered_set.cpp<br>
+│   ├── ClassicProblem<br>
+│   │   ├── LCS.hpp<br>
+│   │   ├── LPS.hpp<br>
+│   │   ├── edit_distance.cpp<br>
+│   │   ├── histogram_largest_rectangle.cpp<br>
+│   │   ├── largest_rectangle.cpp<br>
+│   │   └── limitedknapsack_slidemin.hpp<br>
+│   ├── Computation_Advanced<br>
+│   │   ├── 01_knapsack_bound_branch.hpp<br>
+│   │   ├── BabyStep_GiantStep.hpp<br>
+│   │   ├── CRT.hpp<br>
+│   │   ├── Hungarian.hpp<br>
+│   │   ├── Lagrange_interpolation.hpp<br>
+│   │   ├── Mapping_12_phase.hpp<br>
+│   │   ├── SlideMin.hpp<br>
+│   │   ├── inversion_count.hpp<br>
+│   │   ├── kitamasa.hpp<br>
+│   │   ├── miller_rabbin.hpp<br>
+│   │   ├── parallel_binary_search.hpp<br>
+│   │   ├── rapid_count_divisor.hpp<br>
+│   │   ├── simplex.hpp<br>
+│   │   └── simplex_exit_loop.hpp<br>
+│   ├── Computation_Basic<br>
+│   │   ├── RecurrenceSolver.hpp<br>
+│   │   ├── Zeller.hpp<br>
+│   │   ├── all_fac.hpp<br>
+│   │   ├── allxor.hpp<br>
+│   │   ├── binary_tree.hpp<br>
+│   │   ├── divisor.hpp<br>
+│   │   ├── gcd_lcm.hpp<br>
+│   │   ├── mod_combination.hpp<br>
+│   │   ├── mod_inv.hpp<br>
+│   │   ├── mod_pow.hpp<br>
+│   │   ├── next_combination.hpp<br>
+│   │   ├── prime_factorize.hpp<br>
+│   │   ├── prime_judge.hpp<br>
+│   │   └── prime_number.hpp<br>
+│   ├── DataStructure_Advanced<br>
+│   │   ├── BIT_2D_RangeAdd_RangeSum.hpp<br>
+│   │   ├── BIT_two_dimension.hpp<br>
+│   │   ├── LIS2D.hpp<br>
+│   │   ├── Moalgorithm.hpp<br>
+│   │   ├── WaveletMatrix.hpp<br>
+│   │   ├── WaveletTree.hpp<br>
+│   │   ├── convex_hull_trick.hpp<br>
+│   │   └── dynamic_CHT.hpp<br>
+│   ├── DataStructure_Basic<br>
+│   │   ├── BIT.hpp<br>
+│   │   ├── BIT_1D_RangeAdd_RangeSum.hpp<br>
+│   │   ├── Binary_Trie.hpp<br>
+│   │   ├── QuadraticDecomposition.hpp<br>
+│   │   ├── SparseTable.hpp<br>
+│   │   ├── SparseTable_index.hpp<br>
+│   │   ├── Trie.hpp<br>
+│   │   ├── UpdateInterval.hpp<br>
+│   │   └── UpdateInterval_plus.hpp<br>
+│   ├── DataStructure_On_Graph<br>
+│   │   ├── HL_decomposition_query.hpp<br>
+│   │   ├── HL_decomposition_subtree.hpp<br>
+│   │   ├── LCA.hpp<br>
+│   │   ├── LinkCutTree.hpp<br>
+│   │   ├── RootedCentroidDecomposition.hpp<br>
+│   │   ├── UnionFind.hpp<br>
+│   │   ├── UnionFind_reverse.hpp<br>
+│   │   ├── Weighted_UnionFind.hpp<br>
+│   │   ├── centroid_decomposition.hpp<br>
+│   │   ├── skew_heap.hpp<br>
+│   │   └── skew_heap_lazy.hpp<br>
+│   ├── FFTs<br>
+│   │   ├── FFT.hpp<br>
+│   │   ├── FWHT.hpp<br>
+│   │   ├── NTT.hpp<br>
+│   │   └── NTT_arbitrary_modulo.hpp<br>
+│   ├── Geometry<br>
+│   │   ├── all_in.hpp<br>
+│   │   ├── area.hpp<br>
+│   │   ├── basic.hpp<br>
+│   │   ├── closest_pair.hpp<br>
+│   │   ├── convex.hpp<br>
+│   │   ├── crosspoint.hpp<br>
+│   │   ├── distance.hpp<br>
+│   │   ├── intersect.hpp<br>
+│   │   ├── line.hpp<br>
+│   │   ├── slope.hpp<br>
+│   │   ├── tangent.hpp<br>
+│   │   └── voronoi.hpp<br>
+│   ├── Graph<br>
+│   │   ├── 2-SAT.hpp<br>
+│   │   ├── Arbolescence.hpp<br>
+│   │   ├── SteinerTree.hpp<br>
+│   │   ├── UndirectedMinCut.hpp<br>
+│   │   ├── centroid.hpp<br>
+│   │   ├── clique_number.hpp<br>
+│   │   ├── color_number.hpp<br>
+│   │   ├── euler_tour.hpp<br>
+│   │   ├── euler_trail.hpp<br>
+│   │   ├── merge_tech.hpp<br>
+│   │   ├── topological_sort.hpp<br>
+│   │   ├── topological_sort_queue.hpp<br>
+│   │   ├── tree_diameter.hpp<br>
+│   │   └── tree_isomorphic.hpp<br>
+│   ├── Graph_Decomposition<br>
+│   │   ├── DominatorTree.hpp<br>
+│   │   ├── FunctionalGraph.hpp<br>
+│   │   ├── Namori.hpp<br>
+│   │   ├── SCC.hpp<br>
+│   │   ├── articulation_node.hpp<br>
+│   │   └── biconnected.hpp<br>
+│   ├── Graph_SP_MST<br>
+│   │   ├── Kruskal.hpp<br>
+│   │   ├── bellman_ford.hpp<br>
+│   │   ├── dijkstra.hpp<br>
+│   │   ├── dijkstra_dense_graph.hpp<br>
+│   │   ├── dijkstra_rapid.hpp<br>
+│   │   ├── prim.hpp<br>
+│   │   ├── prim_dense_graph.hpp<br>
+│   │   └── warshall_floyd.hpp<br>
+│   ├── ICPC<br>
+│   │   ├── Dice.hpp<br>
+│   │   ├── ICPC_matrix.hpp<br>
+│   │   ├── ICPC_rolling_hash_double.hpp<br>
+│   │   └── ICPC_rollinghash.hpp<br>
+│   ├── Matrix<br>
+│   │   ├── bit_matrix.hpp<br>
+│   │   └── matrix.hpp<br>
+│   ├── Misc<br>
+│   │   ├── EraseOuterInnerInterval.hpp<br>
+│   │   ├── hoge.cpp<br>
+│   │   ├── input_ouput.hpp<br>
+│   │   ├── int128.hpp<br>
+│   │   ├── loop_unrolling.cpp<br>
+│   │   ├── template.cpp<br>
+│   │   └── time.hpp<br>
+│   ├── MultiPrecisionInteger<br>
+│   │   ├── multi_precision_integer.hpp<br>
+│   ├── NetworkFlow<br>
+│   │   ├── Dinic.hpp<br>
+│   │   ├── bipartite_matching.hpp<br>
+│   │   ├── ford_fulkerson.hpp<br>
+│   │   ├── limited_mincap_maxflow.hpp<br>
+│   │   ├── min_cost_flow.hpp<br>
+│   │   ├── min_cost_flow_DAG.hpp<br>
+│   │   └── min_cost_flow_exist_negative_edge.hpp<br>
+│   ├── PersistentDataStructure<br>
+│   │   ├── RBST_lazy_persistent.hpp<br>
+│   │   ├── persistent_Array.hpp<br>
+│   │   ├── persistent_RBST_Set.hpp<br>
+│   │   ├── persistent_UnionFind.hpp<br>
+│   │   └── persistent_segtree.hpp<br>
+│   ├── SegmentTrees<br>
+│   │   ├── OrthogonalRangeReport.hpp<br>
+│   │   ├── basic<br>
+│   │   │   ├── PointUpdateQueryandRangeMinQuery_with_index.hpp<br>
+│   │   │   ├── Range01XorQueryandRangeSumQuery.hpp<br>
+│   │   │   ├── RangeAddQueryandRangeMinQuery.hpp<br>
+│   │   │   ├── RangeAddQueryandRangeMinQuery_with_index.hpp<br>
+│   │   │   ├── RangeAddQueryandRangeSumQuery.hpp<br>
+│   │   │   ├── RangeAndQuery_RangeOrQueryandRangeMinQuery.hpp<br>
+│   │   │   ├── RangeMaxUpdateQueryandRangeSumQuery.hpp<br>
+│   │   │   ├── RangeModuloQueryandRangeSumQuery.hpp<br>
+│   │   │   ├── RangeTree_PointUpdate.hpp<br>
+│   │   │   ├── RangeUpdateQuery_RangeAddQueryandRangeMinQuery.hpp<br>
+│   │   │   ├── RangeUpdateQuery_RangeAddQueryandRangeSumQuery.hpp<br>
+│   │   │   ├── RangeUpdateQueryandRangeMinQuery.hpp<br>
+│   │   │   ├── RangeUpdateQueryandRangeMinQuery_with_index.hpp<br>
+│   │   │   ├── RangeUpdateQueryandRangeSumQuery.hpp<br>
+│   │   │   ├── segtree.hpp<br>
+│   │   │   └── segtree_nonrecursion.hpp<br>
+│   │   ├── dynamic_segtree.hpp<br>
+│   │   ├── dynamic_segtree_lazy.hpp<br>
+│   │   └── merge_segtree.hpp<br>
+│   ├── String<br>
+│   │   ├── Aho-Corasick.hpp<br>
+│   │   ├── KMP.hpp<br>
+│   │   ├── SA_IS.hpp<br>
+│   │   ├── SA_IS_binary_search.hpp<br>
+│   │   ├── manacher.hpp<br>
+│   │   ├── minimum_loop.hpp<br>
+│   │   ├── rolling_hash.hpp<br>
+│   │   ├── rolling_hash_double.hpp<br>
+│   │   ├── suffix_arrayandlcp.hpp<br>
+│   │   └── z_algorithm.hpp<br>
+│   ├── SyntaxAnalysis<br>
+│   │   └── syntax_analysis_arithmetic.cpp<br>
+│   ├── Viewer<br>
+│   │   ├── graphviz.hpp<br>
+│   │   ├── matplotlib.cpp<br>
+│   │   └── matplotlib.hpp<br>
+│   └── header.hpp<br>
+├── README.md<br>
+└── _config.yml<br>
+</p>
+</section>
+
+
+<section>
+
+<h2>当テンプレートについて</h2>
+
+<h3>当テンプレートはhtml5+CSS3(レスポンシブWEBデザイン)です</h3>
+<p>当テンプレートは、パソコン、スマホ、タブレットでhtml共通のレスポンシブWEBデザインになっております。<br>
+古いブラウザ（※特にIE8以下）で閲覧した場合にCSSの一部が適用されない（角を丸くする設定など）のでご注意下さい。</p>
+
+<h3>各デバイスごとのレイアウトチェックは</h3>
+<p>最終的なチェックは実際のタブレットやスマホで行うのがおすすめですが、臨時チェックは最新のブラウザ(IEならIE10以降)で行う事もできます。ブラウザの幅を狭くしていくと、各端末サイズに合わせたレイアウトになります。</p>
+<p>注意：cssはリアルタイムで反映されますが、javascript(js)は<span class="color1">ブラウザを再読み込み</span>させないと反映されないので、レイアウトが切り替わったらブラウザを再読み込みさせて下さい。javascriptは小さい端末用の開閉ブロックなどに使われています。</p>
+
+<h3>各デバイス用のスタイル変更は</h3>
+<p>cssフォルダのstyle.cssファイルで行って下さい。詳しい説明も入っています。<br>
+前半はパソコン環境を含めた全端末の共通設定になります。中盤以降、各端末向けのスタイルが追加設定されています。<br>
+media=&quot; (～)&quot;の「～」部分でcssを切り替えるディスプレイのサイズを設定しています。ここは必要に応じて変更も可能です。</p>
+
+</section>
+
+<section>
+
+<h2>当テンプレートの使い方</h2>
+
+<h3>titleタグ、copyright、metaタグ、他の設定</h3>
+<p><strong class="color1">■titleタグの設定はとても重要です。念入りにワードを選んで適切に入力しましょう。</strong><br>
+まず、htmlソースが見れる状態にして、上から６行目あたりにある、<br>
+<span class="look">&lt;title&gt;初心者向けホームページテンプレート tp_beginner5&lt;/title&gt;</span><br>
+を編集しましょう。<br>
+あなたのホームページ名が「SAMPLE SITE」だとすれば、<br>
+<span class="look">&lt;title&gt;SAMPLE SITE&lt;/title&gt;</span><br>
+とすればＯＫです。</p>
+<p><strong class="color1">■copyrightを変更しましょう。</strong><br>
+続いてhtmlの下の方にある、<br>
+<span class="look">Copyright&copy; SAMPLE SITE All Rights Reserved.</span><br>
+の「SAMPLE SITE」部分もあなたのサイト名に変更します。</p>
+<p><strong class="color1">■metaタグを変更しましょう。</strong><br>
+htmlソースが見える状態にしてmetaタグを変更しましょう。</p>
+<p>ソースの上の方に、<br>
+<span class="look">content=&quot;ここにサイト説明を入れます&quot;</span><br>
+という部分がありますので、テキストをサイトの説明文に入れ替えます。検索結果の文面に使われる場合もありますので、見た人が来訪したくなるような説明文を簡潔に書きましょう。</p>
+<p>続いて、その下の行の<br>
+<span class="look">content=&quot;キーワード１,キーワード２,～～～&quot;</span><br>
+も設定します。ここはサイトに関係のあるキーワードを入れる箇所です。10個前後ぐらいあれば充分です。キーワード間はカンマ「,」で区切ります。</p>
+<p><strong class="color1">■ロゴ画像のalt指定と、ロゴ画像本体も変更しましょう。</strong><br>
+html側に<br>
+<span class="look">&lt;img src=&quot;images/logo_top.png&quot; alt=&quot;SAMPLE SITE&quot;&gt;</span><br>
+又は、<br>
+<span class="look">&lt;img src=&quot;images/logo.png&quot; alt=&quot;SAMPLE SITE&quot;&gt;</span><br>
+となっている箇所があるので、ここのalt指定(SAMPLE SITE)もあなたのサイト名に変更しましょう。</p>
+<p>ロゴ画像本体については、baseフォルダに文字なしの土台画像「logo.png(トップ以外で使うロゴ)」と「logo_top.png(トップページで使うロゴ)」が入っているので、画像ソフトなど使ってあなたのサイト名を入れて、imagesフォルダに上書きしましょう。<br>
+このロゴ画像、HPで見るサイズよりかなり大きく感じると思いますが、高解像度の端末でピンボケさせない為に適当に大きくしてあります。</p>
+<p>レイアウト上のロゴの大きさは、cssフォルダのstyle.cssの<br>
+<spna class="color1">/*ヘッダー（ロゴが入った最上段のブロック）</spna><br>
+のブロックで設定されている、<br>
+<span class="color1">#logo img</span><br>
+にあるwidthの値で変更可能です。css下の方に小さな端末用の設定がある場合もあるのでそちらも確認して下さい。</p>
+
+<h3>上部メニューの「現在表示中」の設定について</h3>
+<p>現在表示中のメニューに装飾が入りますが、これはhtml側のliタグに直接class=&quot;current&quot;と指定する必要があり、自動では入りませんので注意して下さい。<br>
+例えば当ページだと、通常なら、<br>
+<strong>&lt;li&gt;&lt;a href=&quot;about.html&quot;&gt;About&lt;/a&gt;&lt;/li&gt;</strong><br>
+ですが、class=&quot;current&quot;を追加し、<br>
+<strong>&lt;li <span class="color1">class=&quot;current&quot;</span>&gt;&lt;a href=&quot;about.html&quot;&gt;About&lt;/a&gt;&lt;/li&gt;</strong><br>
+のようにする事で装飾が入ります。</p>
+<h3>その他、テンプレートのカラーやデザイン変更などは</h3>
+<p>cssフォルダのstyle.cssで行って下さい。詳しい解説も書かれています。<br>
+cssの解説は、「<span class="color1">/*</span>」と「<span class="color1">*/</span>」の間にコメントとして入れています。「<span class="color1">/*</span>」と「<span class="color1">*/</span>」はcss用のコメントタグであり、飾りではないので削除をしないで下さい。もし解説を削除したい場合は、「<span class="color1">/*</span>」と「<span class="color1">*/</span>」含めて丸ごと削除して下さい。</p>
+
+<h3>プレビューでチェックすると警告メッセージが出る場合(一部ブラウザ対象)</h3>
+<p>主にjavascript（jsファイル）ファイルによって出る警告ですが、WEB上では出ません。また、この警告が出ている間は効果を見る事ができないので、警告メッセージ内でクリックして解除してあげて下さい。これにより効果がちゃんと見れるようになります。</p>
+
+<h3>うまく編集できない場合は</h3>
+<p><a href="https://template-party.com/bbs/">サポート掲示板</a>からご質問下さい。対応可能な範囲内でサポートしております。</p>
+
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+</div>
+<!--/container-->
+
+</body>
+</html>
