@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../css/style.css">
+<script type="text/javascript" src="../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../css/prettify.css" type="text/css">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../index.html"><img src="../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../guide.html">Guide</a></li>
+<li class="current"><a href="../code.html">Code</a></li>
+<li><a href="../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>exact_treewidth_*O(2^n)</h2>
+<h3>コードについての説明</h3>
+<p>
+木幅の exact な値を DP を用いて計算するアルゴリズム. 説明すると長くなるので下記の論文を参照してください. <br>
+<a href="https://opus4.kobv.de/opus4-zib/files/926/ZR-06-32.pdf">Bodlaender et al. 2006</a>
+</p>
+<p>
+時間計算量: O*(2^n) (poly(n) の factor は省略)
+</p>
+<h3>コード</h3>
+<pre class="prettyprint linenums">
+#include&lt;iostream&gt;
+#include&lt;vector&gt;
+#include&lt;algorithm&gt;
+#include&lt;set&gt;
+#define INF 1000000005
+
+const int MAX_SIZE = 25;
+
+std::vector&lt;int&gt; graph[MAX_SIZE];
+
+std::pair&lt;int, int&gt; maximum_clique(int node_size)
+{
+    std::vector&lt;std::vector&lt;bool&gt; &gt; connected(node_size, std::vector&lt;bool&gt;(node_size, false));
+    for(int i = 0; i &lt; node_size; i++){
+        for(int j = 0; j &lt; (int)graph[i].size(); j++){
+            connected[i][graph[i][j]] = true;
+        }
+    }
+    int ans_value = 0;
+    int ans_set = 0;
+    for(int S = (1 &lt;&lt; node_size) - 1; S &gt;= 1; S--){
+        int S_size = __builtin_popcount(S);
+        if(S_size &lt;= ans_value){
+            continue;
+        }
+        bool ok = true;
+        for(int i = 0; i &lt; node_size; i++){
+            for(int j = 0; j &lt; i; j++){
+                if(((S &gt;&gt; i) &amp; (S &gt;&gt; j) &amp; 1) &amp;&amp; !connected[i][j]){
+                    ok = false;
+                }
+            }
+        }
+        if(ok){
+            ans_value = S_size;
+            ans_set = S;
+        }
+    }
+    return std::make_pair(ans_value, ans_set);
+}
+
+void solve_Q_size(const int v, int cur_vertex, const int subset, int&amp; Q_size, int&amp; visited)
+{
+    visited |= (1 &lt;&lt; cur_vertex);
+    for(int i = 0; i &lt; graph[cur_vertex].size(); i++){
+        int next_vertex = graph[cur_vertex][i];
+        //一度訪れた点はたどらない
+        if(visited &amp; (1 &lt;&lt; next_vertex)){
+            continue;
+        }
+        //subsetに含まれていたらさらにたどる,含まれていなかったらQ_sizeを増やして終了
+        if(subset &amp; (1 &lt;&lt; next_vertex)){
+            solve_Q_size(v, next_vertex, subset, Q_size, visited);
+        }else{
+            visited |= (1 &lt;&lt; next_vertex);
+            Q_size++;
+        }
+    }
+    return;
+}
+
+int solve_treewidth(int node_size)
+{
+    int V = (1 &lt;&lt; node_size) - 1;
+    std::pair&lt;int, int&gt; res = maximum_clique(node_size);
+    int max_clique_size = res.first, max_clique = res.second;
+    int upper_bound = node_size - 1;
+    std::set&lt;std::pair&lt;int, int&gt; &gt; TW[MAX_SIZE];
+    TW[0].insert(std::make_pair(0, -INF) );
+    for(int i = 1; i &lt;= node_size - max_clique_size; i++){
+        for(const std::pair&lt;int, int&gt; element: TW[i-1]){
+            int subset = element.first;
+            int TW_value = element.second;
+            for(int v = 0; v &lt; node_size; v++){
+                if(!(subset &amp; (1 &lt;&lt; v))){
+                    int next_subset = subset ^ (1 &lt;&lt; v);
+                    int Q_size = 0;
+                    int visited = 0;
+                    solve_Q_size(v, v, subset, Q_size, visited);
+                    int candidate = std::max(TW_value, Q_size);
+                    if(candidate &lt; upper_bound){
+                        upper_bound = std::min(upper_bound, node_size - i);
+                        std::set&lt;std::pair&lt;int, int&gt; &gt;::iterator it =
+                            std::lower_bound(TW[i].begin(), TW[i].end(), std::make_pair(next_subset, -INF));
+                        if(it == TW[i].end()){
+                            TW[i].insert(std::make_pair(next_subset, candidate));
+                            continue;
+                        }
+                        std::pair&lt;int, int&gt; it_value = *it;
+                        //存在していたら
+                        if(it_value.first == next_subset){
+                            if(candidate &lt; it_value.second){
+                                TW[i].erase(it);
+                                it_value.second = candidate;
+                                TW[i].insert(it_value);
+                            }
+                        }else{
+                            TW[i].insert(std::make_pair(next_subset, candidate));
+                        }
+                    }
+                }
+            }
+        }
+        TW[i-1].clear();
+    }
+    std::set&lt;std::pair&lt;int, int&gt; &gt;::iterator it =
+        std::lower_bound(TW[node_size - max_clique_size].begin(), TW[node_size - max_clique_size].end(), std::make_pair(V ^ max_clique, -INF));
+    if(it == TW[node_size - max_clique_size].end()){
+        return upper_bound;
+    }
+    std::pair&lt;int, int&gt; it_value = *it;
+    if(it_value.first == V ^ max_clique &amp;&amp; it_value.first != 0){
+        return it_value.second;
+    }else{
+        return upper_bound;
+    }
+}
+
+int main(){
+    int node_size, edge_size;
+    std::cin &gt;&gt; node_size &gt;&gt; edge_size;
+    for(int i = 0; i &lt; edge_size; i++){
+        int u,v;
+        std::cin &gt;&gt; u &gt;&gt; v;
+        graph[u].push_back(v), graph[v].push_back(u);
+    }
+    clock_t start = clock();    // スタート時間
+    std::cout &lt;&lt; solve_treewidth(node_size) &lt;&lt; std::endl;
+    clock_t end = clock();     // 終了時間
+    std::cout &lt;&lt; &quot;duration = &quot; &lt;&lt; (double)(end - start) / CLOCKS_PER_SEC &lt;&lt; &quot;sec.\n&quot;;
+}
+
+</pre>
+<h3>verify 用の問題</h3>
+<p>
+verify していません(verify 問題を知らない)
+</p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../js/prettify.js"></script>
+<script src="../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../css/style.css">
+<script type="text/javascript" src="../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../css/prettify.css" type="text/css">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../index.html"><img src="../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../guide.html">Guide</a></li>
+<li class="current"><a href="../code.html">Code</a></li>
+<li><a href="../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>arbolescence</h2>
+<h3>コードについての説明</h3>
+<p>根 r と有向辺が与えられたときに最小全域有向木(根からすべての点に有向辺の向きに沿って到達できるような木)を求めるアルゴリズム<br>
+根から DFS で辺をたどっていき、 たどった頂点がなすパスがサイクルになる場合は適宜サイクルを開く. <br>
+操作自体は簡単だが, 頂点の圧縮やヒープの併合などの実装コストが割とある. </p>
+<p>
+このアルゴリズムについては圧倒的に<a href="http://joisino.hatenablog.com/entry/2017/01/11/230141">このブログの記事</a>がわかりやすいです. 大いに参考にさせていただきました. <br>
+また元論文は <a href="https://cw.fel.cvut.cz/old/_media/courses/a4m33pal/cviceni/tarjan-finding-optimum-branchings.pdf">
+Tarjan 1977</a> です.
+</p>
+<p>
+時間計算量: O(mlogn)
+</p>
+</p>
+<h3>コード</h3>
+<pre class="prettyprint linenums">
+class UnionFind {
+private:
+    int sz; vector&lt;int&gt; par;
+public:
+    UnionFind(){}
+    UnionFind(int node_size) : sz(node_size), par(sz){
+        iota(par.begin(),par.end(),0);
+    }
+    int find(int x){
+        if(par[x] == x) return x;
+        else return par[x] = find(par[x]);
+    }
+    void unite(int x,int y){
+        x = find(x), y = find(y);
+        if(x == y) return;
+    	par[x] = y;
+    }
+    bool same(int x,int y){
+        return find(x) == find(y);
+    }
+};
+
+//マージ可能なヒープ(skew heap)
+template&lt;typename T&gt; class LazyHeap {
+public:
+    struct node{
+        node *l, *r;
+        T val, lazy;
+        int id;
+        node(T t, int i) : l(nullptr), r(nullptr), val(t), lazy(0), id(i){}
+    };
+    void push(node* a){
+        if(a-&gt;l) a-&gt;l-&gt;lazy += a-&gt;lazy;
+        if(a-&gt;r) a-&gt;r-&gt;lazy += a-&gt;lazy;
+        a-&gt;val += a-&gt;lazy;
+        a-&gt;lazy = 0;
+    }
+    node* meld(node* a, node* b){
+        if(!a) return b; if(!b) return a;
+        if(a-&gt;val+a-&gt;lazy &gt; b-&gt;val+b-&gt;lazy) swap(a, b);
+        push(a);
+        a-&gt;r = meld(a-&gt;r,b);
+        swap(a-&gt;l, a-&gt;r);
+        return a;
+    }
+    node* insert(node* org, T val, int i){
+        node* p = new node(val, i);
+        return meld(org, p);
+    }
+    node* erase(node* p){
+        push(p);
+        return meld(p-&gt;l, p-&gt;r);
+    }
+};
+
+template&lt;typename T&gt; class Arborescence {
+public:
+    // ここでの edge の cost は枝の重みというよりは枝を取り替えたときの差分を持っている
+    struct edge{
+        int from, to;
+        T cost;
+    };
+    int V;
+    LazyHeap&lt;T&gt; heap;
+    vector&lt;edge&gt; es;
+    vector&lt;int&gt; used, from, from_cost;
+    // 各頂点ごとに入ってくる辺を skew heap で管理
+    vector&lt;typename LazyHeap&lt;T&gt;::node*&gt; come;
+    Arborescence(int node_size) : V(node_size), used(V, 0),
+        from(V), from_cost(V), come(V, nullptr){}
+    void add_edge(int u, int v, T cost){
+        es.push_back((edge){u,v,cost});
+    }
+    //rを根とする最小全域有向木のコストを計算
+    T solve(int r){
+        used[r] = 2;
+        UnionFind uf(V);
+        for(int i = 0; i &lt; (int)es.size(); i++){
+            edge&amp; e = es[i];
+            come[e.to] = heap.insert(come[e.to], e.cost, i);
+        }
+        T ans = 0;
+        for(int i = 0; i &lt; V; i++){
+            // i に入ってくる辺がすでに存在する場合
+            if(used[i] != 0) continue;
+            int cur = i;
+            vector&lt;int&gt; path;
+            while(used[cur] != 2){
+                used[cur] = 1;
+                path.push_back(cur);
+                //全域有向木が存在しない場合
+                if(!come[cur]) return numeric_limits&lt;T&gt;::max();
+                from[cur] = uf.find(es[come[cur]-&gt;id].from);
+                from_cost[cur] = come[cur]-&gt;val + come[cur]-&gt;lazy;
+                come[cur] = heap.erase(come[cur]);
+                // 自己ループの場合
+                if(from[cur] == cur) continue;
+                ans += from_cost[cur];
+                // サイクルをたどって１つの頂点に圧縮する
+                if(used[from[cur]] == 1){
+                    int p = cur;
+                    do{
+                        if(come[p]){
+                            come[p]-&gt;lazy -= from_cost[p];
+                        }
+                        if(p != cur){
+                            uf.unite(p,cur);
+                            come[cur] = heap.meld(come[cur],come[p]);
+                        }
+                        p = uf.find(from[p]);
+                    }while(p != cur);
+                }else{
+                    cur = from[cur];
+                }
+            }
+            // 頂点を確定済みにする
+            for(int v : path){
+                used[v] = 2;
+            }
+        }
+        return ans;
+    }
+};
+</pre>
+<h3>verify 用の問題</h3>
+<p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_2_B&lang=jp">Minimum-Cost Arborescence</a>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3122547#1">提出コード</a></p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../js/prettify.js"></script>
+<script src="../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>
