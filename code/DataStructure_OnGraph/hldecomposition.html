@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>アルゴリズム名</h2>
+<h3>コードについての説明</h3>
+<p>
+元論文は <a href=""></a>
+</p>
+<p>
+時間計算量: O(mlogn)
+</p>
+<h3>コード</h3>
+<pre class="prettyprint linenums">
+class HLdecomposition{
+public:
+    int V;
+    vector&lt;vector&lt;int&gt; &gt; G;
+    vector&lt;int&gt; stsize, parent, pathtop, in, out;
+    void BuildStsize(int u, int p){
+        stsize[u] = 1, parent[u] = p;
+        for(int&amp; v : G[u]){
+            if(v == p) continue;
+            BuildStsize(v, u);
+            stsize[u] += stsize[v];
+            if(stsize[v] &gt; stsize[G[u][0]]){
+                swap(v, G[u][0]);
+            }
+        }
+    }
+    void BuildPath(int u, int p, int&amp; tm){
+        in[u] = tm++;
+        for(int v : G[u]){
+            if(v == p) continue;
+            pathtop[v] = (v == G[u][0] ? pathtop[u] : v);
+            BuildPath(v, u, tm);
+        }
+        out[u] = tm;
+    }
+
+public:
+    void add_edge(int u, int v){
+        G[u].push_back(v), G[v].push_back(u);
+    }
+    void build(){
+        int tm = 0;
+        BuildStsize(0, -1), BuildPath(0, -1, tm);
+    }
+    //元の頂点のインデックスの配列上でのidを返す
+    inline int get(int a){
+        return in[a];
+    }
+    int lca(int a, int b){
+        int pa = pathtop[a], pb = pathtop[b];
+        while(pathtop[a] != pathtop[b]){
+            if(in[pa] &gt; in[pb]){
+                a = parent[pa], pa = pathtop[a];
+            }else{
+                b = parent[pb], pb = pathtop[b];
+            }
+        }
+        if(in[a] &gt; in[b]) swap(a, b);
+        return a;
+    }
+    void subtree_query(int a, const function&lt; void(int, int) &gt; &amp;func){
+        func(in[a], out[a]);
+    }
+    void path_query(int a, int b, const function&lt; void(int, int) &gt; &amp;func){
+        int pa = pathtop[a], pb = pathtop[b];
+        while(pathtop[a] != pathtop[b]){
+            if(in[pa] &gt; in[pb]){
+                func(in[pa], in[a] + 1);
+                a = parent[pa], pa = pathtop[a];
+            }else{
+                func(in[pb], in[b] + 1);
+                b = parent[pb], pb = pathtop[b];
+            }
+        }
+        if(in[a] &gt; in[b]) swap(a, b);
+        func(in[a], in[b] + 1);
+    }
+    HLdecomposition(int node_size) : V(node_size), G(V), stsize(V, 0), parent(V, -1),
+        pathtop(V, -1), in(V, -1), out(V, -1){}
+};
+</pre>
+<h3>verify 用の問題</h3>
+<p>yukicoder : <a href="https://yukicoder.me/problems/no/529">帰省ラッシュ</a>
+  <a href="https://yukicoder.me/submissions/283076">提出コード</a></p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>
