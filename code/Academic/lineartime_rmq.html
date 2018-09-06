@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>lineartime rmq</h2>
+<h3>コードについての説明</h3>
+<p>
+静的 RMQ(更新のない区間最小値クエリ) に O(1) で答えるデータ構造を O(n) 時間で構築するアルゴリズム. ブロック分割をしている影響で要素数が2以上を仮定しています. <br>
+実測はあまり速くなく, SparseTable とほぼ同じ. <br>
+元論文は <a href="https://media.proquest.com/media/pq/classic/doc/2578959551/fmt/pi/rep/NONE?cit%3Aauth=Harel%2C+Dov%3BTarjan%2C+Robert+Endre&cit%3Atitle=Fast+Algorithms+for+Finding+Nearest+Common+Ancestors&cit%3Apub=SIAM+Journal+on+Computing&cit%3Avol=13&cit%3Aiss=2&cit%3Apg=338&cit%3Adate=May+1984&ic=true&cit%3Aprod=Agricultural+%26+Environmental+Science+Database&_a=ChgyMDE4MDkwNjIwMTQwNDAxOTozODgyOTkSBTk2NDYxGgpPTkVfU0VBUkNIIgwxMjYuMTIuOTguOTMqBjY2NjMxMzIJOTE5OTYxMTAzOg1Eb2N1bWVudEltYWdlQgEwUgZPbmxpbmVaAkZUYgNQRlRqCjE5ODQvMDUvMDFyCjE5ODQvMDUvMzF6AIIBKVAtMTAwNzE2MC0xNDM1Ny1DVVNUT01FUi0xMDAwMDIzNC00OTA4MTE4kgEGT25saW5lygFoTW96aWxsYS81LjAgKFgxMTsgTGludXggeDg2XzY0KSBBcHBsZVdlYktpdC81MzcuMzYgKEtIVE1MLCBsaWtlIEdlY2tvKSBDaHJvbWUvNjguMC4zNDQwLjg0IFNhZmFyaS81MzcuMzbSARJTY2hvbGFybHkgSm91cm5hbHOaAgdQcmVQYWlkqgIlT1M6RU1TLURvd25sb2FkUGRmLWdldE1lZGlhVXJsRm9ySXRlbcoCB0FydGljbGXSAgFZ4gIdaHR0cHM6Ly9zY2hvbGFyLmdvb2dsZS5jby5qcC%2FqAghnc2Nob2xhcvICAPoCAU6CAwNXZWI%3D&_s=LImvBWOb85BkX8m2OPY9N2Hm2R0%3D">Harel, Tarjan 1984</a> <a href="http://www.ccs.neu.edu/home/dherman/browse/projects/mini-javac/papers/bender00lca.pdf">Bender, Colton 2000</a>
+</p>
+<p>
+この<a href="https://www.slideshare.net/yumainoue965/lca-and-rmq">スライド</a>の説明を参考に実装した
+</p>
+<p>
+時間計算量: 構築 O(n), クエリ O(1)
+</p>
+<h3>コード</h3>
+<pre class="prettyprint linenums">
+template&lt;typename T&gt; class RMQ
+{
+private:
+    struct RMQNode
+    {
+        int id;
+        T val;    //インデックス, 値
+        int par, left, right;   //親,　左の子, 右の子
+    };
+    std::vector&lt;RMQNode&gt; tree;
+    std::vector&lt;T&gt; arr;
+    std::vector&lt;int&gt; euler_tour, depth, diff, visit_id;
+    int node_size, root, arr_len;
+    bool max_query;
+    std::vector&lt;int&gt; block_arr, diff_bit;   //各ブロックで深さが最小になるようなインデックス　各ブロックのdiffの情報をビットに詰めたもの
+    std::vector&lt;std::vector&lt;int&gt; &gt; sparse_table;  //i番目から長さ2^kの区間に含まれるdepthのうち最小のインデックス
+    std::vector&lt;std::vector&lt;std::vector&lt;int&gt; &gt; &gt; table_lookup;
+    int block_size, block_rem, block_cnt, log_block_cnt;
+
+    void make_cartesian_tree();
+    void make_euler_tour(int cur_node, int&amp; id, int cur_depth);
+    void make_block_arr();
+    void make_sparse_table();
+    void make_diff_bit();
+    void make_table_lookup();
+    std::pair&lt;int, T&gt; PM_RMQ(int st, int ed);
+public:
+    void build(std::vector&lt;T&gt;&amp; arg1, bool max_query_=false);    //trueのときrange_max_queryを表す
+    pair&lt;int, T&gt; query(int st, int ed); // (最小(大)値を達成するインデックス, 値)
+};
+
+template&lt;typename T&gt;
+void RMQ&lt;T&gt;::build(std::vector&lt;T&gt;&amp; arg1, bool max_query_){
+    node_size = (int)arg1.size();
+    assert(node_size &gt;= 2);
+    arr.resize(node_size, 0);
+    max_query = max_query_;
+    if(max_query){
+        for(int i = 0; i &lt; node_size; i++){
+            arr[i] = -arg1[i];
+        }
+    }else{
+        for(int i = 0; i &lt; node_size; i++){
+            arr[i] = arg1[i];
+        }
+    }
+    make_cartesian_tree();
+    euler_tour.resize(2 * node_size - 1, -1), depth.resize(2 * node_size - 1, -1);
+    diff.resize(2 * node_size - 2, -1), visit_id.resize(node_size, -1);
+    int val = 0;
+    make_euler_tour(root, val, 0);
+    for(int i = 0;i &lt; 2 * node_size - 2; i++){
+        diff[i] = depth[i+1] - depth[i];
+    }
+    //±RMQの実装
+    arr_len = 2 * node_size - 1;
+    make_block_arr();
+    make_sparse_table();
+    make_diff_bit();
+    make_table_lookup();
+}
+
+template&lt;typename T&gt;
+void RMQ&lt;T&gt;::make_cartesian_tree()
+{
+    tree.resize(node_size);
+    for(int i = 0; i &lt; node_size; i++){
+        tree[i] = (RMQNode){i, arr[i], -1, -1, -1};
+    }
+    std::stack&lt;std::pair&lt;int, T&gt; &gt; st;    //インデックス,値
+    st.push(std::make_pair(0,arr[0]));
+    root = 0;
+    for(int i = 1; i &lt; node_size ; i++){
+        int buff;
+        while(1){
+            //iが根となる場合
+            if(st.empty()){
+                st.push(std::make_pair(i, arr[i]));
+                tree[i].left = buff;
+                tree[buff].par = i;
+                root = i;
+                break;
+            }
+            std::pair&lt;int, T&gt; top = st.top();
+            if(top.second &lt;= arr[i]){
+                tree[i].par = top.first; //iの親を変更
+                int nd = tree[top.first].right;  //iの親の右下のノード
+                //iの子となるものが存在する場合
+                if(nd != -1){
+                    tree[i].left = nd;  //iの親の右下のノードをiの左の子とする
+                    tree[nd].par = i; //iの親の右下のノードの親をiとする
+                }
+                tree[top.first].right = i;  //iの親の右下の子をiとする
+                st.push(std::make_pair(i,arr[i]));
+                break;
+            }
+            buff = top.first;   //最後にpopされたものを暗記
+            st.pop();
+        }
+    }
+}
+
+template&lt;typename T&gt;
+void RMQ&lt;T&gt;::make_euler_tour(int cur_node, int&amp; id, int cur_depth)
+{
+    visit_id[cur_node] = id;
+    euler_tour[id] = cur_node;
+    depth[id++] = cur_depth;
+    if(tree[cur_node].left &gt;= 0){
+        make_euler_tour(tree[cur_node].left, id, cur_depth+1);
+        euler_tour[id] = cur_node;
+        depth[id++] = cur_depth;
+    }
+    if(tree[cur_node].right &gt;= 0){
+        make_euler_tour(tree[cur_node].right, id, cur_depth+1);
+        euler_tour[id] = cur_node;
+        depth[id++] = cur_depth;
+    }
+}
+
+template&lt;typename T&gt;
+void RMQ&lt;T&gt;::make_block_arr()
+{
+    block_size = ceil(log2(arr_len)/2);
+    block_cnt = (arr_len - 1) / block_size + 1;
+    block_rem = arr_len % block_size;
+    log_block_cnt = ceil(log2(block_cnt)) + 1;
+    block_arr.resize(block_cnt);
+    for(int i = 0; i &lt; block_cnt; i++){
+        int mn = numeric_limits&lt;int&gt;::max();
+        int mn_id = -1;
+        for(int j = 0; j &lt; block_size; j++){
+            int now_id = i * block_size + j;
+            if(now_id &gt;= arr_len){
+                break;
+            }
+            if(depth[now_id] &lt; mn){
+                mn = depth[now_id];
+                mn_id = now_id;
+            }
+        }
+        block_arr[i] = mn_id;
+    }
+}
+
+template&lt;typename T&gt;
+void RMQ&lt;T&gt;::make_sparse_table()
+{
+    sparse_table.resize(block_cnt, std::vector&lt;int&gt;(log_block_cnt, -1));
+    for(int i = 0; i &lt; block_cnt; i++){
+        sparse_table[i][0] = block_arr[i];
+    }
+    for(int j = 0; j &lt; log_block_cnt - 1; j++){
+        for(int i = 0; i &lt; block_cnt; i++){
+            if(i + (1 &lt;&lt; j) &gt;= block_cnt){
+                sparse_table[i][j + 1] = sparse_table[i][j];
+            }else{
+                if(depth[sparse_table[i][j]] &lt;= depth[sparse_table[i + (1 &lt;&lt; j)][j]]){
+                    sparse_table[i][j + 1] = sparse_table[i][j];
+                }else{
+                    sparse_table[i][j + 1] = sparse_table[i + (1 &lt;&lt; j)][j];
+                }
+            }
+        }
+    }
+}
+
+template&lt;typename T&gt;
+void RMQ&lt;T&gt;::make_diff_bit()
+{
+    diff_bit.resize(block_cnt, -1);
+    for(int i = 0; i &lt; block_cnt; i++){
+        int num = 0;
+        for(int j = 0; j &lt; block_size - 1; j++){
+            int now_id = i * block_size + j;
+            if(now_id &gt;= arr_len){
+                break;
+            }
+            if(diff[now_id] &gt; 0){
+                num += (1 &lt;&lt; (block_size - j - 2));
+            }
+        }
+        diff_bit[i] = num;
+    }
+}
+
+template&lt;typename T&gt;
+void RMQ&lt;T&gt;::make_table_lookup()
+{
+    table_lookup.resize((1 &lt;&lt; block_size), std::vector&lt;std::vector&lt;int&gt; &gt;(block_size + 1, std::vector&lt;int&gt;(block_size + 1, 0)));
+    //0は減少,1は増加
+    for(int i = 0; i &lt; (1 &lt;&lt; block_size); i++){
+        std::vector&lt;int&gt; vec(block_size - 1, -1);
+        for(int j = 0; j &lt; block_size; j++){
+            if(i &amp; (1 &lt;&lt; (block_size - j - 2))){
+                vec[j] = 1;
+            }
+        }
+        for(int j = 0; j &lt; block_size; j++){
+            int nw = 0, mn = 0, mn_id = j;
+            table_lookup[i][j][j+1] = j;
+            for(int k = j + 2; k &lt;= block_size; k++){
+                nw += vec[k-2];
+                if(nw &lt; mn){
+                    mn = nw;
+                    mn_id = k-1;
+                }
+                table_lookup[i][j][k] = mn_id;
+            }
+        }
+    }
+}
+
+//インデックスと値のpair
+template&lt;typename T&gt;
+std::pair&lt;int, T&gt; RMQ&lt;T&gt;::PM_RMQ(int st, int ed)
+{
+    int st_block_id = (st == 0)?0:((st - 1) / block_size + 1);  //ブロック区間の開始
+    int ed_block_id = ed / block_size - 1;    //ブロック区間の終了
+    int st_id = st / block_size;
+    int ed_id = ed / block_size;
+    int st_rem = st % block_size;
+    int ed_rem = ed % block_size;
+    if(ed_block_id - st_block_id &lt; 0){    //間にブロック区間がひとつもない場合
+        if(st_id == ed_id){ //同じブロック区間に存在する場合
+            int id_kari = block_size * st_id + table_lookup[diff_bit[st_id]][st_rem][ed_rem + 1];
+            return std::make_pair(euler_tour[id_kari], arr[euler_tour[id_kari]]);
+        }else{
+            int cand1 = block_size * st_id + table_lookup[diff_bit[st_id]][st_rem][block_size];
+            int cand2 = block_size * ed_id + table_lookup[diff_bit[ed_id]][0][ed_rem + 1];
+            if(depth[cand1] &lt;= depth[cand2]){
+                return std::make_pair(euler_tour[cand1], arr[euler_tour[cand1]]);
+            }else{
+                return std::make_pair(euler_tour[cand2], arr[euler_tour[cand2]]);
+            }
+        }
+    }else{  //間にブロックっ区間が存在する場合
+        int num = floor(log2(ed_block_id - st_block_id + 1));
+        int cand1 = sparse_table[st_block_id][num];
+        int cand2 = sparse_table[ed_block_id - (1 &lt;&lt; num) + 1][num];
+        int c1,c2;
+        if(depth[cand1] &lt;= depth[cand2]){
+            c1 = cand1;
+        }else{
+            c1 = cand2;
+        }
+        int cand3 = block_size * st_id + table_lookup[diff_bit[st_id]][st_rem][block_size];
+        int cand4 = block_size * ed_id + table_lookup[diff_bit[ed_id]][0][ed_rem + 1];
+        if(depth[cand3] &lt;= depth[cand4]){
+            c2 = cand3;
+        }else{
+            c2 = cand4;
+        }
+        if(depth[c1] &lt;= depth[c2]){
+            return std::make_pair(euler_tour[c1], arr[euler_tour[c1]]);
+        }else{
+            return std::make_pair(euler_tour[c2], arr[euler_tour[c2]]);
+        }
+    }
+}
+
+template&lt;typename T&gt;
+pair&lt;int, T&gt; RMQ&lt;T&gt;::query(int st, int ed)
+{
+    assert(st &lt; ed);
+    std::pair&lt;int, T&gt; res = PM_RMQ(std::min(visit_id[st], visit_id[ed-1]), std::max(visit_id[st], visit_id[ed-1]));
+    if(max_query) res.second = -res.second;
+    return res;
+}
+</pre>
+<h3>verify 用の問題</h3>
+<p>Atcoder : <a href="https://beta.atcoder.jp/contests/arc067/tasks/arc067_d">Yakiniku Restaurants</a>
+  <a href="https://beta.atcoder.jp/contests/arc067/submissions/3144707">提出コード</a></p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>

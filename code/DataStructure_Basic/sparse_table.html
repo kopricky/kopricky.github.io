@@ -38,24 +38,60 @@
 <div id="contents">
 
 <section>
-<h2>アルゴリズム名</h2>
+<h2>sparse_table</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
+静的 RMQ(更新のない区間最小値クエリ) に O(1) で答えるデータ構造を O(nlogn) 時間で構築するアルゴリズム. <br>
 </p>
 <p>
-時間計算量: O(mlogn)
+時間計算量: 構築 O(nlogn), クエリ O(1)
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">
-あ
+template&lt;typename T&gt; class SparseTable {
+private:
+    int sz;
+    vector&lt;T&gt; arr;
+    vector&lt;int&gt; logTable;
+    vector&lt;vector&lt;int&gt; &gt; table; //最小値のインデックスを保持
+    bool max_query;
+    bool greater(T a, T b){ return (max_query) ? (a &gt; b) : (a &lt; b); }
+public:
+    SparseTable(vector&lt;T&gt;&amp; v, bool max_query_=false) : sz((int)v.size()), arr(v),
+        logTable(sz+1), max_query(max_query_){
+        for(int i = 2; i &lt; sz + 1; i++){
+            logTable[i] = logTable[i &gt;&gt; 1] + 1;
+        }
+        table.resize(sz,vector&lt;T&gt;(logTable[sz]+1));
+        for(int i = 0; i &lt; sz; i++){
+            table[i][0] = i;
+        }
+        for(int k = 1; (1 &lt;&lt; k) &lt;= sz; k++){
+            for(int i = 0; i + (1 &lt;&lt; k) &lt;= sz; i++){
+                int s = table[i][k-1];
+                int t = table[i + (1 &lt;&lt; (k-1))][k-1];
+                if(greater(arr[s], arr[t])){
+                    table[i][k] = s;
+                }else{
+                    table[i][k] = t;
+                }
+            }
+        }
+    }
+    //(最小(大)値, それを達成するインデックス)
+    pair&lt;T,int&gt; query(int l,int r){
+        int k = logTable[r-l];
+        if(greater(arr[table[l][k]], arr[table[r-(1&lt;&lt;k)][k]])){
+            return make_pair(arr[table[l][k]],table[l][k]);
+        }else{
+            return make_pair(arr[table[r-(1&lt;&lt;k)][k]],table[r-(1&lt;&lt;k)][k]);
+        }
+    }
+};
 </pre>
 <h3>verify 用の問題</h3>
-<p>
-verify していません(verify 問題を知らない)
-</p>
-<p>AOJ : <a href=""></a>
-  <a href="">提出コード</a></p>
+<p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_2_B&lang=jp">Minimum-Cost Arborescence</a>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3122547#1">提出コード</a></p>
 </section>
 
 </div>

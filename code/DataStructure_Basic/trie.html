@@ -38,24 +38,59 @@
 <div id="contents">
 
 <section>
-<h2>アルゴリズム名</h2>
+<h2>trie</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
-</p>
-<p>
-時間計算量: O(mlogn)
+時間計算量: 構築, クエリ O(L) (L=挿入する数の総ビット長)
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">
-あ
+class Trie {
+public:
+	struct Node {
+		Node *next[26];
+		int sub;
+		Node() : sub(0){
+            rep(i,26){
+                next[i] = nullptr;
+            }
+        }
+	};
+	Node* root;
+	Trie(){
+		root = new Node();
+	}
+	//Trie木にxを加える
+	void add(string&amp; s) {
+		Node *curr = root;
+        rep(i,(int)s.size()){
+			int y = s[i] - 'a';
+			if (!curr-&gt;next[y]) {
+				curr-&gt;next[y] = new Node();
+			}
+			curr-&gt;sub++;
+			curr = curr-&gt;next[y];
+		}
+		curr-&gt;sub++;
+	}
+    //何らかのクエリ
+	int query(Node *curr,int d) {
+		int res = 0;
+		rep(i,26){
+			if(curr-&gt;next[i]){
+				res += query(curr-&gt;next[i],d+1);
+			}
+		}
+		return res;
+	}
+	int query() {
+		return query(root, 0);
+	}
+};
 </pre>
 <h3>verify 用の問題</h3>
-<p>
-verify していません(verify 問題を知らない)
-</p>
-<p>AOJ : <a href=""></a>
-  <a href="">提出コード</a></p>
+<p>Codeforces : <a href="http://codeforces.com/contest/965/problem/E">Short Code</a>
+  <a href="http://codeforces.com/contest/965/submission/38195978">提出コード</a></p>
 </section>
 
 </div>

@@ -38,24 +38,59 @@
 <div id="contents">
 
 <section>
-<h2>アルゴリズム名</h2>
+<h2>binary_trie</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
+
 </p>
 <p>
-時間計算量: O(mlogn)
+時間計算量: 構築, クエリ O(L) (L=挿入する数の総ビット長)
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">
-あ
+class BinaryTrie {
+public:
+	struct Node {
+		Node *next[2];
+		int sub;
+		Node() : sub(0) { next[0] = next[1] = nullptr; }
+	};
+	Node* root;
+	//2^30より小さい場合
+    const int MAX_BIT = 30;
+	BinaryTrie(){
+		root = new Node();
+	}
+	//Trie木にxを加える
+	void add(int x) {
+		Node *curr = root;
+        for(int i = MAX_BIT-1; i &gt;= 0; i--){
+            int y = x &gt;&gt; i &amp; 1;
+			if (!curr-&gt;next[y]) {
+				curr-&gt;next[y] = new Node();
+			}
+			curr-&gt;sub++;
+			curr = curr-&gt;next[y];
+        }
+		curr-&gt;sub++;
+	}
+    //何らかのクエリ
+	int query(Node *curr,const int a,int d){
+		if(!curr) return 0;
+		if((a &gt;&gt; d) &amp; 1){
+            return query(curr-&gt;next[1],a,d-1);
+		}else{
+            return query(curr-&gt;next[0],a,d-1);
+        }
+	}
+    int query(const int a){
+        return query(root,a,MAX_BIT-1);
+    }
+};
 </pre>
 <h3>verify 用の問題</h3>
-<p>
-verify していません(verify 問題を知らない)
-</p>
-<p>AOJ : <a href=""></a>
-  <a href="">提出コード</a></p>
+<p>Atcoder : <a href="https://beta.atcoder.jp/contests/arc087/tasks/arc087_c">Prefix-free Game</a>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3122547#1">提出コード</a></p>
 </section>
 
 </div>

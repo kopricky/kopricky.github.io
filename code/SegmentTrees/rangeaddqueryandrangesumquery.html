@@ -38,24 +38,81 @@
 <div id="contents">
 
 <section>
-<h2>アルゴリズム名</h2>
+<h2>range add query and range sum query</h2>
 <h3>コードについての説明</h3>
 <p>
 元論文は <a href=""></a>
 </p>
 <p>
-時間計算量: O(mlogn)
+時間計算量: 構築 O(n), 更新, 応答クエリ O(logn)
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">
-あ
+template&lt;typename T&gt; class segtree{
+private:
+    int n,sz;
+    vector&lt;T&gt; node, lazy;
+
+public:
+    segtree(vector&lt;T&gt;&amp; v) : sz((int)v.size()){
+        n = 1;
+        while(n &lt; sz){
+            n *= 2;
+        }
+        node.resize(2*n-1, 0), lazy.resize(2*n-1, 0);
+        for(int i = 0; i &lt; sz; i++){
+            node[i+n-1] = v[i];
+        }
+        for(int i=n-2; i&gt;=0; i--){
+            node[i] = node[i*2+1] + node[i*2+2];
+        }
+    }
+    void eval(int k, int l, int r){
+        if(lazy[k] != 0){
+            node[k] += lazy[k]; //kを根とするsubtreeについての情報を更新
+            if(r - l &gt; 1){
+                lazy[2*k+1] += lazy[k] / 2, lazy[2*k+2] += lazy[k] / 2;
+            }
+            lazy[k] = 0;
+        }
+    }
+    void range(int a, int b, T x, int k=0, int l=0, int r=-1){
+        if(r &lt; 0) r = n;
+        eval(k, l, r);
+        if(b &lt;= l || r &lt;= a){
+            return;
+        }
+        if(a &lt;= l &amp;&amp; r &lt;= b){
+            lazy[k] += (r - l) * x;
+            eval(k, l, r);
+        }else{
+            range(a, b, x, 2*k+1, l, (l+r)/2), range(a, b, x, 2*k+2, (l+r)/2, r);
+            node[k] = node[2*k+1] + node[2*k+2];
+        }
+    }
+    T query(int a, int b, int k=0, int l=0, int r=-1){
+        if(r &lt; 0) r = n;
+        eval(k, l, r);
+        if(b &lt;= l || r &lt;= a){
+            return 0;
+        }
+        if(a &lt;= l &amp;&amp; r &lt;= b){
+            return node[k];
+        }
+        T vl = query(a, b, 2*k+1, l, (l+r)/2), vr = query(a, b, 2*k+2, (l+r)/2, r);
+        return vl + vr;
+    }
+    void print(){
+        for(int i = 0; i &lt; sz; i++){
+            cout&lt;&lt;query(i,i+1)&lt;&lt; &quot; &quot;;
+        }
+        cout&lt;&lt;endl;
+    }
+};
 </pre>
 <h3>verify 用の問題</h3>
-<p>
-verify していません(verify 問題を知らない)
-</p>
-<p>AOJ : <a href=""></a>
-  <a href="">提出コード</a></p>
+<p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=DSL_2_G">RSQ and RAQ</a>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3122576#1">提出コード</a></p>
 </section>
 
 </div>

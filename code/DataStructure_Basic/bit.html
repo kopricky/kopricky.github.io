@@ -41,21 +41,59 @@
 <h2>アルゴリズム名</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
 </p>
 <p>
-時間計算量: O(mlogn)
+時間計算量: 構築 O(nlogn)(本実装では), クエリ O(nlogn)
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">
-あ
+template&lt;typename T&gt; class BIT {
+private:
+	int n;
+	vector&lt;T&gt; bit;
+public:
+	// 0_indexed で i 番目の要素に x を加える
+	void add(int i, T x){
+		i++;
+		while(i &lt; n){
+			bit[i] += x, i += i &amp; -i;
+		}
+	}
+	// 0_indexed で [0,i] の要素の和(両閉区間！！)
+	T sum(int i){
+		i++;
+		T s = 0;
+		while(i &gt; 0){
+			s += bit[i], i -= i &amp; -i;
+		}
+		return s;
+	}
+	BIT(){}
+	//初期値がすべて0の場合
+	BIT(int sz) : n(sz+1), bit(n, 0){}
+	BIT(vector&lt;T&gt;&amp; v) : n((int)v.size()+1), bit(n, 0){
+		for(int i = 0; i &lt; n-1; i++){
+			add(i, v[i]);
+		}
+	}
+	void print(){
+		for(int i = 0; i &lt; n-1; i++){
+			cout&lt;&lt;sum(i)-sum(i-1)&lt;&lt; &quot; &quot;;
+		}
+		cout&lt;&lt;endl;
+	}
+	//-1スタート
+	void print_sum(){
+		for(int i = 0; i &lt; n; i++){
+			cout&lt;&lt;sum(i-1)&lt;&lt;&quot; &quot;;
+		}
+		cout&lt;&lt;endl;
+	}
+};
 </pre>
 <h3>verify 用の問題</h3>
-<p>
-verify していません(verify 問題を知らない)
-</p>
-<p>AOJ : <a href=""></a>
-  <a href="">提出コード</a></p>
+<p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=DSL_2_B">Range Sum Query (RSQ)</a>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3122574#1">提出コード</a></p>
 </section>
 
 </div>

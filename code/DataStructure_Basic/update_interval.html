@@ -38,24 +38,65 @@
 <div id="contents">
 
 <section>
-<h2>アルゴリズム名</h2>
+<h2>update_interval</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
+各操作後には例えば[1,2),[2,3)みたいな区間も[1,3)にちゃんとマージされている.
 </p>
 <p>
-時間計算量: O(mlogn)
+時間計算量: 更新 ならしO(logn)
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">
-あ
+template&lt;typename T&gt; class UpdateInterval
+{
+private:
+    using ptt = pair&lt;T,T&gt;;
+    T inf;
+public:
+    //1の区間をsetで保持
+    set&lt;ptt&gt; st;
+    UpdateInterval() : inf(numeric_limits&lt;T&gt;::max()){};
+    //[l,r)をk(0,1)に更新
+    void update(T l,T r,int k){
+        T lb = l, rb = r;
+        while(1){
+            auto it = st.lower_bound(ptt(l,-inf));
+            if(it == st.end()){
+                break;
+            }
+            ptt p = *it;
+            if(p.fi &gt; r){
+                break;
+            }
+            st.erase(it);
+            if(p.se &gt; r){
+                rb = max(rb, p.se);
+                if(!k) st.insert(ptt(r,p.se));
+                break;
+            }
+        }
+        auto it = st.lower_bound(ptt(l,-inf));
+        if(it != st.begin()){
+            --it;
+            ptt p = *it;
+            if(p.se &gt;= l){
+                st.erase(it);
+                if(!k) st.insert(ptt(p.fi,l));
+                lb = min(lb, p.fi);
+            }
+            if(p.se &gt; r){
+                if(!k) st.insert(ptt(r,p.se));
+                rb = max(rb, p.se);
+            }
+        }
+        if(k) st.insert(ptt(lb,rb));
+    }
+};
 </pre>
 <h3>verify 用の問題</h3>
-<p>
-verify していません(verify 問題を知らない)
-</p>
-<p>AOJ : <a href=""></a>
-  <a href="">提出コード</a></p>
+<p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1373">Placing Medals on a Binary Tree</a>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3122567#1">提出コード</a></p>
 </section>
 
 </div>
