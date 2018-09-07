@@ -41,7 +41,10 @@
 <h2>fwht</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
+高速 Walsh-Hadamrd 変換. 高速フーリエ変換の亜種で FFT が c[k] = sum_{i+j=k} a[i]*b[j] を満たす c を求めるのに対し,
+c[k] = sum_{i^j=k} a[i]*b[j] を満たす c を求める(xor-convolution). <br>
+xor 以外にも係数行列を少し変えれば and, or についても求めることが可能(係数行列が各演算に対して体系的に決められるのかは知らない). <br>
+正確には高速 Walsh-Hadamrd 変換はこれらの演算をすべて含む FFT のもっと広い一般化だそう.
 </p>
 <p>
 時間計算量: O(nlogn)

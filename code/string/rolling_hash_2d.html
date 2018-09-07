@@ -52,7 +52,61 @@ add_edge(): 辺を追加する <br>
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">
-あ
+struct RH {
+    static long long mod[2], mul[4];
+    static vector&lt;long long&gt; pm[4];
+    vector&lt;string&gt; s; int rw, cl; vector&lt;vector&lt;long long&gt; &gt; hs[2];
+    void init(vector&lt;string&gt;&amp; s){
+        this-&gt;s = s; rw = (int)s.size(), cl = (int)s[0].size();
+        for(int i = 0; i &lt; 2; i++){
+            hs[i].resize(rw+1,vector&lt;long long&gt;(cl+1,0));
+            if(pm[i].empty()) pm[i].push_back(1), pm[i+2].push_back(1);
+            for(int j = 0; j &lt; rw; j++){
+                for(int k = 0; k &lt; cl; k++){
+                    hs[i][j+1][k+1] = (hs[i][j+1][k]*mul[i]+s[j][k])%mod[i];
+                }
+            }
+            for(int j = 0; j &lt; rw; j++){
+                for(int k = 0; k &lt; cl; k++){
+                    hs[i][j+1][k+1] = (hs[i][j][k+1]*mul[i+2]+hs[i][j+1][k+1])%mod[i];
+                }
+            }
+        }
+    }
+    long long comp(int u, int l, int d, int r, int id, const long long mod){
+        return (hs[id][d][r]+mod-hs[id][d][l]*pm[id][r-l]%mod
+                +mod-hs[id][u][r]*pm[id+2][d-u]%mod
+                +hs[id][u][l]*pm[id][r-l]%mod*pm[id+2][d-u])%mod;
+    }
+    pair&lt;long long,long long&gt; hash(int u,int l,int d,int r){ //文字列sのインデックス[u,d),[l,r)までの部分文字列のハッシュ値
+        if(l&gt;=r||u&gt;=d) return make_pair(0,0);
+        for(int i = 0; i &lt; 2; i++){
+            while((int)pm[i].size() &lt;= r) pm[i].push_back(pm[i].back()*mul[i]%mod[i]);
+            while((int)pm[i+2].size() &lt;= d) pm[i+2].push_back(pm[i+2].back()*mul[i+2]%mod[i]);
+        }
+        return make_pair(comp(u,l,d,r,0,mod[0]),comp(u,l,d,r,1,mod[1]));
+    }
+};
+vector&lt;long long&gt; RH::pm[4];
+long long RH::mod[2]={1000000007,1000000009}, RH::mul[4]={10009,10007,10039,10037};
+
+bool contain(RH&amp; arg1, vector&lt;string&gt;&amp; arg2){
+    int r = (int)arg2.size(), c = (int)arg2[0].size();
+    if(arg1.rw &lt; r || arg1.cl &lt; c){
+        return false;
+    }
+    RH rh;
+    rh.init(arg2);
+    pair&lt;long long,long long&gt; hs = rh.hash(0, 0, r, c);
+    for(int i = 0; i &lt; arg1.rw-r+1; i++){
+        for(int j = 0; j &lt; arg1.cl-c+1; j++){
+            if(arg1.hash(i,j,i+r,j+c) == hs){
+                return true;
+            }
+        }
+    }
+    return false;
+}
 </pre>
 <h3>verify 用の問題</h3>
 <p>

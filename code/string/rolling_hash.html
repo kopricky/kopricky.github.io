@@ -44,38 +44,22 @@
 元論文は <a href=""></a>
 </p>
 <p>
+(関数)<br>
+add_edge(): 辺を追加する <br>
+</p>
+<p>
 時間計算量: O(mlogn)
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">
-class MergeTech{
-private:
-    int sz;
-public:
-    vector&lt;int&gt; kind;   //所属しているグループ番号
-    vector&lt;vector&lt;int&gt; &gt; inc;   //グループのメンバー
-    MergeTech(){}
-    MergeTech(int node_size) : sz(node_size), kind(sz), inc(sz){
-        for(int i = 0; i &lt; sz; i++){
-            kind[i] = i, inc[i].push_back(i);
-        }
-    }
-    bool same(int a,int b){ return kind[a] == kind[b]; }
-    void unite(int a,int b){
-        if(same(a,b)) return;
-        if(inc[kind[a]].size() &lt; inc[kind[b]].size()) swap(a,b);
-        int ga = kind[a], gb = kind[b];
-        for(int u : inc[gb]){
-            kind[u] = ga;
-        }
-        inc[ga].insert(inc[ga].end(),inc[gb].begin(),inc[gb].end());
-        inc[gb].clear();
-    }
-};
+あ
 </pre>
 <h3>verify 用の問題</h3>
-<p>yukicoder : <a href="https://yukicoder.me/problems/no/416">旅行会社</a>
-  <a href="https://yukicoder.me/submissions/283091">提出コード</a></p>
+<p>
+verify していません(verify 問題を知らない)
+</p>
+<p>Atcoder : <a href=""></a>
+  <a href="">提出コード</a></p>
 </section>
 
 </div>

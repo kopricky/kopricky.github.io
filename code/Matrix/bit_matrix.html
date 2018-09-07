@@ -38,7 +38,7 @@
 <div id="contents">
 
 <section>
-<h2>アルゴリズム名</h2>
+<h2>bit matrix</h2>
 <h3>コードについての説明</h3>
 <p>
 元論文は <a href=""></a>
@@ -48,18 +48,31 @@
 add_edge(): 辺を追加する <br>
 </p>
 <p>
-時間計算量: O(mlogn)
+時間計算量: O(n^3/64) (64 bit環境で)
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">
-あ
+#define MAX_N 2000
+
+struct mat
+{
+    bitset&lt;MAX_N&gt; a[MAX_N];
+};
+
+mat operator*(const mat&amp; m1,const mat&amp; m2){
+    mat ans;
+    for(int i = 0; i &lt; MAX_N; i++){
+        for(int j = 0; j &lt; MAX_N; j++){
+            if(m1.a[i][j] == 0) continue;
+            ans.a[i] |= m2.a[j];
+        }
+    }
+    return ans;
+}
 </pre>
 <h3>verify 用の問題</h3>
-<p>
-verify していません(verify 問題を知らない)
-</p>
-<p>Atcoder : <a href=""></a>
-  <a href="">提出コード</a></p>
+<p>Atcoder : <a href="https://beta.atcoder.jp/contests/jag2017autumn/tasks/jag2017autumn_is">Revenge of the Endless BFS</a>
+  <a href="https://beta.atcoder.jp/contests/jag2017autumn/submissions/2453237">提出コード</a></p>
 </section>
 
 </div>

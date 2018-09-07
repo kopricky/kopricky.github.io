@@ -38,13 +38,17 @@
 <div id="contents">
 
 <section>
-<h2>アルゴリズム名</h2>
+<h2>hl decomposition</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
+HL 分解とは木上のパスについてのクエリに高速に答えることのできるデータ構造である. <br>
+部分木のうち最も要素数の大きいものに heavy edge, それ以外のものに light edge を貼って heavy edge でつながれた path の部分をまとめて管理することで実質木の高さが O(logn) になる. <br>
+これだけ読んでも絶対にわからない(ごめんなさい)ので、<a href="http://math314.hateblo.jp/entry/2014/06/24/220107">こちらのブログ</a>を参考にしてください.<br>
+以下の実装は一般的な HL 分解とは異なり, heavy edge から順番に探索することで部分木についてのクエリにも同じセグ木を用いて高速に答えることができるようにしている.<br>
+詳しくは<a href="http://codeforces.com/blog/entry/53170">こちらのブログ</a>を参考にしてください.
 </p>
 <p>
-時間計算量: O(mlogn)
+時間計算量: 構築 O(nlogn), クエリ O(log^2n)
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">

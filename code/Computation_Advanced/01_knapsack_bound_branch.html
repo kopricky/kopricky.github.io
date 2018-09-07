@@ -38,74 +38,73 @@
 <div id="contents">
 
 <section>
-<h2>cenroid decomposition</h2>
+<h2>アルゴリズム名</h2>
 <h3>コードについての説明</h3>
 <p>
 元論文は <a href=""></a>
+</p>
+<p>
+(関数)<br>
+add_edge(): 辺を追加する <br>
 </p>
 <p>
 時間計算量: O(mlogn)
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">
-class CentroidDecomposition
+void dfs(int n, long long W, long long value, long long weight, long long&amp; opt, int index, vector&lt;pair&lt;long long,long long&gt; &gt;&amp; vec)
 {
-private:
-    int V;
-    vector&lt;vector&lt;int&gt; &gt; G;
-    vector&lt;bool&gt; used;
-    //sz:重心分解後の最大部分木に含まれる頂点の数(自分を含める)
-    //par:重心分解後の親の頂点
-    vector&lt;int&gt; sz, par;
-    //部分木のサイズを計算
-    void calcSize(int u,int p){
-        sz[u] = 1;
-        for(int v : G[u]){
-            if(!used[v] &amp;&amp; v != p){
-                calcSize(v,u);
-                sz[u] += sz[v];
+    if(index == (int)vec.size()){
+        opt = max(opt, value);
+        return;
+    }
+    //使う
+    if(weight + vec[index].second &lt;= W){
+        opt = max(opt, value + vec[index].first);
+        long long tweight = weight + vec[index].second;;
+        long long tvalue = value + vec[index].first;
+        for(int i=index+1;i&lt;(int)vec.size();i++){
+            if(tweight + vec[i].second &lt;= W){
+                tweight += vec[i].second;
+                tvalue += vec[i].first;
+            }else{
+                tvalue += vec[i].first * (W - tweight) / vec[i].second;
+                break;
             }
         }
-    }
-    void cdBuild(int u,int p){
-        calcSize(u,-1);
-        int tot = sz[u];
-        bool ok = false;
-        int pp = -1;
-        //いま見ている部分木での重心を見つける
-        while(!ok){
-            ok = true;
-            for(int v : G[u]){
-                if(!used[v] &amp;&amp; v != pp &amp;&amp; 2*sz[v] &gt; tot){
-                    pp = u, u = v, ok = false;
-                    break;
-                }
-            }
-        }
-        par[u] = p;
-        //何らかの操作
-        used[u] = true;
-        //深さ優先でたどる
-        for(int v : G[u]){
-            if(!used[v]){
-                cdBuild(v,u);
-            }
+        if(tvalue &gt; opt){
+            dfs(n, W, value+vec[index].first,weight+vec[index].second,opt,index+1,vec);
         }
     }
-public:
-    CentroidDecomposition(int node_size) : V(node_size), G(V), used(V, false)
-                                                , sz(V, 0), par(V, -1){}
-    void add_edge(int u,int v){
-        G[u].push_back(v), G[v].push_back(u);
+    //使わない
+    long long tweight = weight;
+    long long tvalue = value;
+    for(int i=index+1;i&lt;(int)vec.size();i++){
+        if(tweight + vec[i].second &lt;= W){
+            tweight += vec[i].second;
+            tvalue += vec[i].first;
+        }else{
+            tvalue += vec[i].first * (W - tweight) / vec[i].second;
+            break;
+        }
     }
-    void build(){
-        cdBuild(0,-1);
+    if(tvalue &gt; opt){
+        dfs(n, W, value,weight,opt,index+1,vec);
     }
-};
+}
+//vecには(価値, 重さ)の順で商品を詰める
+long long solve(int n, long long W, vector&lt;pair&lt;long long,long long&gt; &gt;&amp; vec)
+{
+    long long opt = 0;
+    dfs(n,W,0,0,opt,0,vec);
+    return opt;
+}
 </pre>
 <h3>verify 用の問題</h3>
-<p>Atcoder : <a href="https://beta.atcoder.jp/contests/yahoo-procon2018-final-open/tasks/yahoo_procon2018_final_c">木の問題</a>
-  <a href="https://beta.atcoder.jp/contests/yahoo-procon2018-final-open/submissions/3144817">提出コード</a></p>
+<p>Atcoder : <a href="https://beta.atcoder.jp/contests/arc096/tasks/arc096_d">Sweet Alchemy</a>
+  <a href="https://beta.atcoder.jp/contests/arc096/submissions/3147142">提出コード</a></p>
+<p>yukicoder : <a href="https://yukicoder.me/problems/no/626">Randomized 01 Knapsack</a>
+  <a href="https://yukicoder.me/submissions/283348">提出コード</a></p>
 </section>
 
 </div>

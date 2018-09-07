@@ -38,18 +38,25 @@
 <div id="contents">
 
 <section>
-<h2>アルゴリズム名</h2>
+<h2>NTT</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
+Number Theoretic Transform の略. 特殊な素数 p について有限体 Z/pZ 上で高速フーリエ変換を行うアルゴリズム. <br>
+特殊な剰余の場合 FFT での 1 の原始 n 乗根が Z/pZ の原始根 g に対応する. つまり g が 1 の原始 n 乗根の性質をちゃんと満たすそうな... <br>
+<a href="../MultiPrecisionIntegar/multi_precision_integar.html">多倍長整数の実装</a>では乗算にこの NTT を用いた.
+</p>
+<p>
+<p>
+(関数) <br>
+mul(a, b): 配列 a, b の畳み込みを行う
+<p>
 </p>
 <p>
 時間計算量: O(nlogn)
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">
-// 特殊なmodの場合
-// 剰余と原始根
+// 特殊な剰余と原始根
 // (924844033, 5)
 // (998244353, 3)
 // (1012924417, 5)

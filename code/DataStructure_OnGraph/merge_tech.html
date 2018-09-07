@@ -38,85 +38,49 @@
 <div id="contents">
 
 <section>
-<h2>functional graph</h2>
+<h2>merge tech</h2>
 <h3>コードについての説明</h3>
 <p>
-Functional Graph とは各頂点の出次数がちょうど1の単純な有向グラフのことである. {1,...,n} → {1,...,n} の関数として表現できることがその名の由来であると思われる. <br>
-定義よりグラフはループとチェインからなるグラフとなる.
+"データ構造をマージする一般的なテク"と呼ばれているもの. <br>
+例えば, a = {1,3,5,7,9,11}, b = {2,4} という vector を一つにマージしようとしたとき a の要素を b に移すか, b の要素を a に移すかの2通りが考えられる. <br>
+もちろん, 移動させる要素の数が少ない方, つまり b の要素を a に移したほうがよい. 重要な事実としてこのように大きい方に小さい方の要素を移すようにマージを行って要素数 n の集合が得られたとき,
+それまでに行われた要素の移動回数は O(nlogn) になることが帰納法などを用いて言える(何も考えずマージしていると最悪 O(n^2) かかってしまう). <br>
+以上は vector の話だが, set や priority_queue にも上記のテクニックが使え, その場合は一度の要素の移動に O(logn) かかるので全体で O(nlog^2n) の計算量となる. <br>
+以下の実装は vector に対してマージテクを使ったもので UnionFind の強化版、 連結性だけでなく各連結成分の要素も保持できるようなデータ構造となっている.
 </p>
 <p>
-(関数) <br>
-solve(): <br>
-make_graph():
-</p>
-<p>
-時間計算量: O(mlogn)
+時間計算量: マージ ならしO(logn)
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">
-class FunctionalGraph {
+class MergeTech{
+private:
+    int sz;
 public:
-    int V;
-    vector&lt;int&gt; nx,visit;
-    vector&lt;vector&lt;int&gt; &gt; loop;
-    vector&lt;vector&lt;int&gt; &gt; G;
-    vector&lt;int&gt; st;
-    FunctionalGraph(int node_size)  : V(node_size), nx(V, 0), visit(V, 0){}
-    void add_edge(int u,int v){
-        nx[u] = v;
-    }
-    void make_loop(const int st,int nw,int ch,vector&lt;int&gt;&amp; vec){
-        while(nx[nw] != st){
-            vec.push_back(nx[nw]);
-            visit[nx[nw]] = ch;
-            nw = nx[nw];
+    vector&lt;int&gt; par;              //所属しているグループ番号(par[x]はunion findのfind(x)に対応)
+    vector&lt;vector&lt;int&gt; &gt; group;   //group[x]:グループxに含まれる数
+    MergeTech(){}
+    MergeTech(int node_size) : sz(node_size), par(sz), group(sz){
+        for(int i = 0; i &lt; sz; i++){
+            par[i] = i, group[i].push_back(i);
         }
     }
-    void dfs(int u,int kind,vector&lt;int&gt;&amp; vec){
-        visit[u] = kind;
-        int v = nx[u];
-        if(visit[v] == kind){
-            vec.push_back(u),vec.push_back(v);
-            int ch = (int)(loop.size()) + 1;
-            visit[u] = visit[v] = -ch;
-            make_loop(u,v,-ch,vec);
-        }else if(visit[v] == 0){
-            dfs(v,kind,vec);
+    bool same(int a,int b){ return par[a] == par[b]; }
+    void unite(int a,int b){
+        if(same(a,b)) return;
+        if(group[par[a]].size() &lt; group[par[b]].size()) swap(a,b);
+        int ga = par[a], gb = par[b];
+        for(int u : group[gb]){
+            par[u] = ga;
         }
-    }
-    void solve(){
-        int id = 1;
-        for(int i = 0; i &lt; V; i++){
-            if(visit[i] == 0){
-                vector&lt;int&gt; vec;
-                dfs(i,id++,vec);
-                if((int)vec.size()){
-                    loop.push_back(vec);
-                }
-            }
-        }
-        // make_graph();
-    }
-    void make_graph(){
-        G.resize(V);
-        vector&lt;bool&gt; flag(V,false);
-        for(int i = 0; i &lt; V; i++){
-            if(visit[i] &gt;= 0){
-                G[nx[i]].push_back(i);
-                flag[nx[i]] = (visit[nx[i]] &lt; 0);
-            }
-        }
-        for(int i = 0; i &lt; V; i++){
-            if(flag[i]){
-                st.push_back(i);
-            }
-        }
+        group[ga].insert(group[ga].end(),group[gb].begin(),group[gb].end());
+        group[gb].clear();
     }
 };
 </pre>
 <h3>verify 用の問題</h3>
-<p>JOI : <a href="https://www.ioi-jp.org/camp/2011/2011-sp-tasks/2011-sp-day3.pdf">報告(report)</a>
-  <a href="https://joisc2011.contest.atcoder.jp/submissions/3144919">提出コード</a></p>
+<p>yukicoder : <a href="https://yukicoder.me/problems/no/416">旅行会社</a>
+  <a href="https://yukicoder.me/submissions/283091">提出コード</a></p>
 </section>
 
 </div>

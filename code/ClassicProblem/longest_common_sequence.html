@@ -38,28 +38,44 @@
 <div id="contents">
 
 <section>
-<h2>アルゴリズム名</h2>
+<h2>longest_common_sequence</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
+O(n^2) の実装が有名だが, a[i] = b[j] を満たすようなペア (i, j) の最長増加列問題と考えれば O(nlogn) で解くことができる.
 </p>
 <p>
-(関数)<br>
-add_edge(): 辺を追加する <br>
-</p>
-<p>
-時間計算量: O(mlogn)
+時間計算量: O(nlogn)
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">
-あ
+#define INF 1000000005
+const int MAX_SIZE = 26;
+
+int LCS(const string&amp; a, const string&amp; b){
+    int n = (int)a.size(), m = (int)b.size();
+    vector&lt;int&gt; x(n), y(m);
+    for(int i = 0; i &lt; n; i++){
+        x[i] = a[i]-'a';
+    }
+    for(int i = 0; i &lt; m; i++){
+        y[i] = b[i]-'a';
+    }
+    vector&lt;vector&lt;int&gt; &gt; vec(MAX_SIZE);
+    for(int j = m-1; j &gt;= 0; --j){
+        vec[y[j]].push_back(j);
+    }
+    vector&lt;int&gt; xs(n, INF);
+    for(int i = 0; i &lt; n; i++){
+        for(int val : vec[x[i]]){
+            *lower_bound(xs.begin(),xs.end(),val) = val;
+        }
+    }
+    return lower_bound(xs.begin(),xs.end(),INF) - xs.begin();
+}
 </pre>
 <h3>verify 用の問題</h3>
-<p>
-verify していません(verify 問題を知らない)
-</p>
-<p>Atcoder : <a href=""></a>
-  <a href="">提出コード</a></p>
+<p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=ALDS1_10_C">Longest Common Subsequence</a>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=2765139">提出コード</a></p>
 </section>
 
 </div>

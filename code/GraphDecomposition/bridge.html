@@ -41,7 +41,15 @@
 <h2>bridge</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
+橋を求めるアルゴリズム. また各2(辺)連結成分を一つの頂点とみなした木を構築する.<br>
+橋とはその辺を削除したときにグラフが非連結になるような辺のことで<a href="./articulation.html">関節点を求めるアルゴリズム</a>と同様に lowlink を用いて線形時間で求めることが可能.<br>
+また橋の列挙は<a href="https://www.slideshare.net/chokudai/arc039/">このスライド</a>のDのように木上の imos 法を用いても求めることができる. 関節点も同様の方法で求めることが可能.<br>
+</p>
+<p>
+(関数)<br>
+add_edge(): 辺を追加する <br>
+solve(): 橋を求める(bridgeに橋となる辺が入る) <br>
+make_tree(): 各2(辺)連結成分を一つの頂点とみなした木が tree に入る
 </p>
 <p>
 時間計算量: O(n+m)
@@ -59,14 +67,6 @@ public:
 	vector&lt;bool&gt; visit;
 	biconnected(int node_size) : V(node_size), kind(0), G(V), check(V), ord(V), low(V)
 									,cmp(V), visit(V, false){}
-	void build(){
-		int id = 0;
-		for(int i = 0; i &lt; V; i++){
-			if(!visit[i]){
-				dfs(i,-1,id);
-			}
-		}
-	}
 	void dfs(int u,int p,int &amp;k)
 	{
 		visit[u] = true;
@@ -110,7 +110,15 @@ public:
 	        }
 	    }
 	}
-    void rebuild()
+	void solve(){
+		int id = 0;
+		for(int i = 0; i &lt; V; i++){
+			if(!visit[i]){
+				dfs(i,-1,id);
+			}
+		}
+	}
+    void build()
     {
 	    fill(visit.begin(),visit.end(),false);
 	    for(int i = 0; i &lt; V; i++){
@@ -127,10 +135,10 @@ public:
 	    }
     }
 	// 2(辺)連結成分を頂点とする木を作る
-	void make_bctree()
+	void make_tree()
 	{
 		tree.resize(V);
-		rebuild();
+		build();
 	    for(int i = 0; i &lt; (int)bridge.size(); i++){
 	        int a = cmp[bridge[i].first], b = cmp[bridge[i].second];
 	        tree[a].push_back(b), tree[b].push_back(a);

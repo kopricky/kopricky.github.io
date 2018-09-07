@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>cenroid decomposition</h2>
+<h3>コードについての説明</h3>
+<p>
+重心分解と呼ばれる重心で木を再帰的に分解していくことで高さがO(logn)になるような分解. <br>
+各階層であつかう木構造をすべて合わせても空間計算量が O(nlogn) なのですべての木について DFS なりの探索を行うことが可能. <br>
+申しわけ程度に説明を書いているけれども結局<a href="https://qiita.com/drken/items/4b4c3f1824339b090202">わかりやすく説明してくれている記事</a>を参考にする方が圧倒的に理解しやすい.<br>
+多くの問題は重心分解をただやるだけでなく前処理として行ったあとに問題に応じた操作を行う. 一応親子関係を伝播させることもできるが,基本的には親子関係は壊れてしまうので
+部分木についての条件など元の木上での親子関係が必要となる問題については使えない. 以下に挙げた verify 問題みたいなものについては有効である.
+</p>
+<p>
+(関数) <br>
+add_edge(): 辺を追加する <br>
+build(): 重心分解を行う
+<p>
+時間計算量: O(nlogn)
+</p>
+<h3>コード</h3>
+<pre class="prettyprint linenums">
+class CentroidDecomposition
+{
+private:
+    int V;
+    vector&lt;vector&lt;int&gt; &gt; G;
+    vector&lt;bool&gt; used;
+    //sz:重心分解後の最大部分木に含まれる頂点の数(自分を含める)
+    //par:重心分解後の親の頂点
+    vector&lt;int&gt; sz, par;
+    //部分木のサイズを計算
+    void calcSize(int u,int p){
+        sz[u] = 1;
+        for(int v : G[u]){
+            if(!used[v] &amp;&amp; v != p){
+                calcSize(v,u);
+                sz[u] += sz[v];
+            }
+        }
+    }
+    void cdBuild(int u,int p){
+        calcSize(u,-1);
+        int tot = sz[u];
+        bool ok = false;
+        int pp = -1;
+        //いま見ている部分木での重心を見つける
+        while(!ok){
+            ok = true;
+            for(int v : G[u]){
+                if(!used[v] &amp;&amp; v != pp &amp;&amp; 2*sz[v] &gt; tot){
+                    pp = u, u = v, ok = false;
+                    break;
+                }
+            }
+        }
+        par[u] = p;
+        //何らかの操作
+        used[u] = true;
+        //深さ優先でたどる
+        for(int v : G[u]){
+            if(!used[v]){
+                cdBuild(v,u);
+            }
+        }
+    }
+public:
+    CentroidDecomposition(int node_size) : V(node_size), G(V), used(V, false)
+                                                , sz(V, 0), par(V, -1){}
+    void add_edge(int u,int v){
+        G[u].push_back(v), G[v].push_back(u);
+    }
+    void build(){
+        cdBuild(0,-1);
+    }
+};
+</pre>
+<h3>verify 用の問題</h3>
+<p>Atcoder : <a href="https://beta.atcoder.jp/contests/yahoo-procon2018-final-open/tasks/yahoo_procon2018_final_c">木の問題</a>
+  <a href="https://beta.atcoder.jp/contests/yahoo-procon2018-final-open/submissions/3144817">提出コード</a></p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>
