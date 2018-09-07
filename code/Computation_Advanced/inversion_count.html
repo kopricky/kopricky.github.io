@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>inversion count</h2>
+<h3>コードについての説明</h3>
+<p>
+元論文は <a href=""></a>
+</p>
+<p>
+(関数)<br>
+add_edge(): 辺を追加する <br>
+</p>
+<p>
+時間計算量: O(mlogn)
+</p>
+<h3>コード</h3>
+<pre class="prettyprint linenums">
+template&lt;typename T&gt; class BIT {
+private:
+	int n;
+	vector&lt;T&gt; bit;
+public:
+	// 0_indexed で i 番目の要素に x を加える
+	void add(int i, T x){
+		i++;
+		while(i &lt; n){
+			bit[i] += x, i += i &amp; -i;
+		}
+	}
+	// 0_indexed で [0,i] の要素の和(両閉区間！！)
+	T sum(int i){
+		i++;
+		T s = 0;
+		while(i &gt; 0){
+			s += bit[i], i -= i &amp; -i;
+		}
+		return s;
+	}
+	BIT(){}
+	//初期値がすべて0の場合
+	BIT(int sz) : n(sz+1), bit(n, 0){}
+	BIT(vector&lt;T&gt;&amp; v) : n((int)v.size()+1), bit(n, 0){
+		for(int i = 0; i &lt; n-1; i++){
+			add(i,v[i]);
+		}
+	}
+	void print(){
+		for(int i = 0; i &lt; n-1; i++){
+			cout&lt;&lt;sum(i)-sum(i-1)&lt;&lt; &quot; &quot;;
+		}
+		cout&lt;&lt;endl;
+	}
+	//-1スタート
+	void print_sum(){
+		for(int i = 0; i &lt; n; i++){
+			cout&lt;&lt;sum(i-1)&lt;&lt;&quot; &quot;;
+		}
+		cout&lt;&lt;endl;
+	}
+};
+
+//nu,nvにu,vを[0,n)に座圧した結果をいれる(必要な場合のみ)
+pair&lt;vector&lt;int&gt;,vector&lt;int&gt; &gt; zaatu(vector&lt;int&gt;&amp; u,vector&lt;int&gt;&amp; v)
+{
+    int n = (int)u.size();
+    vector&lt;int&gt; sa = u;
+    sort(sa.begin(), sa.end());
+    vector&lt;int&gt; nu(n),nv(n);
+    for(int i = 0; i &lt; n; i++){
+        nu[i] = lower_bound(sa.begin(), sa.end(), u[i]) - sa.begin();
+        nv[i] = lower_bound(sa.begin(), sa.end(), v[i]) - sa.begin();
+    }
+    return make_pair(nu,nv);
+}
+
+//uをvに変換するのに必要な交換回数(転倒数)
+long long inv_count(vector&lt;int&gt;&amp; u,vector&lt;int&gt;&amp; v)
+{
+    int n = (int)u.size();
+    vector&lt;int&gt; p(n);
+    BIT&lt;int&gt; bt(n);
+    long long ans = 0;
+    for(int i = 0; i &lt; n; i++){
+        p[v[i]] = i;
+    }
+    for(int i = 0; i &lt; n; i++){
+        ans += i-bt.sum(p[u[i]]);
+        bt.add(p[u[i]],1);
+    }
+    return ans;
+}
+</pre>
+<h3>verify 用の問題</h3>
+<p>
+verify していません(verify 問題を知らない)
+</p>
+<p>Atcoder : <a href="https://beta.atcoder.jp/contests/arc088/tasks/arc088_c">Papple Sort</a>
+  <a href="https://beta.atcoder.jp/contests/arc088/submissions/1902895">提出コード</a></p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>

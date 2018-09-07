@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>CRT</h2>
+<h3>コードについての説明</h3>
+<p>
+元論文は <a href=""></a>
+</p>
+<p>
+(関数)<br>
+add_edge(): 辺を追加する <br>
+</p>
+<p>
+時間計算量: O(mlogn)
+</p>
+<h3>コード</h3>
+<pre class="prettyprint linenums">
+template&lt;typename T&gt;
+T gcd(T a,T b)
+{
+    if(a % b == 0){
+        return b;
+    }else{
+        return gcd(b,a%b);
+    }
+}
+
+template &lt;typename T&gt;
+void extgcd(T a, T b, T&amp; x, T&amp; y)
+{
+	if(b != 0){
+		extgcd(b,a%b,y,x);
+		y -= (a/b)*x;
+	}else{
+		x = 1;
+		y = 0;
+	}
+}
+
+//modが10^6より大きい値を扱うときはm1*xを__int128にキャストする(10^12とかまで可能)
+//(value, mod)
+template &lt;typename T&gt;
+pair&lt;T, T&gt; CRT(const pair&lt;T, T&gt;&amp; a1, const pair&lt;T, T&gt;&amp; a2)
+{
+    const T v1 = a1.first, m1 = a1.second;
+    const T v2 = a2.first, m2 = a2.second;
+    if(v1 == v2){
+        return make_pair(v1,m1*m2);
+    }else{
+        T x, y;
+        extgcd(m1, m2, x, y);
+        x *= (v2 - v1), y *= (v2 - v1);
+        const T m = m1 * m2;
+        return make_pair((((m1 * x + v1) % m) + m) % m, m);
+    }
+}
+
+//modどうしが互いに素でないとき
+//modが10^6より大きい値を扱うときはm1*xを__int128にキャストする(10^12とかまで可能)
+//(value, mod)
+template &lt;typename T&gt;
+pair&lt;T, T&gt; CRT(const pair&lt;T, T&gt;&amp; a1, const pair&lt;T, T&gt;&amp; a2)
+{
+    const T v1 = a1.first, m1 = a1.second;
+    const T v2 = a2.first, m2 = a2.second;
+    T g = gcd(m1, m2);
+    T dev = (v2 - v1) / g;
+    T mod = abs(v2 - v1) % g;
+    if(mod) return make_pair(-1,-1);
+    T x, y;
+    extgcd(m1 / g, m2 / g, x, y);
+    x *= dev, y *= dev;
+    const T m = m1 / g * m2;
+    return make_pair((((m1 * x + v1) % m) + m) % m, m);
+}
+</pre>
+<h3>verify 用の問題</h3>
+<p>Codeforces : <a href="https://codeforces.com/problemset/problem/982/E">Billiard</a>
+  <a href="https://codeforces.com/contest/982/submission/41429630">提出コード</a>(普通にやるとオーバーフローするので多倍長使うか, Python or Java で実装する)</p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>

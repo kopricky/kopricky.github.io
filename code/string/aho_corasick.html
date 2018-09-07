@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>aho corasick</h2>
+<h3>コードについての説明</h3>
+<p>
+元論文は <a href=""></a>
+</p>
+<p>
+(関数)<br>
+add_edge(): 辺を追加する <br>
+</p>
+<p>
+時間計算量: O(mlogn)
+</p>
+<h3>コード</h3>
+<pre class="prettyprint linenums">
+class AhoCorasick
+{
+private:
+    using AC = AhoCorasick*;
+    vector&lt;pair&lt;int, int&gt; &gt; ac;
+    map&lt;int, AC&gt; next;
+    AC t, fail, dnx;
+    void add(const string&amp; s, int pos, int id){
+        if(pos == (int)s.size()){
+            ac.emplace_back(id, pos);
+            return;
+        }
+        if(!next[s[pos]]) next[s[pos]] = new AhoCorasick();
+        next[s[pos]]-&gt;add(s,pos+1,id);
+    }
+    AC count(vector&lt;vector&lt;int&gt; &gt;&amp; res, int pos){
+        if(!fail) return this;
+        for(auto val : ac) res[val.first].push_back(pos-val.second+1);
+        if(dnx) dnx-&gt;count(res,pos);
+        else dnx = fail-&gt;count(res,pos);
+        return ac.size() ? this : dnx;
+    }
+    void match_(vector&lt;vector&lt;int&gt; &gt;&amp; res, const string&amp; s, int pos=0){
+        if(pos == (int)s.size()) return;
+        if(next[s[pos]]){
+            next[s[pos]]-&gt;count(res, pos);
+            next[s[pos]]-&gt;match_(res,s,pos+1);
+        }else{
+            if(!fail) match_(res,s,pos+1);
+            else fail-&gt;match_(res,s,pos);
+        }
+    }
+public:
+    AhoCorasick() : fail(nullptr), dnx(nullptr){}
+    //パターンを入力として木を構築
+    AhoCorasick(vector&lt;string&gt;&amp; pattern): AhoCorasick(){
+        int sz = (int)pattern.size();
+        t = new AhoCorasick();
+        for(int i = 0; i &lt; sz; i++){
+            t-&gt;add(pattern[i],0,i);
+        }
+        queue&lt;AC&gt; que;
+        que.push(t);
+        t-&gt;fail = nullptr;
+        while(!que.empty()){
+            AC nw = que.front();
+            que.pop();
+            for(auto p : nw-&gt;next){
+                int i = p.first;
+                AC fail = nw-&gt;fail;
+                while(fail &amp;&amp; !fail-&gt;next.count(i)){
+                    fail = fail-&gt;fail;
+                }
+                nw-&gt;next[i]-&gt;fail = (!fail ? t : fail-&gt;next[i]);
+                que.push(nw-&gt;next[i]);
+            }
+        }
+    }
+    //sのインデックスpos(デフォルト0)以降に含まれる各パターンの開始位置をresで返す
+    void match(vector&lt;vector&lt;int&gt; &gt;&amp; res, const string&amp; s, int pos=0){
+        t-&gt;match_(res,s,pos);
+    }
+};
+</pre>
+<h3>verify 用の問題</h3>
+<p>Atcoder : <a href="https://beta.atcoder.jp/contests/tenka1-2016-final-open/tasks/tenka1_2016_final_c">たんごたくさん</a>
+  <a href="https://beta.atcoder.jp/contests/tenka1-2016-final-open/submissions/2938562">提出コード</a>(非想定解, MLE厳しめ, 開始位置の verify も同時に行えるからいい)</p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>

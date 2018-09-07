@@ -38,7 +38,7 @@
 <div id="contents">
 
 <section>
-<h2>miller rabbin</h2>
+<h2>warshall_floyd</h2>
 <h3>コードについての説明</h3>
 <p>
 元論文は <a href=""></a>
@@ -52,71 +52,25 @@ add_edge(): 辺を追加する <br>
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">
-//long long型の素数判定には__int128を用いる
-const vector&lt;ll&gt; numset = {2,7,61}; // &lt; 4,759,123,141 ≒ 4×10^9
-//const vector&lt;ll&gt; numset = {2,3,5,7,11,13,17}; &lt; 341,550,071,728,321 ≒　3*10^14
-//const vector&lt;ll&gt; numset = {2,3,5,7,11,13,17,19,23,29,31,37}; 2^64までいける
-// x^k (mod m)
-ll modpow(ll x, ll k, ll m){
-    ll res = 1;
-    while(k){
-        if(k &amp; 1){
-            res = res * x % m;
-        }
-        k /= 2;
-        x = x * x % m;
+int d[MAX_N][MAX_N];
+
+void warshall_floyd(int V)
+{
+    for(int i = 0; i &lt; V; i++){
+        d[i][i] = 0;
     }
-    return res;
-}
-// long long型の素数判定の場合
-// ll modpow(__int128 x, ll k, ll m){
-//     __int128 res = 1;
-//     while(k){
-//         if(k &amp; 1){
-//             res = res * x % m;
-//         }
-//         k /= 2;
-//         x = x * x % m;
-//     }
-//     return res;
-// }
-// check if n is prime
-bool check(ll n){
-    if(n &lt; 2){
-      return false;
-    }
-    ll d = n - 1;
-    ll s = 0;
-    while(d % 2 == 0){
-        d /= 2;
-        s++;
-    }
-    for(ll a : numset){
-        if(a == n){
-          return true;
-        }
-        if(modpow(a,d,n) != 1){
-            bool ok = true;
-            for(ll r=0;r&lt;s;r++){
-                if(modpow(a,d*(1LL &lt;&lt; r),n) == n-1){
-                    ok = false;
-                    break;
-                }
-            }
-            if(ok){
-                return false;
+    for(int i = 0; i &lt; V; i++){
+        for(int j = 0; j &lt; V; j++){
+            for(int k = 0; k &lt; V; k++){
+                d[j][k] = min(d[j][k],d[j][i]+d[i][k]);
             }
         }
     }
-    return true;
 }
 </pre>
 <h3>verify 用の問題</h3>
-<p>
-verify していません(verify 問題を知らない)
-</p>
-<p>yukicoder : <a href="https://yukicoder.me/problems/no/3030">ミラー・ラビン素数判定法のテスト</a>
-  <a href="https://yukicoder.me/submissions/283543">提出コード</a></p>
+<p>Atcoder : <a href="https://arc035.contest.atcoder.jp/tasks/arc035_c">アットコーダー王国の交通事情</a>
+  <a href="https://arc035.contest.atcoder.jp/submissions/3147924">提出コード</a></p>
 </section>
 
 </div>
