@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>アルゴリズム名</h2>
+<h3>コードについての説明</h3>
+<p>
+元論文は <a href=""></a>
+</p>
+<p>
+(関数)<br>
+add_edge(): 辺を追加する <br>
+</p>
+<p>
+時間計算量: O(mlogn)
+</p>
+<h3>コード</h3>
+<pre class="prettyprint linenums">
+class suffixarray{
+public:
+    int sz,index1,index2;
+    vector&lt;int&gt; rnk,tmp,sa,lcp;
+    string recs;
+    suffixarray(string s){
+        recs = s;
+        sz = (int)s.size();
+        rnk.resize(sz+1),tmp.resize(sz+1);
+        make_sa();
+        // make_lcp();
+    }
+    void make_sa(){
+        index1 = sz;
+        sa.resize(index1+1);
+        for(int i = 0; i &lt; index1+1; i++){
+            sa[i] = i;
+            rnk[i] = i&lt;index1?recs[i]:-1;
+        }
+        auto comp = [&amp;](int i,int j){
+            if(rnk[i] != rnk[j]){
+                return rnk[i] &lt; rnk[j];
+            }else{
+                int ri = (i+index2&lt;=index1)?rnk[i+index2]:-1;
+                int rj = (j+index2&lt;=index1)?rnk[j+index2]:-1;
+                return ri &lt; rj;
+            }
+        };
+        for(index2=1;index2&lt;=index1;index2*=2){
+            sort(sa.begin(),sa.end(),comp);
+            tmp[sa[0]] = 0;
+            for(int i=1;i&lt;=index1;i++){
+                tmp[sa[i]] = tmp[sa[i-1]]+(comp(sa[i-1],sa[i])?1:0);
+            }
+            for(int i = 0; i &lt; index1+1; i++){
+                rnk[i] = tmp[i];
+            }
+        }
+    }
+    void make_lcp(){
+        lcp.resize(sz+1);
+        for(int i = 0; i &lt; sz+1; i++){
+            rnk[sa[i]] = i;
+        }
+        int h = 0;
+        lcp[0] = 0;
+        for(int i = 0; i &lt; sz; i++){
+            int j = sa[rnk[i]-1];
+            if(h &gt; 0){
+                h--;
+            }
+            for(;j+h&lt;sz&amp;&amp;i+h&lt;sz;h++){
+                if(recs[j+h] != recs[i+h]){
+                    break;
+                }
+            }
+            lcp[rnk[i]-1] = h;
+        }
+    }
+};
+
+//cri以上の値のスタートインデックス
+int stsearch(suffixarray&amp; ag,string&amp; cri)
+{
+    int n = ag.sz;
+    int l=0,r=n+1;
+    vector&lt;int&gt;&amp; sa = ag.sa;
+    while(r-l&gt;1){
+        int mid = (l+r)/2;
+        if(n-sa[mid] &lt; (int)(cri.size())){
+            string t = ag.recs.substr(sa[mid],n-sa[mid]);
+            if(t &lt;= cri){
+                l = mid;
+            }else{
+                r = mid;
+            }
+        }else{
+            string t = ag.recs.substr(sa[mid],(int)(cri.size()));
+            if(t &lt; cri){
+                l = mid;
+            }else{
+                r = mid;
+            }
+        }
+    }
+    return r;
+}
+
+//cri以下の値のエンドインデックス+1(開区間的な)
+int edsearch(suffixarray&amp; ag,string&amp; cri)
+{
+    int n = ag.sz;
+    int l=0,r=n+1;
+    vector&lt;int&gt;&amp; sa = ag.sa;
+    while(r-l&gt;1){
+        int mid = (l+r)/2;
+        if(n-sa[mid] &lt; (int)(cri.size())){
+            string t = ag.recs.substr(sa[mid],n-sa[mid]);
+            if(t &lt; cri){
+                l = mid;
+            }else{
+                r = mid;
+            }
+        }else{
+            string t = ag.recs.substr(sa[mid],(int)(cri.size()));
+            if(t &lt;= cri){
+                l = mid;
+            }else{
+                r = mid;
+            }
+        }
+    }
+    return r;
+}
+</pre>
+<h3>verify 用の問題</h3>
+<p>
+verify していません(verify 問題を知らない)
+</p>
+<p>Atcoder : <a href=""></a>
+  <a href="">提出コード</a></p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>
