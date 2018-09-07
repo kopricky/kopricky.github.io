@@ -38,7 +38,7 @@
 <div id="contents">
 
 <section>
-<h2>アルゴリズム名</h2>
+<h2>functional graph</h2>
 <h3>コードについての説明</h3>
 <p>
 元論文は <a href=""></a>
@@ -48,14 +48,69 @@
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">
-あ
+class FunctionalGraph {
+public:
+    int V;
+    vector&lt;int&gt; nx,visit;
+    vector&lt;vector&lt;int&gt; &gt; loop;
+    vector&lt;vector&lt;int&gt; &gt; G;
+    vector&lt;int&gt; st;
+    FunctionalGraph(int node_size)  : V(node_size), nx(V, 0), visit(V, 0){}
+    void add_edge(int u,int v){
+        nx[u] = v;
+    }
+    void make_loop(const int st,int nw,int ch,vector&lt;int&gt;&amp; vec){
+        while(nx[nw] != st){
+            vec.push_back(nx[nw]);
+            visit[nx[nw]] = ch;
+            nw = nx[nw];
+        }
+    }
+    void dfs(int u,int kind,vector&lt;int&gt;&amp; vec){
+        visit[u] = kind;
+        int v = nx[u];
+        if(visit[v] == kind){
+            vec.push_back(u),vec.push_back(v);
+            int ch = (int)(loop.size()) + 1;
+            visit[u] = visit[v] = -ch;
+            make_loop(u,v,-ch,vec);
+        }else if(visit[v] == 0){
+            dfs(v,kind,vec);
+        }
+    }
+    void solve(){
+        int id = 1;
+        for(int i = 0; i &lt; V; i++){
+            if(visit[i] == 0){
+                vector&lt;int&gt; vec;
+                dfs(i,id++,vec);
+                if((int)vec.size()){
+                    loop.push_back(vec);
+                }
+            }
+        }
+        // make_graph();
+    }
+    void make_graph(){
+        G.resize(V);
+        vector&lt;bool&gt; flag(V,false);
+        for(int i = 0; i &lt; V; i++){
+            if(visit[i] &gt;= 0){
+                G[nx[i]].push_back(i);
+                flag[nx[i]] = (visit[nx[i]] &lt; 0);
+            }
+        }
+        for(int i = 0; i &lt; V; i++){
+            if(flag[i]){
+                st.push_back(i);
+            }
+        }
+    }
+};
 </pre>
 <h3>verify 用の問題</h3>
-<p>
-verify していません(verify 問題を知らない)
-</p>
-<p>Atcoder : <a href=""></a>
-  <a href="">提出コード</a></p>
+<p>JOI : <a href="https://www.ioi-jp.org/camp/2011/2011-sp-tasks/2011-sp-day3.pdf">報告(report)</a>
+  <a href="https://joisc2011.contest.atcoder.jp/submissions/3144919">提出コード</a></p>
 </section>
 
 </div>

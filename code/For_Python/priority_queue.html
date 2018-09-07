@@ -48,14 +48,54 @@
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">
-あ
+class PriorityQueue:
+
+
+    def __init__(self, max_size):
+        self.array = [0]*max_size
+        self.size = 0
+
+    def size(self):
+        return self.size
+
+    def empty(self):
+        return self.size == 0
+
+    def push(self, data):
+        self.array[self.size] = data
+        index = self.size
+        while index != 0 and self.array[index] &gt; self.array[(index-1)//2]:
+            self.array[index], self.array[(index-1)//2] = self.array[(index-1)//2], self.array[index]
+            index = (index-1)//2
+        self.size += 1
+
+    def top(self):
+        return self.array[0]
+
+    def pop(self):
+        self.size -= 1
+        self.array[0], self.array[self.size] = self.array[self.size], self.array[0]
+        index = 0
+        while 2*index+1 &lt; self.size:
+            if 2*index+2 &lt; self.size:
+                if self.array[2*index+2] &gt; self.array[index] and self.array[2*index+2] &gt;= self.array[2*index+1]:
+                    self.array[2*index+2], self.array[index] = self.array[index], self.array[2*index+2]
+                    index = 2*index+2
+                elif self.array[2*index+1] &gt; self.array[index] and self.array[2*index+1] &gt;= self.array[2*index+2]:
+                    self.array[2*index+1], self.array[index] = self.array[index], self.array[2*index+1]
+                    index = 2*index+1
+                else:
+                    break
+            else:
+                if self.array[2*index+1] &gt; self.array[index]:
+                    self.array[2*index+1], self.array[index] = self.array[index], self.array[2*index+1]
+                    index = 2*index+1
+                else:
+                    break
 </pre>
 <h3>verify 用の問題</h3>
-<p>
-verify していません(verify 問題を知らない)
-</p>
-<p>Atcoder : <a href=""></a>
-  <a href="">提出コード</a></p>
+<p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=ALDS1_9_C&lang=jp">Priority Queue</a>
+  heapq を用いていないため TLE (時間的に間に合うものは正答解を返す)</p>
 </section>
 
 </div>

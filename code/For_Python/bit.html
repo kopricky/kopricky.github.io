@@ -48,14 +48,28 @@
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">
-あ
+class BIT:
+    def __init__(self, node_size):
+        self._node = node_size+1
+        self.bit = [0]*self._node
+
+    def add(self, index, add_val):
+        index += 1
+        while index &lt; self._node:
+            self.bit[index] += add_val
+            index += index &amp; -index
+
+    def sum(self, index):
+        index += 1
+        res = 0
+        while index &gt; 0:
+            res += self.bit[index]
+            index -= index &amp; -index
+        return res
 </pre>
 <h3>verify 用の問題</h3>
-<p>
-verify していません(verify 問題を知らない)
-</p>
-<p>Atcoder : <a href=""></a>
-  <a href="">提出コード</a></p>
+<p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=DSL_2_B">Range Sum Query (RSQ)</a>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3039744#1">提出コード</a></p>
 </section>
 
 </div>

@@ -48,14 +48,52 @@
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">
-あ
+class UnionFind:
+    def __init__(self, node_size):
+        self._node = node_size
+        self.par = [i for i in range(self._node)]
+        self.size_ = [1] * self._node
+
+    def find(self, ver):
+        if self.par[ver] == ver:
+            return ver
+        else:
+            self.par[ver] = self.find(self.par[ver])
+            return self.par[ver]
+
+    def unite(self, ver1, ver2):
+        ver1, ver2 = self.find(ver1), self.find(ver2)
+        if ver1 == ver2:
+            return
+        if self.size_[ver1] &lt; self.size_[ver2]:
+            ver1, ver2 = ver2, ver1
+        self.par[ver2] = ver1
+        self.size_[ver1] += self.size_[ver2]
+
+    def size(self, ver):
+        ver = self.find(ver);
+        return self.size_[ver]
+
+    def same(self, ver1, ver2):
+        return self.find(ver1) == self.find(ver2)
+
+if __name__ == '__main__':
+    n, m = map(int, sys.stdin.readline().split())
+    uf = UnionFind(n)
+    for i in range(m):
+        s, t = map(int, sys.stdin.readline().split())
+        uf.unite(s, t)
+    q = int(sys.stdin.readline())
+    for i in range(q):
+        s, t = map(int, sys.stdin.readline().split())
+        if uf.same(s, t):
+            print(&quot;yes&quot;)
+        else:
+            print(&quot;no&quot;)
 </pre>
 <h3>verify 用の問題</h3>
-<p>
-verify していません(verify 問題を知らない)
-</p>
-<p>Atcoder : <a href=""></a>
-  <a href="">提出コード</a></p>
+<p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=ALDS1_11_D">Connected Components</a>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3030132#1">提出コード</a></p>
 </section>
 
 </div>

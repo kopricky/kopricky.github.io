@@ -44,17 +44,82 @@
 元論文は <a href=""></a>
 </p>
 <p>
-時間計算量: O(mlogn)
+時間計算量: O(nlogn)
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">
-あ
+// 特殊なmodの場合
+// 剰余と原始根
+// (924844033, 5)
+// (998244353, 3)
+// (1012924417, 5)
+// (167772161, 3)
+// (469762049, 3)
+// (1224736769, 3)
+
+#define MOD 924844033
+#define root 5
+
+int add(const int x, const int y) { return (x + y &lt; MOD) ? x + y : x + y - MOD; }
+int mul(const int x, const int y) { return (long long)x * y % MOD; }
+int power(int x, int n)
+{
+    int res = 1;
+    while(n &gt; 0) {
+        if (n &amp; 1) { res = mul(res, x); }
+        x = mul(x, x);
+        n &gt;&gt;= 1;
+    }
+    return res;
+}
+int inverse(const int x) { return power(x, MOD - 2); }
+
+void ntt(vector&lt;int&gt;&amp; a, const bool rev = false)
+{
+    int i,j,k,s,t,v,w,wn;
+    const int size = (int)a.size();
+    const int height = (int)log2(2 * size - 1);
+    for(i = 0; i &lt; size; i++) {
+        j = 0;
+        for(k = 0; k &lt; height; k++) { j |= (i &gt;&gt; k &amp; 1) &lt;&lt; (height - 1 - k); }
+        if(i &lt; j) swap(a[i], a[j]);
+    }
+    for(i = 1; i &lt; size; i *= 2) {
+        w = power(root, (MOD - 1) / (i * 2));
+        if(rev) w = inverse(w);
+        for(j = 0; j &lt; size; j += i * 2) {
+            wn = 1;
+            for(k = 0; k &lt; i; k++) {
+                s = a[j + k + 0], t = mul(a[j + k + i], wn);
+                a[j + k + 0] = add(s, t);
+                a[j + k + i] = add(s, MOD - t);
+                wn = mul(wn, w);
+            }
+        }
+    }
+    if(rev){
+        v = inverse(size);
+        for (i = 0; i &lt; size; i++) { a[i] = mul(a[i], v); }
+    }
+}
+
+vector&lt;int&gt; convolute(const vector&lt;int&gt;&amp; a, const vector&lt;int&gt;&amp; b)
+{
+    const int size = (int)a.size() + (int)b.size() - 1;
+    int t = 1;
+    while (t &lt; size) { t &lt;&lt;= 1; }
+    vector&lt;int&gt; A(t, 0), B(t, 0);
+    for (int i = 0; i &lt; (int)a.size(); i++) { A[i] = a[i]; }
+    for (int i = 0; i &lt; (int)b.size(); i++) { B[i] = b[i]; }
+    ntt(A), ntt(B);
+    for (int i = 0; i &lt; t; i++) { A[i] = mul(A[i], B[i]); }
+    ntt(A, true);
+    A.resize(size);
+    return A;
+}
 </pre>
 <h3>verify 用の問題</h3>
-<p>
-verify していません(verify 問題を知らない)
-</p>
-<p>Atcoder : <a href=""></a>
+<p>CSAcademy : <a href="https://csacademy.com/contest/round-75/task/permutations/">Permutations</a>
   <a href="">提出コード</a></p>
 </section>
 

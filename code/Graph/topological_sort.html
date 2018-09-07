@@ -38,7 +38,7 @@
 <div id="contents">
 
 <section>
-<h2>アルゴリズム名</h2>
+<h2>topological_sort</h2>
 <h3>コードについての説明</h3>
 <p>
 元論文は <a href=""></a>
@@ -48,14 +48,41 @@
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">
-あ
+class tsort {
+public:
+	int V;
+	vector<vector<int> > G;
+	vector<int> deg,res;
+	tsort(int node_size) : V(node_size), G(V), deg(V, 0){}
+	void add_edge(int from,int to){
+		G[from].push_back(to);
+		deg[to]++;
+	}
+ 	bool solve() {
+		queue<int> que;
+		for(int i = 0; i < V; i++){
+	        if(deg[i] == 0){
+	            que.push(i);
+	        }
+	    }
+		while(!que.empty()){
+			int p = que.front();
+	        que.pop();
+			res.push_back(p);
+			for(int v : G[p]){
+	            if(--deg[v] == 0){
+	                que.push(v);
+	            }
+	        }
+		}
+		return (*max_element(deg.begin(),deg.end()) != 0);
+	}
+};
+
 </pre>
 <h3>verify 用の問題</h3>
-<p>
-verify していません(verify 問題を知らない)
-</p>
-<p>Atcoder : <a href=""></a>
-  <a href="">提出コード</a></p>
+<p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2181">Neko's Treasure</a>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3122758#1">提出コード</a></p>
 </section>
 
 </div>

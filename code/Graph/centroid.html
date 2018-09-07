@@ -48,13 +48,50 @@
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">
-あ
+class centroid
+{
+private:
+    int V;
+    vector&lt;vector&lt;int&gt; &gt; G;
+    vector&lt;int&gt; sz;
+public:
+    centroid(int node_size) : V(node_size), G(V), sz(V, 0){}
+    void add_edge(int u, int v){
+        G[u].push_back(v), G[v].push_back(u);
+    }
+    void dfs(int u,int p){
+        sz[u] = 1;
+        for(int v : G[u]){
+            if(v != p){
+                dfs(v,u);
+                sz[u] += sz[v];
+            }
+        }
+    }
+    int solve(){
+        int u = 0;
+        dfs(u,-1);
+        int tot = sz[u];
+        bool ok = false;
+        int p = -1;
+        while(!ok){
+            ok = true;
+            for(int v : G[u]){
+                if(v != p &amp;&amp; 2*sz[v] &gt; tot){
+                    p = u, u = v, ok = false;
+                    break;
+                }
+            }
+        }
+        return u;
+    }
+};
 </pre>
 <h3>verify 用の問題</h3>
 <p>
 verify していません(verify 問題を知らない)
 </p>
-<p>Atcoder : <a href=""></a>
+<p>Atcoder : <a href="https://beta.atcoder.jp/contests/arc087/tasks/arc087_d">Squirrel Migration</a>
   <a href="">提出コード</a></p>
 </section>
 

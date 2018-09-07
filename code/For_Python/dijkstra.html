@@ -38,7 +38,7 @@
 <div id="contents">
 
 <section>
-<h2>アルゴリズム名</h2>
+<h2>dikkstra</h2>
 <h3>コードについての説明</h3>
 <p>
 元論文は <a href=""></a>
@@ -48,14 +48,42 @@
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">
-あ
+from heapq import heappush, heappop
+
+
+class Dijkstra:
+
+    class Edge:
+        def __init__(self, end, cost):
+            self.to = end
+            self.cost = cost
+
+    def __init__(self, node_size, inf):
+        self._node = node_size
+        self._graph = [[] for _ in range(self._node)]
+        self.inf = inf
+        self.dist = [self.inf for _ in range(self._node)]
+
+    def add_edge(self, st, ed, cost):
+        self._graph[st].append(self.Edge(ed, cost))
+        self._graph[ed].append(self.Edge(st, cost))
+
+    def solve(self, start):
+        que = []
+        self.dist[start] = 0
+        heappush(que, (0, start))
+        while que:
+            cur_cost, cur_vertex = heappop(que)
+            if self.dist[cur_vertex] &lt; cur_cost:
+                continue
+            for e in self._graph[cur_vertex]:
+                if self.dist[e.to] &gt; cur_cost + e.cost:
+                    self.dist[e.to] = cur_cost + e.cost
+                    heappush(que, (self.dist[e.to], e.to))
 </pre>
 <h3>verify 用の問題</h3>
-<p>
-verify していません(verify 問題を知らない)
-</p>
-<p>Atcoder : <a href=""></a>
-  <a href="">提出コード</a></p>
+<p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_1_A&lang=jp">Single Source Shortest Path</a>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3030084#1">提出コード</a></p>
 </section>
 
 </div>

@@ -41,21 +41,53 @@
 <h2>アルゴリズム名</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
+envelope を保持
 </p>
 <p>
 時間計算量: O(mlogn)
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">
-あ
+template&lt;typename T&gt; class LIS2D
+{
+private:
+    using ptt = pair&lt;T,T&gt;;
+    set&lt;ptt&gt; st;
+public:
+    //実際に追加されたかどうかを返す
+    bool insert(pair&lt;T,T&gt; val){
+        bool in = false;
+        auto it = st.lower_bound(val);
+        if(it != st.end()){
+            if(*it == val) return in;
+            in = (it-&gt;second &gt;= val.second);
+        }
+        if(in){
+            while(it != st.end() &amp;&amp; it-&gt;second &gt;= val.second){
+                it = st.erase(it);
+            }
+        }else{
+            if(it != st.begin()){
+                it--;
+                in = (it-&gt;second &gt; val.second);
+            }else{
+                in = true;
+            }
+        }
+        if(in) st.insert(val);
+        return in;
+    }
+    void print(){
+        for(auto&amp; val : st){
+            cout &lt;&lt; &quot;{&quot; &lt;&lt; val.first &lt;&lt; &quot;,&quot; &lt;&lt; val.second &lt;&lt; &quot;}&quot; &lt;&lt; &quot; &quot;;
+        }
+        cout &lt;&lt; &quot;\n&quot;;
+    }
+};
 </pre>
 <h3>verify 用の問題</h3>
-<p>
-verify していません(verify 問題を知らない)
-</p>
-<p>Atcoder : <a href=""></a>
-  <a href="">提出コード</a></p>
+<p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1182&lang=jp">Railway Connection</a>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=2989203#1">提出コード</a>(非想定解)</p>
 </section>
 
 </div>

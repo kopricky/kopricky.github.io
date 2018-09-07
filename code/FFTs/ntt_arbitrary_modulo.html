@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>ntt arbitrary modulo</h2>
+<h3>コードについての説明</h3>
+<p>
+元論文は <a href=""></a>
+</p>
+<p>
+時間計算量: O(mlogn)
+</p>
+<h3>コード</h3>
+<pre class="prettyprint linenums">
+int mod_pow(int a, int n, int mod){
+    int ret = 1;
+	while(n){
+		if(n &amp; 1) ret = (long long)ret * a % mod;
+		a = (long long)a * a % mod;
+		n &gt;&gt;= 1;
+	}
+	return ret;
+}
+
+template&lt;int mod&gt;
+class NTT {
+public:
+	int get_mod() const { return mod; }
+	void _ntt(vector&lt;int&gt;&amp; a, int sign){
+		const int n = (int)a.size();
+		const int g = 3; //g is primitive root of mod
+		int h = mod_pow(g, (mod - 1) / n, mod); // h^n = 1
+		if(sign == -1) h = mod_pow(h, mod-2, mod); //h = h^-1 % mod
+        int s,x,m,j,k;
+        int i = 0;
+		for(j = 1; j &lt; n - 1; ++j){
+			for(k = n &gt;&gt; 1; k &gt;(i ^= k); k &gt;&gt;= 1);
+			if (j &lt; i) swap(a[i], a[j]);
+		}
+		for (m = 1; m &lt; n; m *= 2){
+			const int m2 = 2 * m;
+			const int base = mod_pow(h, n / m2, mod);
+			int w = 1;
+			for(x = 0; x &lt; m; x++){
+				for(s = x; s &lt; n; s += m2){
+					unsigned int u = a[s];
+					unsigned int d = (long long)a[s + m] * w % mod;
+					a[s] = (u + d) % mod;
+					a[s + m] = (u + mod - d) % mod;
+				}
+				w = (long long)w * base % mod;
+			}
+		}
+	}
+	void ntt(vector&lt;int&gt;&amp; input){
+		_ntt(input, 1);
+	}
+	void intt(vector&lt;int&gt;&amp; input){
+		_ntt(input, -1);
+		const int n_inv = mod_pow((int)(input.size()), mod-2, mod);
+		for(auto&amp; x : input) x = (long long)x * n_inv % mod;
+	}
+	void _convolution(const vector&lt;int&gt;&amp; a, const vector&lt;int&gt;&amp; b, vector&lt;int&gt;&amp; _a, vector&lt;int&gt;&amp; _b){
+		int ntt_size = 1;
+		while (ntt_size &lt; (int)(a.size()) + (int)(b.size())) ntt_size *= 2;
+        _a = a, _b = b;
+		_a.resize(ntt_size); _b.resize(ntt_size);
+		ntt(_a), ntt(_b);
+		for(int i = 0; i &lt; ntt_size; i++){
+			_a[i] = (long long)_a[i] * _b[i] % mod;
+		}
+		intt(_a);
+	}
+};
+
+typedef NTT&lt;167772161&gt; NTT_1;
+typedef NTT&lt;469762049&gt; NTT_2;
+typedef NTT&lt;1224736769&gt; NTT_3;
+
+void convolution(const vector&lt;int&gt;&amp; a, const vector&lt;int&gt;&amp; b, vector&lt;int&gt;&amp; res){
+	NTT_1 ntt1; NTT_2 ntt2; NTT_3 ntt3;
+    vector&lt;int&gt; x,_x,y,_y,z,_z;
+	ntt1._convolution(a, b, x, _x), ntt2._convolution(a, b, y, _y), ntt3._convolution(a, b, z, _z);
+	const int m1 = ntt1.get_mod(), m2 = ntt2.get_mod(), m3 = ntt3.get_mod();
+	const int m1_inv_m2 = mod_pow(m1, m2-2, m2);
+	const int m12_inv_m3 = mod_pow((long long)m1 * m2 % m3, m3-2, m3);
+	const int m12_mod = (long long)m1 * m2 % MOD;
+	res.resize((int)(x.size()));
+	for(int i = 0; i &lt; (int)(x.size()); i++){
+	    int v1 = ((long long)y[i] + m2 - x[i]) *  m1_inv_m2 % m2;
+	    int v2 = ((long long)z[i] + m3 - (x[i] + (long long)m1 * v1) % m3) * m12_inv_m3 % m3;
+	    res[i] = (x[i] + (long long)m1 * v1 + (long long)m12_mod * v2) % MOD;
+	}
+}
+</pre>
+<h3>verify 用の問題</h3>
+<p>Atcoder : <a href="https://beta.atcoder.jp/contests/arc077/tasks/arc077_b">11</a>
+  <a href="https://beta.atcoder.jp/contests/arc077/submissions/3145139">提出コード</a>(非想定解)</p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>

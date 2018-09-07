@@ -38,7 +38,7 @@
 <div id="contents">
 
 <section>
-<h2>アルゴリズム名</h2>
+<h2>tree diameter</h2>
 <h3>コードについての説明</h3>
 <p>
 元論文は <a href=""></a>
@@ -48,13 +48,56 @@
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">
-あ
+class TreeDiameter
+{
+public:
+    int V;
+    vector&lt;vector&lt;int&gt; &gt; G;
+    vector&lt;int&gt; diameter;
+    TreeDiameter(int node_size) : V(node_size), G(V){}
+    void add_edge(int u,int v){
+        G[u].push_back(v),G[v].push_back(u);
+    }
+    void dfs(int u,int p,int d,int&amp; far,int&amp; mx){
+        if(mx &lt; d){
+            far = u;
+            mx = d;
+        }
+        for(int v : G[u]){
+            if(v != p){
+                dfs(v,u,d+1,far,mx);
+            }
+        }
+    }
+    bool redfs(int u,int p,const int t){
+        if(u == t){
+            return true;
+        }
+        for(int v : G[u]){
+            if(v != p){
+                diameter.push_back(v);
+                if(redfs(v,u,t)){
+                    return true;
+                }else{
+                    diameter.pop_back();
+                }
+            }
+        }
+        return false;
+    }
+    void solve(){
+        int s,t,mx;
+        mx = -1;
+        dfs(0,-1,0,s,mx);
+        mx = -1;
+        dfs(s,-1,0,t,mx);
+        diameter.push_back(s);
+        redfs(s,-1,t);
+    }
+};
 </pre>
 <h3>verify 用の問題</h3>
-<p>
-verify していません(verify 問題を知らない)
-</p>
-<p>Atcoder : <a href=""></a>
+<p>AOJ : <a href="https://csacademy.com/contest/round-65/task/crossing-tree/">Crossing Tree</a>
   <a href="">提出コード</a></p>
 </section>
 

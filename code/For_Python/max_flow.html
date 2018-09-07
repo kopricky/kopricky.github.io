@@ -48,14 +48,62 @@
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">
-あ
+class MaxFlow:
+    class Edge:
+        def __init__(self, to, cap, rev):
+            self.to, self.cap, self.rev = to, cap, rev
+
+    def __init__(self, node_size, inf):
+        self._node = node_size
+        self._inf = inf
+        self._level = [-1]*self._node
+        self._iter = [0]*self._node
+        self._graph = [[] for _ in range(self._node)]
+
+    def add_edge(self, from_, to, cap):
+        self._graph[from_].append(self.Edge(to, cap, len(self._graph[to])))
+        self._graph[to].append(self.Edge(from_, 0, len(self._graph[from_])-1))
+
+    def bfs(self, start):
+        self._level = [-1]*self._node
+        que = deque()
+        self._level[start] = 0
+        que.append(start)
+        while que:
+            cur_vertex = que.popleft()
+            for e in self._graph[cur_vertex]:
+                if e.cap &gt; 0 &gt; self._level[e.to]:
+                    self._level[e.to] = self._level[cur_vertex] + 1
+                    que.append(e.to)
+
+    def dfs(self, cur_vertex, end_vertex, flow):
+        if cur_vertex == end_vertex:
+            return flow
+        for e in self._graph[cur_vertex][self._iter[cur_vertex]:len(self._graph[cur_vertex])]:
+            if e.cap &gt; 0 and self._level[cur_vertex] &lt; self._level[e.to]:
+                flowed = self.dfs(e.to, end_vertex, min(flow, e.cap))
+                if flowed &gt; 0:
+                    e.cap -= flowed
+                    self._graph[e.to][e.rev].cap += flowed
+                    return flowed
+        return 0
+
+    def solve(self, source, sink):
+        flow = 0
+        while True:
+            self.bfs(source)
+            if self._level[sink] &lt; 0:
+                return flow
+            self._iter = [0]*self._node
+            while True:
+                f = self.dfs(source, sink, self._inf)
+                if f == 0:
+                    break
+                flow += f
 </pre>
 <h3>verify 用の問題</h3>
-<p>
-verify していません(verify 問題を知らない)
-</p>
-<p>Atcoder : <a href=""></a>
-  <a href="">提出コード</a></p>
+<p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_6_A">Maximum Flow</a>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3030273#1">提出コード</a></p>
 </section>
 
 </div>

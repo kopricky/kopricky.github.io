@@ -44,103 +44,85 @@
 元論文は <a href=""></a>
 </p>
 <p>
-時間計算量: O(mlogn)
+時間計算量: O(n+m)
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">
-class biconnected{
-public:
-	using P = pair<int, int>;
-	int V,kind;
-	vector<vector<int> > G,tree;
-	vector<vector<P> > check;
-	vector<int> ord,low,cmp;
-	vector<P> bridge;
-	vector<bool> visit;
-	biconnected(int node_size) : V(node_size), kind(0), G(V), check(V), ord(V), low(V)
-									,cmp(V), visit(V, false){}
-	void build(){
-		int id = 0;
-		for(int i = 0; i < V; i++){
-			if(!visit[i]){
-				dfs(i,-1,id);
+class SAT {
+private:
+	int V;	//頂点数
+	vector&lt;vector&lt;int&gt; &gt; G,rG;
+	vector&lt;int&gt; post_order; //帰りがけ順の並び
+	vector&lt;bool&gt; used; //すでに調べたかどうか
+	vector&lt;int&gt; cmp;	//属する強連結成分のトポロジカル順序
+	void _add_edge(int from,int to){
+		G[from].push_back(to);
+		rG[to].push_back(from);
+	}
+	void _dfs(int u){
+		used[u] = true;
+		for(int v : G[u]){
+			if(!used[v]){
+				_dfs(v);
+			}
+		}
+		post_order.push_back(u);
+	}
+	void _rdfs(int u,int k){
+		used[u] = true;
+		cmp[u] = k;
+		for(int v : rG[u]){
+			if(!used[v]){
+				_rdfs(v,k);
 			}
 		}
 	}
-	void dfs(int u,int p,int &k)
-	{
-		visit[u] = true;
-		ord[u] = k++;
-		low[u] = ord[u];
-		for(int i = 0; i < (int)G[u].size(); i++){
-			int v = G[u][i];
-			if(!visit[v]){
-				dfs(v,u,k);
-				low[u] = min(low[u],low[v]);
-				if(ord[u] < low[v]){
-				    bridge.push_back(P(u,v));
-	                check[u][i].second = 1;
-	                check[v][check[u][i].first].second = 1;
-				}
-			//(v,w)は後退辺
-			}else if(v != p){
-				low[u] = min(low[u],ord[v]);
+	int _scc(){
+		fill(used.begin(),used.end(),false);
+		post_order.clear();
+		for(int v=0;v&lt;2*V;v++){
+			if(!used[v]){
+				_dfs(v);
 			}
 		}
+		fill(used.begin(),used.end(),false);
+		int k=0;
+		for(int i=2*V-1;i&gt;=0;i--){
+			if(!used[post_order[i]]){
+				_rdfs(post_order[i],k++);
+			}
+		}
+		return k;
 	}
 
-	void add_edge(int u,int v)
-	{
-	    G[u].push_back(v),G[v].push_back(u);
-	    check[u].push_back(P((int)check[v].size(),0));
-	    check[v].push_back(P((int)check[u].size()-1,0));
-	}
-	void restrict_dfs(int u,int p,int kind,queue<int>& que)
-	{
-	    visit[u] = true;
-	    cmp[u] = kind;
-	    for(int i = 0; i < (int)G[u].size(); i++){
-			int v = G[u][i];
-	        if(check[u][i].second){
-	            if(!visit[v]){
-	                que.push(v);
-	            }
-	        }else if(!visit[v]){
-	            restrict_dfs(v,u,kind,que);
+public:
+	SAT(int node_size) : V(node_size), G(2*V), rG(2*V), used(2*V), cmp(2*V){}
+	//充足可能性判定
+	bool ok(vector&lt;pair&lt;int, int&gt; &gt;&amp; vec){
+	   	for(pair&lt;int, int&gt; p : vec){
+	        _add_edge((p.first+V)%(2*V),p.second);
+	        _add_edge((p.second+V)%(2*V),p.first);
+	    }
+	    _scc();
+	    for(int i = 0; i &lt; V; i++){
+	        if(cmp[i] == cmp[V+i]){
+	            return false;
 	        }
 	    }
+	    return true;
 	}
-    void rebuild()
-    {
-	    fill(visit.begin(),visit.end(),false);
-	    for(int i = 0; i < V; i++){
-	        if(!visit[i]){
-	            queue<int> que;
-	            que.push(i);
-	            while(!que.empty()){
-	                int p = que.front();
-	                que.pop();
-	                restrict_dfs(p,-1,kind,que);
-	                kind++;
-	            }
-	        }
-	    }
-    }
-	// 2(辺)連結成分を頂点とする木を作る
-	void make_bctree()
-	{
-		tree.resize(V);
-		rebuild();
-	    for(int i = 0; i < (int)bridge.size(); i++){
-	        int a = cmp[bridge[i].first], b = cmp[bridge[i].second];
-	        tree[a].push_back(b), tree[b].push_back(a);
+	//真のものは1,偽のものは0を返す(解の構成)
+	void restore(vector&lt;int&gt;&amp; ans){
+		ans.resize(V);
+	    for(int i = 0; i &lt; V; i++){
+			ans[i] = (cmp[i] &gt; cmp[V+i]);
 	    }
 	}
 };
 </pre>
 <h3>verify 用の問題</h3>
-<p>yukicoder : <a href="https://yukicoder.me/problems/no/529">帰省ラッシュ</a>
-  <a href="https://yukicoder.me/submissions/283076">提出コード</a></p>
+<p>Atcoder : <a href="https://beta.atcoder.jp/contests/arc069/tasks/arc069_d">Flags</a>
+  <a href="https://beta.atcoder.jp/contests/arc069/submissions/3144949">提出コード</a></p>
 </section>
 
 </div>

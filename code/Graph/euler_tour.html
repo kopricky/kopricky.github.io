@@ -38,23 +38,76 @@
 <div id="contents">
 
 <section>
-<h2>アルゴリズム名</h2>
+<h2>euler tour</h2>
 <h3>コードについての説明</h3>
 <p>
 元論文は <a href=""></a>
 </p>
 <p>
-時間計算量: O(mlogn)
+時間計算量: O(n+m)
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">
-あ
+//uを根とする部分木は[lb[u],rb[u])で表せる
+
+//行きがけ、通りがけ、帰りがけのすべてを記録
+vector&lt;int&gt; G[MAX_N];
+vector&lt;int&gt; ord;
+int lb[MAX_N],rb[MAX_N],id[MAX_N];
+
+void dfs(int u,int p)
+{
+    id[u] = ord.size();
+    lb[u] = (int)ord.size();
+    ord.push_back(u);
+    for(int v : G[u]){
+        if(v != p){
+            dfs(v,u);
+            ord.push_back(u);
+        }
+    }
+    rb[u] = (int)ord.size() - 1;
+}
+
+//行きがけ、帰りがけのみを記録
+vector&lt;int&gt; G[MAX_N];
+vector&lt;int&gt; ord;
+int lb[MAX_N],rb[MAX_N],id[MAX_N];
+
+void dfs(int u,int p)
+{
+    id[u] = ord.size();
+    lb[u] = (int)ord.size();
+    ord.push_back(u);
+    for(int v : G[u]){
+        if(v != p){
+            dfs(v,u);
+        }
+    }
+    ord.push_back(u);
+    rb[u] = (int)ord.size() - 1;
+}
+
+//行きがけのみを記録
+vector&lt;int&gt; G[MAX_N];
+vector&lt;int&gt; ord;
+int lb[MAX_N],rb[MAX_N],id[MAX_N];
+
+void dfs(int u,int p)
+{
+    id[u] = ord.size();
+    lb[u] = (int)ord.size();
+    ord.push_back(u);
+    for(int v : G[u]){
+        if(v != p){
+            dfs(v,u);
+        }
+    }
+    rb[u] = (int)ord.size();
+}
 </pre>
 <h3>verify 用の問題</h3>
-<p>
-verify していません(verify 問題を知らない)
-</p>
-<p>Atcoder : <a href=""></a>
+<p>AOJ : <a href=""></a>
   <a href="">提出コード</a></p>
 </section>
 

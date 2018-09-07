@@ -38,24 +38,48 @@
 <div id="contents">
 
 <section>
-<h2>アルゴリズム名</h2>
+<h2>union find</h2>
 <h3>コードについての説明</h3>
 <p>
 元論文は <a href=""></a>
 </p>
 <p>
-時間計算量: O(mlogn)
+時間計算量: クエリ O(α(n)) (α(n)はアッカーマンの逆関数)
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">
-あ
+class UnionFind {
+private:
+    int sz;
+    vector&lt;int&gt; par, size_;
+public:
+    UnionFind(){}
+    UnionFind(int node_size) : sz(node_size), par(sz), size_(sz, 1){
+        iota(par.begin(), par.end(), 0);
+    }
+    int find(int x){
+        if(par[x] == x) return x;
+        else return par[x] = find(par[x]);
+    }
+    void unite(int x,int y){
+        x = find(x), y = find(y);
+        if(x == y) return;
+        if(size_[x] &lt; size_[y]) swap(x,y);
+        par[y] = x;
+        size_[x] += size_[y];
+    }
+    int size(int x){
+        x = find(x);
+        return size_[x];
+    }
+    bool same(int x,int y){
+        return find(x) == find(y);
+    }
+};
 </pre>
 <h3>verify 用の問題</h3>
-<p>
-verify していません(verify 問題を知らない)
-</p>
-<p>Atcoder : <a href=""></a>
-  <a href="">提出コード</a></p>
+<p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=ALDS1_11_D&lang=jp">Connected Components</a>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3122618#1">提出コード</a></p>
 </section>
 
 </div>
