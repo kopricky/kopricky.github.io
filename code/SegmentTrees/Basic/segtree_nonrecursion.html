@@ -38,7 +38,7 @@
 <div id="contents">
 
 <section>
-<h2>アルゴリズム名</h2>
+<h2>segtree nonrecursion</h2>
 <h3>コードについての説明</h3>
 <p>
 元論文は <a href=""></a>
@@ -52,14 +52,54 @@ add_edge(): 辺を追加する <br>
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">
-あ
+template&lt;typename T&gt; class segtree {
+private:
+    int n,sz;
+    vector&lt;T&gt; node;
+public:
+    segtree(vector&lt;T&gt;&amp; v) : sz((int)v.size()){
+        n = 1;
+        while(n &lt; sz){
+            n *= 2;
+        }
+        node.assign(2*n,numeric_limits&lt;T&gt;::max());
+        for(int i = 0; i &lt; sz; i++){
+            node[i+n] = v[i];
+        }
+        for(int i=n-1; i&gt;=1; i--){
+            node[i] = min(node[2*i],node[2*i+1]);
+        }
+    }
+    void update(int k,T a)
+    {
+    	node[k+=n] = a;
+    	while(k&gt;&gt;=1){
+    		node[k] = min(node[2*k],node[2*k+1]);
+    	}
+    }
+    T query(int a,int b)
+    {
+        T res1 = numeric_limits&lt;T&gt;::max();
+        T res2 = numeric_limits&lt;T&gt;::max();
+        a += n, b += n;
+        while(a != b){
+            if(a % 2) res1 = min(res1, node[a++]);
+            if(b % 2) res2 = min(res2, node[--b]);
+            a &gt;&gt;= 1, b&gt;&gt;= 1;
+        }
+        return min(res1, res2);
+    }
+    void print(){
+        for(int i = 0; i &lt; sz; i++){
+            cout &lt;&lt; query(i,i+1) &lt;&lt; &quot; &quot;;
+        }
+        cout &lt;&lt; endl;
+    }
+};
 </pre>
 <h3>verify 用の問題</h3>
-<p>
-verify していません(verify 問題を知らない)
-</p>
-<p>Atcoder : <a href=""></a>
-  <a href="">提出コード</a></p>
+<p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=DSL_2_A">Range Minimum Query (RMQ)</a>
+    <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3126058#1">提出コード</a></p>
 </section>
 
 </div>
