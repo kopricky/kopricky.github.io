@@ -38,18 +38,19 @@
 <div id="contents">
 
 <section>
-<h2>lineartime rmq</h2>
+<h2>linear time superbubble</h2>
 <h3>コードについての説明</h3>
 <p>
-静的 RMQ(更新のない区間最小値クエリ) に O(1) で答えるデータ構造を O(n) 時間で構築するアルゴリズム. ブロック分割をしている影響で要素数が2以上を仮定しています. <br>
-実測はあまり速くなく, SparseTable とほぼ同じ. <br>
-元論文は <a href="https://media.proquest.com/media/pq/classic/doc/2578959551/fmt/pi/rep/NONE?cit%3Aauth=Harel%2C+Dov%3BTarjan%2C+Robert+Endre&cit%3Atitle=Fast+Algorithms+for+Finding+Nearest+Common+Ancestors&cit%3Apub=SIAM+Journal+on+Computing&cit%3Avol=13&cit%3Aiss=2&cit%3Apg=338&cit%3Adate=May+1984&ic=true&cit%3Aprod=Agricultural+%26+Environmental+Science+Database&_a=ChgyMDE4MDkwNjIwMTQwNDAxOTozODgyOTkSBTk2NDYxGgpPTkVfU0VBUkNIIgwxMjYuMTIuOTguOTMqBjY2NjMxMzIJOTE5OTYxMTAzOg1Eb2N1bWVudEltYWdlQgEwUgZPbmxpbmVaAkZUYgNQRlRqCjE5ODQvMDUvMDFyCjE5ODQvMDUvMzF6AIIBKVAtMTAwNzE2MC0xNDM1Ny1DVVNUT01FUi0xMDAwMDIzNC00OTA4MTE4kgEGT25saW5lygFoTW96aWxsYS81LjAgKFgxMTsgTGludXggeDg2XzY0KSBBcHBsZVdlYktpdC81MzcuMzYgKEtIVE1MLCBsaWtlIEdlY2tvKSBDaHJvbWUvNjguMC4zNDQwLjg0IFNhZmFyaS81MzcuMzbSARJTY2hvbGFybHkgSm91cm5hbHOaAgdQcmVQYWlkqgIlT1M6RU1TLURvd25sb2FkUGRmLWdldE1lZGlhVXJsRm9ySXRlbcoCB0FydGljbGXSAgFZ4gIdaHR0cHM6Ly9zY2hvbGFyLmdvb2dsZS5jby5qcC%2FqAghnc2Nob2xhcvICAPoCAU6CAwNXZWI%3D&_s=LImvBWOb85BkX8m2OPY9N2Hm2R0%3D">Harel, Tarjan 1984</a> <a href="http://www.ccs.neu.edu/home/dherman/browse/projects/mini-javac/papers/bender00lca.pdf">Bender, Colton 2000</a>
+おそらく誰も知らないようなアルゴリズム. supperbubble と呼ばれる構造を線形時間ですべて列挙するアルゴリズム(残念ながら自分はもうこれ関連の研究はやっていません). <br>
+詳しくは <a href="https://arxiv.org/pdf/1505.04019.pdf">Brankovic et al. 2015</a> をご覧ください. DNA のゲノム解析などで使えるそうです. <br>
+"誰も知らないようなアルゴリズムを公開することに何の意味があるのですか?"というプルリクがとんでこないことを祈ります.
 </p>
 <p>
-この<a href="https://www.slideshare.net/yumainoue965/lca-and-rmq">スライド</a>の説明を参考に実装した
+(関数)<br>
+add_edge(): 辺を追加する <br>
 </p>
 <p>
-時間計算量: 構築 O(n), クエリ O(1)
+時間計算量: O(mlogn)
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">
@@ -322,10 +323,193 @@ std::pair&lt;int, T&gt; RMQ&lt;T&gt;::query(int st, int ed)
     if(max_query) res.second = -res.second;
     return res;
 }
+
+void graph_input(int edge_size, std::vector&lt;std::vector&lt;int&gt; &gt;&amp; graph, std::vector&lt;std::vector&lt;int&gt; &gt;&amp; rgraph)
+{
+    for(int i = 0; i &lt; edge_size; i++){
+        int arg1, arg2;
+        scanf(&quot;%d%d&quot;, &amp;arg1, &amp;arg2);
+        graph[arg1].push_back(arg2);
+        rgraph[arg2].push_back(arg1);
+    }
+}
+
+void recursive_topological_sort(int u, int&amp; index, std::vector&lt;int&gt;&amp; visit, std::vector&lt;int&gt;&amp; ord,
+     std::vector&lt;int&gt;&amp; ordD, std::vector&lt;std::vector&lt;int&gt; &gt;&amp; graph)
+{
+    if(visit[u] == 1){
+        return;
+    }
+    visit[u] = 0;
+	for(int nx : graph[u]){
+        recursive_topological_sort(nx, index, visit, ord, ordD, graph);
+	}
+    visit[u] = 1;
+    ord[index] = u;
+	ordD[u] = index--;
+}
+
+void topological_sort(int node_size, std::vector&lt;int&gt;&amp; ord, std::vector&lt;int&gt;&amp; ordD, std::vector&lt;std::vector&lt;int&gt; &gt;&amp; graph)
+{
+    //与えられたグラフがconnected かつ DAGであることを仮定
+    std::vector&lt;int&gt; visit(node_size, -1);
+    int index = node_size - 1;
+    for(int i = 0; i &lt; node_size; i++){
+        if(visit[i] == -1){
+            recursive_topological_sort(i, index, visit, ord, ordD, graph);
+        }
+    }
+}
+
+void prepare_superbubble(int node_size, std::vector&lt;bool&gt;&amp; ent, std::vector&lt;bool&gt;&amp; exi,std::vector&lt;int&gt;&amp; ordD, std::vector&lt;int&gt;&amp; outparent,
+     std::vector&lt;int&gt;&amp; outchild, std::vector&lt;std::vector&lt;int&gt; &gt;&amp; graph, std::vector&lt;std::vector&lt;int&gt; &gt;&amp; rgraph)
+{
+    for(int i = 0; i &lt; node_size; i++){
+        bool ok = false;
+        for(int j = 0; j &lt; (int)rgraph[i].size(); j++){
+            if((int)graph[rgraph[i][j]].size() == 1){
+                ok = true;
+                break;
+            }
+        }
+        exi[i] = ok;
+        ok = false;
+        for(int j = 0; j &lt; (int)graph[i].size(); j++){
+            if((int)rgraph[graph[i][j]].size() == 1){
+                ok = true;
+                break;
+            }
+        }
+        ent[i] = ok;
+    }
+    for(int i = 0; i &lt; node_size; i++){
+        int mn_ordD = node_size;
+        for(int j = 0; j &lt; (int)rgraph[i].size(); j++){
+            mn_ordD = std::min(mn_ordD, ordD[rgraph[i][j]]);
+        }
+        outparent[ordD[i]] = mn_ordD;
+        int mx_ordD = -1;
+        for(int j = 0; j &lt; (int)graph[i].size(); j++){
+            mx_ordD = std::max(mx_ordD, ordD[graph[i][j]]);
+        }
+        outchild[ordD[i]] = mx_ordD;
+    }
+}
+
+int validate_superbubble(int st_node, int ed_node, std::vector&lt;bool&gt;&amp; ent, std::vector&lt;int&gt;&amp; ord, std::vector&lt;int&gt;&amp; ordD,
+     std::vector&lt;int&gt;&amp; prev_ent, RMQ&lt;int&gt;&amp; parent_rmq, RMQ&lt;int&gt;&amp; child_rmq)
+{
+    int st_id = ordD[st_node];
+    int ed_id = ordD[ed_node];
+    int mx_child = child_rmq.query(st_id, ed_id).second;
+    int mn_parent = parent_rmq.query(st_id + 1, ed_id + 1).second;
+    if(mx_child != ed_id){
+        return -1;
+    }
+    if(mn_parent == st_id){
+        return st_node;
+    }else if(ent[ord[mn_parent]]){
+        return ord[mn_parent];
+    }else{
+        return prev_ent[ord[mn_parent]];
+    }
+}
+
+void report_superbubble(std::list&lt;std::pair&lt;int, int&gt; &gt;&amp; cand, int st_node, int ed_node, std::vector&lt;bool&gt;&amp; ent, std::vector&lt;bool&gt;&amp; exi,
+     std::vector&lt;int&gt;&amp; ord, std::vector&lt;int&gt;&amp; ordD, std::vector&lt;int&gt;&amp; prev_ent, std::vector&lt;int&gt;&amp; next_ent, std::vector&lt;int&gt;&amp; alt_ent,
+      RMQ&lt;int&gt;&amp; parent_rmq, RMQ&lt;int&gt;&amp; child_rmq, std::vector&lt;std::pair&lt;int, int&gt; &gt;&amp; superbubble_set)
+     //ex_nodeで終わるsuperbubbleを存在すれば報告する
+{
+    if(st_node &lt; 0 || ed_node &lt; 0 || ordD[st_node] &gt;= ordD[ed_node]){
+        cand.pop_back();
+        return;
+    }
+    int prevent_node = prev_ent[ed_node];
+    int valid = -1;
+    while(ordD[prevent_node] &gt;= ordD[st_node]){
+        valid = validate_superbubble(prevent_node, ed_node, ent, ord, ordD, prev_ent, parent_rmq, child_rmq);
+        if(valid == prevent_node || valid == alt_ent[prevent_node] || valid == -1){
+            break;
+        }
+        alt_ent[prevent_node] = valid;
+        prevent_node = valid;
+    }
+    cand.pop_back();
+    if(valid == prevent_node){
+        superbubble_set.push_back(std::make_pair(prevent_node, ed_node));
+        while((cand.back()).first != prevent_node){
+            if((cand.back()).second == 1){
+                //nestされたsuperbubbleについて調べる
+                report_superbubble(cand, next_ent[prevent_node], (cand.back()).first, ent, exi, ord, ordD, prev_ent, next_ent, alt_ent,
+                 parent_rmq, child_rmq, superbubble_set);
+            }else{
+                cand.pop_back();
+            }
+        }
+    }
+}
+
+void superbubble(int node_size, std::vector&lt;std::vector&lt;int&gt; &gt;&amp; graph, std::vector&lt;std::vector&lt;int&gt; &gt;&amp; rgraph,
+ std::vector&lt;std::pair&lt;int, int&gt; &gt;&amp; superbubble_set)
+{
+    std::vector&lt;int&gt; ord(node_size, -1);
+    std::vector&lt;int&gt; ordD(node_size, -1);
+    topological_sort(node_size, ord, ordD, graph);
+    std::vector&lt;bool&gt; ent(node_size, false), exi(node_size, false);
+    std::vector&lt;int&gt; outparent(node_size, -1), outchild(node_size, -1);
+    std::vector&lt;int&gt; alt_ent(node_size, -1), prev_ent(node_size, -1), next_node(node_size, -1);
+    prepare_superbubble(node_size, ent, exi, ordD, outparent, outchild, graph, rgraph);
+    std::list&lt;std::pair&lt;int, int&gt; &gt; cand;   //(頂点の値,entかexiのフラグ)
+    std::vector&lt;int&gt; next_ent(node_size, -1);
+    RMQ&lt;int&gt; parent_rmq, child_rmq;
+    parent_rmq.build(outparent, 0), child_rmq.build(outchild, 1);
+    int prev_entrance = -1;
+    int next_entrance = -1;
+    for(int ver : ord){
+        alt_ent[ver] = -1;
+        prev_ent[ver] = prev_entrance;
+        if(exi[ver]){
+            cand.push_back(std::make_pair(ver, 1));
+        }
+        if(ent[ver]){
+            cand.push_back(std::make_pair(ver, 0));
+            prev_entrance = ver;
+            if(next_entrance &gt;= 0){
+                next_ent[next_entrance] = ver;
+            }
+            next_entrance = ver;
+        }
+    }
+    while(!cand.empty()){
+        if((cand.back()).second == 0){
+            cand.pop_back();
+        }else{
+            report_superbubble(cand, (cand.front()).first, (cand.back()).first, ent, exi, ord, ordD, prev_ent, next_ent, alt_ent,
+             parent_rmq, child_rmq, superbubble_set);
+        }
+    }
+}
+
+int main()
+{
+    int node_size, edge_size;
+	scanf(&quot;%d%d&quot;, &amp;node_size, &amp;edge_size);
+    std::vector&lt;std::vector&lt;int&gt; &gt; graph(node_size);
+    std::vector&lt;std::vector&lt;int&gt; &gt; rgraph(node_size);
+    graph_input(edge_size, graph, rgraph);
+    std::vector&lt;std::pair&lt;int, int&gt; &gt; superbubble_set;
+    superbubble(node_size, graph, rgraph, superbubble_set);
+    for(int i = 0; i &lt; (int)superbubble_set.size(); i++){
+        printf(&quot;%d %d\n&quot;,superbubble_set[i].first, superbubble_set[i].second);
+    }
+}
 </pre>
 <h3>verify 用の問題</h3>
-<p>Atcoder : <a href="https://beta.atcoder.jp/contests/arc067/tasks/arc067_d">Yakiniku Restaurants</a>
-  <a href="https://beta.atcoder.jp/contests/arc067/submissions/3144707">提出コード</a></p>
+<p>
+verify していません(verify 問題を知らない)
+</p>
+<p>Atcoder : <a href=""></a>
+  <a href="">提出コード</a></p>
 </section>
 
 </div>
