@@ -51,6 +51,9 @@ add_edge(): 辺を追加する <br>
 時間計算量: O(mlogn)
 </p>
 <h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
 <pre class="prettyprint linenums">
 template&lt;typename CandidateType&gt; class OrthogonalRangeReport
 {
@@ -89,7 +92,7 @@ public:
         sort(sorted.begin(), sorted.end());
         ys.resize(2*n-1);
         for(int i = 0; i &lt; sz; i++){
-            
+
             xs[i] = (sorted[i].first).first;
             ys[i+n-1] = {pci((sorted[i].first).second, sorted[i].second)};
         }
@@ -108,6 +111,7 @@ public:
     }
 };
 </pre>
+</div>
 <h3>verify 用の問題</h3>
 <p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=DSL_2_C">Range Search (kD Tree)</a>
   <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3125289#1">提出コード</a></p>

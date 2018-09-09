@@ -395,6 +395,31 @@ footer .pr {
     content: '\f078';
 }
 
+/* code open-close
+---------------------------------------------------------------------------*/
+
+.codebox label:before {
+	content: 'コードを拡げる';
+	font-weight: bold;
+	color: #4344ff;
+	text-decoration: underline;
+	cursor :pointer;
+	margin-left: 18px
+}
+
+.csscode:checked + label:before {
+	content: "コードを折りたたむ";
+	font-weight: bold
+}
+
+.codebox input {
+    display: none;
+}
+
+.csscode:checked + label + .prettyprint {
+	max-height: none
+}
+
 /*Font awesome
 ---------------------------------------------------------------------------*/
 .my-small {
