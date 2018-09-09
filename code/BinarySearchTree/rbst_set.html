@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>RBST set</h2>
+<h3>コードについての説明</h3>
+<p>
+GNU C++ の標準ライブラリには赤黒木があるらしいがどうみても使いにくそうだし、それにあまり速くないみたい(<a href="https://codeforces.com/blog/entry/11080">参考</a>)<br>
+元論文は <a href=""></a>
+</p>
+<p>
+(関数)<br>
+add_edge(): 辺を追加する <br>
+</p>
+<p>
+時間計算量: O(mlogn)
+</p>
+<h3>コード</h3>
+<pre class="prettyprint linenums">
+template &lt;typename T&gt; class RBST {
+private:
+    struct node{
+        T val;
+        node *left, *right;
+        int st_size;   // 部分木のサイズ
+        node(){}
+        node(T v) : val(v), left(nullptr), right(nullptr), st_size(1){}
+        ~node() { delete left; delete right; }
+    };
+    node *root;
+    using pnn = pair&lt;node*,node*&gt;;
+    int size(node* t) { return t ? t-&gt;st_size : 0; }
+    node* update(node *t) {
+        node* l = t-&gt;left; node* r = t-&gt;right;
+        t-&gt;st_size = size(l) + size(r) + 1;
+        return t;
+    }
+    unsigned rnd(){
+        static unsigned x = 123456789, y = 362436069, z = 521288629, w = 86675123;
+        unsigned t = (x^(x&lt;&lt;11));
+        x = y,y = z,z = w;
+        return (w = (w^(w&gt;&gt;19))^(t^(t&gt;&gt;8)));
+    }
+    node* merge(node* l, node* r){
+        if (!l || !r) return (!l) ? r : l;
+        if(rnd() % (size(l) + size(r)) &lt; (unsigned)size(l)){
+            l-&gt;right = merge(l-&gt;right, r);
+            return update(l);
+        }else{
+            r-&gt;left = merge(l, r-&gt;left);
+            return update(r);
+        }
+    }
+    pnn split(node* t, int k){   //木のサイズが(k,n-k)となるように分割する
+        if(!t) return pnn(nullptr, nullptr);
+        if(k &lt;= size(t-&gt;left)){
+            pnn s = split(t-&gt;left, k);
+            t-&gt;left = s.second;
+            return pnn(s.first,update(t));
+        }else{
+            pnn s = split(t-&gt;right, k-size(t-&gt;left)-1);
+            t-&gt;right = s.first;
+            return pnn(update(t), s.second);
+        }
+    }
+    int lower_bound(node *t, const T k){
+        if(!t) return 0;
+        if(t-&gt;val &lt; k){
+            return size(t-&gt;left) + lower_bound(t-&gt;right,k) + 1;
+        }else{
+            return lower_bound(t-&gt;left,k);
+        }
+    }
+    void lower_value(node *t, const T k, T&amp; res){
+        if(!t) return;
+        if(t-&gt;val &lt; k){
+            lower_value(t-&gt;right,k,res);
+        }else{
+            lower_value(t-&gt;left,k,res=t-&gt;val);
+        }
+    }
+    int upper_bound(node *t, const T k){
+        if(!t) return 0;
+        if(t-&gt;val &lt;= k){
+            return size(t-&gt;left) + upper_bound(t-&gt;right,k) + 1;
+        }else{
+            return upper_bound(t-&gt;left,k);
+        }
+    }
+    void upper_value(node *t, const T k, T&amp; res){
+        if(!t) return;
+        if(t-&gt;val &lt;= k){
+            upper_value(t-&gt;right,k,res);
+        }else{
+            upper_value(t-&gt;left,k,res=t-&gt;val);
+        }
+    }
+    T get(node *t, int k){
+        if(!t) assert(false);
+        int s = size(t-&gt;left);
+        if(s &gt; k)       return get(t-&gt;left,k);
+        else if(s &lt; k)  return get(t-&gt;right,k-s-1);
+        else            return t-&gt;val;
+    }
+    node* insert(node* t, int k, node* u){
+        pnn s = split(t, k);
+        return merge(merge(s.first, u), s.second);
+    }
+    pnn erase(node* t, int k){
+        pnn sr = split(t, k+1);
+        pnn sl = split(sr.first, k);
+        return pnn(merge(sl.first, sr.second), sl.second);
+    }
+public:
+    RBST() : root(nullptr){}
+    //k以上の数の最小インデックス
+    int lower_bound(const T k){ return lower_bound(root,k); }
+    //k以上の最小の数
+    T lower_value(const T k){
+        T res = numeric_limits&lt;T&gt;::max();
+        lower_value(root,k,res);
+        return res;
+    }
+    //kを超える数の最小インデックス
+    int upper_bound(const T k){ return upper_bound(root,k); }
+    //kを超える最小の数
+    T upper_value(const T k){
+        T res = numeric_limits&lt;T&gt;::max();
+        upper_value(root, k, res);
+        return res;
+    }
+    //値valを挿入
+    void insert(T val){
+        root = insert(root, upper_bound(val), new node(val));
+    }
+    //値valを削除
+    void erase(T val){
+        node *p;
+        tie(root, p) = erase(root, lower_bound(val));
+        p-&gt;left = p-&gt;right = nullptr;
+        delete p;
+    }
+    //k番目の値を返す
+    T get(int k){ return get(root,k); }
+    void print(){
+        int sz = size(root);
+        rep(i,sz) cout &lt;&lt; get(i) &lt;&lt; &quot; &quot;;
+        cout &lt;&lt; &quot;\n&quot;;
+    }
+};
+</pre>
+<h3>verify 用の問題</h3>
+<p>Atcoder : <a href="https://beta.atcoder.jp/contests/arc033/tasks/arc033_3">データ構造</a>
+  <a href="https://beta.atcoder.jp/contests/arc033/submissions/2147378">提出コード</a>(非想定解)</p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>

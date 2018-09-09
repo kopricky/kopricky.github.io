@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>dynamic convex hull trick</h2>
+<h3>コードについての説明</h3>
+<p>
+元論文は <a href=""></a>
+</p>
+<p>
+(関数)<br>
+add_edge(): 辺を追加する <br>
+</p>
+<p>
+時間計算量: O(mlogn)
+</p>
+<h3>コード</h3>
+<pre class="prettyprint linenums">
+// 単調でない傾きについての convex hull trick
+// Li Chao Segment Tree を用いて O(nlog(MAX_A))
+template&lt;typename T&gt; class CHT {
+private:
+    struct node {
+        node *left, *right;
+        T a, b;
+        node() : left(nullptr), right(nullptr) {}
+        node(T arg1, T arg2)
+            : left(nullptr), right(nullptr), a(arg1), b(arg2) {}
+        T f(T x, T a, T b) {
+            return a * x + b;
+        }
+        void add(T l, T r, T a_, T b_) {
+            if(f(l,a_,b_) &lt; f(l,a,b)) {
+                swap(a,a_), swap(b,b_);
+            }
+            if(f(r,a,b) &lt;= f(r,a_,b_)) return;
+            T mid = (l + r) / 2;
+            if(f(mid,a,b) &lt; f(mid,a_,b_)){
+                if(!right){
+                    right = new node(a_,b_);
+                }else{
+                    right-&gt;add(mid+1,r,a_,b_);
+                }
+            }else{
+                swap(a, a_), swap(b, b_);
+                if(!left){
+                    left = new node(a_,b_);
+                }else{
+                    left-&gt;add(l,mid,a_,b_);
+                }
+            }
+        }
+        T query(T l, T r, T k) {
+            if(l == r) return f(k, a, b);
+            T ans = f(k, a, b);
+            T mid = (l + r) / 2;
+            if(k &lt;= mid &amp;&amp; left){
+                ans = min(ans, left-&gt;query(l, mid, k));
+            }
+            if(k &gt; mid &amp;&amp; right){
+                ans = min(ans, right-&gt;query(mid+1, r, k));
+            }
+            return ans;
+        }
+        void rm() {
+            if(left) left-&gt;rm();
+            if(right) right-&gt;rm();
+            delete this;
+        }
+    };
+    node *root;
+    T min_val, max_val;
+public:
+    // arg1:クエリになげる最小の値, arg2:クエリになげる最大の値
+    CHT(T arg1, T arg2)
+        : min_val(arg1), max_val(arg2) { root = new node(0,numeric_limits&lt;T&gt;::max()); }
+    // f(x) = a*x+b を挿入
+    void add(T a, T b) {
+        return root-&gt;add(min_val, max_val, a, b);
+    }
+    // x=kでの最小値
+    T query(T k) {
+        return root-&gt;query(min_val, max_val, k);
+    }
+    ~CHT(){
+        root-&gt;rm();
+    }
+};
+</pre>
+<h3>verify 用の問題</h3>
+<p>CSAcademy : <a href="https://csacademy.com/contest/archive/task/squared-ends/">Squared Ends</a>
+  <a href="https://csacademy.com/submission/1751627/">提出コード</a></p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>

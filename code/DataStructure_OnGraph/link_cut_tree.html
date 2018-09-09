@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>link cut tree</h2>
+<h3>コードについての説明</h3>
+<p>
+Link Cut Tree とは木の動的な変化(辺の挿入, 辺の削除)を効率的に処理するデータ構造. 木上のパスのクエリも効率的に処理することができますが, 実装していません. <br>
+HL 分解に雰囲気は似ていて, HL 分解での heavy path の部分を平衡二分探索木(splay 木)で持っている. <br>
+あくまで木に対するデータ構造なので同じ連結成分内の頂点間に辺を貼ったりはできない. そういうことがしたい(一般のグラフの動的連結性を行いたい)なら, O(logn) 個の Link Cut Tree を持つ必要がある. <br>
+しかし Link Cut Tree はパスを扱うのには適しているが, 部分木を扱うにはあまり適していないので実際に実装する際は同じく木の動的連結性を保持するデータ構造である <a href="http://web.stanford.edu/class/archive/cs/cs166/cs166.1166/lectures/17/Small17.pdf">Euler Tour Tree</a> を使ったほうがよいかもしれない. <br>
+Link Cut Tree の参考資料としては<a href="https://www.ioi-jp.org/camp/2013/2013-sp-tasks/2013-sp-day4-spaceships-review.pdf">このスライド</a>で雰囲気を理解し, 別の記事なりを読むと理解が早まるかもしれません. アルゴリズムの理解には時間がかかりますが, 実装自体はそこまで重くない. <br>
+正直なところなぜならしO(logn)になるかのポテンシャル部分の議論があまり良くわかっていない(ダメじゃん...)
+</p>
+<p>
+時間計算量: 各クエリ ならし O(logn)
+</p>
+<h3>コード</h3>
+<pre class="prettyprint linenums">
+struct node {
+    int id;
+    node *left, *right, *par;
+    bool rev;
+    node(int num) : id(num), left(nullptr), right(nullptr), par(nullptr), rev(false){}
+    bool isRoot(){
+        return (!par) || (par-&gt;left != this &amp;&amp; par-&gt;right != this);
+    }
+    //スプレー木を反転させる
+    void push(){
+        if(!rev) return;
+        rev = false;
+        swap(left,right);
+        if(left) left-&gt;rev = !(left-&gt;rev);
+        if(right) right-&gt;rev = !(right-&gt;rev);
+    }
+};
+
+class LinkCutTree{
+private:
+    //chとpを親子関係にする(lch:左の子かどうか)
+    void connect(node* ch, node* p, bool lch){
+        if(ch) ch-&gt;par = p;
+        if(lch){
+            p-&gt;left = ch;
+        }else{
+            p-&gt;right = ch;
+        }
+    }
+    //zig, zig-zag, zig-zig の３種類の回転を表す
+    void rotate(node* u){
+        node *p = u-&gt;par, *gp  = p-&gt;par;
+        bool root = p-&gt;isRoot(), lch = (u == p-&gt;left);
+        connect(lch ? (u-&gt;right) : (u-&gt;left),p,lch);
+        connect(p,u,!lch);
+        if(root){
+            if(u) u-&gt;par = gp;
+        }else{
+            connect(u,gp,!root &amp;&amp; (p == gp-&gt;left));
+        }
+    }
+    //uをスプレー木の根にする
+    void splay(node* u){
+        while(!(u-&gt;isRoot())){
+            node* p = u-&gt;par;
+            node* gp = p-&gt;par;
+            if(!(p-&gt;isRoot())) gp-&gt;push();
+            p-&gt;push(), u-&gt;push();
+            if(!(p-&gt;isRoot())) rotate((u == p-&gt;left) == (p == gp-&gt;left) ? p : u);
+            rotate(u);
+        }
+        u-&gt;push();
+    }
+    node* expose(node* u){
+        node* last = nullptr;
+        for(node* v = u; v; v=v-&gt;par){
+            splay(v);
+            v-&gt;left = last;
+            last = v;
+        }
+        splay(u);
+        return last;
+    }
+    //uを全体の根にする
+    void evert(node* u){
+        expose(u);
+        u-&gt;rev = !(u-&gt;rev);
+    }
+    bool connected(node* u,node* v){
+        expose(u), expose(v);
+        return u-&gt;par;
+    }
+    void link(node* u,node* v){
+        // u, v が同じ連結成分にないか
+        // assert(!connected(u, v));
+        evert(u);
+        u-&gt;par = v;
+    }
+    void cut(node* u, node* v){
+        evert(u);
+        expose(v);
+        // u, v の間に辺があるか
+        // assert(v-&gt;right == u &amp;&amp; !(u-&gt;left));
+        v-&gt;right-&gt;par = nullptr, v-&gt;right = nullptr;
+    }
+    node* lca(node* u, node* v){
+        // u,v が同じ連結成分内にあるか
+        // assert(connected(u, v));
+        expose(u);
+        return expose(v);
+    }
+
+public:
+    node** arr;
+    LinkCutTree(int node_size){
+        arr = new node* [node_size];
+        for(int i = 0; i &lt; node_size; i++){
+            arr[i] = new node(i);
+        }
+    }
+    // id1 と id2 が同じ木(連結成分)に属するか
+    bool connected(int id1, int id2){ return connected(arr[id1],arr[id2]); }
+    // 木(連結成分)の根 id1 の親を id2 にする
+    void link(int id1, int id2){ link(arr[id1],arr[id2]); }
+    // id1 と その親 id2 の間の辺を削除する
+    void cut(int id1, int id2){ cut(arr[id1], arr[id2]); }
+    // id1 と id2 の LCA を求める
+    int lca(int id1, int id2){ return lca(arr[id1],arr[id2])-&gt;id; }
+};
+</pre>
+<h3>verify 用の問題</h3>
+<p>
+connected, link, cut の verify <br>
+Atcoder : <a href="https://beta.atcoder.jp/contests/njpc2017/tasks/njpc2017_h">白黒ツリー</a>
+  <a href="https://beta.atcoder.jp/contests/njpc2017/submissions/3165804">提出コード</a></p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>

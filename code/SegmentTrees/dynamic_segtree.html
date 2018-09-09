@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>dynamic segtree</h2>
+<h3>コードについての説明</h3>
+<p>
+値の範囲は大きい(10^9)が要素数自体は少なく(10^5)かつクエリをオンラインで処理するとき(オフラインなら座圧ができる)に用いるデータ構造が動的 segment tree です. <br>
+例えば範囲が0~10^9までのセグメント木に動的にノードを追加していくのだが, 結局のところ必要な部分だけのノードを確保すれば良いので実際に確保されるノード数は O(nlog(10^9)) となり, クエリも O(log(10^9)) 処理することができる. <br>
+以下の実装では verify 問題に沿って区間 add と区間 sum を実装した. 寝ぼけて書いていたせいか割と実装をバグらせたので, verify してはいるが若干不安...
+</p>
+<p>
+(関数)<br>
+insert(a, x): a に値 x をもつ要素を追加する <br>
+range(a, b, x): 区間[a,b)内の要素に値ｘを加える <br>
+query(a, b): 区間[a,b)内の要素の合計を返す <br>
+POOL_SIZE(ノードの最大数), MAX_SIZE(範囲の最大値) は問題に応じて変更する.
+</p>
+<p>
+時間計算量: 各クエリO(log(MAX_SIZE))
+</p>
+<h3>コード</h3>
+<pre class="prettyprint linenums">
+template&lt;typename T&gt; class dynamic_segtree{
+private:
+    struct node {
+    	T val, lazy;
+        int st_size;
+    	node *par, *left, *right;
+    	node() : val(id2), lazy(id1), st_size(0),
+            par(nullptr), left(nullptr), right(nullptr){}
+    };
+    void opr1(T&amp; arg1,T arg2){
+        arg1 += arg2;
+    }
+    T opr2(T arg1,T arg2){
+        return arg1 + arg2;
+    }
+    static const int POOL_SIZE = 4000000;
+    static const int MAX_SIZE = 100001;
+    static node *root;
+    static node pool[POOL_SIZE];
+    static const T id1 = (T)0;
+    static const T id2 = (T)0;
+    int nw_size;
+    node* alloc(){
+        assert(nw_size &lt; POOL_SIZE);
+        return (&amp;pool[nw_size++]);
+    }
+    void eval(node* k, int l, int r){
+        if(k-&gt;lazy != id1){
+            opr1(k-&gt;val,k-&gt;lazy);
+            if(r-l&gt;1){
+                if(k-&gt;left){
+                    opr1(k-&gt;left-&gt;lazy, k-&gt;lazy / k-&gt;st_size * k-&gt;left-&gt;st_size);
+                }
+                if(k-&gt;right){
+                    opr1(k-&gt;right-&gt;lazy, k-&gt;lazy / k-&gt;st_size * k-&gt;right-&gt;st_size);
+                }
+            }
+            k-&gt;lazy = id1;
+        }
+    }
+public:
+    dynamic_segtree() : nw_size(0){ root = alloc(); }
+    //a番目にxを追加
+    void insert(int a, T x, node *k = root, int l = 0, int r = MAX_SIZE){
+        eval(k, l, r);
+        k-&gt;st_size++;
+        k-&gt;val = opr2(k-&gt;val,x);
+        if(r - l == 1){
+            return;
+        }
+        if(a &lt; (l + r) / 2){
+            if(!(k-&gt;left)){
+                k-&gt;left = alloc();
+                k-&gt;left-&gt;par = k;
+            }
+            insert(a, x, k-&gt;left, l, (l+r)/2);
+        }else{
+            if(!(k-&gt;right)){
+                k-&gt;right = alloc();
+                k-&gt;right-&gt;par = k;
+            }
+            insert(a, x, k-&gt;right, (l+r)/2, r);
+        }
+    }
+    void range(int a, int b, const T x, node *k = root, int l = 0, int r = MAX_SIZE){
+        eval(k, l, r);
+    	if(b &lt;= l || r &lt;= a) return;
+    	if(a &lt;= l &amp;&amp; r &lt;= b){
+            opr1(k-&gt;lazy, k-&gt;st_size * x);
+    		eval(k, l, r);
+    		return;
+    	}
+        k-&gt;val = id2;
+    	if(k-&gt;left){
+            range(a, b, x, k-&gt;left, l, (l+r)/2);
+            k-&gt;val = opr2(k-&gt;val,k-&gt;left-&gt;val);
+    	}
+        if(k-&gt;right){
+            range(a, b, x, k-&gt;right, (l+r)/2, r);
+            k-&gt;val = opr2(k-&gt;val,k-&gt;right-&gt;val);
+        }
+    }
+    T query(int a, int b, node *k = root, int l=0, int r = MAX_SIZE){
+        eval(k, l, r);
+        if(b &lt;= l || r &lt;= a){
+            return id2;z
+        }
+        if(a &lt;= l &amp;&amp; r &lt;= b){
+            return k-&gt;val;
+        }
+        T vl = id2,vr = id2;
+        if(k-&gt;left){
+            vl = query(a, b, k-&gt;left, l, (l+r)/2);
+        }
+        if(k-&gt;right){
+            vr = query(a, b, k-&gt;right, (l+r)/2, r);
+        }
+        return opr2(vl, vr);
+    }
+};
+template&lt;typename T&gt; class dynamic_segtree&lt;T&gt;::node* dynamic_segtree&lt;T&gt;::root;
+template&lt;typename T&gt; class dynamic_segtree&lt;T&gt;::node dynamic_segtree&lt;T&gt;::pool[POOL_SIZE];
+</pre>
+<h3>verify 用の問題</h3>
+<p>JOI : <a href="https://www.ioi-jp.org/camp/2011/2011-sp-tasks/2011-sp-day4.pdf">リンゴの出荷 (Apples)</a>
+  <a href="https://beta.atcoder.jp/contests/joisc2011/submissions/2227451">提出コード</a></p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>

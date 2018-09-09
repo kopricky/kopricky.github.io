@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>skew heap</h2>
+<h3>コードについての説明</h3>
+<p>
+ヒープ間のマージ操作を効率的行うことのできるヒープ. とても簡単な実装でならし O(logn) を達成する. "ならし"って恐ろしい計算量の概念だというのが改めて分かる. <br>
+どのようにマージされるかを実際に図で書いて考えてみると分かりやすく, そして計算量がそんなかからないことも実験からなんとなく分かる. <br>
+計算量の議論については<a href="http://hos.ac/blog/">ここ</a>にのっている. このポテンシャルを用いた議論は難しくはないけど, 自分で考えろと言われたらすぐ思いつかないのでやっぱりポテンシャル系の議論はまだまだ苦手. <br>
+Hu-Tucker のアルゴリズム(最適二分探索木を求めるアルゴリズム) にも用いられているそうです(参考 <a href="https://atc002.contest.atcoder.jp/tasks/atc002_c">最適平衡二分探索木</a>). <br>
+ヒープなので大きい方が top にくるが, meld の中の不等号を変えることで小さいほうが top に変更可能. <br>
+
+</p>
+<p>
+(関数)<br>
+empty(): ヒープが空かどうか <br>
+size(): ヒープ内の要素数を返す <br>
+push(val): 要素 val を追加する <br>
+top(): ヒープ内の最大値を返す <br>
+pop(): ヒープ内の最大値を削除する <br>
+meld(a, b): ヒープ a, ヒープ b をマージして, 新しく出来たヒープのポインタを返す
+</p>
+<p>
+時間計算量: empty(), size(), top(): O(1)　pop(), meld(): ならしO(logn)
+</p>
+<h3>コード</h3>
+<pre class="prettyprint linenums">
+template&lt;typename T&gt; class node {
+public:
+    node&lt;T&gt;* l; node&lt;T&gt;* r; T val;
+    node(T t) : l(nullptr), r(nullptr), val(t){}
+    friend node* meld(node* a, node* b){
+        if(!a) return b; if(!b) return a;
+        if(a-&gt;val &lt; b-&gt;val) swap(a, b);
+        a-&gt;l = meld(a-&gt;l,b);
+        swap(a-&gt;l, a-&gt;r);
+        return a;
+    }
+};
+
+template&lt;typename T&gt; class Heap {
+public:
+    node&lt;T&gt;* root;
+    int sz;
+    Heap() : root(nullptr), sz(0){}
+    bool empty(){
+        return !root;
+    }
+    int size(){
+        return sz;
+    }
+    void push(T val){
+        sz++;
+        node&lt;T&gt;* p = new node&lt;T&gt;(val);
+        root = meld(root, p);
+    }
+    T top(){
+        return root-&gt;val;
+    }
+    void pop(){
+        sz--;
+        node&lt;T&gt;* p = root;
+        root = meld(root-&gt;r, root-&gt;l);
+        delete p;
+    }
+    friend Heap&lt;T&gt;* meld(Heap&lt;T&gt;* hp1, Heap&lt;T&gt;* hp2){
+        Heap&lt;T&gt;* res = new Heap&lt;T&gt;();
+        res-&gt;sz = hp1-&gt;sz + hp2-&gt;sz;
+        res-&gt;root = meld(hp1-&gt;root, hp2-&gt;root);
+        return res;
+    }
+};
+</pre>
+<h3>verify 用の問題</h3>
+<p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2559">Minimum Spanning Tree</a>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3125263#1">提出コード</a></p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>

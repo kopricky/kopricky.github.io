@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>loop unrolling</h2>
+<h3>コードについての説明</h3>
+<p>
+ループの中身が単純な演算でかつ互いに独立している場合, ループを部分的に開いてベタ書きするループアンローリングとよばれる高速化テクニックがあります. 行列積の高速化などで見られる手法です. <br>
+このコードはそのループアンローリングのコードを生成するコードになっています(ループが3重の場合). pragma にもそれらしいのがあるが効果を実感できたことがないです.
+</p>
+<h3>コード</h3>
+<pre class="prettyprint linenums">
+// loop-unrolling のコードを生成するコード
+// i,j,kループについて行うべき処理を一行実装しかつ各添字i,j,kの前に!をつける
+// 入力は
+// 処理 (一行)
+// x y z (i,j,kのアンローリングの段数)
+// の形
+
+#include &lt;bits/stdc++.h&gt;
+#define ll long long
+#define rep(i,n) for(int i=0;i&lt;(int)(n);++i)
+#define len(v) (int)(v).size()
+#define pb push_back
+
+using namespace std;
+
+int main()
+{
+    cin.tie(0);
+    ios::sync_with_stdio(false);
+    string s;
+    getline(cin,s);
+    int x,y,z;
+    cin &gt;&gt; x &gt;&gt; y &gt;&gt; z;
+    vector&lt;vector&lt;vector&lt;string&gt; &gt; &gt; res(x,vector&lt;vector&lt;string&gt; &gt;(y,vector&lt;string&gt;(z)));
+    rep(i,len(s)){
+        if(s[i] == '!'){
+            if(s[i+1] == 'i'){
+                rep(k,y){ rep(l,z){ rep(j,x){
+                    if(j) res[j][k][l].pb('i'), res[j][k][l].pb('+'), res[j][k][l] += to_string(j);
+                    else res[j][k][l].pb('i');
+                } } }
+            }else if(s[i+1] == 'j'){
+                rep(j,x){ rep(l,z){ rep(k,y){
+                    if(k) res[j][k][l].pb('j'), res[j][k][l].pb('+'), res[j][k][l] += to_string(k);
+                    else res[j][k][l].pb('j');
+                } } }
+            }else{
+                rep(j,x){ rep(k,y){ rep(l,z){
+                    if(l) res[j][k][l].pb('k'), res[j][k][l].pb('+'), res[j][k][l] += to_string(l);
+                    else res[j][k][l].pb('k');
+                } } }
+            }
+            i++;
+        }else{
+            rep(j,x){ rep(k,y){ rep(l,z){
+                res[j][k][l].pb(s[i]);
+            } } }
+        }
+    }
+    rep(i,x){ rep(j,y){ rep(k,z){
+        cout &lt;&lt; res[i][j][k] &lt;&lt; &quot;\n&quot;;
+    } } }
+    return 0;
+}
+</pre>
+<h3>verify 用の問題</h3>
+<p>
+verify というわけではありませんが<a href="http://codeforces.com/contest/1019/submission/41509142">このようなコード</a>になります. <br>
+結局通りませんでしたし, こんなコードを投げても誰も幸せにならないのでちゃんと想定解を考えましょう.
+</p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>
