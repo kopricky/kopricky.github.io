@@ -7,10 +7,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
 <meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
-<link rel="stylesheet" href="../../css/style.css">
-<script type="text/javascript" src="../../js/openclose.js"></script>
+<link rel="stylesheet" href="../../../css/style.css">
+<script type="text/javascript" src="../../../js/openclose.js"></script>
 <link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
-<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<link rel="stylesheet" href="../../../css/prettify.css" type="text/css">
 <!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
@@ -22,16 +22,16 @@
 <div id="container">
 
 <header>
-<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+<h1 id="logo"><a href="../../../index.html"><img src="../../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
 </header>
 
 
 <nav id="menubar">
 <ul>
-<li><a href="../../index.html">Home</a></li>
-<li><a href="../../guide.html">Guide</a></li>
-<li class="current"><a href="../../code.html">Code</a></li>
-<li><a href="../../link.html">Link</a></li>
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../guide.html">Guide</a></li>
+<li class="current"><a href="../../../code.html">Code</a></li>
+<li><a href="../../../link.html">Link</a></li>
 </ul>
 </nav>
 
@@ -41,14 +41,19 @@
 <h2>range max update query and range sum query</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
+区間 max への更新 (a_i ← max(a_i, x) (i ∈ [l, r)), 区間和 (sum_(l <= i < r) a_i) のクエリを効率的に処理できる. <br>
+<a = href="https://codeforces.com/blog/entry/57319">コドフォのブログ</a> に書いてあったテクニックで自分は最初知ったとき結構びっくりした. <br>
+実装もそこまでめんどくさくなく, 通常の遅延セグ木の更新の際の探索において <br>
+「b <= l || r <= a」 なら探索終了の部分を 「b <= l || r <= a || min_val[k] >= x」 なら探索終了に変更し, (min_val[k] とは対応する区間内の最小値を表す) <br>
+「a <= l && r <= b」 なら遅延処理するという部分を 「a <= l && r <= b && second_val[k] > x」 なら遅延処理するに変更する. (second_val[k] とは対応する区間内の 2 番目((注)strict に 2 番目) に小さい値を表す) <br>
+のように変更するだけである. もちろん min_val, second_val は合わせて計算しておく. <br>
+前者の条件の変更は探索終了の条件をゆるくしたので計算量的にはむしろプラスに働く. 問題は後者の条件の方で second_val[k] <= x が成り立つ場合, 遅延セグ木では遅延処理に回して終了していたところを余分に探索することになる. 以下ではこの点について説明する.<br>
+セグ木が保持するノード(2*n個ぐらいある)に対応する区間 [l, r) について D[l..r) を区間 [l, r) に含まれる数の種類数とする. またすべてのノードの D[l, r) の和を C とする. ここで C = O(nlogn) であることに注意する. <br>
+ここで遅延セグ木と比べて余分に探索しなければいけないとき, つまり second_val[k] <= x のときは探索終了後にはこの区間内の min_val[k] と second_val[k] が x に更新されている. 言い換えると余分に一回探索するごとにその区間の範囲内の数の種類数が少なくとも 1 減ることになる. もちろん C も少なくとも 1 減る. <br>
+さらに C = O(nlogn) であることと合わせると, クエリをすべて処理した時にかかる余分な探索は O(nlogn) であることがいえ, これより 1 回のクエリの処理にかかる計算量はならし O(logn) となる.
 </p>
 <p>
-(関数)<br>
-add_edge(): 辺を追加する <br>
-</p>
-<p>
-時間計算量: O(mlogn)
+時間計算量: 構築 O(n), 各クエリ ならしO(logn)
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">
@@ -74,25 +79,6 @@ private:
             count[id] = count[2*id+1]+count[2*id+2];
         }
     }
-public:
-    segtree(vector&lt;T&gt;&amp; v) : sz((int)v.size()){
-        n = 1;
-        while(n &lt; sz){
-            n *= 2;
-        }
-        node.resize(2*n-1, 0);
-        lazy.resize(2*n-1, 0);
-        lazyFlag.resize(2*n-1,false);
-        min_val.resize(2*n-1,numeric_limits&lt;T&gt;::max());
-        second_val.resize(2*n-1,numeric_limits&lt;T&gt;::max());
-        count.resize(2*n-1,1);
-        for(int i = 0; i &lt; sz; i++){
-            node[i+n-1] = min_val[i+n-1] = v[i];
-        }
-        for(int i=n-2; i&gt;=0; i--){
-            update(i);
-        }
-    }
     void eval(int k, int l, int r) {
         if(lazyFlag[k]){
             if(lazy[k] &gt; min_val[k]){
@@ -104,6 +90,24 @@ public:
                 }
             }
             lazyFlag[k] = false;
+        }
+    }
+public:
+    segtree(vector&lt;T&gt;&amp; v) : sz((int)v.size()){
+        n = 1;
+        while(n &lt; sz){
+            n *= 2;
+        }
+        node.resize(2*n-1, 0), lazy.resize(2*n-1, 0);
+        lazyFlag.resize(2*n-1,false);
+        min_val.resize(2*n-1,numeric_limits&lt;T&gt;::max());
+        second_val.resize(2*n-1,numeric_limits&lt;T&gt;::max());
+        count.resize(2*n-1,1);
+        for(int i = 0; i &lt; sz; i++){
+            node[i+n-1] = min_val[i+n-1] = v[i];
+        }
+        for(int i=n-2; i&gt;=0; i--){
+            update(i);
         }
     }
     void range(int a, int b, T x, int k=0, int l=0, int r=-1){
@@ -154,12 +158,12 @@ verify していません(verify 問題を知らない)
 <!--/contents-->
 
 <footer>
-<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<small>Copyright&copy; <a href="../../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
 <span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
 </footer>
 
-<script src="../../js/prettify.js"></script>
-<script src="../../js/lang-css.js"></script>
+<script src="../../../js/prettify.js"></script>
+<script src="../../../js/lang-css.js"></script>
 <!-- prettyPrint()関数を実行するため追加↓ -->
 <script>prettyPrint();</script>
 

@@ -42,6 +42,7 @@
 <h3>コードについての説明</h3>
 <p>
 静的 RMQ(更新のない区間最小値クエリ) に O(1) で答えるデータ構造を O(nlogn) 時間で構築するアルゴリズム. <br>
+「table[i][k] : インデックス i から始まる 2^k 個の要素の中の最小値」 という配列を O(nlogn) かけて計算しておけば区間[l,r)のクエリに対して k = floor(r-l) とすると min(table[l][k], table[r-2^k][k]) のように O(1) で答えることができる.
 </p>
 <p>
 時間計算量: 構築 O(nlogn), クエリ O(1)
@@ -51,47 +52,32 @@
 template&lt;typename T&gt; class SparseTable {
 private:
     int sz;
-    vector&lt;T&gt; arr;
     vector&lt;int&gt; logTable;
-    vector&lt;vector&lt;int&gt; &gt; table; //最小値のインデックスを保持
-    bool max_query;
-    bool greater(T a, T b){ return (max_query) ? (a &gt; b) : (a &lt; b); }
+    vector&lt;vector&lt;pair&lt;T, int&gt; &gt; &gt; table; //最小値のインデックスを保持
 public:
-    SparseTable(vector&lt;T&gt;&amp; v, bool max_query_=false) : sz((int)v.size()), arr(v),
-        logTable(sz+1), max_query(max_query_){
+    SparseTable(vector&lt;T&gt;&amp; v) : sz((int)v.size()), logTable(sz+1){
         for(int i = 2; i &lt; sz + 1; i++){
             logTable[i] = logTable[i &gt;&gt; 1] + 1;
         }
-        table.resize(sz,vector&lt;T&gt;(logTable[sz]+1));
-        for(int i = 0; i &lt; sz; i++){
-            table[i][0] = i;
+        table.resize(sz, vector&lt;pair&lt;T, int&gt; &gt;(logTable[sz]+1));
+        rep(i,sz){
+            table[i][0] = make_pair(v[i], i);
         }
         for(int k = 1; (1 &lt;&lt; k) &lt;= sz; k++){
             for(int i = 0; i + (1 &lt;&lt; k) &lt;= sz; i++){
-                int s = table[i][k-1];
-                int t = table[i + (1 &lt;&lt; (k-1))][k-1];
-                if(greater(arr[s], arr[t])){
-                    table[i][k] = s;
-                }else{
-                    table[i][k] = t;
-                }
+                table[i][k] = min(table[i][k-1], table[i + (1 &lt;&lt; (k-1))][k-1]);
             }
         }
     }
-    //(最小(大)値, それを達成するインデックス)
-    pair&lt;T,int&gt; query(int l,int r){
+    pair&lt;T, int&gt; query(int l,int r){
         int k = logTable[r-l];
-        if(greater(arr[table[l][k]], arr[table[r-(1&lt;&lt;k)][k]])){
-            return make_pair(arr[table[l][k]],table[l][k]);
-        }else{
-            return make_pair(arr[table[r-(1&lt;&lt;k)][k]],table[r-(1&lt;&lt;k)][k]);
-        }
+        return min(table[l][k], table[r-(1&lt;&lt;k)][k]);
     }
 };
 </pre>
 <h3>verify 用の問題</h3>
-<p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_2_B&lang=jp">Minimum-Cost Arborescence</a>
-  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3122547#1">提出コード</a></p>
+<p>AOJ : <a href="https://arc067.contest.atcoder.jp/tasks/arc067_d">Yakiniku Restaurants</a>
+  <a href="https://arc067.contest.atcoder.jp/submissions/3174716">提出コード</a></p>
 </section>
 
 </div>

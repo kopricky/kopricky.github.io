@@ -38,13 +38,14 @@
 <div id="contents">
 
 <section>
-<h2>bit_1d_rangeadd_rangesum</h2>
+<h2>bit range add range sum</h2>
 <h3>コードについての説明</h3>
 <p>
-bit を 2 つ持つことで, 
+bit を 2 つ持つことで, 区間加算, 区間和 のクエリを (ならしではなく)O(logn) で処理するデータ構造を実現できる. 実測がどっちが速いかはテストケースによる(こちらは区間加算の定数倍が重い). <br>
+1 つの BIT で区間加算, ある1点の値を求める というクエリを処理するやつ(imos 的にやるとできる)の応用版. 区間に線形関数を足すみたいなことができればよくてそれは 1 次の係数と定数項それぞれについて BIT を持てば実現可能.
 </p>
 <p>
-時間計算量: O(mlogn)
+時間計算量: 構築 O(n), クエリ O(logn)
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">
@@ -102,6 +103,7 @@ private:
 public:
     // 初期値がすべて0の場合
     BIT_1D_RangeAdd_RangeSum(int sz) : n(sz), bitc(sz), biti(sz){}
+	// [l, r) に val を足す
     void add(int l, int r, T val){
         add(bitc, l, r, val), add(biti, l, r, -val*(l-1)), add(biti, r, n, val*(r-l));
     }

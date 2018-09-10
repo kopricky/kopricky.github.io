@@ -41,11 +41,8 @@
 <h2>bit matrix</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
-</p>
-<p>
-(関数)<br>
-add_edge(): 辺を追加する <br>
+F_2上の行列の積に (or, and) をのせた演算が 64 bit高速化により O(n^3) よりも速くなるという話. <br>
+具体的な使い道としては隣接行列の積が高速に計算できるようになるため到達可能性などの問題に有効.
 </p>
 <p>
 時間計算量: O(n^3/64) (64 bit環境で)
@@ -71,7 +68,7 @@ mat operator*(const mat&amp; m1,const mat&amp; m2){
 }
 </pre>
 <h3>verify 用の問題</h3>
-<p>Atcoder : <a href="https://beta.atcoder.jp/contests/jag2017autumn/tasks/jag2017autumn_is">Revenge of the Endless BFS</a>
+<p>Atcoder : <a href="https://beta.atcoder.jp/contests/jag2017autumn/tasks/jag2017autumn_i">Revenge of the Endless BFS</a>
   <a href="https://beta.atcoder.jp/contests/jag2017autumn/submissions/2453237">提出コード</a></p>
 </section>
 

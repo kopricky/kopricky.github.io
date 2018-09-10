@@ -41,18 +41,77 @@
 <h2>merge segtree</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
+Wavelet Tree に似ているが, 例えば二次元上の点集合を保持する際に, x → y の順番にソートしてセグ木で管理するのだが, そこでセグ木の各ノードに対応する区間[l, r)
+このように構築することで長方形領域に対する静的クエリに効率良く答えることができる, 以下の実装では長方形領域内に含まれる点の値の和を答える.
 </p>
 <p>
-(関数)<br>
-add_edge(): 辺を追加する <br>
-</p>
-<p>
-時間計算量: O(mlogn)
+時間計算量: 構築 O(nlogn), 各クエリ O(log^2n)
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">
-あ
+#define all(v) (v).begin(),(v).end()
+
+template&lt;typename CandidateType, typename ValueType&gt; class segtree
+{
+private:
+    using CT = CandidateType;
+    using VT = ValueType;
+    using pcc = pair&lt;CT, CT&gt;;
+    using pci = pair&lt;CT, int&gt;;
+    vector&lt;vector&lt;VT&gt; &gt; sum;
+    //座標, インデックス
+    vector&lt;pair&lt;pcc, int&gt; &gt; sorted;
+    //x座標
+    vector&lt;CT&gt; xs;
+    //y座標, インデックス
+    vector&lt;vector&lt;pci&gt; &gt; ys;
+    int n, sz;
+    VT query(int lxid, int rxid, CT ly, CT ry, int k, int l, int r){
+        if(r &lt;= lxid || rxid &lt;= l) return 0;
+        if(lxid &lt;= l &amp;&amp; r &lt;= rxid){
+            int lyid = lower_bound(all(ys[k]),pci(ly,-1)) - ys[k].begin();
+            int ryid = upper_bound(all(ys[k]),pci(ry,-1)) - ys[k].begin();
+            if(lyid &gt;= ryid) return 0;
+            return sum[k][ryid] - sum[k][lyid];
+        }else{
+            return query(lxid,rxid,ly,ry,2*k+1,l,(l+r)/2) + query(lxid,rxid,ly,ry,2*k+2,(l+r)/2,r);
+        }
+    }
+public:
+    segtree(vector&lt;pcc&gt;&amp; cand, vector&lt;VT&gt;&amp; val) : sz((int)cand.size()), sorted(sz), xs(sz){
+        n = 1;
+        while(n &lt; sz){
+            n *= 2;
+        }
+        for(int i = 0; i &lt; sz; i++){
+            sorted[i] = make_pair(cand[i], i);
+        }
+        sort(sorted.begin(), sorted.end());
+        ys.resize(2*n-1), sum.resize(2*n-1);
+        for(int i = 0; i &lt; sz; i++){
+            xs[i] = (sorted[i].first).first;
+            ys[i+n-1] = {pci((sorted[i].first).second, sorted[i].second)};
+            sum[i+n-1] = {0, val[sorted[i].second]};
+        }
+        for(int i=n-2; i&gt;=0; i--){
+            ys[i].resize((int)ys[2*i+1].size() + (int)ys[2*i+2].size());
+            merge(all(ys[2*i+1]),all(ys[2*i+2]),ys[i].begin(),[&amp;](pci&amp; a, pci&amp; b){
+                return a.first &lt; b.first;
+            });
+            sum[i].resize((int)ys[i].size()+1,0);
+            for(int j = 0; j &lt; (int)ys[i].size(); j++){
+                sum[i][j+1] = sum[i][j] + val[ys[i][j].second];
+            }
+        }
+    }
+    //[lx,rx)×[ly,ry)の長方形領域に含まれる値の和に答える
+    VT query(CT lx, CT ly, CT rx, CT ry){
+        int lxid = lower_bound(all(xs),lx) - xs.begin();
+        int rxid = upper_bound(all(xs),rx-1) - xs.begin();
+        if(lxid &gt;= rxid) return 0;
+        return query(lxid,rxid,ly,ry,0,0,n);
+    }
+};
 </pre>
 <h3>verify 用の問題</h3>
 <p>yukicoder : <a href="https://yukicoder.me/problems/1937">ギブ and テイク</a>

@@ -7,52 +7,175 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
 <meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
-<link rel="stylesheet" href="../../css/style.css">
-<script type="text/javascript" src="../../js/openclose.js"></script>
+<link rel="stylesheet" href="../../../css/style.css">
+<script type="text/javascript" src="../../../js/openclose.js"></script>
 <link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
-<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<link rel="stylesheet" href="../../../css/prettify.css" type="text/css">
 <!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]-->
 </head>
-
 <body>
 
 <div id="container">
 
 <header>
-<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+<h1 id="logo"><a href="../../../index.html"><img src="../../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
 </header>
 
 
 <nav id="menubar">
 <ul>
-<li><a href="../../index.html">Home</a></li>
-<li><a href="../../guide.html">Guide</a></li>
-<li class="current"><a href="../../code.html">Code</a></li>
-<li><a href="../../link.html">Link</a></li>
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../guide.html">Guide</a></li>
+<li class="current"><a href="../../../code.html">Code</a></li>
+<li><a href="../../../link.html">Link</a></li>
 </ul>
 </nav>
 
 <div id="contents">
 
 <section>
-<h2>アルゴリズム名</h2>
+<h2>range tree point update</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
+range tree (領域木). 1 次元セグ木のノードに対応する区間をまたセグ木で管理する. フラクショナルカスケーディングは実装していません... <br>
+2次元上の一点の値更新および長方形領域のクエリに答えるデータ構造(この実装は一点更新, 長方形 min)で, 遅延処理は多次元だとうまく回らないので一点更新のみ可能. <br>
 </p>
 <p>
-(関数)<br>
-add_edge(): 辺を追加する <br>
-</p>
-<p>
-時間計算量: O(mlogn)
+時間計算量: 構築 O(nlogn), クエリ O(log^2n)
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">
-あ
+template&lt;typename T&gt; class segtree {
+private:
+    int n,sz;
+    vector&lt;T&gt; node;
+public:
+    void init(vector&lt;T&gt;&amp; v){
+        sz = (int)v.size();
+        n = 1;
+        while(n &lt; sz){
+            n *= 2;
+        }
+        node.assign(2*n,numeric_limits&lt;T&gt;::max());
+        for(int i = 0; i &lt; sz; i++){
+            node[i+n] = v[i];
+        }
+        for(int i=n-1; i&gt;=1; i--){
+            node[i] = min(node[2*i],node[2*i+1]);
+        }
+    }
+    void update(int k,T a)
+    {
+    	node[k+=n] = a;
+    	while(k&gt;&gt;=1){
+    		node[k] = min(node[2*k],node[2*k+1]);
+    	}
+    }
+    T query(int a,int b)
+    {
+        T res1 = numeric_limits&lt;T&gt;::max();
+        T res2 = numeric_limits&lt;T&gt;::max();
+        a += n, b += n;
+        while(a != b){
+            if(a % 2) res1 = min(res1, node[a++]);
+            if(b % 2) res2 = min(res2, node[--b]);
+            a &gt;&gt;= 1, b&gt;&gt;= 1;
+        }
+        return min(res1, res2);
+    }
+    void print(){
+        for(int i = 0; i &lt; sz; i++){
+            cout &lt;&lt; query(i,i+1) &lt;&lt; &quot; &quot;;
+        }
+        cout &lt;&lt; endl;
+    }
+};
+
+//座標の型, 値の型
+template&lt;typename CandidateType, typename ValueType&gt; class RangeTree
+{
+private:
+    using CT = CandidateType;
+    using VT = ValueType;
+    using pcc = pair&lt;CT, CT&gt;;
+    using pci = pair&lt;CT, int&gt;;
+    vector&lt;segtree&lt;VT&gt; &gt; seg;
+    //座標, インデックス
+    vector&lt;pair&lt;pcc, int&gt; &gt; sorted;
+    //x座標
+    vector&lt;CT&gt; xs;
+    //y座標, インデックス
+    vector&lt;vector&lt;pci&gt; &gt; ys;
+    int n, sz;
+    void update_(int xid, CT y, const VT x) {
+        xid += n-1;
+        int yid = lower_bound(all(y[xid]),pci(y,-1)) - y[xid].begin();
+        seg[xid].update(yid,x);
+        while(xid&gt;0){
+            xid = (xid-1)/2;
+            int yid = lower_bound(all(y[xid]),pci(y,-1)) - y[xid].begin();
+            seg[xid].update(yid,x);
+        }
+    }
+    VT query(int lxid, int rxid, CT ly, CT ry, int k, int l, int r) {
+        if(r &lt;= lxid || rxid &lt;= l) return numeric_limits&lt;VT&gt;::max();
+        if(lxid &lt;= l &amp;&amp; r &lt;= rxid){
+            int lyid = lower_bound(all(ys[k]),pci(ly,-1)) - ys[k].begin();
+            int ryid = upper_bound(all(ys[k]),pci(ry,-1)) - ys[k].begin();
+            if(lyid &gt;= ryid) return numeric_limits&lt;VT&gt;::max();
+            return seg[k].query(lyid,ryid);
+        }else{
+            return min(query(lxid,rxid,ly,ry,2*k+1,l,(l+r)/2), query(lxid,rxid,ly,ry,2*k+2,(l+r)/2,r));
+        }
+    }
+public:
+    // 座標, それぞれの点が保持する値
+    RangeTree(vector&lt;pcc&gt;&amp; cand, vector&lt;VT&gt;&amp; val){
+        sz = (int)cand.size();
+        n = 1;
+        while(n &lt; sz){
+            n *= 2;
+        }
+        sorted.resize(sz);
+        rep(i,sz){
+            sorted[i] = make_pair(cand[i], i);
+        }
+        sort(sorted.begin(), sorted.end());
+        xs.resize(sz), ys.resize(2*n-1), seg.resize(2*n-1);
+        rep(i,sz){
+            xs[i] = (sorted[i].first).first;
+            ys[i+n-1] = {pci((sorted[i].first).second, sorted[i].second)};
+            vector&lt;VT&gt; arg = {val[sorted[i].second]};
+            seg[i+n-1].init(arg);
+        }
+        for(int i=n-2; i&gt;=0; i--){
+            ys[i].resize((int)ys[2*i+1].size() + (int)ys[2*i+2].size());
+            merge(all(ys[2*i+1]),all(ys[2*i+2]),ys[i].begin(),[&amp;](pci&amp; a, pci&amp; b){
+                return a.first &lt; b.first;
+            });
+            vector&lt;VT&gt; arg((int)ys[i].size());
+            rep(j,(int)ys[i].size()){
+                arg[j] = val[ys[i][j].second];
+            }
+            seg[i].init(arg);
+        }
+    }
+    // 点(x,y) の値を val に更新する
+    void update_(CT x, CT y, const VT val){
+        int xid = lower_bound(all(xs),x) - xs.begin();
+        return update(xid,y,val);
+    }
+    // [lx,rx) × [ly,ry)の長方形領域のクエリに答える
+    VT query(CT lx, CT ly, CT rx, CT ry){
+        int lxid = lower_bound(all(xs),lx) - xs.begin();
+        int rxid = upper_bound(all(xs),rx-1) - xs.begin();
+        if(lxid &gt;= rxid) return numeric_limits&lt;VT&gt;::max();
+        return query(lxid,rxid,ly,ry,0,0,n);
+    }
+};
 </pre>
 <h3>verify 用の問題</h3>
 <p>
@@ -64,12 +187,12 @@ verify していません(verify 問題を知らない)
 <!--/contents-->
 
 <footer>
-<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<small>Copyright&copy; <a href="../../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
 <span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
 </footer>
 
-<script src="../../js/prettify.js"></script>
-<script src="../../js/lang-css.js"></script>
+<script src="../../../js/prettify.js"></script>
+<script src="../../../js/lang-css.js"></script>
 <!-- prettyPrint()関数を実行するため追加↓ -->
 <script>prettyPrint();</script>
 

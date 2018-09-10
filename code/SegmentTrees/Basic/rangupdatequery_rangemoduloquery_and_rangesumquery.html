@@ -7,10 +7,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
 <meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
-<link rel="stylesheet" href="../../css/style.css">
-<script type="text/javascript" src="../../js/openclose.js"></script>
+<link rel="stylesheet" href="../../../css/style.css">
+<script type="text/javascript" src="../../../js/openclose.js"></script>
 <link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
-<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<link rel="stylesheet" href="../../../css/prettify.css" type="text/css">
 <!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
@@ -22,33 +22,31 @@
 <div id="container">
 
 <header>
-<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+<h1 id="logo"><a href="../../../index.html"><img src="../../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
 </header>
 
 
 <nav id="menubar">
 <ul>
-<li><a href="../../index.html">Home</a></li>
-<li><a href="../../guide.html">Guide</a></li>
+<li><a href="../../../index.html">Home</a></li>
+<li><a href="../../../guide.html">Guide</a></li>
 <li class="current"><a href="../../code.html">Code</a></li>
-<li><a href="../../link.html">Link</a></li>
+<li><a href="../../../link.html">Link</a></li>
 </ul>
 </nav>
 
 <div id="contents">
 
 <section>
-<h2>アルゴリズム名</h2>
+<h2>range update query range modulo query and range sum query</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
+区間更新 (a_i ← x (i ∈ [l, r)), 区間剰余更新 (a_i ← a_i % x (i ∈ [l, r)), 区間和 (sum_(l <= i < r) a_i) のクエリを効率的に処理できる. <br>
+詳しくは <a href="https://codeforces.com/blog/entry/57319">ここの</a> part2 に書いている. 計算量は O(log^2n) と書いてあるがたぶんポテンシャルを考えると O(lognlogMAX_VAL) な気がする. <br>
+他の segment tree beats のテクニックと同様にセグ木を下って行くときに追加で条件を課すのだがここでは 「max_val[k] < x で探索終了, max_val[k] == min_val[k] で遅延処理する」 となる. またもやこんなんでいけるのかという気がするが, 意味のある mod 演算だと一回で値が 1/2 未満になるのと区間更新クエリは max_val[k] == min_val[k] に捕捉されることから効率よくクエリを処理できていることがいえる.
 </p>
 <p>
-(関数)<br>
-add_edge(): 辺を追加する <br>
-</p>
-<p>
-時間計算量: O(mlogn)
+時間計算量: 構築 O(n), 各クエリ ならし O(lognlogMAX_VAL) (MAX_VAL はデータの値の最大値とする)
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">
@@ -62,6 +60,18 @@ private:
         min_val[id] = min(min_val[2*id+1],min_val[2*id+2]);
         max_val[id] = max(max_val[2*id+1],max_val[2*id+2]);
     }
+    void eval(int k, int l, int r) {
+        if(lazyFlag[k]){
+            node[k] = (r - l) * lazy[k];
+            min_val[k] = max_val[k] = lazy[k];
+            if(r - l &gt; 1){
+                lazy[k*2+1] = lazy[k*2+2] = lazy[k];
+                lazyFlag[k*2+1] = lazyFlag[k*2+2] = true;
+            }
+            lazyFlag[k] = false;
+        }
+    }
+    
 public:
     segtree(vector&lt;T&gt;&amp; v) : sz((int)v.size()){
         n = 1;
@@ -78,17 +88,6 @@ public:
         }
         for(int i=n-2; i&gt;=0; i--){
             opr(i);
-        }
-    }
-    void eval(int k, int l, int r) {
-        if(lazyFlag[k]){
-            node[k] = (r - l) * lazy[k];
-            min_val[k] = max_val[k] = lazy[k];
-            if(r - l &gt; 1){
-                lazy[k*2+1] = lazy[k*2+2] = lazy[k];
-                lazyFlag[k*2+1] = lazyFlag[k*2+2] = true;
-            }
-            lazyFlag[k] = false;
         }
     }
     void update(int a, int b, T x, int k=0, int l=0, int r=-1){
@@ -146,20 +145,22 @@ public:
 };
 </pre>
 <h3>verify 用の問題</h3>
-<p>Codeforces : <a href=""></a>
-  <a href="">提出コード</a></p>
+<p>
+区間 mod, 一点更新, 区間和の verify <br>
+Codeforces : <a href="https://codeforces.com/contest/438/problem/D">The Child and Sequence</a>
+  <a href="https://codeforces.com/contest/438/submission/38061442">提出コード</a></p>
 </section>
 
 </div>
 <!--/contents-->
 
 <footer>
-<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<small>Copyright&copy; <a href="../../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
 <span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
 </footer>
 
-<script src="../../js/prettify.js"></script>
-<script src="../../js/lang-css.js"></script>
+<script src="../../../js/prettify.js"></script>
+<script src="../../../js/lang-css.js"></script>
 <!-- prettyPrint()関数を実行するため追加↓ -->
 <script>prettyPrint();</script>
 

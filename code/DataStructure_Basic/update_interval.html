@@ -38,10 +38,11 @@
 <div id="contents">
 
 <section>
-<h2>update_interval</h2>
+<h2>update interval</h2>
 <h3>コードについての説明</h3>
 <p>
-各操作後には例えば[1,2),[2,3)みたいな区間も[1,3)にちゃんとマージされている.
+セグメント木で持てないような大きな範囲についての範囲の 0,1(ON/OFF) のようなものを保持する. 1 (ON) の範囲を set で持つ. また範囲 [1,3), [3,5) などはちゃんと [1,5) にマージされる. <br>
+たまに使えるシーンがある.
 </p>
 <p>
 時間計算量: 更新 ならしO(logn)
@@ -50,18 +51,16 @@
 <pre class="prettyprint linenums">
 template&lt;typename T&gt; class UpdateInterval
 {
-private:
-    using ptt = pair&lt;T,T&gt;;
-    T inf;
 public:
-    //1の区間をsetで保持
+using ptt = pair&lt;T,T&gt;;
+    // 1の区間をsetで保持
     set&lt;ptt&gt; st;
-    UpdateInterval() : inf(numeric_limits&lt;T&gt;::max()){};
-    //[l,r)をk(0,1)に更新
+    UpdateInterval(){};
+    // [l,r) を k ({0,1})に更新
     void update(T l,T r,int k){
         T lb = l, rb = r;
         while(1){
-            auto it = st.lower_bound(ptt(l,-inf));
+            auto it = st.lower_bound(ptt(l, numeric_limits&lt;T&gt;::min()));
             if(it == st.end()){
                 break;
             }
@@ -76,7 +75,7 @@ public:
                 break;
             }
         }
-        auto it = st.lower_bound(ptt(l,-inf));
+        auto it = st.lower_bound(ptt(l, numeric_limits&lt;T&gt;::min()));
         if(it != st.begin()){
             --it;
             ptt p = *it;
@@ -96,7 +95,7 @@ public:
 </pre>
 <h3>verify 用の問題</h3>
 <p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1373">Placing Medals on a Binary Tree</a>
-  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3122567#1">提出コード</a></p>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3127916#1">提出コード</a>(非想定解)</p>
 </section>
 
 </div>
