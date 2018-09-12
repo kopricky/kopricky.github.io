@@ -55,50 +55,49 @@ add_edge(): 辺を追加する <br>
 template&lt;typename T&gt; class Parser
 {
 private:
-    int pos;
-    T expr(string&amp; eq){
-        T res = term();
-        while(eq[pos] == '+' || eq[pos] == '-'){
-            if(eq[pos++] == '+'){
-                res += term();
+    T expr(const string&amp; s, int&amp; pos){
+        T res = term(s, pos);
+        while(s[pos] == '+' || s[pos] == '-'){
+            if(s[pos] == '+'){
+                res += term(s, pos++);
             }else{
-                res -= term();
+                res -= term(s, pos++);
             }
         }
         return res;
     }
-    T term(string&amp; eq){
-        T res = factor();
-        while(eq[pos] == '*' || eq[pos] == '/'){
-            if(eq[pos++] == '*'){
-                res *= term();
+    T term(const string&amp; s, int&amp; pos){
+        T res = factor(s, pos);
+        while(s[pos] == '*' || s[pos] == '/'){
+            if(s[pos] == '*'){
+                res *= term(s, pos++);
             }else{
-                res /= term();
+                res /= term(s, pos++);
             }
         }
         return res;
     }
-    T factor(string&amp; eq){
-        if(isdigit(eq[pos])) return number();
+    T factor(const string&amp; s, int&amp; pos){
+        if(isdigit(s[pos])) return number(s, pos);
         pos++; // '('をとばす
-        T res = expr();
+        T res = expr(s, pos);
         pos++; // ')'をとばす
         return res;
     }
-    T number(string&amp; eq){
+    T number(const string&amp; s, int&amp; pos){
         T res = 0;
         do{
             res *= 10;
-            res += (eq[pos++] - '0');
-        }while(isdigit(eq[pos]));
+            res += (s[pos++] - '0');
+        }while(isdigit(s[pos]));
         return res;
     }
 
 public:
     Parser(){}
-    T solve(string&amp; eq){
-        pos = 0;
-        return expr(eq);
+    T solve(const string&amp; s){
+        int pos = 0;
+        return expr(s, pos);
     }
 };
 </pre>
