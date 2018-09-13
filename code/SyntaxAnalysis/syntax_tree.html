@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>syntax tree</h2>
+<h3>コードについての説明</h3>
+<p>
+元論文は <a href=""></a>
+</p>
+<p>
+(関数)<br>
+add_edge(): 辺を追加する <br>
+</p>
+<p>
+時間計算量: O(mlogn)
+</p>
+<h3>コード</h3>
+<pre class="prettyprint linenums">
+template&lt;typename T&gt; class SyntaxTree {
+private:
+    class node {
+    public:
+        int opr;
+        T val;
+        node *left, *right;
+        node(int opr_, T val_, node *lc, node *rc)
+            : opr(opr_), val(val_), left(lc), right(rc){};
+    };
+
+    node* alloc(T val){
+        return new node(-1, val, nullptr, nullptr);
+    }
+
+    node* alloc(int opr_, node* lc, node* rc){
+        return new node(opr_, func[opr_](lc-&gt;val, rc-&gt;val), lc, rc);
+    }
+
+    node* expr(const string&amp; s, int&amp; pos){
+        node* lc = term(s, pos);
+        while(s[pos] == '+' || s[pos] == '-'){
+            int opr_ = ((s[pos++] == '+') ? (0) : (1));
+            lc = alloc(opr_, lc, term(s, pos));
+        }
+        return lc;
+    }
+    node* term(const string&amp; s, int&amp; pos){
+        node* lc = factor(s, pos);
+        while(s[pos] == '*' || s[pos] == '/'){
+            int opr_ = ((s[pos++] == '*') ? (2) : (3));
+            lc = alloc(opr_, lc, factor(s, pos));
+        }
+        return lc;
+    }
+    node* factor(const string&amp; s, int&amp; pos){
+        if(isdigit(s[pos])) return number(s, pos);
+        pos++; // '('をとばす
+        node* res = expr(s, pos);
+        pos++; // ')'をとばす
+        return res;
+    }
+    node* number(const string&amp; s, int&amp; pos){
+        T res = 0;
+        do{
+            res *= 10;
+            res += (s[pos++] - '0');
+        }while(isdigit(s[pos]));
+        return new node(res);
+    }
+
+    node* root;
+    function&lt; T(T, T) &gt; func[4];
+
+public:
+    SyntaxTree(string&amp; s){
+        func[0] = [&amp;](T x, T y){ return x + y; }, func[1] = [&amp;](T x, T y){ return x - y; };
+        func[2] = [&amp;](T x, T y){ return x * y; }, func[3] = [&amp;](T x, T y){ return x / y; };
+        int pos = 0;
+        root = expr(s, pos);
+    }
+};
+</pre>
+<h3>verify 用の問題</h3>
+<p>Atcoder : <a href="https://beta.atcoder.jp/contests/bitflyer2018-final-open/tasks/bitflyer2018_final_e">数式クエリ</a>
+  <a href="https://beta.atcoder.jp/contests/bitflyer2018-final-open/submissions/3179768">提出コード</a></p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>

@@ -41,10 +41,11 @@
 <h2>namori graph</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
+なもりグラフとは n 頂点 n 辺の連結なグラフのことでグラフはサイクル+サイクルから生える木の構造になる. 名称の由来は<a href="https://twitter.com/_namori_">このアカウント</a>のアイコンだそうです. <br>
+以下の実装は無向グラフの場合について, サイクル上の頂点を loop に, サイクルから生える木を graph に格納する(分解する)ような実装になっている. たとえば, すべての頂点の入次数が1の有向グラフを分解するときは rG(逆辺のグラフ) を用いて葉からサイクルに向かって進んでいく感じに変更する必要がある.
 </p>
 <p>
-時間計算量: O(mlogn)
+時間計算量: O(n)
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">
@@ -56,7 +57,7 @@ public:
     vector&lt;bool&gt; flag;
     Namori(int node_size) : V(node_size), G(V), deg(V, 0), flag(V, false){}
     void add_edge(int u,int v){
-        G[u].push_back(v),G[v].push_back(u);
+        G[u].push_back(v), G[v].push_back(u);
         deg[u]++, deg[v]++;
     }
     void dfs(int u){
@@ -70,12 +71,14 @@ public:
     void build(){
         graph.resize(V);
         queue&lt;int&gt; que;
+        // 葉の頂点を que に突っ込む
         for(int i = 0; i &lt; V; i++){
             if(deg[i] == 1){
                 que.push(i);
                 flag[i] = true;
             }
         }
+        // 葉からサイクル上の頂点に向かって登っていく
         while(!que.empty()){
             int p = que.front();
             que.pop();
@@ -91,6 +94,7 @@ public:
                 flag[v] = true;
             }
         }
+        // サイクル上の頂点を loop に格納
         for(int i = 0; i &lt; V; i++){
             if(flag[i]) continue;
             flag[i] = true;
@@ -102,7 +106,7 @@ public:
 </pre>
 <h3>verify 用の問題</h3>
 <p>Atcoder : <a href="https://beta.atcoder.jp/contests/arc079/tasks/arc079_d">Namori Grundy</a>
-  <a href="">提出コード</a></p>
+  <a href="https://beta.atcoder.jp/contests/arc079/submissions/3182908">提出コード</a></p>
 </section>
 
 </div>
