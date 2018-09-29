@@ -38,10 +38,15 @@
 <div id="contents">
 
 <section>
-<h2>アルゴリズム名</h2>
+<h2>undirected min cut</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
+無向グラフの大域最小容量カットを求めるアルゴリズム. 愚直に n-1 回 s,t 最大フローを求めるよりも高速に解くことができ計算量は O(mn + n^2log(n)) である. <br>
+ある頂点 v_1 から始めて今の頂点集合 S と一番連結度の高い頂点を S に加えていくというように貪欲に取っていく順序を MA(最大隣接) 順序と呼ぶ. <br>
+このように頂点を並び替えることで効率よく大域最小容量カットを求めることができる. これは(対称)劣モジュラ関数の最小化というより一般的な視点で見るととてもおもしろい(Queyranne 1998).<br>
+元論文は <a href="https://epubs.siam.org/doi/abs/10.1137/0405004">Nagamochi and Ibaraki 1992</a> <br>
+大域最小容量カットは他にも, 何も考えずグラフの辺をランダムに縮約していき残り 2 点になったときの連結度を最小容量カットとするというような一連の操作を O(n^2) くらい繰り返せば高確率で正しい値を得られるというようなモンテカルロアルゴリズムも存在する(Randomized Algorithm などにのっている). <br>
+最後に上記の計算量は MA 順序の計算量にフィボナッチヒープを用いたものであり, 以下の実装で少し遅い O(n^3) である.
 </p>
 <p>
 時間計算量: O(n^3)
@@ -50,10 +55,11 @@
 <pre class="prettyprint linenums">
 template&lt;typename T&gt; class UndirectedMinCut
 {
-public:
+private:
     int V;
     vector&lt;vector&lt;T&gt; &gt; G;
     vector&lt;int&gt; order;
+public:
     UndirectedMinCut(int node_size) : V(node_size), G(V, vector&lt;T&gt;(V,0)), order(V){
         iota(order.begin(),order.end(),0);
     }
@@ -66,7 +72,7 @@ public:
             vector&lt;T&gt; val(i,0);
             vector&lt;int&gt; new_order(i-1);
             for(int j = 0; j &lt; i-1; j++){
-                int mx_id = max_element(val.begin(),val.end()) - val.begin();
+                int mx_id = max_element(val.begin(), val.end()) - val.begin();
                 new_order[j] = order[mx_id];
                 val[mx_id] = -1;
                 for(int k = 0; k &lt; i; k++){

@@ -41,20 +41,25 @@
 <h2>max_flow_push_relabel</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
+フロー f が s, t 間の最大フローであるとは (1) (v から出る量) = (v に入る量) (すべての v ∈ V / {s,t}), (2) augment path が存在しない の 2 つが成り立つことが必要十分条件である. <br>
+Edmonds-Karp, Dinic などは (1) の条件を常に満たしながら (2) の条件を成立させようとしていたのに対し, push-relabel は (2) の条件を常に満たしながら (1) の条件を成立させようとするアルゴリズムになっている. <br>
+活性点の解消など詳しいことは組合せ最適化(Korte, Fiegen)などを読むと良い. <br>
+元論文は <a href="http://akira.ruc.dk/~keld/teaching/algoritmedesign_f03/Artikler/08/Goldberg88.pdf">Goldberg and Tarjan 1988</a> で動的木を用いて計算量の改善が可能. <br>
+計算量は O(n^3) なので Dinic(計算量 O(n^2m)) よりも優秀だが, 実測はそんなに速くないです. 若干遅いぐらい. <br>
+ただ worst case(|V| = 628, |E| = 33491 のグラフ) で試してみると push-relabel 182 msec, Dinic 11777 msec という感じになったので push-relabel の方が安定感はある.
 </p>
 <p>
 (関数)<br>
-add_edge(): 辺を追加する <br>
+add_edge(from, to, cap): 容量 cap の辺 (from, to) を追加する <br>
+solve(s, t): s, t 間の最大フローを計算する
 </p>
 <p>
-時間計算量: O(mlogn)
+時間計算量: O(n^3)
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">
 //実測は速くない
 //ヒューリスティックにより高速化可能
-//O(n^3) Goldberg and Tarjan 1988 を参照(動的木により計算量は改善可能)
 template&lt;typename T&gt; class PushRelabel{
 private:
     struct edge{
@@ -124,8 +129,8 @@ public:
 };
 </pre>
 <h3>verify 用の問題</h3>
-<p>Atcoder : <a href=""></a>
-  <a href="">提出コード</a></p>
+<p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_6_A">Network Flow - Maximum Flow</a>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=2727988#1">提出コード</a></p>
 </section>
 
 </div>

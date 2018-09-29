@@ -38,28 +38,94 @@
 <div id="contents">
 
 <section>
-<h2>アルゴリズム名</h2>
+<h2>dinic</h2>
 <h3>コードについての説明</h3>
 <p>
 元論文は <a href=""></a>
 </p>
 <p>
 (関数)<br>
-add_edge(): 辺を追加する <br>
+add_edge(from, to, cap): 容量 cap の辺 (from, to) を追加する <br>
+solve(s, t): s, t 間の最大フローを計算する
 </p>
 <p>
-時間計算量: O(mlogn)
+時間計算量: O(n^2m)
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">
-あ
+template&lt;typename T&gt; class Dinic {
+private:
+    struct edge{
+        int to;
+        T cap;
+        int rev;
+    };
+    int V;
+    vector&lt;vector&lt;edge&gt; &gt; G;
+    vector&lt;int&gt; level,iter;
+    void bfs(int s)
+    {
+    	fill(level.begin(),level.end(),-1);
+    	queue&lt;int&gt; que;
+    	level[s] = 0;
+    	que.push(s);
+    	while(!que.empty()){
+    		int v = que.front();
+    		que.pop();
+    		for(auto&amp; e : G[v]){
+    			if(e.cap &gt; 0 &amp;&amp; level[e.to] &lt; 0){
+    				level[e.to] = level[v] + 1;
+    				que.push(e.to);
+    			}
+    		}
+    	}
+    }
+    T dfs(int v,int t,T f)
+    {
+    	if(v==t){
+    		return f;
+    	}
+        for(edge&amp; e : G[v]){
+    		if(e.cap &gt; 0 &amp;&amp; level[v] &lt; level[e.to]){
+    			T d = dfs(e.to,t,min(f,e.cap));
+    			if(d&gt;0){
+    				e.cap -= d;
+    				G[e.to][e.rev].cap += d;
+    				return d;
+    			}
+    		}
+    	}
+    	return 0;
+    }
+public:
+    Dinic(int node_size) : V(node_size), G(V), level(V), iter(V){}
+    //辺を張る
+    void add_edge(int from,int to,T cap)
+    {
+    	G[from].push_back((edge){to,cap,(int)G[to].size()});
+    	G[to].push_back((edge){from,(T)0,(int)G[from].size()-1});
+    }
+    //最大流を計算
+    T solve(int s, int t)
+    {
+    	T flow = 0;
+    	for(;;){
+    		bfs(s);
+    		if(level[t]&lt;0){
+    			return flow;
+    		}
+    		fill(iter.begin(),iter.end(),0);
+    		T f;
+    		while((f=dfs(s,t,numeric_limits&lt;T&gt;::max())) &gt; 0){
+    			flow += f;
+    		}
+    	}
+    }
+};
 </pre>
 <h3>verify 用の問題</h3>
-<p>
-verify していません(verify 問題を知らない)
-</p>
-<p>Atcoder : <a href=""></a>
-  <a href="">提出コード</a></p>
+<p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_6_A">Network Flow - Maximum Flow</a>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3161457#1">提出コード</a></p>
 </section>
 
 </div>
