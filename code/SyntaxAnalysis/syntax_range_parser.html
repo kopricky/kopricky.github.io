@@ -38,59 +38,28 @@
 <div id="contents">
 
 <section>
-<h2>Dijkstra</h2>
+<h2>アルゴリズム名</h2>
 <h3>コードについての説明</h3>
 <p>
-非負重みの辺のみからなるグラフに対する単一始点最短経路問題を高速に解くアルゴリズム. <br>
-始点からの距離が近いものから順に探索を繰り返す("始点から最も近い頂点"は優先度付きキューを用いて効率よく管理する).
+元論文は <a href=""></a>
 </p>
 <p>
 (関数)<br>
-add_edge(u, v, cost): u から v に向かう重み cost の有向辺を追加する <br>
-solve(s): s を始点として各頂点までの最短距離を求める
+add_edge(): 辺を追加する <br>
 </p>
 <p>
-時間計算量: O((n+m)logn)
+時間計算量: O(mlogn)
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">
-template&lt;typename T&gt; class Dijkstra {
-private:
-	struct edge{
-		int to; T cost;
-	};
-	int V;
-	vector&lt;vector&lt;edge&gt; &gt; G;
-	vector&lt;T&gt; d;
-	using pti = pair&lt;T,int&gt;;
-
-public:
-	Dijkstra(int node_size) : V(node_size), G(V), d(V, numeric_limits&lt;T&gt;::max()){}
-	void add_edge(int u,int v,T cost){
-		G[u].push_back((edge){v,cost});
-	}
-	void solve(int s){
-		priority_queue&lt;pti,vector&lt;pti&gt;,greater&lt;pti&gt; &gt; que;
-		d[s] = 0;
-		que.push(pti(0,s));
-		while(!que.empty()){
-			pti p = que.top();
-			que.pop();
-			int v = p.second;
-			if(d[v] &lt; p.first) continue;
-			for(auto&amp; w : G[v]){
-				if(d[w.to] &gt; d[v] + w.cost){
-					d[w.to] = d[v] + w.cost;
-					que.push(pti(d[w.to],w.to));
-				}
-			}
-		}
-	}
-};
+あ
 </pre>
 <h3>verify 用の問題</h3>
-<p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_1_A">Single Source Shortest Path</a>
-  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3123690#1">提出コード</a></p>
+<p>
+verify していません(verify 問題を知らない)
+</p>
+<p>Atcoder : <a href=""></a>
+  <a href="">提出コード</a></p>
 </section>
 
 </div>

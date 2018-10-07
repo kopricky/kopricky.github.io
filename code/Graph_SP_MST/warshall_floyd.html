@@ -41,18 +41,16 @@
 <h2>warshall_floyd</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
+全点対間の最短経路問題を高速に解くアルゴリズム. j から k への最短距離 d[j][k] は min_i (d[j][i] + d[i][k]) と等しいことを用いている.
 </p>
 <p>
-(関数)<br>
-add_edge(): 辺を追加する <br>
-</p>
-<p>
-時間計算量: O(mlogn)
+時間計算量: O(n^3)
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">
-int d[MAX_N][MAX_N];
+// d[i][j] は INF 初期化したあと
+// i → j に重み cost の辺が存在するなら d[i][j] = cost のように代入しておく
+int d[MAX_V][MAX_V];
 
 void warshall_floyd(int V)
 {

@@ -41,14 +41,10 @@
 <h2>matrix</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
+行列の基本的な演算 + rank, det, inverse, 連立方程式の求解をガウスの消去法を用いて実装している
 </p>
 <p>
-(関数)<br>
-add_edge(): 辺を追加する <br>
-</p>
-<p>
-時間計算量: O(mlogn)
+時間計算量: rank, det, inverse, 連立方程式の求解 O(n^3)
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">
@@ -373,7 +369,8 @@ AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2315">Sh
   <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3123478#1">提出コード</a><br>
 乗算, mod_pow の verify <br>
 yukicoder : <a href="https://yukicoder.me/problems/no/569">3 x N グリッドのパスの数</a>
-    <a href="https://yukicoder.me/submissions/283500">提出コード</a></p>
+    <a href="https://yukicoder.me/submissions/283500">提出コード</a><br>
+rank の verify はしていません (verify 問題を知らない)
 </section>
 
 </div>

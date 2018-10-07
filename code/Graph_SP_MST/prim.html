@@ -41,11 +41,14 @@
 <h2>prim</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
+グラフの最小全域木の重みを求めるアルゴリズム. <br>
+頂点集合 V={0} から始めて, V 内の頂点と隣接する頂点のうちその間の辺の重みが最小であるようなものを新たに V の要素として加えることを繰り返す. <br>
+密なグラフ(m = O(n^2))については最小重みの辺を優先度付きキューを使わず愚直に計算することで O(n^2) で解くことができ, この場合は Kruskal 法(n^2logn) よりも高速に動作する.
 </p>
 <p>
 (関数)<br>
-add_edge(): 辺を追加する <br>
+add_edge(u, v, cost): u, v の間に重み cost の無向辺を追加する <br>
+solve(): 最小全域木の重みを計算する
 </p>
 <p>
 時間計算量: O(mlogn)
@@ -53,7 +56,7 @@ add_edge(): 辺を追加する <br>
 <h3>コード</h3>
 <pre class="prettyprint linenums">
 template&lt;typename T&gt; class Prim{
-public:
+private:
 	struct edge{
 		int to;
 		T cost;
@@ -63,9 +66,11 @@ public:
 	vector&lt;vector&lt;edge&gt; &gt; G;
     vector&lt;T&gt; d;
     vector&lt;bool&gt; used;
+
+public:
     Prim(int node_size) : V(node_size), G(V), d(V, numeric_limits&lt;T&gt;::max()), used(V, false){}
-	void add_edge(int u, int v, T val){
-        G[u].push_back((edge){v, val}), G[v].push_back((edge){u, val});
+	void add_edge(int u, int v, T cost){
+        G[u].push_back((edge){v, cost}), G[v].push_back((edge){u, cost});
 	}
 	T solve(){
         priority_queue&lt;pti, vector&lt;pti&gt;, greater&lt;pti&gt; &gt; que;

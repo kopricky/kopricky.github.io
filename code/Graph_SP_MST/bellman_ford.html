@@ -41,19 +41,21 @@
 <h2>bellman ford</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
+負辺を含むグラフに対する単一始点最短経路問題を高速に解くことができるアルゴリズム. また負有向閉路の検出(3種類)も同じ計算量で行うことが可能. <br>
+全辺を見て始点からの最短距離が更新されるなら更新するという操作を n 回行う. それ以降もなお最短距離が更新される場合は始点から到達可能な負の有向閉路が存在することになる.
 </p>
 <p>
 (関数)<br>
-add_edge(): 辺を追加する <br>
+add_edge(u, v, cost): u から v に向かう重み cost の有向辺を追加する <br>
+solve(s): s を始点として各頂点までの最短距離を求める
 </p>
 <p>
-時間計算量: O(mlogn)
+時間計算量: O(nm)
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">
 template&lt;typename T&gt; class bellman_ford {
-public:
+private:
 	struct edge{
 		int from,to;
 		T cost;
@@ -61,6 +63,8 @@ public:
 	int V,E;
 	vector&lt;int&gt; d;
 	vector&lt;edge&gt; es;
+
+public:
 	bellman_ford(int node_size) : V(node_size), d(V, numeric_limits&lt;T&gt;::max()){}
 	void add_edge(int from,int to,T cost){
 		es.push_back((edge){from,to,cost});

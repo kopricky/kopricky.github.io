@@ -46,11 +46,75 @@
 コストの小さい辺から貪欲に取っていくことでアルゴリズムが正しく動くことが知られている. 証明はグラフ, マトロイドの両面から示せる.
 </p>
 <p>
+(関数)<br>
+add_edge(u, v, cost): u, v の間に重み cost の無向辺を追加する <br>
+solve(): 最小全域木の重みを計算する
+</p>
+<p>
 時間計算量: O(mlogn)
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">
+class UnionFind {
+private:
+    int sz;
+    vector&lt;int&gt; par, nrank;
+public:
+    UnionFind(){}
+    UnionFind(int node_size) : sz(node_size), par(sz), nrank(sz, 0){
+        iota(par.begin(), par.end(), 0);
+    }
+    int find(int x){
+        if(par[x] == x) return x;
+        else return par[x] = find(par[x]);
+    }
+    void unite(int x,int y){
+        x = find(x), y = find(y);
+        if(x == y) return;
+        if(nrank[x] &lt; nrank[y]) swap(x,y);
+        par[y] = x;
+        if(nrank[x] == nrank[y]) nrank[x]++;
+    }
+    bool same(int x,int y){
+        return find(x) == find(y);
+    }
+};
 
+template&lt;typename T&gt; class Kruskal{
+private:
+    struct edge{
+        int u,v;
+        T cost;
+        bool operator&lt;(const edge&amp; another) const {
+            return cost &lt; another.cost;
+        }
+    };
+    int V;
+    vector&lt;edge&gt; es;
+
+public:
+    Kruskal(int node_size) : V(node_size){}
+    void add_edge(int u,int v,T cost){
+        es.push_back((edge){u,v,cost});
+    }
+    T solve(){
+        UnionFind uf(V);
+        T res = 0;
+        int cnt = 0;
+        sort(es.begin(),es.end());
+        for(edge&amp; e : es){
+            if(!uf.same(e.u,e.v)){
+                uf.unite(e.u,e.v);
+                res += e.cost;
+                cnt++;
+                if(cnt == V-1){
+                    break;
+                }
+            }
+        }
+        return res;
+    }
+};
 </pre>
 <h3>verify 用の問題</h3>
 <p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_2_A">Minimum Spanning Tree</a>
