@@ -38,7 +38,7 @@
 <div id="contents">
 
 <section>
-<h2>max_flow_push_relabel</h2>
+<h2>Max Flow Push Relabel</h2>
 <h3>コードについての説明</h3>
 <p>
 フロー f が s, t 間の最大フローであるとは (1) (v から出る量) = (v に入る量) (すべての v ∈ V / {s,t}), (2) augment path が存在しない の 2 つが成り立つことが必要十分条件である. <br>
@@ -57,6 +57,9 @@ solve(s, t): s, t 間の最大フローを計算する
 時間計算量: O(n^3)
 </p>
 <h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
 <pre class="prettyprint linenums">
 //実測は速くない
 //ヒューリスティックにより高速化可能
@@ -129,7 +132,7 @@ public:
 };
 </pre>
 <h3>verify 用の問題</h3>
-<p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_6_A">Network Flow - Maximum Flow</a>
+<p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_6_A">Maximum Flow</a>
   <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=2727988#1">提出コード</a></p>
 </section>
 

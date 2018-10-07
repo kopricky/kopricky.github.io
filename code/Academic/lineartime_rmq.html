@@ -38,7 +38,7 @@
 <div id="contents">
 
 <section>
-<h2>lineartime rmq</h2>
+<h2>Lineartime RangeMinimumQuery</h2>
 <h3>コードについての説明</h3>
 <p>
 静的 RMQ(更新のない区間最小値クエリ) に O(1) で答えるデータ構造を O(n) 時間で構築するアルゴリズム. ブロック分割をしている影響で要素数が2以上を仮定しています. <br>
@@ -49,9 +49,17 @@
 この<a href="https://www.slideshare.net/yumainoue965/lca-and-rmq">スライド</a>の説明を参考に実装した
 </p>
 <p>
+(関数)<br>
+build(arg1, max_query): 配列 arg1 についてのデータ構造を構築する(max_query=true なら最大値を返す) <br>
+query(st, ed) (最小(大)値を達成するインデックス, 値) を返す
+</p>
+<p>
 時間計算量: 構築 O(n), クエリ O(1)
 </p>
 <h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
 <pre class="prettyprint linenums">
 template&lt;typename T&gt; class RMQ
 {

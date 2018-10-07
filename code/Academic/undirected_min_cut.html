@@ -38,7 +38,7 @@
 <div id="contents">
 
 <section>
-<h2>undirected min cut</h2>
+<h2>Undirected Mincut</h2>
 <h3>コードについての説明</h3>
 <p>
 無向グラフの大域最小容量カットを求めるアルゴリズム. 愚直に n-1 回 s,t 最大フローを求めるよりも高速に解くことができ計算量は O(mn + n^2log(n)) である. <br>
@@ -52,6 +52,9 @@
 時間計算量: O(n^3)
 </p>
 <h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
 <pre class="prettyprint linenums">
 template&lt;typename T&gt; class UndirectedMinCut
 {

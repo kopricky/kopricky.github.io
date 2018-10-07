@@ -38,20 +38,19 @@
 <div id="contents">
 
 <section>
-<h2>linear time superbubble</h2>
+<h2>Lineartime Superbubble</h2>
 <h3>コードについての説明</h3>
 <p>
-おそらく誰も知らないようなアルゴリズム. supperbubble と呼ばれる構造を線形時間ですべて列挙するアルゴリズム(残念ながら自分はもうこれ関連の研究はやっていません). <br>
+おそらく誰も知らないようなアルゴリズム. supperbubble と呼ばれる構造を線形時間ですべて列挙するアルゴリズム. <br>
 詳しくは <a href="https://arxiv.org/pdf/1505.04019.pdf">Brankovic et al. 2015</a> をご覧ください. DNA のゲノム解析などで使えるそうです. <br>
 </p>
 <p>
-(関数)<br>
-add_edge(): 辺を追加する <br>
-</p>
-<p>
-時間計算量: O(mlogn)
+構築: O(n), クエリ: O(1)
 </p>
 <h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
 <pre class="prettyprint linenums">
 template&lt;typename T&gt; class RMQ
 {
