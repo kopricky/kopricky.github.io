@@ -43,9 +43,12 @@
 <p>
 無向グラフ G に長さ3の単純閉路が含まれるかどうかを返すアルゴリズム. <br>
 threshold α を決めて, 次数が α 以下の各頂点についてはそこから出る辺のもう一方の端点同士の間に辺があるかどうかを調べる(あれば true). <br>
-次数が α より大きい頂点(個数は 2m/α 以下)については隣接行列の3乗を計算して対角成分を見る. <br>
+次数が α より大きい頂点(個数は 2m/α 以下)については隣接行列の3乗(64 bit高速化が使える)を計算して対角成分を見る(非ゼロの成分があれば true). <br>
 α はだいたい O(sqrt(m)) とか O(sqrt(m/logm)) とかにするのがよい(この実装では端点同士の辺のあるなしを logm かけて調べているので).<br>
 元論文は <a href="https://www.tau.ac.il/~nogaa/PDFS/ayz97.pdf">Alon, Yuster, Zwick 1997</a>
+</p>
+<p>
+MAX_E には辺の数の最大値を持たせて
 </p>
 <p>
 時間計算量: だいたい O(m^1.5)
@@ -117,11 +120,13 @@ public:
     C3_Find(int node_size) : V(node_size), high_num(0), G(V), deg(V, 0), unzip(V){
         iota(unzip.begin(), unzip.end(), -V);
     }
+
     void add_edge(int u, int v){
         G[u].push_back(v), G[v].push_back(u);
         deg[u]++, deg[v]++;
         es.insert(make_pair(min(u, v), max(u, v)));
     }
+    
     bool solve(){
         for(int i = 0; i &lt; V; i++){
             if(deg[i] &gt; alpha){

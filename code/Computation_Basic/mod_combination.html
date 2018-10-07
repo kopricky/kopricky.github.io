@@ -38,21 +38,27 @@
 <div id="contents">
 
 <section>
-<h2>mod combination</h2>
+<h2>Mod Combination</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
+Z/pZ (p は素数) 上で nCr の計算を行う. <br>
+階乗,階乗逆元を前計算しておけば O(1) で combination を計算可能になる.
 </p>
 <p>
-(関数)<br>
-add_edge(): 辺を追加する <br>
+(関数) <br>
+make() で階乗,階乗逆元を前計算する. <br>
+comb(a, b) で aCb を返す
 </p>
 <p>
-時間計算量: O(mlogn)
+make(): O(n), comb(a, b): O(1)
 </p>
 <h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
 <pre class="prettyprint linenums">
 #define MAX_N 100005
+#define MOD 1000000007
 
 int inv[MAX_N],fac[MAX_N],finv[MAX_N];
 
@@ -74,21 +80,6 @@ int comb(int a,int b)
 		return 0;
 	}
 	return fac[a] * ((long long)finv[b] * finv[a-b] % MOD) % MOD;
-}
-
-inline int add(int x,int y)
-{
-    return (x+y)%MOD;
-}
-
-inline int sub(int x,int y)
-{
-    return (x+MOD-y)%MOD;
-}
-
-inline int mul(int x,int y)
-{
-    return (long long)x*y%MOD;
 }
 </pre>
 <h3>verify 用の問題</h3>

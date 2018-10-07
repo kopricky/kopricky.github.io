@@ -41,16 +41,20 @@
 <h2>Mod Inverse</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
+Z/pZ (p は素数) の逆元を拡張ユークリッドの互除法を用いて計算するアルゴリズム. <br>
+フェルマーの小定理を用いて p-2 乗を計算して求めても良い.
 </p>
 <p>
 (関数)<br>
-add_edge(): 辺を追加する <br>
+mod_inverse(a, m): a の Z/mZ 上の逆元を求める <br>
 </p>
 <p>
 時間計算量: O(mlogn)
 </p>
 <h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
 <pre class="prettyprint linenums">
 void extgcd(int a,int b, int&amp; x,int&amp; y)
 {
@@ -63,7 +67,7 @@ void extgcd(int a,int b, int&amp; x,int&amp; y)
 	}
 }
 
-int mod_inverse(int a,int m)
+int mod_inverse(int a, int m)
 {
 	int x,y;
 	extgcd(a,m,x,y);

@@ -38,7 +38,7 @@
 <div id="contents">
 
 <section>
-<h2>01 knapsack bound branch</h2>
+<h2>01 Knapsack Bound Branch</h2>
 <h3>コードについての説明</h3>
 <p>
 01ナップサック問題の分割統治法を用いた解法. yukicoder の<a href="https://yukicoder.me/problems/no/626">これ</a>で出題されたもので多くのテストケースで高速に動作するので驚いた. <br>
@@ -49,6 +49,9 @@
 solve(n, W, vec): n 個の商品 vec(価値, 重さ) を用いて, 重さ W 以下で最大の価値を返す<br>
 </p>
 <h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
 <pre class="prettyprint linenums">
 void dfs(int n, long long W, long long value, long long weight, long long&amp; opt, int index, vector&lt;pair&lt;long long,long long&gt; &gt;&amp; vec)
 {

@@ -38,30 +38,34 @@
 <div id="contents">
 
 <section>
-<h2>アルゴリズム名</h2>
+<h2>All Factorial</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
+1~n のすべての数の素因数分解を高速に行うアルゴリズム. <br>
+エラトステネスのふるいの要領で、素数を見つけたらその倍数を見ていき、その素数をいくつ因数として含むかを計算してやると良い.
 </p>
 <p>
-時間計算量: O(mlogn)
+時間計算量: O(nlogn)
 </p>
 <h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
 <pre class="prettyprint linenums">
 #define MAX_N 100000
 
-//2〜MAX_Nのすべての数の素因数分解を計算(O(MAX_Nlog(MAX_N)))
+//2〜MAX_N-1のすべての数の素因数分解を計算(O(MAX_Nlog(MAX_N)))
 vector&lt;int&gt; pr[MAX_N],id[MAX_N];
 bool is_prime[MAX_N];
 
-void all_fac(int n)
+void all_fac()
 {
-    fill(is_prime,is_prime+n+1,true);
-    for(int i=2;i&lt;=n;i++){
+    fill(is_prime,is_prime+MAX_N,true);
+    for(int i=2;i&lt;MAX_N;i++){
         if(is_prime[i]){
             pr[i].push_back(i);
             id[i].push_back(1);
-            for(int j=2*i;j&lt;=n;j+=i){
+            for(int j=2*i;j&lt;MAX_N;j+=i){
                 is_prime[j] = false;
                 int cnt = 0;
                 int nw = j;
@@ -77,13 +81,9 @@ void all_fac(int n)
 }
 </pre>
 <h3>verify 用の問題</h3>
-<p>
-省略
-</p>
 <p>Atcoder : <a href="https://beta.atcoder.jp/contests/yahoo-procon2018-final-open/tasks/yahoo_procon2018_final_a">Uncommon</a>
+    <a href="https://beta.atcoder.jp/contests/yahoo-procon2018-final-open/submissions/3166063">提出コード</a></p>
 </section>
-<a href="https://beta.atcoder.jp/contests/yahoo-procon2018-final-open/submissions/3166063">提出コード</a></p>
-
 </div>
 <!--/contents-->
 

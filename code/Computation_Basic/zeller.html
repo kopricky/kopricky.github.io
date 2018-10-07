@@ -38,7 +38,7 @@
 <div id="contents">
 
 <section>
-<h2>zeller</h2>
+<h2>Zeller</h2>
 <h3>コードについての説明</h3>
 <p>
 ツェラーの公式とは西暦の年、月、日から曜日(mod 7)をO(1)で求める公式である. <br>
@@ -48,6 +48,9 @@
 時間計算量: O(1)
 </p>
 <h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
 <pre class="prettyprint linenums">
 int zeller(int y, int m, int d){
     if(m &lt;= 2){
