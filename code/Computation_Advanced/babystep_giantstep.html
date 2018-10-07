@@ -38,17 +38,15 @@
 <div id="contents">
 
 <section>
-<h2>アルゴリズム名</h2>
+<h2>baby step giant step</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
+Baby Step Giant Step は離散対数問題を効率よく解く有名なアルゴリズム. 競技プログラミングでは見たことない. <br>
+離散対数問題は g^x = y (mod p) で y から x を求める問題で Elgamal とか Diffie-Hellman の安全性を担保しているものである. <br>
+g^j (0 <= j <= sqrt(p)) の値をテーブルで持っておくと愚直にやるより効率よく計算できる(アルゴリズムについてはそこまで難しくないので別のサイトを参考にしてください).
 </p>
 <p>
-(関数)<br>
-add_edge(): 辺を追加する <br>
-</p>
-<p>
-時間計算量: O(mlogn)
+時間計算量: O(sqrt(p)log(p))
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">

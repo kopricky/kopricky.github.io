@@ -38,50 +38,28 @@
 <div id="contents">
 
 <section>
-<h2>limited_knapsack</h2>
+<h2>アルゴリズム名</h2>
 <h3>コードについての説明</h3>
 <p>
-各品物に個数の制約がついたナップサック問題のアルゴリズム. 少し意外だが, 個数制約なしの場合と同じ計算量で解くことができる. <br>
-本実装では<a href="../Computation_Advanced/slide_min.html">スライド最小値</a>の考えを用いた実装をしている. スライド最小値以外にも <br>
-dp[i][j] = (i 番目までの品物まで考慮して重み j の組み合わせを作ったときに i 番目の品物が最大何個余るか) <br>
-というような DP でも同じ計算量で解くことができる. <br>
-また各品物の個数のビットごとに考えて((例)7コ→4コ+2コ+1コ) 01 ナップザック問題に落とす方法もある. 計算量は O(nWlogM) (M は品物の個数の最大値). <br>
-蟻本に詳しくのっているので参照してほしい.
+元論文は <a href=""></a>
 </p>
 <p>
-時間計算量: O(nW) (Wは総重量の上限値)
+(関数)<br>
+add_edge(): 辺を追加する <br>
+</p>
+<p>
+時間計算量: O(mlogn)
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">
-template&lt;typename T&gt;
-//価値v,重さw,個数m,重さの上限W
-T knapsack(vector&lt;T&gt;&amp; v,vector&lt;int&gt;&amp; w,vector&lt;int&gt;&amp; m, int W){
-    int n = (int)v.size();
-    vector&lt;T&gt; dp(W+1), deqv(W+1);
-    vector&lt;int&gt; deq(W+1);
-    for(int i = 0; i &lt; n; i++){
-        for(int a = 0; a &lt; w[i]; a++){
-            int s = 0,t = 0;
-            for(int j = 0; j*w[i]+a &lt;= W; j++){
-                T val = dp[j*w[i]+a] - j*v[i];
-                while(s &lt; t &amp;&amp; deqv[t-1] &lt;= val){
-                    t--;
-                }
-                deq[t] = j;
-                deqv[t++] = val;
-                dp[j*w[i]+a] = deqv[s] + j*v[i];
-                if(deq[s] == j-m[i]){
-                    s++;
-                }
-            }
-        }
-    }
-    return dp[W];
-}
+あ
 </pre>
 <h3>verify 用の問題</h3>
-<p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=DPL_1_G">Knapsack Problem with Limitations</a>
-  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3123423#1">提出コード</a></p>
+<p>
+verify していません(verify 問題を知らない)
+</p>
+<p>Atcoder : <a href=""></a>
+  <a href="">提出コード</a></p>
 </section>
 
 </div>

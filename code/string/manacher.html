@@ -48,23 +48,23 @@
 add_edge(): 辺を追加する <br>
 </p>
 <p>
-時間計算量: O(mlogn)
+時間計算量: O(S)
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">
-int R[MAX_N];
-
-void manacher(string& S)
+void manacher(string&amp; S,vector&lt;int&gt;&amp; res)
 {
+    int sz = (int)S.size();
+    res.resize(sz);
     int np=0,nr=0;
-    while (np < (int)S.size()) {
-        while(np-nr >= 0 && np+nr < (int)S.size() && S[np-nr] == S[np+nr]){
+    while(np &lt; sz){
+        while(np-nr &gt;= 0 &amp;&amp; np+nr &lt; sz &amp;&amp; S[np-nr] == S[np+nr]){
             nr++;
         }
-        R[np] = nr;
+        res[np] = nr;
         int k = 1;
-        while(np-k >= 0 && np+k < (int)S.size() && k+R[np-k] < nr){
-            R[np+k] = R[np-k];
+        while(np-k &gt;= 0 &amp;&amp; np+k &lt; sz &amp;&amp; k+res[np-k] &lt; nr){
+            res[np+k] = res[np-k];
             k++;
         }
         np += k; nr -= k;
@@ -73,7 +73,7 @@ void manacher(string& S)
 </pre>
 <h3>verify 用の問題</h3>
 <p>Atcoder : <a href="https://beta.atcoder.jp/contests/ukuku09/tasks/ukuku09_d">ukuku</a>
-  <a href="">提出コード</a></p>
+  <a href="https://beta.atcoder.jp/contests/ukuku09/submissions/3194738">提出コード</a></p>
 </section>
 
 </div>

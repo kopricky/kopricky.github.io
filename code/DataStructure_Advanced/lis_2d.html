@@ -38,13 +38,19 @@
 <div id="contents">
 
 <section>
-<h2>アルゴリズム名</h2>
+<h2>2次元LIS</h2>
 <h3>コードについての説明</h3>
 <p>
-envelope を保持
+2次元LIS とは {(x_1, y_1), (x_2, y_2), ... , (x_n, y_n)} (x_i <= x_i+1 かつ y_i <= y_i+1 かつ (x_i, y_i) ≠ (x_i+1, y_i+1)) というような単調増加する組の列のことをいう(イコール周りは定義がいろいろ) <br>
+本実装では {(x_1, y_1), (x_2, y_2), ... , (x_n, y_n)} (x_i <= x_i+1 かつ y_i >= y_i+1 かつ (x_i, y_i) ≠ (x_i+1, y_i+1)) というような x の増加に伴い, y は単調に減少する列を動的に管理するデータ構造になっている <br>
+これは 2 次元座標上にプロットしたとき追加された点の下側 envelope を保持していることに等しい.
 </p>
 <p>
-時間計算量: O(mlogn)
+(関数)<br>
+insert(val): 点 val (∈ R^2) を追加する. 実際に下側 envelope に組み込まれたか(true / false)を返す.<br>
+</p>
+<p>
+時間計算量: insert ならしO(logn)
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">

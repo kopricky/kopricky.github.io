@@ -41,15 +41,12 @@
 <h2>RBST Set</h2>
 <h3>コードについての説明</h3>
 <p>
+Randomized binnary search tree (乱択平衡二分探索木) を用いたランダムアクセス可能な set の実装である. deterministic に深さが O(logn) になる平衡二分探索木(AVL 木や赤黒木など)とは異なり木を
+マージする際にれぞれの木のサイズに比例した確率で片方の木の根をもう一方の木の根につけるかを決めるという randomize をおこなっている(<a href="./rbst_query.html">同様のコード</a>). <br>
 GNU C++ の標準ライブラリには赤黒木があるらしいがどうみても使いにくそうだし、それにあまり速くないみたい(<a href="https://codeforces.com/blog/entry/11080">参考</a>)<br>
-元論文は <a href=""></a>
 </p>
 <p>
-(関数)<br>
-add_edge(): 辺を追加する <br>
-</p>
-<p>
-時間計算量: O(mlogn)
+時間計算量: 各関数 O(logn) (期待計算量)
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">

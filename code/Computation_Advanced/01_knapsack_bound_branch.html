@@ -38,17 +38,15 @@
 <div id="contents">
 
 <section>
-<h2>アルゴリズム名</h2>
+<h2>01 knapsack bound branch</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
+01ナップサック問題の分割統治法を用いた解法. yukicoder の<a href="https://yukicoder.me/problems/no/626">これ</a>で出題されたもので多くのテストケースで高速に動作するので驚いた. <br>
+<a href="https://qiita.com/hamko/items/cceb1a92da14e2755527">このスライド</a> とかを見るとよいかも. 単純に 「価値 / 重さ」 の降順に並べて分割統治法を行っている.
 </p>
 <p>
 (関数)<br>
-add_edge(): 辺を追加する <br>
-</p>
-<p>
-時間計算量: O(mlogn)
+solve(n, W, vec): n 個の商品 vec(価値, 重さ) を用いて, 重さ W 以下で最大の価値を返す<br>
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">
