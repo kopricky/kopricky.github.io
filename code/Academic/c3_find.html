@@ -38,31 +38,104 @@
 <div id="contents">
 
 <section>
-<h2>c3 find</h2>
+<h2>C3 Find</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
+無向グラフ G に長さ3の単純閉路が含まれるかどうかを返すアルゴリズム. <br>
+threshold α を決めて, 次数が α 以下の各頂点についてはそこから出る辺のもう一方の端点同士の間に辺があるかどうかを調べる(あれば true). <br>
+次数が α より大きい頂点(個数は 2m/α 以下)については隣接行列の3乗を計算して対角成分を見る. <br>
+α はだいたい O(sqrt(m)) とか O(sqrt(m/logm)) とかにするのがよい(この実装では端点同士の辺のあるなしを logm かけて調べているので).<br>
+元論文は <a href="https://www.tau.ac.il/~nogaa/PDFS/ayz97.pdf">Alon, Yuster, Zwick 1997</a>
 </p>
 <p>
-(関数)<br>
-add_edge(): 辺を追加する <br>
-</p>
-<p>
-時間計算量: O(mlogn)
+時間計算量: だいたい O(m^1.5)
 </p>
 <h3>コード</h3>
 <div class="codebox">
 <input type="checkbox" id="label" class="csscode" />
 <label for="label"></label>
 <pre class="prettyprint linenums">
-あ
+template &lt;int MAX_E&gt; class C3_Find {
+private:
+
+    // static constexpr int alpha = floor(sqrt(MAX_E/log2((double)MAX_E+1)))+1;
+    static constexpr int alpha = floor(sqrt(MAX_E/2.0))+1;
+    static constexpr int MAX_N = ceil(2.0*MAX_E / alpha);
+
+    class mat {
+    public:
+        bitset&lt;MAX_N&gt;* a;
+        mat(){ a = new bitset&lt;MAX_N&gt;[MAX_N]; }
+        mat operator*(const mat&amp; m) const {
+            mat ans;
+            for(int i = 0; i &lt; MAX_N; i++){
+                for(int j = 0; j &lt; MAX_N; j++){
+                    if(this-&gt;a[i][j] == 0) continue;
+                    ans.a[i] |= m.a[j];
+                }
+            }
+            return ans;
+        }
+    };
+
+    bool low_degree() {
+        for(int u = 0; u &lt; V; u++){
+            if(unzip[u] &lt; 0){
+                for(int j = 0; j &lt; deg[u]-1; j++){
+                    int v = G[u][j];
+                    if(unzip[v] &lt; unzip[u]) continue;
+                    for(int k = j+1; k &lt; deg[u]; k++){
+                        int w = G[u][k];
+                        if(unzip[w] &lt; unzip[u]) continue;
+                        if(es.find(make_pair(min(v, w), max(v, w))) != es.end()) return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    bool high_degree() {
+        mat A;
+        for(auto&amp; p : es){
+            int u = unzip[p.first], v = unzip[p.second];
+            if(u &gt;= 0 &amp;&amp; v &gt;= 0) A.a[u].set(v), A.a[v].set(u);
+        }
+        mat B = A * A * A;
+        for(int i = 0; i &lt; high_num; i++){
+            if(B.a[i].test(i)) return true;
+        }
+        return false;
+    }
+
+    int V, high_num;
+    vector&lt;vector&lt;int&gt; &gt; G;
+    set&lt;pair&lt;int, int&gt; &gt; es;
+    vector&lt;int&gt; deg, unzip;
+
+public:
+    C3_Find(int node_size) : V(node_size), high_num(0), G(V), deg(V, 0), unzip(V){
+        iota(unzip.begin(), unzip.end(), -V);
+    }
+    void add_edge(int u, int v){
+        G[u].push_back(v), G[v].push_back(u);
+        deg[u]++, deg[v]++;
+        es.insert(make_pair(min(u, v), max(u, v)));
+    }
+    bool solve(){
+        for(int i = 0; i &lt; V; i++){
+            if(deg[i] &gt; alpha){
+                unzip[i] = high_num++;
+            }
+        }
+        return low_degree() || high_degree();
+    }
+};
 </pre>
 <h3>verify 用の問題</h3>
 <p>
 verify していません(verify 問題を知らない)
 </p>
-<p>Atcoder : <a href=""></a>
-  <a href="">提出コード</a></p>
 </section>
 
 </div>
