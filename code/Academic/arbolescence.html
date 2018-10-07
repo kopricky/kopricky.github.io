@@ -38,13 +38,13 @@
 <div id="contents">
 
 <section>
-<h2>arbolescence</h2>
+<h2>Arbolescence</h2>
 <h3>コードについての説明</h3>
-<p>根 r と有向辺が与えられたときに最小全域有向木(根からすべての点に有向辺の向きに沿って到達できるような木)を求めるアルゴリズム<br>
-根から DFS で辺をたどっていき、 たどった頂点がなすパスがサイクルになる場合は適宜サイクルを開く. <br>
+<p>根 r と有向辺が与えられたときに最小全域有向木(根からすべての点に有向辺の向きに沿って到達できるような木)を求めるアルゴリズム.<br>
+根から DFS で辺をたどっていき、 たどった頂点のなすパスがサイクルになる場合は適宜サイクルを開く. <br>
 操作自体は簡単だが, 頂点の圧縮やヒープの併合などの実装コストが割とある. </p>
 <p>
-このアルゴリズムについては圧倒的に<a href="http://joisino.hatenablog.com/entry/2017/01/11/230141">このブログの記事</a>がわかりやすいです. 大いに参考にさせていただきました. <br>
+このアルゴリズムについては<a href="http://joisino.hatenablog.com/entry/2017/01/11/230141">このブログの記事</a>がわかりやすいです. 大いに参考にさせていただきました. <br>
 また元論文は <a href="https://cw.fel.cvut.cz/old/_media/courses/a4m33pal/cviceni/tarjan-finding-optimum-branchings.pdf">
 Tarjan 1977</a> です.
 </p>
@@ -53,6 +53,9 @@ Tarjan 1977</a> です.
 </p>
 </p>
 <h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
 <pre class="prettyprint linenums">
 class UnionFind {
 private:
@@ -181,6 +184,9 @@ public:
 <h3>verify 用の問題</h3>
 <p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_2_B&lang=jp">Minimum-Cost Arborescence</a>
   <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3122547#1">提出コード</a></p>
+
+<h3>GitHub へのリンク</h3>
+<p><a href="https://github.com/kopricky/my-algorithm/blob/master/Academic/Arbolescence.hpp">https://github.com/kopricky/my-algorithm/blob/master/Academic/Arbolescence.hpp</a></p>
 </section>
 
 </div>
