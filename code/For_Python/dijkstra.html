@@ -38,13 +38,16 @@
 <div id="contents">
 
 <section>
-<h2>dijkstra</h2>
+<h2>Dijkstra</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
+非負重みの辺のみからなるグラフに対する単一始点最短経路問題を高速に解くアルゴリズム. <br>
+始点からの距離が近いものから順に探索を繰り返す("始点から最も近い頂点"は優先度付きキューを用いて効率よく管理する).
 </p>
 <p>
-時間計算量: O(mlogn)
+(関数)<br>
+add_edge(st, ed, cost): st から ed に向かう重み cost の有向辺を追加する <br>
+solve(start): start を始点として各頂点までの最短距離を求める
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">

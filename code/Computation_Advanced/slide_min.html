@@ -38,17 +38,19 @@
 <div id="contents">
 
 <section>
-<h2>slide min</h2>
+<h2>Slide Min</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
+数列 a(要素数 n), 正の整数 k に対して b[i] = min_{i <= j < i+k} a[j] (0 <= i <= n-k) で定まる長さ n-k+1 の数列 b を線形時間で求めるアルゴリズムがスライド最小値である. <br>
+実装は deque を用いて a の要素を順番に後ろから詰めていき, j < i (範囲外)となった a[j] は deque の前から削除していく. <br>
+また deque に後ろから挿入する際に deq の最後の要素 >= 今入れる要素 が成り立つときは deq の最後の要素が今後最小値を取ることが無いので後ろから削除する. <br>
+以上の操作を繰り返すことで線形時間で b を構築することができる.
 </p>
 <p>
-(関数)<br>
-add_edge(): 辺を追加する <br>
+SilideMin(Array, sz): res[i] = min_{i <= j < i+sz} Array[j] (0 <= i <= n-sz) を構築する
 </p>
 <p>
-時間計算量: O(mlogn)
+時間計算量: O(n)
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">
@@ -58,7 +60,7 @@ public:
     vector&lt;int&gt; deq;
     vector&lt;T&gt; res;
     int n,k;
-    SlideMin(vector&lt;T&gt; Array,int sz) : n((int)Array.size()), k(sz), deq(n), res(n-k+1){
+    SlideMin(vector&lt;T&gt; Array, int sz) : n((int)Array.size()), k(sz), deq(n), res(n-k+1){
         int s = 0, t = 0;
         for(int i = 0; i &lt; n; i++){
             //iを追加した場合に添字deq[t-1]の値がa[i]以上のときdeqから削除されるまで採用されることはないので

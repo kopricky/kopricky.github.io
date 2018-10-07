@@ -38,7 +38,7 @@
 <div id="contents">
 
 <section>
-<h2>lca</h2>
+<h2>LCA</h2>
 <h3>コードについての説明</h3>
 <p>
 木上の任意の 2 点間の LCA (lowest common ancestor) を効率的に求めることができるアルゴリズム. また同時に任意の 2 点間のキョリも効率的に求めることが可能になる. <br>
@@ -47,7 +47,7 @@
 </p>
 <p>
 (関数)<br>
-add_edge(): 辺を追加する <br>
+add_edge(from, to): from, to の間に無向辺を追加する <br>
 build(): 加えられた辺の情報を用いてデータ構造を構築する <br>
 lca(u, v): u, v の LCA を求める <br>
 dist(u, v): u, v 間のキョリを求める
@@ -98,15 +98,11 @@ public:
 };
 
 class LCA{
-public:
+private:
     int V;
     vector&lt;vector&lt;int&gt; &gt; G;
     vector&lt;int&gt; ord,depth,id;
     segtree&lt;int&gt; st;
-    LCA(int node_size) : V(node_size), G(V), depth(V), id(V, -1){}
-    void add_edge(int from,int to){
-        G[from].push_back(to),G[to].push_back(from);
-    }
     void dfs(int u,int p,int k){
         id[u] = (int)ord.size();
         ord.push_back(u);
@@ -117,6 +113,12 @@ public:
                 ord.push_back(u);
             }
         }
+    }
+
+public:
+    LCA(int node_size) : V(node_size), G(V), depth(V), id(V, -1){}
+    void add_edge(int from,int to){
+        G[from].push_back(to),G[to].push_back(from);
     }
     void build(){
         ord.reserve(2*V-2);

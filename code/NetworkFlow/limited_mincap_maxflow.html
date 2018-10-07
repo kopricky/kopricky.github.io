@@ -41,14 +41,17 @@
 <h2>limited mincap maxflow</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
+各辺に最小流量制約がついた最大流問題を解くアルゴリズム. 基本的には DAG に対してのみ用いたほうがよい(ループがあるとフローの定義を満たしたままそこにいくらでも流せてしまうので...).
+詳しくは蟻本を
 </p>
 <p>
 (関数)<br>
-add_edge(): 辺を追加する <br>
+add_edge(from, to, cap): from から to に向かう流量が min_cap 以上 max_cap 以下の有向辺を追加する <br>
+check(s, t): s から t に最小流量制約を満たすように流すことができるかどうか(true/false)を計算する <br>
+max_flow(s, t): s から t に最小流量制約を満たしたうえでの最大流を計算する
 </p>
 <p>
-時間計算量: O(mlogn)
+時間計算量: O(n^2m)
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">
@@ -59,8 +62,7 @@ template &lt;typename T&gt;
 class Dinic
 {
 private:
-    struct edge
-    {
+    struct edge {
         int to;
         T cap;
         int rev;
@@ -70,13 +72,11 @@ private:
     vector&lt;vector&lt;edge&gt;&gt; G;
     vector&lt;int&gt; level, iter;
     //辺を張る
-    void add_edge(int from, int to, T cap)
-    {
+    void add_edge(int from, int to, T cap) {
         G[from].push_back((edge){to, cap, (int)G[to].size()});
         G[to].push_back((edge){from, (T)0, (int)G[from].size() - 1});
     }
-    void bfs(int s)
-    {
+    void bfs(int s) {
         fill(level.begin(), level.end(), -1);
         queue&lt;int&gt; que;
         level[s] = 0;
@@ -92,8 +92,7 @@ private:
             }
         }
     }
-    T dfs(int v, int t, T f)
-    {
+    T dfs(int v, int t, T f) {
         if (v == t) {
             return f;
         }
@@ -110,8 +109,7 @@ private:
         }
         return 0;
     }
-    T solve()
-    {
+    T solve() {
         T flow = 0;
         for (;;) {
             bfs(V);
@@ -128,8 +126,7 @@ private:
 
 public:
     Dinic(int node_size) : V(node_size), cap_sum(0), G(V + 2), level(V + 2), iter(V + 2) {}
-    void add_edge(int from, int to, T min_cap, T max_cap)
-    {
+    void add_edge(int from, int to, T min_cap, T max_cap) {
         add_edge(from, to, max_cap - min_cap);
         if(min_cap){
             cap_sum += min_cap;
@@ -137,8 +134,7 @@ public:
             add_edge(from, V + 1, min_cap);
         }
     }
-    bool check(int s, int t)
-    {
+    bool check(int s, int t) {
         auto tmpG = G;
         add_edge(t, s, numeric_limits&lt;T&gt;::max());
         T res = solve();
@@ -146,8 +142,7 @@ public:
         return (res == cap_sum);
     }
     //最大流を計算
-    T max_flow(int s, int t)
-    {
+    T max_flow(int s, int t) {
         add_edge(V, s, numeric_limits&lt;T&gt;::max());
         add_edge(t, V + 1, numeric_limits&lt;T&gt;::max());
         return solve() - cap_sum;

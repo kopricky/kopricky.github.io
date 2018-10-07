@@ -38,30 +38,24 @@
 <div id="contents">
 
 <section>
-<h2>next permutation</h2>
+<h2>Next Combination</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
-</p>
-<p>
-(関数)<br>
-add_edge(): 辺を追加する <br>
-</p>
-<p>
-時間計算量: O(mlogn)
+要素数 n の数列から r 個の要素の取り方 nCr 通りをなめたいときに使うテク. <br>
+STL にある next_permutation を用いて true/false の配列で mask する形で r 個選んでくると良い
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">
-vector&lt;bool&gt; v(n.false);
+vector&lt;bool&gt; v(n. false);
 fill(v.end() - r, v.end(), true);
 do {
     vector&lt;int&gt; res;
-    rep(i,n) {
+    for(int i = 0; i < n; i++){
         if (v[i]) {
             res.push_back(i);
         }
     }
-} while (next_permutation(all(v)));
+} while (next_permutation(v.begin(), v.end()));
 </pre>
 <h3>verify 用の問題</h3>
 <p>
