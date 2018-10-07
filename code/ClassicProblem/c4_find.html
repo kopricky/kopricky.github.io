@@ -38,31 +38,40 @@
 <div id="contents">
 
 <section>
-<h2>アルゴリズム名</h2>
+<h2>C4 Find</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
+無向グラフ G に長さ4の単純閉路が含まれるかどうかを返すアルゴリズム. <br>
+各点 u について u を端点とする無向辺で (u,v), (u,w) というものが存在した場合 check[v][w], check[w][v] を true にする. <br>
+別の頂点について見ているときにすでに check に true が入っていたなら長さ4の単純閉路が存在することになる. <br>
+
 </p>
 <p>
-(関数)<br>
-add_edge(): 辺を追加する <br>
-</p>
-<p>
-時間計算量: O(mlogn)
+時間計算量: O(n^2)
 </p>
 <h3>コード</h3>
 <div class="codebox">
 <input type="checkbox" id="label" class="csscode" />
 <label for="label"></label>
 <pre class="prettyprint linenums">
-あ
+bool C4_Find(vector&lt;vector&lt;int&gt; &gt;&amp; G) {
+    int n = (int)G.size();
+    vector&lt;vector&lt;bool&gt; &gt; check(n, vector&lt;bool&gt;(n, false));
+    for(int i = 0; i &lt; n; i++){
+        for(int j = 0; j &lt; (int)G[i].size()-1; j++){
+            for(int k = j+1; k &lt; (int)G[i].size(); k++){
+                if(check[G[i][j]][G[i][k]]) return true;
+                check[G[i][j]][G[i][k]] = check[G[i][k]][G[i][j]] = true;
+            }
+        }
+    }
+    return false;
+}
 </pre>
 <h3>verify 用の問題</h3>
 <p>
 verify していません(verify 問題を知らない)
 </p>
-<p>Atcoder : <a href=""></a>
-  <a href="">提出コード</a></p>
 </section>
 
 </div>
