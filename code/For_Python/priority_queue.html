@@ -41,12 +41,16 @@
 <h2>Priority Queue</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
+優先度付きキューと呼ばれる挿入, 削除からなるクエリに対して効率よく最大値を返すデータ構造の実装である. <br>
+以下では二分ヒープを用いて実装している. 詳しい実装については他のサイトを参照されたい.
 </p>
 <p>
-時間計算量: O(mlogn)
+時間計算量: 挿入, 削除 O(logn), 最大値の参照 O(1)
 </p>
 <h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
 <pre class="prettyprint linenums">
 class PriorityQueue:
 

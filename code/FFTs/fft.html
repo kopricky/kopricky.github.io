@@ -38,7 +38,7 @@
 <div id="contents">
 
 <section>
-<h2>fft</h2>
+<h2>Fast Fourier Transform</h2>
 <h3>コードについての説明</h3>
 <p>
 高速フーリエ変換. 畳み込みの演算を O(nlogn) で行うアルゴリズム(Cooley-Tukey).<br>
@@ -53,6 +53,9 @@ mul(a, b): 配列 a, b の畳み込みを行う
 時間計算量: O(nlogn)
 </p>
 <h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
 <pre class="prettyprint linenums">
 complex&lt;double&gt; operator* (const complex&lt;double&gt; a, const complex&lt;double&gt; b){
     return complex&lt;double&gt;(a.real()*b.real()-a.imag()*b.imag(),a.real()*b.imag()+a.imag()*b.real());

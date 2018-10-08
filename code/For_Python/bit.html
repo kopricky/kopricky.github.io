@@ -38,7 +38,7 @@
 <div id="contents">
 
 <section>
-<h2>BIT</h2>
+<h2>Binary Indexed Tree (Fenwick Tree) </h2>
 <h3>コードについての説明</h3>
 <p>
 BIT(binary indexed tree) は1点加算と区間和のクエリを高速に処理することのできるデータ構造です. segment tree でも実装できますが BIT の方が基本的に速いです. <br>
@@ -49,6 +49,9 @@ fenwick tree とも呼ばれています. 説明はおそらく検索すれば�
 時間計算量: 構築 O(n), 各クエリ O(logn)
 </p>
 <h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
 <pre class="prettyprint linenums">
 class BIT:
     def __init__(self, node_size):

@@ -38,7 +38,7 @@
 <div id="contents">
 
 <section>
-<h2>fwht</h2>
+<h2>Fast Walsh Hadamard Transform</h2>
 <h3>コードについての説明</h3>
 <p>
 高速 Walsh-Hadamrd 変換. 高速フーリエ変換の亜種で FFT が c[k] = sum_{i+j=k} a[i]*b[j] を満たす c を求めるのに対し,
@@ -50,6 +50,9 @@ xor 以外にも係数行列を少し変えれば and, or についても求め�
 時間計算量: O(nlogn)
 </p>
 <h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
 <pre class="prettyprint linenums">
 #define MOD 1000000007
 

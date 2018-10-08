@@ -41,10 +41,12 @@
 <h2>Chromatic Number</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
+グラフの頂点に隣り合う頂点は違う色となるように彩色するのに必要な色の数の最小値を彩色数と言い, それを求めるアルゴリズムである. <br>
+彩色数は補グラフでの最小クリーク被覆の値と等しいことが知られている. <br>
+<a href="https://www.slideshare.net/wata_orz/ss-12131479">このスライド</a>がとても参考になる
 </p>
 <p>
-時間計算量: O(mlogn)
+時間計算量: O(n*2^n)
 </p>
 <h3>コード</h3>
 <div class="codebox">
@@ -55,7 +57,7 @@ class ChromaticrNumber {
 public:
     int V;
     vector&lt;int&gt; adj,I;
-    const static int MOD = 1000000007;
+    static constexpr int MOD = 1000000007;
     ChromaticrNumber(int node_size) : V(node_size), adj(V), I((1 &lt;&lt; V), 0){
         for(int i = 0; i &lt; V; i++){
             adj[i] = (1 &lt;&lt; i);
@@ -64,8 +66,7 @@ public:
     void add_edge(int u, int v){
         adj[u] |= (1 &lt;&lt; v),adj[v] |= (1 &lt;&lt; u);
     }
-    int mod_pow(int a, int b)
-    {
+    int mod_pow(int a, int b) {
         a %= MOD;
         int res = 1;
         while(b){
