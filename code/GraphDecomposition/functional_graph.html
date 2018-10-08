@@ -38,21 +38,24 @@
 <div id="contents">
 
 <section>
-<h2>functional graph</h2>
+<h2>Functional Graph</h2>
 <h3>コードについての説明</h3>
 <p>
 Functional Graph とは各頂点の出次数がちょうど1の単純な有向グラフのことである. {1,...,n} → {1,...,n} の関数として表現できることがその名の由来であると思われる. <br>
-定義よりグラフはループとチェインからなるグラフとなる.
+定義よりグラフはループと(無向グラフと見たとき)そこから生える木からなるグラフとなる.
 </p>
 <p>
 (関数) <br>
-solve(): <br>
-make_graph():
+solve(): ループ上の頂点を loop の配列に入れる<br>
+make_graph(): (無向グラフと見たとき)ループから生える木たちをループ側から端に向かう方向(元とは逆の方向)の有向森とみたグラフを構築する
 </p>
 <p>
-時間計算量: O(mlogn)
+時間計算量: O(n)
 </p>
 <h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
 <pre class="prettyprint linenums">
 class FunctionalGraph {
 public:

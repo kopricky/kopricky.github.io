@@ -41,16 +41,13 @@
 <h2>Dice</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
-</p>
-<p>
-(関数)<br>
-add_edge(): 辺を追加する <br>
-</p>
-<p>
-時間計算量: O(mlogn)
+ICPCのサイコロ問題のために Rotate と回転後の上の面を返すようなコードを書いた. <br>
+間違ってはいないがあまり良い実装だと思っていないのでおすすめはしない
 </p>
 <h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
 <pre class="prettyprint linenums">
 //上:0,下:1,右:2,左:3,手前:4,奥:5
 struct Dice{

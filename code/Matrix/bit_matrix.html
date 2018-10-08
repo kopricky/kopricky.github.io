@@ -38,7 +38,7 @@
 <div id="contents">
 
 <section>
-<h2>bit matrix</h2>
+<h2>Bit Matrix</h2>
 <h3>コードについての説明</h3>
 <p>
 F_2上の行列の積に (or, and) をのせた演算が 64 bit高速化により O(n^3) よりも速くなるという話. <br>
@@ -48,28 +48,31 @@ F_2上の行列の積に (or, and) をのせた演算が 64 bit高速化によ�
 時間計算量: O(n^3/64) (64 bit環境で)
 </p>
 <h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
 <pre class="prettyprint linenums">
 #define MAX_N 2000
 
-struct mat
-{
-    bitset&lt;MAX_N&gt; a[MAX_N];
-};
-
-mat operator*(const mat&amp; m1,const mat&amp; m2){
-    mat ans;
-    for(int i = 0; i &lt; MAX_N; i++){
-        for(int j = 0; j &lt; MAX_N; j++){
-            if(m1.a[i][j] == 0) continue;
-            ans.a[i] |= m2.a[j];
+class mat {
+public:
+    bitset&lt;MAX_N&gt;* a;
+    mat(){ a = new bitset&lt;MAX_N&gt;[MAX_N]; }
+    mat operator*(const mat&amp; m) const {
+        mat ans;
+        for(int i = 0; i &lt; MAX_N; i++){
+            for(int j = 0; j &lt; MAX_N; j++){
+                if(this-&gt;a[i][j] == 0) continue;
+                ans.a[i] |= m.a[j];
+            }
         }
+        return ans;
     }
-    return ans;
-}
+};
 </pre>
 <h3>verify 用の問題</h3>
 <p>Atcoder : <a href="https://beta.atcoder.jp/contests/jag2017autumn/tasks/jag2017autumn_i">Revenge of the Endless BFS</a>
-  <a href="https://beta.atcoder.jp/contests/jag2017autumn/submissions/2453237">提出コード</a></p>
+  <a href="https://beta.atcoder.jp/contests/jag2017autumn/submissions/3370313">提出コード</a></p>
 </section>
 
 </div>

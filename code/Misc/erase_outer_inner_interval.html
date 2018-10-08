@@ -38,19 +38,19 @@
 <div id="contents">
 
 <section>
-<h2>アルゴリズム名</h2>
+<h2>Erase Outer Interval Inner Interval</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
+区間が n 個与えられたときにある別の区間を完全に含んでいるような区間を削除(EraseOuterInterval), ある別の区間に完全に含まれているような区間を削除(EraseInnerInterval) という操作を効率良く行うアルゴリズム. <br>
+前処理として使いたくなるときがたまにある.
 </p>
 <p>
-(関数)<br>
-add_edge(): 辺を追加する <br>
-</p>
-<p>
-時間計算量: O(mlogn)
+時間計算量: O(nlogn)
 </p>
 <h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
 <pre class="prettyprint linenums">
 //区間(pair&lt;int,int&gt;)の配列が与えられたときに最内の区間および最外の区間を取り除く(前処理で用いる)
 //外側の区間を削除
