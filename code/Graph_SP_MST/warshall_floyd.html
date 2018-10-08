@@ -38,15 +38,19 @@
 <div id="contents">
 
 <section>
-<h2>warshall_floyd</h2>
+<h2>Warshall Floyd</h2>
 <h3>コードについての説明</h3>
 <p>
-全点対間の最短経路問題を高速に解くアルゴリズム. j から k への最短距離 d[j][k] は min_i (d[j][i] + d[i][k]) と等しいことを用いている.
+全点対間の最短経路問題を高速に解くアルゴリズム. j から k への最短距離 d[j][k] は min_i (d[j][i] + d[i][k]) と等しいことを用いている. <br>
+全点対間の最短経路問題をこのアルゴリズムより速いオーダーで求めることは絶望視されている(ASAP conjecture).
 </p>
 <p>
 時間計算量: O(n^3)
 </p>
 <h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
 <pre class="prettyprint linenums">
 // d[i][j] は INF 初期化したあと
 // i → j に重み cost の辺が存在するなら d[i][j] = cost のように代入しておく

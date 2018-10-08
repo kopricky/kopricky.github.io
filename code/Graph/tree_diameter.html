@@ -38,26 +38,29 @@
 <div id="contents">
 
 <section>
-<h2>tree diameter</h2>
+<h2>Tree Diameter</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
+木の直径を求めるアルゴリズム. <br>
+木の直径とは木上の異なる2点の組でその間の距離が最大となるようなものを u, v としたとき u, v を端点とする木上のパスにある頂点の列のことをいう. 一般に木の直径は一意に定まらないことに注意する. <br>
+求める方法はある点 u から一番遠い点を探索し v であったとする. その v から一番遠い点を探索し w であったとするとこのとき v, w が木の直径の端点となっていることがいえる.
 </p>
 <p>
-時間計算量: O(mlogn)
+(関数) <br>
+solve(): 木の直径を計算し, diameter に格納する
+</p>
+<p>
+時間計算量: O(n)
 </p>
 <h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
 <pre class="prettyprint linenums">
-class TreeDiameter
-{
-public:
+class TreeDiameter {
+private:
     int V;
     vector&lt;vector&lt;int&gt; &gt; G;
-    vector&lt;int&gt; diameter;
-    TreeDiameter(int node_size) : V(node_size), G(V){}
-    void add_edge(int u,int v){
-        G[u].push_back(v),G[v].push_back(u);
-    }
     void dfs(int u,int p,int d,int&amp; far,int&amp; mx){
         if(mx &lt; d){
             far = u;
@@ -84,6 +87,13 @@ public:
             }
         }
         return false;
+    }
+
+public:
+    vector&lt;int&gt; diameter;
+    TreeDiameter(int node_size) : V(node_size), G(V){}
+    void add_edge(int u,int v){
+        G[u].push_back(v),G[v].push_back(u);
     }
     void solve(){
         int s,t,mx;

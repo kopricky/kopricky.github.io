@@ -38,29 +38,36 @@
 <div id="contents">
 
 <section>
-<h2>topological_sort</h2>
+<h2>Topological Sort</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
+グラフがDAG(閉路を持たないグラフ)であるかの判定およびDAGの場合は頂点をトポロジカル順序にソートするアルゴリズム. <br>
 </p>
 <p>
-時間計算量: O(mlogn)
+(関数) <br>
+solve(): DAGかどうか(true/false)を返し, true なら res にトポロジカル順序にソートされた頂点列が格納される.
+</p>
+<p>
+時間計算量: O(m)
 </p>
 <h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
 <pre class="prettyprint linenums">
 class tsort {
 public:
 	int V;
-	vector<vector<int> > G;
-	vector<int> deg,res;
+	vector&lt;vector&lt;int&gt; &gt; G;
+	vector&lt;int&gt; deg,res;
 	tsort(int node_size) : V(node_size), G(V), deg(V, 0){}
 	void add_edge(int from,int to){
 		G[from].push_back(to);
 		deg[to]++;
 	}
  	bool solve() {
-		queue<int> que;
-		for(int i = 0; i < V; i++){
+		queue&lt;int&gt; que;
+		for(int i = 0; i &lt; V; i++){
 	        if(deg[i] == 0){
 	            que.push(i);
 	        }
@@ -78,7 +85,6 @@ public:
 		return (*max_element(deg.begin(),deg.end()) != 0);
 	}
 };
-
 </pre>
 <h3>verify 用の問題</h3>
 <p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2181">Neko's Treasure</a>

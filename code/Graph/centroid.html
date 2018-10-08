@@ -38,61 +38,54 @@
 <div id="contents">
 
 <section>
-<h2>アルゴリズム名</h2>
+<h2>Centroid</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
+木の重心を求めるアルゴリズム. <br>
+頂点 u が木の重心であるとは u を根と見たときにすべての u の子を根とする部分木のサイズが n / 2 以下であることをいう. 重心は一つの木に対して高々 2 個存在する.<br>
+ある頂点を根と見たときの各頂点を根とする部分木を dfs で求めておけば簡単に求まる.
 </p>
 <p>
-時間計算量: O(mlogn)
+時間計算量: O(n)
 </p>
 <h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
 <pre class="prettyprint linenums">
-class centroid
-{
+class centroid {
 private:
-    int V;
-    vector&lt;vector&lt;int&gt; &gt; G;
-    vector&lt;int&gt; sz;
-public:
-    centroid(int node_size) : V(node_size), G(V), sz(V, 0){}
-    void add_edge(int u, int v){
-        G[u].push_back(v), G[v].push_back(u);
-    }
-    void dfs(int u,int p){
+	int V;
+	vector&lt;vector&lt;int&gt; &gt; G;
+	vector&lt;int&gt; sz;
+    void dfs(int u,int p, vector&lt;int&gt;&amp; ct){
+		bool ok = true;
         sz[u] = 1;
         for(int v : G[u]){
             if(v != p){
-                dfs(v,u);
+                dfs(v, u, ct);
                 sz[u] += sz[v];
+				if(2*sz[v] &gt; V) ok = false;
             }
         }
+		if(ok &amp;&amp; V &lt;= 2*sz[u]) ct.push_back(u);
     }
-    int solve(){
-        int u = 0;
-        dfs(u,-1);
-        int tot = sz[u];
-        bool ok = false;
-        int p = -1;
-        while(!ok){
-            ok = true;
-            for(int v : G[u]){
-                if(v != p &amp;&amp; 2*sz[v] &gt; tot){
-                    p = u, u = v, ok = false;
-                    break;
-                }
-            }
-        }
-        return u;
+
+public:
+    centroid(int node_size) : V(node_size), G(V), sz(V, 0){}
+    void add_edge(int u,int v){
+        G[u].push_back(v),G[v].push_back(u);
+    }
+    vector&lt;int&gt; solve(){
+		vector&lt;int&gt; ct;
+        dfs(0, -1, ct);
+		return ct;
     }
 };
 </pre>
 <h3>verify 用の問題</h3>
-<p>
-verify していません(verify 問題を知らない)
-</p>
 <p>Atcoder : <a href="https://beta.atcoder.jp/contests/arc087/tasks/arc087_d">Squirrel Migration</a>
-  <a href="">提出コード</a></p>
+  <a href="https://beta.atcoder.jp/contests/arc087/submissions/3187077">提出コード</a></p>
 </section>
 
 </div>

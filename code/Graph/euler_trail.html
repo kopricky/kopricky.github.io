@@ -38,22 +38,29 @@
 <div id="contents">
 
 <section>
-<h2>アルゴリズム名</h2>
+<h2>Eulerian Trail</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
+準オイラーグラフ(一筆書きできるようなグラフ)かの判定および準オイラーグラフについては実際にオイラー路を求めるアルゴリズムになっている. <br>
+頑張ったら O(m) で求められるが以下では O(mlogn) の実装になっている.
+</p>
+<p>
+(関数) <br>
+solve(): 準オイラーグラフかどうか(true/false)を返し, true なら path にオイラー路が格納される
 </p>
 <p>
 時間計算量: O(mlogn)(この実装では)
 </p>
 <h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
 <pre class="prettyprint linenums">
-class EulerPath
-{
+class EulerPath {
 public:
     int V; bool directed;
     vector&lt;map&lt;int,int&gt; &gt; G;
-    vector&lt;int&gt; degree,path;
+    vector&lt;int&gt; degree, path;
     EulerPath(int node_size, bool isdirected=false) :
             V(node_size), directed(isdirected), G(V), degree(V, 0){}
     void add_edge(int u,int v){
@@ -107,7 +114,6 @@ public:
         }
         if(s &lt; 0) s = 0;
         dfs(s);
-        reverse(path.begin(),path.end());
         return true;
     }
 };

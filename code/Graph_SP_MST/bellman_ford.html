@@ -38,7 +38,7 @@
 <div id="contents">
 
 <section>
-<h2>bellman ford</h2>
+<h2>Bellman Ford</h2>
 <h3>コードについての説明</h3>
 <p>
 負辺を含むグラフに対する単一始点最短経路問題を高速に解くことができるアルゴリズム. また負有向閉路の検出(3種類)も同じ計算量で行うことが可能. <br>
@@ -53,6 +53,9 @@ solve(s): s を始点として各頂点までの最短距離を求める
 時間計算量: O(nm)
 </p>
 <h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
 <pre class="prettyprint linenums">
 template&lt;typename T&gt; class bellman_ford {
 private:
