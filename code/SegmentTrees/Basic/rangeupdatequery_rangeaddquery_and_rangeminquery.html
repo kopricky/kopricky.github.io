@@ -38,7 +38,7 @@
 <div id="contents">
 
 <section>
-<h2>range update query range add query and range min query</h2>
+<h2>RangeUpdateQuery RangeAddQuery and RangeMinQuery</h2>
 <h3>コードについての説明</h3>
 <p>
 区間更新 (a_i ← val (i ∈ [l, r)), 区間加算 (a_i ← a_i + val (i ∈ [l, r)), 区間最小値 (min_(l <= i < r) a_i) のクエリを効率的に処理できる. <br>
@@ -48,6 +48,9 @@
 時間計算量: 構築 O(n), 各クエリ O(logn)
 </p>
 <h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
 <pre class="prettyprint linenums">
 template&lt;typename T&gt; class segtree {
 private:

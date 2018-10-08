@@ -38,7 +38,7 @@
 <div id="contents">
 
 <section>
-<h2>segtree nonrecursion</h2>
+<h2>Segtree Nonrecursion</h2>
 <h3>コードについての説明</h3>
 <p>
 segment tree を非再帰型で実装したコード. 普通のセグ木より定数倍速い. <a href="http://d.hatena.ne.jp/komiyam/20131202/1385992406">この記事</a> とかにその話がのっている.
@@ -47,6 +47,9 @@ segment tree を非再帰型で実装したコード. 普通のセグ木より�
 時間計算量: 構築 O(n), 各クエリ O(logn)
 </p>
 <h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
 <pre class="prettyprint linenums">
 template&lt;typename T&gt; class segtree {
 private:

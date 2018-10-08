@@ -38,83 +38,80 @@
 <div id="contents">
 
 <section>
-<h2>range add query and range sum query</h2>
+<h2>RangeAddQuery and RangeSumQuery</h2>
 <h3>コードについての説明</h3>
 <p>
 区間加算 (a_i ← a_i + val (i ∈ [l, r)), 区間和 (min_(l <= i < r) a_i) のクエリを効率的に処理できる. <br>
 区間加算のクエリを要素一つ一つに愚直にやっていると遅くなるが区間がセグ木のノードに対応する区間を含んだ場合そのノードにそれより下に伝播されるべき加算の記録を持っておく. そしてその後実際に区間和のクエリで探索された時に初めてその下に伝播させるようにしてやると O(logn) で効率よくクエリを処理できる. <br>
-このような処理は遅延評価と呼ばれ, Haskell などの言語で取り入れられているらしい(よく知らない顔).
+このような処理は遅延評価と呼ばれ, Haskell などの言語で取り入れられているらしい(よく知らない顔). <br>
+以下の実装では高速化のため非再帰での実装にしている.
 </p>
 <p>
 時間計算量: 構築 O(n), 各クエリ O(logn)
 </p>
 <h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
 <pre class="prettyprint linenums">
-template&lt;typename T&gt; class segtree{
+template&lt;typename T&gt; class segtree {
 private:
-    int n,sz;
+    int n,sz,h;
     vector&lt;T&gt; node, lazy;
-    void eval(int k, int l, int r){
-        if(lazy[k] != 0){
-            node[k] += lazy[k]; //kを根とするsubtreeについての情報を更新
-            if(r - l &gt; 1){
-                lazy[2*k+1] += lazy[k] / 2, lazy[2*k+2] += lazy[k] / 2;
+    void eval(int k) {
+        if(lazy[k]){
+            node[k] += lazy[k];
+            if(k &lt; n) {
+                lazy[k*2] += lazy[k] / 2, lazy[k*2+1] += lazy[k] / 2;
             }
             lazy[k] = 0;
         }
     }
 
 public:
-    segtree(vector&lt;T&gt;&amp; v) : sz((int)v.size()){
+    segtree(vector&lt;T&gt;&amp; v) : sz((int)v.size()), h(0) {
         n = 1;
-        while(n &lt; sz){
-            n *= 2;
+        while(n &lt; sz) n *= 2, h++;
+        node.resize(2*n, 0), lazy.resize(2*n, 0);
+        for(int i = 0; i &lt; sz; i++) node[i+n] = v[i];
+        for(int i = n-1; i &gt;= 1; i--) node[i] = node[2*i] + node[2*i+1];
+    }
+    void range(int a, int b, T x) {
+        a += n, b += n - 1;
+        for(int i = h; i &gt; 0; i--) eval(a &gt;&gt; i), eval(b &gt;&gt; i);
+        int ta = a, tb = b++, length = 1;
+        while(a &lt; b){
+            if(a &amp; 1) lazy[a++] += length * x;
+            if(b &amp; 1) lazy[--b] += length * x;
+            a &gt;&gt;= 1, b &gt;&gt;= 1, length &lt;&lt;= 1;
         }
-        node.resize(2*n-1, 0), lazy.resize(2*n-1, 0);
-        for(int i = 0; i &lt; sz; i++){
-            node[i+n-1] = v[i];
-        }
-        for(int i=n-2; i&gt;=0; i--){
-            node[i] = node[i*2+1] + node[i*2+2];
+        while(ta &gt;&gt;= 1, tb &gt;&gt;= 1, ta){
+            if(!lazy[ta]){
+                eval(2*ta), eval(2*ta+1), node[ta] = node[2*ta] + node[2*ta+1];
+            }
+            if(!lazy[tb]){
+                eval(2*tb), eval(2*tb+1), node[tb] = node[2*tb] + node[2*tb+1];
+            }
         }
     }
-    void range(int a, int b, T x, int k=0, int l=0, int r=-1){
-        if(r &lt; 0) r = n;
-        eval(k, l, r);
-        if(b &lt;= l || r &lt;= a){
-            return;
+    T query(int a, int b) {
+        a += n, b += n - 1;
+        for(int i = h; i &gt; 0; i--) eval(a &gt;&gt; i), eval(b &gt;&gt; i);
+        b++;
+        T res1 = 0, res2 = 0;
+        while(a &lt; b) {
+            if(a &amp; 1) eval(a), res1 += node[a++];
+            if(b &amp; 1) eval(--b), res2 += node[b];
+            a &gt;&gt;= 1, b &gt;&gt;= 1;
         }
-        if(a &lt;= l &amp;&amp; r &lt;= b){
-            lazy[k] += (r - l) * x;
-            eval(k, l, r);
-        }else{
-            range(a, b, x, 2*k+1, l, (l+r)/2), range(a, b, x, 2*k+2, (l+r)/2, r);
-            node[k] = node[2*k+1] + node[2*k+2];
-        }
+        return res1 + res2;
     }
-    T query(int a, int b, int k=0, int l=0, int r=-1){
-        if(r &lt; 0) r = n;
-        eval(k, l, r);
-        if(b &lt;= l || r &lt;= a){
-            return 0;
-        }
-        if(a &lt;= l &amp;&amp; r &lt;= b){
-            return node[k];
-        }
-        T vl = query(a, b, 2*k+1, l, (l+r)/2), vr = query(a, b, 2*k+2, (l+r)/2, r);
-        return vl + vr;
-    }
-    void print(){
-        for(int i = 0; i &lt; sz; i++){
-            cout&lt;&lt;query(i,i+1)&lt;&lt; &quot; &quot;;
-        }
-        cout&lt;&lt;endl;
-    }
+    void print(){for(int i = 0; i &lt; sz; i++) cout&lt;&lt;query(i,i+1)&lt;&lt; &quot; &quot;;cout&lt;&lt;endl;}
 };
 </pre>
 <h3>verify 用の問題</h3>
 <p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=DSL_2_G">RSQ and RAQ</a>
-  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3122576#1">提出コード</a></p>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3177302#1">提出コード</a></p>
 </section>
 
 </div>

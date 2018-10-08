@@ -38,7 +38,7 @@
 <div id="contents">
 
 <section>
-<h2>dynamic segtree</h2>
+<h2>Dynamic Segtree</h2>
 <h3>コードについての説明</h3>
 <p>
 値の範囲は大きい(10^9)が要素数自体は少なく(10^5)かつクエリをオンラインで処理するとき(オフラインなら座圧ができる)に用いるデータ構造が動的 segment tree です. <br>
@@ -56,6 +56,9 @@ POOL_SIZE(ノードの最大数), MAX_SIZE(範囲の最大値) は問題に応�
 時間計算量: 各クエリ O(log(MAX_SIZE))
 </p>
 <h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
 <pre class="prettyprint linenums">
 template&lt;typename T&gt; class dynamic_segtree{
 private:

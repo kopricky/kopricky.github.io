@@ -38,17 +38,19 @@
 <div id="contents">
 
 <section>
-<h2>orthogonal range report</h2>
+<h2>Orthogonal Range Report</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
+<a href="merge_segtree.html">Merge Segtree</a> を用いた長方形領域内に含まれる点を効率よく報告するデータ構造である. <br>
+計算量は報告する点の数に依存し, output sensitive である.
 </p>
 <p>
 (関数)<br>
-add_edge(): 辺を追加する <br>
+OrthogonalRangeReport(cand): 点の座標を渡す <br>
+query(lx, ly, rx, ry, report): [lx, rx)×[ly, ry) の長方形領域内に含まれる点のインデックスが report に入る
 </p>
 <p>
-時間計算量: O(mlogn)
+時間計算量: 構築 O(nlogn), 各クエリ O(log^2n + k) (k は報告する点の数)
 </p>
 <h3>コード</h3>
 <div class="codebox">

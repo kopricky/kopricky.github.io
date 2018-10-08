@@ -37,7 +37,7 @@
 <div id="contents">
 
 <section>
-<h2>range tree point update</h2>
+<h2>Rangetree PointUpdate</h2>
 <h3>コードについての説明</h3>
 <p>
 range tree (領域木). 1 次元セグ木のノードに対応する区間をまたセグ木で管理する. フラクショナルカスケーディングは実装していません... <br>
@@ -47,6 +47,9 @@ range tree (領域木). 1 次元セグ木のノードに対応する区間をま
 時間計算量: 構築 O(nlogn), クエリ O(log^2n)
 </p>
 <h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
 <pre class="prettyprint linenums">
 template&lt;typename T&gt; class segtree {
 private:
