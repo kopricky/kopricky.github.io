@@ -38,7 +38,7 @@
 <div id="contents">
 
 <section>
-<h2>quadratic decomposition</h2>
+<h2>Quadratic Decomposition</h2>
 <h3>コードについての説明</h3>
 <p>
 segment tree ではうまく処理できないような区間に対するクエリ、例えば区間 [l,r) に値 val がいくつ含まれているか や 区間 [l,r) 内の k 番目に小さい数はいくつか というような問題に対して有効なデータ構造. <br>
@@ -54,6 +54,9 @@ backet_size が上記の B に等しい. クエリの処理などは問題に応
 時間計算量: 構築 O(n^2/B), クエリ O(n/B+B)
 </p>
 <h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
 <pre class="prettyprint linenums">
 template&lt;typename T&gt; class QuadraticDecomposition{
 public:

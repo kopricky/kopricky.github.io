@@ -58,6 +58,9 @@ to_ll, to_string で long long, string に変換可能. 10倍や10で割るな�
 桁が結構大きくなると(1万桁を超えてくると), 多くの演算が boost よりかなり速い(それ以下ではそこまで差はない). GMP にはさすがに負ける...
 </p>
 <h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
 <pre class="prettyprint linenums">
 class MPI : public vector&lt;int&gt; {
 private:

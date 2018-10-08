@@ -38,19 +38,19 @@
 <div id="contents">
 
 <section>
-<h2>syntax tree</h2>
+<h2>Syntax Tree</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
+計算式をパースして構文木を構築するアルゴリズム. <br>
+以下の実装では括弧を含む四則演算の式について構文木を構築するようにしている.
 </p>
 <p>
-(関数)<br>
-add_edge(): 辺を追加する <br>
-</p>
-<p>
-時間計算量: O(mlogn)
+時間計算量: O(|S|) (|S| は計算式の文字数とする)
 </p>
 <h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
 <pre class="prettyprint linenums">
 template&lt;typename T&gt; class SyntaxTree {
 private:
