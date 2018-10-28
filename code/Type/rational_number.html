@@ -56,6 +56,225 @@ add_edge(): 辺を追加する <br>
 <label for="label"></label>
 <pre class="prettyprint linenums">
 あ
+template&lt;typename T&gt; class Rational {
+private:
+    static T gcd(const T a, const T b){ return (b != 0) ? gcd(b, a % b) : a; }
+    static T lcm(const T a, const T b){ return a / gcd(a, b) * b; }
+
+public:
+    friend ostream&amp; operator&lt;&lt;(ostream&amp; os, const Rational&amp; rn) {
+        os &lt;&lt; rn.val &lt;&lt; &quot; / &quot; &lt;&lt; rn.den;
+        return os;
+    }
+
+    Rational&amp; operator=(T val) {
+        *this = Rational(val);
+        return *this;
+    }
+
+    bool operator&lt;(const Rational&amp; val) const {
+        return num * val.den &lt; den * val.num;
+    }
+
+    bool operator&lt;(const T val) const {
+        return *this &lt; Rational(val);
+    }
+
+    friend bool operator&lt;(const T val, const Rational&amp; another){
+        return Rational(val) &lt; another;
+    }
+
+    bool operator&gt;(const Rational&amp; val) const {
+        return val &lt; num;
+    }
+
+    bool operator&gt;(const T val) const {
+        return *this &gt; Rational(val);
+    }
+
+    friend bool operator&gt;(const T val, const Rational&amp; another){
+        return Rational(val) &gt; another;
+    }
+
+    bool operator&lt;=(const Rational&amp; val) const {
+        return !(*this &gt; val);
+    }
+
+    bool operator&lt;=(const T val) const {
+        return *this &lt;= Rational(val);
+    }
+
+    friend bool operator&lt;=(const T val, const Rational&amp; another){
+        return Rational(val) &lt;= another;
+    }
+
+    bool operator&gt;=(const Rational&amp; val) const {
+        return !(*this &lt; val);
+    }
+
+    bool operator&gt;=(const T val) const {
+        return *this &gt;= Rational(val);
+    }
+
+    friend bool operator&gt;=(const T val, const Rational&amp; another){
+        return Rational(val) &gt;= another;
+    }
+
+    bool operator==(const Rational&amp; val) const {
+        return num * val.den == den * val.num;
+    }
+
+    bool operator==(const T val) const {
+        return *this == Rational(val);
+    }
+
+    friend bool operator==(const T val, const Rational&amp; another){
+        return Rational(val) == another;
+    }
+
+    bool operator!=(const Rational&amp; val) const {
+        return !(*this == val);
+    }
+
+    bool operator!=(const T val) const {
+        return *this != Rational(val);
+    }
+
+    friend bool operator!=(const T val, const Rational&amp; another){
+        return Rational(val) != another;
+    }
+
+    explicit operator bool() const noexcept { return num; }
+    bool operator!() const noexcept { return !static_cast&lt;bool&gt;(*this); }
+
+    Rational operator+() const {
+        return *this;
+    }
+
+    Rational operator-() const {
+        return Rational(-num, den);
+    }
+
+    friend Rational abs(const Rational&amp; val){
+        return Rational(abs(val.num), val.den);
+    }
+
+    Rational operator+(const Rational&amp; val) const {
+        const T nden = lcm(den, val.den);
+        const T nnum = nden / den * num + nden / val.den * val.num;
+        return Rational(nnum, nden);
+    }
+
+    Rational operator+(T val) const {
+        return *this + Rational(val);
+    }
+
+    friend Rational operator+(T a, const Rational&amp; b){
+        return b + a;
+    }
+
+    Rational&amp; operator+=(const Rational&amp; val){
+        *this = *this + val;
+        return *this;
+    }
+
+    Rational&amp; operator+=(const T&amp; val){
+        *this = *this + val;
+        return *this;
+    }
+
+    Rational&amp; operator++(){
+        return *this += 1;
+    }
+
+    Rational operator++(int){
+        return Rational(num + den, den);
+    }
+
+    Rational operator-(const Rational&amp; val) const {
+        const T nden = lcm(den, val.den);
+        const T nnum = nden / den * num - nden / val.den * val.num;
+        return Rational(nnum, nden);
+    }
+
+    Rational operator-(T val) const {
+        return *this - Rational(val);
+    }
+
+    friend Rational operator-(T a, const Rational&amp; b){
+        return Rational(a) - b;
+    }
+
+    Rational&amp; operator-=(const Rational&amp; val){
+        *this = *this - val;
+        return *this;
+    }
+
+    Rational&amp; operator-=(const T&amp; val){
+        *this = *this - val;
+        return *this;
+    }
+
+    Rational&amp; operator--(){
+        return *this -= 1;
+    }
+
+    Rational operator--(int){
+        return Rational(num - den, den);
+    }
+
+    Rational operator*(const Rational&amp; val) const {
+        const T g1 = gcd(num, val.den), g2 = gcd(den, val.num);
+        return Rational((num / g1) * (val.num / g2), (den / g2) * (val.den / g1));
+    }
+
+    Rational operator*(T val) const {
+        return *this * Rational(val);
+    }
+
+    friend Rational operator*(T a, const Rational&amp; b){
+        return b * a;
+    }
+
+    Rational&amp; operator*=(const Rational&amp; val){
+        *this = *this * val;
+        return *this;
+    }
+
+    Rational&amp; operator*=(const T&amp; val){
+        *this = *this * val;
+        return *this;
+    }
+
+    Rational operator/(const Rational&amp; val) const {
+        const T g1 = gcd(num, val.num), g2 = gcd(den, val.den);
+        return Rational((num / g1) * (val.den / g2), (den / g2) * (val.num / g1));
+    }
+
+    Rational operator/(T val) const {
+        return *this / Rational(val);
+    }
+
+    friend Rational operator/(T a, const Rational&amp; b){
+        return Rational(a) / b;
+    }
+
+    Rational&amp; operator/=(const Rational&amp; val){
+        *this = *this / val;
+        return *this;
+    }
+
+    Rational&amp; operator/=(const T&amp; val){
+        *this = *this / val;
+        return *this;
+    }
+
+    T num, den;
+
+    Rational(){}
+    Rational(T num_) : num(num_), den(1){}
+    Rational(T num_, T den_) : num(num_), den(den_){}
+};
 </pre>
 <h3>verify 用の問題</h3>
 <p>
