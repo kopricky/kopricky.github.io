@@ -41,11 +41,14 @@
 <h2>Dynamic Convex Hull Trick</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
+<a href="convex_hull_trick.html">Convex Hull Trick</a>の傾きが単調でなくなった場合に対応する. 各直線が最大値を取る範囲を、動的セグ木と同じ要領で必要な部分にのみノードを用意することで管理する. <br>
 </p>
 <p>
+(コンストラクタ) <br>
+CHT(arg1,arg2) クエリで聞かれる範囲[arg1,arg2] を指定する
 (関数)<br>
-add_edge(): 辺を追加する <br>
+add(a,b) : 直線 y=ax+b を追加する <br>
+query(k) : x=k での最小値を返す
 </p>
 <p>
 時間計算量: O(mlogn)
