@@ -1,2 +1,10 @@
-コードにGithubのコードへのリンクを貼る
-eiたぷブログをrefにのせる
+bit vector
+miller rabbin
+kitamasa
+wavelet matrix の verify
+Trie 木の説明
+BMのverify
+dinicの説明
+limited_max_flowの説明
+AMPのverify
+謝辞
