@@ -42,7 +42,7 @@
 <h3>コードについての説明</h3>
 <p>
 int 型の入出力高速化のコード. <br>
-10^5 個以上のクエリが飛んでくるみたいな場合には少し速くなる.
+10^5 個以上のクエリが飛んでくるみたいな場合には少し速くなる. コドフォではたぶん使えない.
 </p>
 <h3>コード</h3>
 <div class="codebox">
@@ -55,15 +55,14 @@ int 型の入出力高速化のコード. <br>
 // int の入力および出力の高速化
 
 inline int in() {
-    int n, c, flag = 1;
-    while ((c = getchar()) &lt; '0') if (c == EOF) return -1; else flag = -1;
-    n = c - '0';
+    int n = 0; short c; bool flag = false;
+    if((c = getchar()) &lt; '0') flag = true; else n = c - '0';
     while ((c = getchar()) &gt;= '0') n = n * 10 + c - '0';
-    return n * flag;
+    return flag ? -n : n;
 }
 
 inline void out(int n) {
-    short res[11], i = 0;
+    short res[10], i = 0;
     if(n &lt; 0) putchar('-'), n = -n;
     do { res[i++] = n % 10, n /= 10; } while (n);
     while (i) putchar(res[--i] + '0');
