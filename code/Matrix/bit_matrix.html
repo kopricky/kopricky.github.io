@@ -41,8 +41,9 @@
 <h2>Bit Matrix</h2>
 <h3>コードについての説明</h3>
 <p>
-F_2上の行列の積に (or, and) をのせた演算が 64 bit高速化により O(n^3) よりも速くなるという話. <br>
-具体的な使い道としては隣接行列の積が高速に計算できるようになるため到達可能性などの問題に有効.
+F_2上の行列の積に (or, and) をのせた演算が 64 bit高速化により O(n^3) よりも速くできるという話. <br>
+具体的な使い道としては隣接行列の積が高速に計算できるようになるため到達可能性などの問題に有効. <br>
+F_2上の行列のランクについても同様の高速化が可能.
 </p>
 <p>
 時間計算量: O(n^3/64) (64 bit環境で)
@@ -68,11 +69,20 @@ public:
         }
         return ans;
     }
+    void set(int i, int j){
+        a[i].set(j);
+    }
+    int count(int i) const {
+        return a[i].count();
+    }
+    int get(int i, int j) const {
+        return a[i][j];
+    }
 };
 </pre>
 <h3>verify 用の問題</h3>
 <p>Atcoder : <a href="https://beta.atcoder.jp/contests/jag2017autumn/tasks/jag2017autumn_i">Revenge of the Endless BFS</a>
-  <a href="https://beta.atcoder.jp/contests/jag2017autumn/submissions/3370313">提出コード</a></p>
+  <a href="https://beta.atcoder.jp/contests/jag2017autumn/submissions/3518681">提出コード</a></p>
 </section>
 
 </div>

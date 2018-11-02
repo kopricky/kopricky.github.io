@@ -41,7 +41,12 @@
 <h2>Trie</h2>
 <h3>コードについての説明</h3>
 <p>
-時間計算量: 構築, クエリ O(L) (L=挿入する数の総ビット長)
+Trie(トライ)木とよばれる木構造を構築するアルゴリズム. 文字列集合を効率的に管理することのできるデータ構造(<a href="../binary_trie.html">同様のアルゴリズム</a>). <br>
+例えば, n 個の文字列集合を受け取ってそのあとクエリとして " s という文字列(長さ x )はその中に含まれていますか" というものを処理する際 set などを使うと O(xlogn) かかってしまうが Trie 木を用いると O(x) と線形で線形で判定することができる. <br>
+構造自体はとても単純で, 言葉で説明するより図を見たほうが早いと思うので他の方の説明ページを参考にしてください(図を作れない...).
+</p>
+<p>
+時間計算量: 構築, クエリ O(L) (L=挿入する文字列の総長)
 </p>
 <h3>コード</h3>
 <div class="codebox">
@@ -54,10 +59,10 @@ public:
 		Node *next[26];
 		int sub;
 		Node() : sub(0){
-            rep(i,26){
-                next[i] = nullptr;
-            }
-        }
+			for(int i = 0; i &lt; 26; i++){
+				next[i] = nullptr;
+			}
+		}
 	};
 	Node* root;
 	Trie(){
@@ -66,7 +71,7 @@ public:
 	//Trie木にxを加える
 	void add(string&amp; s) {
 		Node *curr = root;
-        rep(i,(int)s.size()){
+		for(int i = 0; i &lt; (int)s.size(); i++){
 			int y = s[i] - 'a';
 			if (!curr-&gt;next[y]) {
 				curr-&gt;next[y] = new Node();
@@ -79,7 +84,7 @@ public:
     //何らかのクエリ
 	int query(Node *curr,int d) {
 		int res = 0;
-		rep(i,26){
+		for(int i = 0; i &lt; 26; i++){
 			if(curr-&gt;next[i]){
 				res += query(curr-&gt;next[i],d+1);
 			}
