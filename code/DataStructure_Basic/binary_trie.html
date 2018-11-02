@@ -41,7 +41,8 @@
 <h2>Binary Trie</h2>
 <h3>コードについての説明</h3>
 <p>
-
+Binary Trie(トライ)木とよばれる木構造を構築するアルゴリズム. Trie(トライ)木の子を2つに限定したようなデータ構造で数字の2進数表現を上手く管理するときに使う(<a href="../trie.html">同様のアルゴリズム</a>). <br>
+数字の xor についての問題は各数字をビットごとに見ると上手くいくことが多く,その際にこのデータ構造が使える印象がある.
 </p>
 <p>
 時間計算量: 構築, クエリ O(L) (L=挿入する数の総ビット長)
@@ -60,35 +61,35 @@ public:
 	};
 	Node* root;
 	//2^30より小さい場合
-    const int MAX_BIT = 30;
+	const int MAX_BIT = 30;
 	BinaryTrie(){
 		root = new Node();
 	}
 	//Trie木にxを加える
 	void add(int x) {
 		Node *curr = root;
-        for(int i = MAX_BIT-1; i &gt;= 0; i--){
-            int y = x &gt;&gt; i &amp; 1;
+		for(int i = MAX_BIT-1; i &gt;= 0; i--){
+			int y = x &gt;&gt; i &amp; 1;
 			if (!curr-&gt;next[y]) {
 				curr-&gt;next[y] = new Node();
 			}
 			curr-&gt;sub++;
 			curr = curr-&gt;next[y];
-        }
+		}
 		curr-&gt;sub++;
 	}
-    //何らかのクエリ
+	//何らかのクエリ
 	int query(Node *curr,const int a,int d){
 		if(!curr) return 0;
 		if((a &gt;&gt; d) &amp; 1){
-            return query(curr-&gt;next[1],a,d-1);
+			return query(curr-&gt;next[1],a,d-1);
 		}else{
-            return query(curr-&gt;next[0],a,d-1);
-        }
+			return query(curr-&gt;next[0],a,d-1);
+		}
 	}
-    int query(const int a){
-        return query(root,a,MAX_BIT-1);
-    }
+	int query(const int a){
+		return query(root,a,MAX_BIT-1);
+	}
 };
 </pre>
 <h3>verify 用の問題</h3>
