@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>Dijkstra with Radix Heap</h2>
+<h3>コードについての説明</h3>
+<p>
+元論文は <a href=""></a>
+</p>
+<p>
+(関数)<br>
+add_edge(): 辺を追加する <br>
+</p>
+<p>
+時間計算量: O(mlogn)
+</p>
+<h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
+<pre class="prettyprint linenums">
+#define impl(x, last) x == last ? 0 : 31 - __builtin_clz(x ^ last)
+
+class RadixHeap{
+public:
+    int last, size_;
+    vector&lt;P&gt; bucket_[32];
+    
+    RadixHeap() : last(0), size_(0){}
+    
+    inline P top(){
+        return pop(false);
+    }
+    inline bool empty(){
+        return !size_;
+    }
+    inline void push(int x, int val){
+        size_++, bucket_[impl(x, last)].emplace_back(x, val);
+    }
+    inline P pop(bool flag = true){
+        if(bucket_[0].empty()){
+            int id = 1;
+            while(bucket_[id].empty()) id++;
+            last = min_element(bucket_[id].begin(), bucket_[id].end())-&gt;first;
+            for(auto val : bucket_[id]){
+                bucket_[impl(val.first, last)].push_back(val);
+            }
+            bucket_[id].clear();
+        }
+        P res = bucket_[0].back();
+        if(flag) size_--, bucket_[0].pop_back();
+        return res;
+    }
+};
+
+template&lt;typename T&gt; class Dijkstra {
+public:
+	struct edge{
+		int to; T cost;
+	};
+	int V;
+	vector&lt;vector&lt;edge&gt; &gt; G;
+	vector&lt;T&gt; d;
+	using pti = pair&lt;T,int&gt;;
+	Dijkstra(int node_size) : V(node_size), G(V), d(V, numeric_limits&lt;T&gt;::max()){}
+	//無向グラフの場合
+	void add_edge(int u,int v,T cost){
+		G[u].pb((edge){v,cost});
+	}
+	void solve(int s){
+		RadixHeap que;
+		d[s] = 0;
+		que.push(0,s);
+		while(!que.empty()){
+			pti p = que.top();
+			que.pop();
+			int v = p.second;
+			if(d[v] &lt; p.first) continue;
+			for(auto&amp; w : G[v]){
+				if(d[w.to] &gt; d[v] + w.cost){
+					d[w.to] = d[v] + w.cost;
+					que.push(d[w.to],w.to);
+				}
+			}
+		}
+	}
+};
+</pre>
+<h3>verify 用の問題</h3>
+<p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_1_A">Single Source Shortest Path</a>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3224633#1">提出コード</a></p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>
