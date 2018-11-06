@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>Fibonacci Heap</h2>
+<h3>コードについての説明</h3>
+<p>
+元論文は <a href=""></a>
+</p>
+<p>
+(関数)<br>
+add_edge(): 辺を追加する <br>
+</p>
+<p>
+時間計算量: O(mlogn)
+</p>
+<h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
+<pre class="prettyprint linenums">
+template&lt;typename KeyType&gt; class Fibonacci_Heap
+{
+public:
+    class node
+    {
+    public:
+        KeyType key;
+        int child;
+        node *par, *prv, *nx, *ch_sentinel;
+        bool mark;
+        node(KeyType val) : key(val), child(0),
+                par(nullptr), prv(nullptr), nx(nullptr), mark(false){}
+        node() : key(numeric_limits&lt;KeyType&gt;::max()), prv(this), nx(this){}
+    };
+    
+private:
+    int _size;
+    node *minimum, *sentinel;
+    
+    inline void _insert(node *_node1, node *_node2){
+        _node1-&gt;prv = _node2-&gt;prv, _node1-&gt;nx = _node2;
+        _node1-&gt;prv-&gt;nx = _node1, _node2-&gt;prv = _node1;
+    }
+    inline void _erase(node *_node){
+        _node-&gt;prv-&gt;nx = _node-&gt;nx, _node-&gt;nx-&gt;prv = _node-&gt;prv;
+    }
+    
+public:
+    Fibonacci_Heap() : _size(0){
+        minimum = sentinel = new node();
+    }
+    inline bool empty(){
+        return (_size == 0);
+    }
+    inline int size(){
+        return _size;
+    }
+    inline KeyType top(){
+        return minimum-&gt;key;
+    }
+    void push(KeyType val){
+        _size++;
+        node* new_node = new node(val);
+        new_node-&gt;ch_sentinel = new node();
+        _insert(new_node, sentinel);
+        if(minimum-&gt;key &gt; val) minimum = new_node;
+    }
+    void pop(){
+        assert(_size &gt; 0);
+        _size--;
+        for(auto _node = minimum-&gt;ch_sentinel-&gt;nx; _node != minimum-&gt;ch_sentinel;){
+            node* nx_node = _node-&gt;nx;
+            _node-&gt;par = nullptr, _insert(_node, sentinel), _node = nx_node;
+        }
+        _erase(minimum);
+        delete minimum;
+        if(_size == 0){
+            minimum = sentinel;
+            return;
+        }
+        int sz = (int)log2(_size)+5;
+        node** array = new node*[sz];
+        for(int i = 0; i &lt; sz; i++) array[i] = nullptr;
+        for(auto _node = sentinel-&gt;nx; _node != sentinel;){
+            node* nx_node = _node-&gt;nx;
+            int deg = _node-&gt;child;
+            while(array[deg]){
+                if(_node-&gt;key &lt; array[deg]-&gt;key){
+                    array[deg]-&gt;par = _node, _node-&gt;child++;
+                    _erase(array[deg]), _insert(array[deg], _node-&gt;ch_sentinel);
+                }else{
+                    _node-&gt;par = array[deg], array[deg]-&gt;child++;
+                    _erase(_node), _insert(_node, array[deg]-&gt;ch_sentinel);
+                    _node = array[deg];
+                }
+                array[deg] = nullptr;
+                deg++;
+                assert(sz &gt; deg);
+            }
+            array[deg] = _node;
+            _node = nx_node;
+        }
+        delete array;
+        KeyType val = sentinel-&gt;key;
+        for(auto _node = sentinel-&gt;nx; _node != sentinel; _node = _node-&gt;nx){
+            if(val &gt; _node-&gt;key) val = _node-&gt;key, minimum = _node;
+        }
+    }
+    void update(node* _node, KeyType val){
+        assert(_node-&gt;key - val &gt;= 0);
+        _node-&gt;key = val;
+        if(_node-&gt;key &lt; minimum-&gt;key) minimum = _node;
+        if(_node-&gt;par &amp;&amp; _node-&gt;par-&gt;key &lt;= val) return;
+        while(_node-&gt;par){
+            node* nx_node = _node-&gt;par;
+            _erase(_node), _node-&gt;par-&gt;child--, _insert(_node, sentinel);
+            _node-&gt;mark = false, _node-&gt;par = nullptr, _node = nx_node;
+            if(!_node) break;
+            if(!_node-&gt;mark){
+                _node-&gt;mark = true;
+                break;
+            }
+        }
+    }
+    friend void unite(Fibonacci_Heap* fh1, Fibonacci_Heap* fh2){
+        if(fh2-&gt;_size == 0){
+            delete fh2;
+            return;
+        }
+        if(fh1-&gt;minimum-&gt;key &gt; fh2-&gt;minimum-&gt;key) fh1-&gt;minimum = fh2-&gt;minimum;
+        fh1-&gt;_size += fh2-&gt;_size;
+        fh1-&gt;sentinel-&gt;prv-&gt;nx = fh2-&gt;sentinel-&gt;nx;
+        fh2-&gt;sentinel-&gt;nx-&gt;prv = fh1-&gt;sentinel-&gt;prv;
+        fh2-&gt;sentinel-&gt;prv-&gt;nx = fh1-&gt;sentinel;
+        fh1-&gt;sentinel-&gt;prv = fh2-&gt;sentinel-&gt;prv;
+        delete fh2-&gt;sentinel;
+    }
+};
+</pre>
+<h3>verify 用の問題</h3>
+<p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2559">Minimum Spanning Tree</a>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3225989#1">提出コード</a></p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>
