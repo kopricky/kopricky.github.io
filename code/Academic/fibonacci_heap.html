@@ -41,14 +41,21 @@
 <h2>Fibonacci Heap</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
+単一始点最短経路の高速化のために考えられた手法で Dijkstra 法の計算量オーダーを改善できたり, 他にも最大隣接順序の計算量オーダーを改善できたりもする. (<a href="./dijkstra_fheap.html">参考1</a>, <a href="./undirected_mincut.html">参考2</a>) <br>
+一般的な二分ヒープとは異なり, push に O(1), pop(最小値削除) に ならしO(logn) の時間計算量がかかる. 二分ヒープと比べて優位な点としてキーの値を減らす方向への更新がならし O(1) の時間計算量で行えることが挙げられ, 上記の 2 つのアルゴリズムについてもこの影響でオーダーが落ちる. <br>
+加えてヒープの併合も簡単に行うことができる.<br>
+<a href="https://www.cs.princeton.edu/~wayne/teaching/fibonacci-heap.pdf">このスライド</a>の説明をもとに実装しました. <br>
+最大値は numeric_limits&lt;KeyType&gt;::max() になっているので int, long long, double 以外を使う場合は適宜変更してください. (pair&lt;int, int&gt; とかだと max() がデフォの (0,0) になるので注意) <br>
+元論文は <a href="http://www.bioinfo.org.cn/~dbu/AlgorithmCourses/Lectures/Fibonacci-Heap-Tarjan.pdf">Fredman, Tarjan 1984</a>
 </p>
 <p>
 (関数)<br>
-add_edge(): 辺を追加する <br>
+update(v, val): ノード v のキー値を val にする(元の数より大きくなるような変更は不可) <br>
+top(): ヒープ内の"最小"キー値を返す <br>
+unite(fh1, fh2): fh1 に fh2 をマージする
 </p>
 <p>
-時間計算量: O(mlogn)
+時間計算量: push O(1), pop ならしO(logn), update(キー値減算) ならしO(1), unite O(1)
 </p>
 <h3>コード</h3>
 <div class="codebox">
@@ -115,7 +122,7 @@ public:
             minimum = sentinel;
             return;
         }
-        int sz = (int)log2(_size)+5;
+        int sz = (int)log2(_size)+2;
         node** array = new node*[sz];
         for(int i = 0; i &lt; sz; i++) array[i] = nullptr;
         for(auto _node = sentinel-&gt;nx; _node != sentinel;){

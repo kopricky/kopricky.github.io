@@ -46,7 +46,7 @@ Edmonds-Karp, Dinic などは (1) の条件を常に満たしながら (2) の�
 活性点の解消など詳しいことは組合せ最適化(Korte, Fiegen)などを読むと良い. <br>
 元論文は <a href="http://akira.ruc.dk/~keld/teaching/algoritmedesign_f03/Artikler/08/Goldberg88.pdf">Goldberg and Tarjan 1988</a> で動的木を用いて計算量の改善が可能. <br>
 計算量は O(n^3) なので Dinic(計算量 O(n^2m)) よりも優秀だが, 実測はそんなに速くないです. 若干遅いぐらい. <br>
-ただ worst case(|V| = 628, |E| = 33491 のグラフ) で試してみると push-relabel 182 msec, Dinic 11777 msec という感じになったので push-relabel の方が安定感はある.
+ただ worst case(|V| = 628, |E| = 33491 のグラフ) で試してみると push-relabel 182 msec, Dinic 2243 msec という感じになったので push-relabel の方が安定感はある.
 </p>
 <p>
 (関数)<br>

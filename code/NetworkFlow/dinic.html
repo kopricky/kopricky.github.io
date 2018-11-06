@@ -41,7 +41,10 @@
 <h2>Dinic</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
+グラフ上の s -> t 間最大流を高速に求めるアルゴリズム. Dinitz と綴られることも多い.<br>
+最大流アルゴリズムとして Ford Fulkerson のアルゴリズムがよく知られているが, こちらは計算量が流量に比例するので流量が大きい場合に計算時間がとてもかかってしまう. <br>
+そこで残余ネットワーク上の s->t 間増加道を辺数最小のパスとすることで頂点数および辺数のみに依存するオーダーのアルゴリズムが Dinc と Edmonds, Karp によって独立に考えられた(冷戦時代あるある). <br>
+Edmonds, Karp のアルゴリズムでは毎回辺数最小のパスを幅優先探索を用いて計算しているのに対し, Dinic のアルゴリズムの方は辺数最小パスの長さは更新後に短くなることはないことから初めに最短経路グラフを構築し, そのグラフ上で深さ優先探索を行い, 
 </p>
 <p>
 (関数)<br>
@@ -64,59 +67,58 @@ private:
     vector&lt;vector&lt;edge&gt; &gt; G;
     vector&lt;int&gt; level,iter;
     void bfs(int s) {
-    	fill(level.begin(),level.end(),-1);
-    	queue&lt;int&gt; que;
-    	level[s] = 0;
-    	que.push(s);
-    	while(!que.empty()){
-    		int v = que.front();
-    		que.pop();
-    		for(auto&amp; e : G[v]){
-    			if(e.cap &gt; 0 &amp;&amp; level[e.to] &lt; 0){
-    				level[e.to] = level[v] + 1;
-    				que.push(e.to);
-    			}
-    		}
-    	}
+        fill(level.begin(),level.end(),-1);
+        queue&lt;int&gt; que;
+        level[s] = 0;
+        que.push(s);
+        while(!que.empty()){
+            int v = que.front();
+            que.pop();
+            for(auto&amp; e : G[v]){
+                if(e.cap &gt; 0 &amp;&amp; level[e.to] &lt; 0){
+                    level[e.to] = level[v] + 1;
+                    que.push(e.to);
+                }
+            }
+        }
     }
     T dfs(int v,int t,T f) {
-    	if(v==t){
-    		return f;
-    	}
-        for(edge&amp; e : G[v]){
-    		if(e.cap &gt; 0 &amp;&amp; level[v] &lt; level[e.to]){
-    			T d = dfs(e.to,t,min(f,e.cap));
-    			if(d&gt;0){
-    				e.cap -= d;
-    				G[e.to][e.rev].cap += d;
-    				return d;
-    			}
-    		}
-    	}
-    	return 0;
+        if(v==t){
+            return f;
+        }
+        for(int&amp; i = iter[v]; i &lt; (int)G[v].size(); i++){
+            edge&amp; e = G[v][i];
+            if(e.cap &gt; 0 &amp;&amp; level[v] &lt; level[e.to]){
+                T d = dfs(e.to,t,min(f,e.cap));
+                if(d&gt;0){
+                    e.cap -= d;
+                    G[e.to][e.rev].cap += d;
+                    return d;
+                }
+            }
+        }
+        return 0;
     }
-
+ 
 public:
     Dinic(int node_size) : V(node_size), G(V), level(V), iter(V){}
     //辺を張る
     void add_edge(int from,int to,T cap) {
-    	G[from].push_back((edge){to,cap,(int)G[to].size()});
-    	G[to].push_back((edge){from,(T)0,(int)G[from].size()-1});
+        G[from].push_back((edge){to,cap,(int)G[to].size()});
+        G[to].push_back((edge){from,(T)0,(int)G[from].size()-1});
     }
     //最大流を計算
     T solve(int s,int t) {
-    	T flow = 0;
-    	for(;;){
-    		bfs(s);
-    		if(level[t]&lt;0){
-    			return flow;
-    		}
-    		fill(iter.begin(),iter.end(),0);
-    		T f;
-    		while((f=dfs(s,t,numeric_limits&lt;T&gt;::max())) &gt; 0){
-    			flow += f;
-    		}
-    	}
+        T flow = 0;
+        for(;;){
+            bfs(s);
+            if(level[t] &lt; 0) return flow;
+            fill(iter.begin(),iter.end(),0);
+            T f;
+            while((f=dfs(s,t,numeric_limits&lt;T&gt;::max())) &gt; 0){
+                flow += f;
+            }
+        }
     }
 };
 </pre>

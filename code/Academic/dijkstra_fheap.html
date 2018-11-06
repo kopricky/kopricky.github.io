@@ -41,10 +41,12 @@
 <h2>Dijkstra with Fibonacci Heap</h2>
 <h3>コードについての説明</h3>
 <p>
+Dijkstra 法を <a href="./fibonacci_heap.html">Fibonacci Heap</a> を用いて高速化したアルゴリズム. 時間計算量が O((n+m)logn) から O(nlogn+m) に落ちる. <br>
+ただ実測ではふつうの Dijkstra 法より少し遅くなってしまった(上手く実装すれば速くなるかも知れないがそんなに変わらないと思う). むしろ <a href="./dijkstra_rheap.html">Radix Heap を用いた高速化</a> のほうが元より多少速くなったので Dijkstra の高速化の意味ではこっちのほうが良いと思う. <br>
 元論文は <a href="http://www.bioinfo.org.cn/~dbu/AlgorithmCourses/Lectures/Fibonacci-Heap-Tarjan.pdf">Fredman, Tarjan 1984</a>
 </p>
 <p>
-時間計算量: O(m+nlogn)
+時間計算量: O(nlogn+m)
 </p>
 <h3>コード</h3>
 <div class="codebox">
@@ -109,7 +111,7 @@ public:
         _erase(minimum);
         delete minimum;
         if(_size == 0) return;
-        int sz = (int)log2(_size)+5;
+        int sz = (int)log2(_size)+2;
         node** array = new node*[sz];
         for(int i = 0; i &lt; sz; i++) array[i] = nullptr;
         for(auto _node = sentinel-&gt;nx; _node != sentinel;){

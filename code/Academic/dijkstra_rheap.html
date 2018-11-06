@@ -41,14 +41,13 @@
 <h2>Dijkstra with Radix Heap</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
+Dijkstra 法を Radix Heap を用いて高速化したアルゴリズム. 辺のコストが非負"整数"の場合に用いることができる高速化である. <br>
+辺コストが int である場合について<a href="https://www.slideshare.net/yosupo/ss-46612984">このスライドの話</a> をもとに実装したので, 計算量や操作についてはこのスライドの説明を参考にしてもらいたい.<br>
+push を O(1), pop を ならしlog(MAX_VAL) で実現するが, push の際に最後に pop した値より小さな値を入れることができないという制限がある. この制限は Dijkstra 法のアルゴリズムとコンフリクトしないので用いることができる.<br>
+実測では priority_queue を用いた Dijkstra 法より少し速くなった.
 </p>
 <p>
-(関数)<br>
-add_edge(): 辺を追加する <br>
-</p>
-<p>
-時間計算量: O(mlogn)
+時間計算量: O((n+m)log(MAX_VAL)) (最短距離の最大値を MAX_VAL とする)
 </p>
 <h3>コード</h3>
 <div class="codebox">
