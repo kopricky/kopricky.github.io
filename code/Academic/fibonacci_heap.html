@@ -41,7 +41,7 @@
 <h2>Fibonacci Heap</h2>
 <h3>コードについての説明</h3>
 <p>
-単一始点最短経路の高速化のために考えられた手法で Dijkstra 法の計算量オーダーを改善できたり, 他にも最大隣接順序の計算量オーダーを改善できたりもする. (<a href="./dijkstra_fheap.html">参考1</a>, <a href="./undirected_mincut.html">参考2</a>) <br>
+単一始点最短経路の高速化のために考えられた手法で Dijkstra 法の計算量オーダーを改善できたり, 他にもプリム法や無向グラフの大域最小カットの計算量オーダーを改善できたりもする. (<a href="./dijkstra_fheap.html">参考1</a>, <a href="./undirected_mincut.html">参考2</a>) <br>
 一般的な二分ヒープとは異なり, push に O(1), pop(最小値削除) に ならしO(logn) の時間計算量がかかる. 二分ヒープと比べて優位な点としてキーの値を減らす方向への更新がならし O(1) の時間計算量で行えることが挙げられ, 上記の 2 つのアルゴリズムについてもこの影響でオーダーが落ちる. <br>
 加えてヒープの併合も簡単に行うことができる.<br>
 <a href="https://www.cs.princeton.edu/~wayne/teaching/fibonacci-heap.pdf">このスライド</a>の説明をもとに実装しました. <br>
