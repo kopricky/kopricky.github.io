@@ -42,7 +42,8 @@
 <h3>コードについての説明</h3>
 <p>
 優先度付きキューと呼ばれる挿入, 削除からなるクエリに対して効率よく最大値を返すデータ構造の実装である. <br>
-以下では二分ヒープを用いて実装している. 詳しい実装については他のサイトを参照されたい.
+以下では二分ヒープを用いて実装している. 詳しい実装については他のサイトを参照されたい. <br>
+ちなみに python には heapq というライブラリがあり, そっちを使ったほうが速く計算できる.
 </p>
 <p>
 時間計算量: 挿入, 削除 O(logn), 最大値の参照 O(1)
@@ -59,7 +60,7 @@ class PriorityQueue:
         self.array = [0]*max_size
         self.size = 0
 
-    def size(self):
+    def size(self): 
         return self.size
 
     def empty(self):
@@ -99,7 +100,7 @@ class PriorityQueue:
 </pre>
 <h3>verify 用の問題</h3>
 <p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=ALDS1_9_C&lang=jp">Priority Queue</a>
-  heapq を用いていないため TLE (時間的に間に合うものは正答解を返す)</p>
+    <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3226528#1">提出コード</a> (heapq を用いていないため TLE にはなっているがすべてのクエリに正答している)</p>
 </section>
 
 </div>
