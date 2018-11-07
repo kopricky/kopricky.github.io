@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>Reccurence Formula Solver</h2>
+<h3>コードについての説明</h3>
+<p>
+元論文は <a href=""></a>
+</p>
+<p>
+(関数)<br>
+add_edge(): 辺を追加する <br>
+</p>
+<p>
+時間計算量: O(k^2logn)
+</p>
+<h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
+<pre class="prettyprint linenums">
+template&lt;typename T&gt;
+void rec(const vector&lt;T&gt;&amp; c, vector&lt;T&gt;&amp; res, const long long n, const int k)
+{
+    if(n &lt; k){
+        res[k-1-n] = 1;
+        return;
+    }
+    rec(c, res, n/2, k);
+    vector&lt;T&gt; num(k+1, 0), sm(k+1, 0);
+    vector&lt;T&gt; tmp = res;
+    int flag = n % 2;
+    if(!flag) for(int i = 0; i &lt;= k; i++) sm[i] = res[i] * tmp[k-1];
+    for(int i = 0; i &lt; k - !flag; i++){
+        for(int j = 0; j &lt;= k-1; j++){
+            num[j] = res[0] * c[j] + res[j+1];
+        }
+        num[k-1] = res[0] * c[k-1], num[k] = res[0] * c[k] + res[k];
+        for(int j = 0; j &lt;= k; j++){
+            sm[j] += num[j] * tmp[k-2-i+flag], res[j] = num[j];
+        }
+    }
+    sm[k] += tmp[k];
+    res = sm;
+}
+
+template&lt;typename T&gt;
+T solve(vector&lt;T&gt;&amp; c, vector&lt;T&gt;&amp; x, const long long n)
+{
+    int k = (int)x.size();
+    vector&lt;T&gt; res(k+1, 0);
+    rec(c, res, n, k);
+    T ans = 0;
+    for(int i = 0; i &lt; k; i++) ans += res[i] * x[k-1-i];
+    return ans + res[k];
+}
+</pre>
+<h3>verify 用の問題</h3>
+<p>Atcoder : <a href="https://tdpc.contest.atcoder.jp/tasks/tdpc_fibonacci">フィボナッチ</a>
+  <a href="https://tdpc.contest.atcoder.jp/submissions/3556317">提出コード</a></p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>
