@@ -41,11 +41,9 @@
 <h2>Reccurence Formula Solver</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
-</p>
-<p>
-(関数)<br>
-add_edge(): 辺を追加する <br>
+k 項間線形漸化式の n 番目の値 a[n] を求めるアルゴリズム. 行列累乗を用いると O(k^3logn) の計算量で求めることができるが, 以下の実装ではより高速なきたまさ法を用いて O(k^2logn) で求めている. <br>
+<a href="http://yosupo.hatenablog.com/entry/2015/03/27/025132">このブログ</a>が参考になった. 以下では定数項が存在する場合にも対応した実装にしている. <br>
+高速に多項式乗算(FFT)と多項式剰余(Montgomery乗算)を計算することできたまさ法のオーダーを O(klogklogn) に落とせるらしいがよくわかっていない.
 </p>
 <p>
 時間計算量: O(k^2logn)
@@ -79,6 +77,10 @@ void rec(const vector&lt;T&gt;&amp; c, vector&lt;T&gt;&amp; res, const long long
     sm[k] += tmp[k];
     res = sm;
 }
+
+// solve(c, x)
+// 第1引数(係数) a[k] = c[0] * a[k-1] + c[1] * a[k-2] + ... + c[k-1] * a[0] + c[k]
+// 第2引数(初期値) a[0] = x[0], a[1] = x[1], ... , a[k-1] = x[k-1]
 
 template&lt;typename T&gt;
 T solve(vector&lt;T&gt;&amp; c, vector&lt;T&gt;&amp; x, const long long n)
