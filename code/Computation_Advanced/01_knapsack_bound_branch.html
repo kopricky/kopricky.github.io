@@ -74,7 +74,7 @@ void dfs(int n, long long W, long long value, long long weight, long long&amp; o
             }
         }
         if(tvalue &gt; opt){
-            dfs(n, W, value+vec[index].first,weight+vec[index].second,opt,index+1,vec);
+            dfs(n, W, value+vec[index].first, weight+vec[index].second, opt, index+1, vec);
         }
     }
     //使わない
@@ -90,14 +90,14 @@ void dfs(int n, long long W, long long value, long long weight, long long&amp; o
         }
     }
     if(tvalue &gt; opt){
-        dfs(n, W, value,weight,opt,index+1,vec);
+        dfs(n, W, value, weight, opt, index+1, vec);
     }
 }
 //vecには(価値, 重さ)の順で商品を詰める
 long long solve(int n, long long W, vector&lt;pair&lt;long long,long long&gt; &gt;&amp; vec)
 {
     long long opt = 0;
-    dfs(n,W,0,0,opt,0,vec);
+    dfs(n, W, 0, 0, opt, 0, vec);
     return opt;
 }
 </pre>

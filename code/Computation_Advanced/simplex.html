@@ -80,11 +80,11 @@ private:
         for(i = 0; i &lt; row; i++){
             for(j = 0; j &lt; column - 1; j++) a[i][j] = -A[i][j];
             a[i][column-1] = 1;
-    	    a[i][column] = b[i];
-    	    if(a[L][column] &gt; a[i][column]) L = i;
+            a[i][column] = b[i];
+            if(a[L][column] &gt; a[i][column]) L = i;
         }
         for(j = 0; j &lt; column - 1; j++) a[row][j] = c[j];
-    	a[row+1][column-1] = -1;
+        a[row+1][column-1] = -1;
     }
 
     void solve(){
@@ -92,9 +92,9 @@ private:
         for(E = column - 1;;){
     	    if(L &lt; row){
                 swap(index[E], index[L + column]);
-        		a[L][E] = 1 / a[L][E];
+                a[L][E] = 1 / a[L][E];
                 for(j = 0; j &lt; column + 1; j++) if(j != E) a[L][j] *= -a[L][E];
-        		for(i = 0; i &lt; row + 2; i++){
+                for(i = 0; i &lt; row + 2; i++){
                     if(abs(a[i][E]) &lt; EPS || i == L) continue;
                     for(j = 0; j &lt; column + 1; j += 4){
                         if(j != E) a[i][j] += a[i][E] * a[L][j];
@@ -102,8 +102,8 @@ private:
                         if(j+2 != E) a[i][j+2] += a[i][E] * a[L][j+2];
                         if(j+3 != E) a[i][j+3] += a[i][E] * a[L][j+3];
                     }
-                    a[i][E] = a[i][E] * a[L][E];
-        		}
+                    a[i][E] *= a[L][E];
+                }
     	    }
     	    E = -1;
             // １つめのコメントアウト(基底に入る変数を選択)
@@ -115,7 +115,7 @@ private:
                     // else if(abs(a[row + 1][j]) &lt; EPS &amp;&amp; a[row][j] &gt; pre) E = j, pre = a[row][j];
                 }
             }
-    	    if(E &lt; 0) break;
+            if(E &lt; 0) break;
             L = -1;
             // 2つめのコメントアウト(基底から出る変数を選択)
             for(i = 0; i &lt; row; i++){
@@ -130,16 +130,16 @@ private:
                 infinity = true;
                 return;
             }
-    	}
-    	if(a[row + 1][column] &lt; -EPS){
-    	    none = true;
-    	    return;
-    	}
-    	x.assign(column - 1, 0);
+        }
+        if(a[row + 1][column] &lt; -EPS){
+            none = true;
+            return;
+        }
+        x.assign(column - 1, 0);
         for(i = 0; i &lt; row; i++){
             if(index[column + i] &lt; column - 1) x[index[column + i]] = a[i][column];
         }
-    	ans = a[row][column];
+        ans = a[row][column];
     }
 public:
     bool infinity, none;

@@ -69,13 +69,13 @@ T gcd(T a,T b)
 template &lt;typename T&gt;
 void extgcd(T a, T b, T&amp; x, T&amp; y)
 {
-	if(b != 0){
-		extgcd(b,a%b,y,x);
-		y -= (a/b)*x;
-	}else{
-		x = 1;
-		y = 0;
-	}
+    if(b != 0){
+        extgcd(b,a%b,y,x);
+        y -= (a/b)*x;
+    }else{
+        x = 1;
+        y = 0;
+    }
 }
 
 //modが10^6より大きい値を扱うときはm1*xを__int128にキャストする(10^12とかまで可能)
@@ -85,35 +85,32 @@ pair&lt;T, T&gt; CRT(const pair&lt;T, T&gt;&amp; a1, const pair&lt;T, T&gt;&amp;
 {
     const T v1 = a1.first, m1 = a1.second;
     const T v2 = a2.first, m2 = a2.second;
-    if(v1 == v2){
-        return make_pair(v1,m1*m2);
-    }else{
-        T x, y;
-        extgcd(m1, m2, x, y);
-        x *= (v2 - v1), y *= (v2 - v1);
-        const T m = m1 * m2;
-        return make_pair((((m1 * x + v1) % m) + m) % m, m);
-    }
+    if(v1 == v2) return make_pair(v1,m1*m2);
+    T x, y;
+    extgcd(m1, m2, x, y);
+    x *= (v2 - v1), y *= (v2 - v1);
+    const T m = m1 * m2;
+    return make_pair((((m1 * x + v1) % m) + m) % m, m);
 }
 
 //modどうしが互いに素でないとき
 //modが10^6より大きい値を扱うときはm1*xを__int128にキャストする(10^12とかまで可能)
 //(value, mod)
-template &lt;typename T&gt;
-pair&lt;T, T&gt; CRT(const pair&lt;T, T&gt;&amp; a1, const pair&lt;T, T&gt;&amp; a2)
-{
-    const T v1 = a1.first, m1 = a1.second;
-    const T v2 = a2.first, m2 = a2.second;
-    T g = gcd(m1, m2);
-    T dev = (v2 - v1) / g;
-    T mod = abs(v2 - v1) % g;
-    if(mod) return make_pair(-1,-1);
-    T x, y;
-    extgcd(m1 / g, m2 / g, x, y);
-    x *= dev, y *= dev;
-    const T m = m1 / g * m2;
-    return make_pair((((m1 * x + v1) % m) + m) % m, m);
-}
+// template &lt;typename T&gt;
+// pair&lt;T, T&gt; CRT(const pair&lt;T, T&gt;&amp; a1, const pair&lt;T, T&gt;&amp; a2)
+// {
+//     const T v1 = a1.first, m1 = a1.second;
+//     const T v2 = a2.first, m2 = a2.second;
+//     T g = gcd(m1, m2);
+//     T dev = (v2 - v1) / g;
+//     T mod = abs(v2 - v1) % g;
+//     if(mod) return make_pair(-1,-1);
+//     T x, y;
+//     extgcd(m1 / g, m2 / g, x, y);
+//     x *= dev, y *= dev;
+//     const T m = m1 / g * m2;
+//     return make_pair((((m1 * x + v1) % m) + m) % m, m);
+// }
 </pre>
 <h3>verify 用の問題</h3>
 <p>Codeforces : <a href="https://codeforces.com/problemset/problem/982/E">Billiard</a>
