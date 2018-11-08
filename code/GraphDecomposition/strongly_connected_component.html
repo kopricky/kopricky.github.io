@@ -38,17 +38,18 @@
 <div id="contents">
 
 <section>
-<h2>アルゴリズム名</h2>
+<h2>Strongly Connected Component</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
+有向グラフの強連結成分分解を行うアルゴリズムである.
 </p>
 <p>
 (関数)<br>
-add_edge(): 辺を追加する <br>
+add_edge(u, v): 有向辺(u,v) を追加する <br>
+make_graph(): solve() 後に呼び出すと各連結成分を頂点とする DAG が graph に入る
 </p>
 <p>
-時間計算量: O(mlogn)
+時間計算量: O(n+m)
 </p>
 <h3>コード</h3>
 <div class="codebox">
@@ -112,11 +113,8 @@ public:
 };
 </pre>
 <h3>verify 用の問題</h3>
-<p>
-verify していません(verify 問題を知らない)
-</p>
-<p>Atcoder : <a href=""></a>
-  <a href="">提出コード</a></p>
+<p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_3_C">Strongly Connected Components</a>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3228072#1">提出コード</a></p>
 </section>
 
 </div>
