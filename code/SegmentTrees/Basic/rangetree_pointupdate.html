@@ -143,12 +143,12 @@ public:
             n *= 2;
         }
         sorted.resize(sz);
-        rep(i,sz){
+        for(int i = 0; i &lt; sz; i++){
             sorted[i] = make_pair(cand[i], i);
         }
         sort(sorted.begin(), sorted.end());
         xs.resize(sz), ys.resize(2*n-1), seg.resize(2*n-1);
-        rep(i,sz){
+        for(int i = 0; i &lt; sz; i++){
             xs[i] = (sorted[i].first).first;
             ys[i+n-1] = {pci((sorted[i].first).second, sorted[i].second)};
             vector&lt;VT&gt; arg = {val[sorted[i].second]};
@@ -160,7 +160,7 @@ public:
                 return a.first &lt; b.first;
             });
             vector&lt;VT&gt; arg((int)ys[i].size());
-            rep(j,(int)ys[i].size()){
+            for(int j = 0; j &lt; (int)ys[i].size(); j++){
                 arg[j] = val[ys[i][j].second];
             }
             seg[i].init(arg);
