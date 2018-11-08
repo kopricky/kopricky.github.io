@@ -41,8 +41,8 @@
 <h2>limited mincap maxflow</h2>
 <h3>コードについての説明</h3>
 <p>
-各辺に最小流量制約がついた最大流問題を解くアルゴリズム. 基本的には DAG に対してのみ用いたほうがよい(ループがあるとフローの定義を満たしたままそこにいくらでも流せてしまうので...).
-詳しくは蟻本を
+各辺に最小流量制約がついた最大流問題を解くアルゴリズム. 基本的には DAG に対してのみ用いたほうがよい(ループがあるとフローの定義を満たしたままそこにいくらでも流せてしまうので...). <br>
+詳しくは蟻本もしくは<a href="http://snuke.hatenablog.com/entry/2016/07/10/043918">こちらのページ</a>を参照してください.
 </p>
 <p>
 (関数)<br>
@@ -51,7 +51,7 @@ check(s, t): s から t に最小流量制約を満たすように流すこと�
 max_flow(s, t): s から t に最小流量制約を満たしたうえでの最大流を計算する
 </p>
 <p>
-時間計算量: O(n^2m)
+時間計算量: check, max_flow O(n^2m)
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">
@@ -135,6 +135,7 @@ public:
         }
     }
     bool check(int s, int t) {
+        // check 後に max_flow を行う場合のためにもとのグラフ G を tmpG にコピーしている 
         auto tmpG = G;
         add_edge(t, s, numeric_limits&lt;T&gt;::max());
         T res = solve();

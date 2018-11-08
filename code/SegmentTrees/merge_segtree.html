@@ -41,8 +41,9 @@
 <h2>Merge Segtree</h2>
 <h3>コードについての説明</h3>
 <p>
-Wavelet Tree に似ているが, 例えば二次元上の点集合を保持する際に, x → y の順番にソートしてセグ木で管理するのだが, そこでセグ木の各ノードに対応する区間[l, r)
-このように構築することで長方形領域に対する静的クエリに効率良く答えることができる, 以下の実装では長方形領域内に含まれる点の値の和を答える.
+長方形領域に対する静的クエリに効率良く答えるデータ構造. 以下の実装では2次元座標上の各点が値と対応しているときに, 長方形領域内に含まれる点に対応する値の和を求めるデータ構造になっている. <br>
+二次元座標上の点集合を扱う際に, まず座標を x 座標について昇順に並べてセグ木を構築するのだが, このときセグ木の各ノードにそのノードの範囲 ([l <= x < r)) に含まれる頂点集合を今度は y 座標について昇順になるように配列で保持しておく. <br>
+<a href="./rangetree_pointupdate.html">領域木</a> の場合は各ノードに対応する頂点集合を配列ではなく新たなセグ木で管理する. そのため領域木の特殊版ともいえる.
 </p>
 <p>
 時間計算量: 構築 O(nlogn), 各クエリ O(log^2n)
@@ -52,7 +53,7 @@ Wavelet Tree に似ているが, 例えば二次元上の点集合を保持す�
 <input type="checkbox" id="label" class="csscode" />
 <label for="label"></label>
 <pre class="prettyprint linenums">
-#define all(v) (v).begin(),(v).end()
+#define all(v) (v).begin(), (v).end()
 
 template&lt;typename CandidateType, typename ValueType&gt; class segtree
 {
@@ -117,8 +118,8 @@ public:
 };
 </pre>
 <h3>verify 用の問題</h3>
-<p>yukicoder : <a href="https://yukicoder.me/problems/1937">ギブ and テイク</a>
-  <a href="">提出コード</a></p>
+<p>Atcoder : <a href="https://beta.atcoder.jp/contests/kupc2018/tasks/kupc2018_i">League of Kyoto</a>
+  <a href="https://beta.atcoder.jp/contests/kupc2018/submissions/3309721">提出コード</a></p>
 </section>
 
 </div>
