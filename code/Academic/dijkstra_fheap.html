@@ -42,7 +42,7 @@
 <h3>コードについての説明</h3>
 <p>
 Dijkstra 法を <a href="./fibonacci_heap.html">Fibonacci Heap</a> を用いて高速化したアルゴリズム. 時間計算量が O((n+m)logn) から O(nlogn+m) に落ちる. <br>
-ただ実測ではふつうの Dijkstra 法より少し遅くなってしまった(上手く実装すれば速くなるかも知れないがそんなに変わらないと思う). むしろ <a href="./dijkstra_rheap.html">Radix Heap を用いた高速化</a> のほうが元より多少速くなったので Dijkstra の高速化の意味ではこっちのほうが良いと思う. <br>
+高速化のために std::list ではなく配列べたうちでやったが, 実測ではふつうの Dijkstra 法より少し遅くなってしまった(上手く実装すれば速くなるかも知れないがそんなに変わらないと思う). むしろ <a href="./dijkstra_rheap.html">Radix Heap を用いた高速化</a> のほうが元より多少速くなったので Dijkstra の高速化の意味ではこっちのほうが良いと思う. <br>
 元論文は <a href="http://www.bioinfo.org.cn/~dbu/AlgorithmCourses/Lectures/Fibonacci-Heap-Tarjan.pdf">Fredman, Tarjan 1984</a>
 </p>
 <p>
