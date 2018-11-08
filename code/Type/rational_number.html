@@ -41,7 +41,13 @@
 <h2>Rational Number</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
+有理数型のコード. 計算幾何や確率の問題で誤差落ちが怖いときに用いたくなるかもしれない(実際に使ったことはない). <br>
+整数型との演算も Rational Number にキャストされて上手く行えるはず
+</p>
+<p>
+(コンストラクタ) <br>
+Rational Number&lt;T&gt;(num): 整数 num の有理数型を構築 <br>
+Rational Number&lt;T&gt;(num, den): 有理数 num / den の有理数型を構築 <br>
 </p>
 <h3>コード</h3>
 <div class="codebox">
@@ -272,8 +278,6 @@ public:
 <p>
 verify していません(verify 問題を知らない)
 </p>
-<p>Atcoder : <a href=""></a>
-  <a href="">提出コード</a></p>
 </section>
 
 </div>
