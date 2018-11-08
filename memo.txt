@@ -1,10 +1,7 @@
 bit vector
-miller rabbin
-kitamasa
+bit 2d を何とかする
 wavelet matrix の verify
 Trie 木の説明
-BMのverify
-dinicの説明
 limited_max_flowの説明
 AMPのverify
 謝辞

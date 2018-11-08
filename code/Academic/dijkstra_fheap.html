@@ -159,40 +159,40 @@ public:
 
 template&lt;typename T&gt; class Dijkstra {
 public:
-	struct edge{
-		int to; T cost;
-	};
+    struct edge{
+        int to; T cost;
+    };
     int V;
-	vector&lt;vector&lt;edge&gt; &gt; G;
-	vector&lt;T&gt; d;
-	using pti = pair&lt;T,int&gt;;
+    vector&lt;vector&lt;edge&gt; &gt; G;
+    vector&lt;T&gt; d;
+    using pti = pair&lt;T,int&gt;;
     Fibonacci_Heap&lt;T&gt; fheap;
     typename Fibonacci_Heap&lt;T&gt;::node** keep;
-	Dijkstra(int node_size) : V(node_size), G(V), d(V, numeric_limits&lt;T&gt;::max()),
+    Dijkstra(int node_size) : V(node_size), G(V), d(V, numeric_limits&lt;T&gt;::max()),
         keep(new typename Fibonacci_Heap&lt;T&gt;::node*[V]){}
-	//無向グラフの場合
-	void add_edge(int u,int v,T cost){
-		G[u].pb((edge){v,cost});
-	}
-	void solve(int s){
-		d[s] = 0;
-		keep[s] = fheap.push(0, s);
-		while(!fheap.empty()){
-			int v = fheap.top()-&gt;id, val = fheap.top()-&gt;key;
-			fheap.pop();
-			if(d[v] &lt; val) continue;
-			for(auto&amp; w : G[v]){
-				if(d[w.to] &gt; d[v] + w.cost){
+    //無向グラフの場合
+    void add_edge(int u,int v,T cost){
+        G[u].push_back((edge){v,cost}), G[v].push_back((edge){u,cost});
+    }
+    void solve(int s){
+        d[s] = 0;
+        keep[s] = fheap.push(0, s);
+        while(!fheap.empty()){
+            int v = fheap.top()-&gt;id, val = fheap.top()-&gt;key;
+            fheap.pop();
+            if(d[v] &lt; val) continue;
+            for(auto&amp; w : G[v]){
+                if(d[w.to] &gt; d[v] + w.cost){
                     if(d[w.to] == numeric_limits&lt;T&gt;::max()){
                         keep[w.to] = fheap.push(d[v] + w.cost, w.to);
                     }else{
                         fheap.update(keep[w.to], d[v] + w.cost);
                     }
                     d[w.to] = d[v] + w.cost;
-				}
-			}
-		}
-	}
+                }
+            }
+        }
+    }
 };
 </pre>
 <h3>verify 用の問題</h3>

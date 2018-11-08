@@ -59,11 +59,11 @@ push を O(1), pop を ならしlog(MAX_VAL) で実現するが, push の際に�
 class RadixHeap{
 public:
     int last, size_;
-    vector&lt;P&gt; bucket_[32];
+    vector&lt;pair&lt;int, int&gt; &gt; bucket_[32];
     
     RadixHeap() : last(0), size_(0){}
     
-    inline P top(){
+    inline pair&lt;int, int&gt; top(){
         return pop(false);
     }
     inline bool empty(){
@@ -72,7 +72,7 @@ public:
     inline void push(int x, int val){
         size_++, bucket_[impl(x, last)].emplace_back(x, val);
     }
-    inline P pop(bool flag = true){
+    inline pair&lt;int, int&gt; pop(bool flag = true){
         if(bucket_[0].empty()){
             int id = 1;
             while(bucket_[id].empty()) id++;
@@ -82,7 +82,7 @@ public:
             }
             bucket_[id].clear();
         }
-        P res = bucket_[0].back();
+        pair&lt;int, int&gt; res = bucket_[0].back();
         if(flag) size_--, bucket_[0].pop_back();
         return res;
     }
@@ -90,35 +90,35 @@ public:
 
 template&lt;typename T&gt; class Dijkstra {
 public:
-	struct edge{
-		int to; T cost;
-	};
-	int V;
-	vector&lt;vector&lt;edge&gt; &gt; G;
-	vector&lt;T&gt; d;
-	using pti = pair&lt;T,int&gt;;
-	Dijkstra(int node_size) : V(node_size), G(V), d(V, numeric_limits&lt;T&gt;::max()){}
-	//無向グラフの場合
-	void add_edge(int u,int v,T cost){
-		G[u].pb((edge){v,cost});
-	}
-	void solve(int s){
-		RadixHeap que;
-		d[s] = 0;
-		que.push(0,s);
-		while(!que.empty()){
-			pti p = que.top();
-			que.pop();
-			int v = p.second;
-			if(d[v] &lt; p.first) continue;
-			for(auto&amp; w : G[v]){
-				if(d[w.to] &gt; d[v] + w.cost){
-					d[w.to] = d[v] + w.cost;
-					que.push(d[w.to],w.to);
-				}
-			}
-		}
-	}
+    struct edge{
+        int to; T cost;
+    };
+    int V;
+    vector&lt;vector&lt;edge&gt; &gt; G;
+    vector&lt;T&gt; d;
+    using pti = pair&lt;T,int&gt;;
+    Dijkstra(int node_size) : V(node_size), G(V), d(V, numeric_limits&lt;T&gt;::max()){}
+    //無向グラフの場合
+    void add_edge(int u,int v,T cost){
+        G[u].push_back((edge){v,cost}), G[v].push_back((edge){u,cost});
+    }
+    void solve(int s){
+        RadixHeap que;
+        d[s] = 0;
+        que.push(0,s);
+        while(!que.empty()){
+            pti p = que.top();
+            que.pop();
+            int v = p.second;
+            if(d[v] &lt; p.first) continue;
+            for(auto&amp; w : G[v]){
+                if(d[w.to] &gt; d[v] + w.cost){
+                    d[w.to] = d[v] + w.cost;
+                    que.push(d[w.to],w.to);
+                }
+            }
+        }
+    }
 };
 </pre>
 <h3>verify 用の問題</h3>
