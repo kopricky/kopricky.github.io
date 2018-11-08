@@ -1,8 +1,2 @@
 bit vector
 bit 2d を何とかする
-SCC の verify
-wavelet matrix の verify
-limited_max_flowの説明
-AMPのverify
-謝辞
-インデントの修正
