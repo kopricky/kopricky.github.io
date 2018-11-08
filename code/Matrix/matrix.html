@@ -51,6 +51,9 @@
 <input type="checkbox" id="label" class="csscode" />
 <label for="label"></label>
 <pre class="prettyprint linenums">
+#define EPS 1e-10
+#define MOD 1000000007
+
 template&lt;typename T&gt; class mat : public vector&lt;vector&lt;T&gt; &gt; {
 private:
     int r,c;    //行,列
@@ -148,36 +151,36 @@ public:
         }
         return X;
     }
-	int rank(){
-	    int res = 0;
-	    mat B(r, c);
-	    for(int i = 0; i &lt; r; i++){
-	        for(int j = 0; j &lt; c; j++){
-				B[i][j] = (*this)[i][j];
-			}
-	    }
-	    for(int i = 0; i &lt; c; i++){
-	        if(res == r) return res;
-	        int pivot = res;
-	        for(int j = res + 1; j &lt; r; j++){
-	            if(abs(B[j][i]) &gt; abs(B[pivot][i])){
-	                pivot = j;
-	            }
-	        }
-	        if(abs(B[pivot][i]) &lt; EPS) continue;
-	        swap(B[pivot],B[res]);
-	        for(int j = i + 1; j &lt; c; j++){
-	            B[res][j] /= B[res][i];
-	        }
-	        for(int j = res + 1; j &lt; r; j++){
-	            for(int k = i + 1; k &lt; c; k++){
-	                B[j][k] -= B[res][k]*B[j][i];
-	            }
-	        }
-	        res++;
-	    }
-	    return res;
-	}
+    int rank(){
+        int res = 0;
+        mat B(r, c);
+        for(int i = 0; i &lt; r; i++){
+            for(int j = 0; j &lt; c; j++){
+                B[i][j] = (*this)[i][j];
+            }
+        }
+        for(int i = 0; i &lt; c; i++){
+            if(res == r) return res;
+            int pivot = res;
+            for(int j = res + 1; j &lt; r; j++){
+                if(abs(B[j][i]) &gt; abs(B[pivot][i])){
+                    pivot = j;
+                }
+            }
+            if(abs(B[pivot][i]) &lt; EPS) continue;
+            swap(B[pivot],B[res]);
+            for(int j = i + 1; j &lt; c; j++){
+                B[res][j] /= B[res][i];
+            }
+            for(int j = res + 1; j &lt; r; j++){
+                for(int k = i + 1; k &lt; c; k++){
+                    B[j][k] -= B[res][k]*B[j][i];
+                }
+            }
+            res++;
+        }
+        return res;
+    }
     T det(){
         if(r != c){
             cout &lt;&lt; &quot;正方行列でない(行列式定義不可)&quot; &lt;&lt; endl;
@@ -311,18 +314,16 @@ template&lt;typename T&gt; mat&lt;T&gt; pow(mat&lt;T&gt; A,long long cnt)
         cout &lt;&lt; &quot;累乗不可&quot; &lt;&lt; endl;
     }
     int n = A.row();
-	mat&lt;T&gt; B(n,n);
-	for(int i = 0; i &lt; n; i++){
-		B[i][i] = 1;
-	}
-	while(cnt&gt;0){
-		if(cnt &amp; 1){
-			B = B*A;
-		}
-		A = A*A;
-		cnt &gt;&gt;= 1;
-	}
-	return B;
+    mat&lt;T&gt; B(n,n);
+    for(int i = 0; i &lt; n; i++){
+        B[i][i] = 1;
+    }
+    while(cnt&gt;0){
+        if(cnt &amp; 1) B = B*A;
+        A = A*A;
+        cnt &gt;&gt;= 1;
+    }
+    return B;
 }
 
 template&lt;typename T&gt; mat&lt;T&gt; mod_mul(mat&lt;T&gt;&amp; A,mat&lt;T&gt;&amp; B)
@@ -348,18 +349,16 @@ template&lt;typename T&gt; mat&lt;T&gt; mod_pow(mat&lt;T&gt; A,long long cnt)
         cout &lt;&lt; &quot;累乗不可&quot; &lt;&lt; endl;
     }
     int n = A.row();
-	mat&lt;T&gt; B(n,n);
-	for(int i = 0; i &lt; n; i++){
-		B[i][i] = 1;
-	}
-	while(cnt&gt;0){
-		if(cnt &amp; 1){
-			B = mod_mul(B,A);
-		}
-		A = mod_mul(A,A);
-		cnt &gt;&gt;= 1;
-	}
-	return B;
+    mat&lt;T&gt; B(n,n);
+    for(int i = 0; i &lt; n; i++){
+        B[i][i] = 1;
+    }
+    while(cnt&gt;0){
+		if(cnt &amp; 1) B = mod_mul(B,A);
+        A = mod_mul(A,A);
+        cnt &gt;&gt;= 1;
+    }
+    return B;
 }
 </pre>
 <h3>verify 用の問題</h3>

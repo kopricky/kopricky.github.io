@@ -58,29 +58,25 @@ solve(s): s を始点として各頂点までの最短距離を求める
 <label for="label"></label>
 <pre class="prettyprint linenums">
 template&lt;typename T&gt; class bellman_ford {
-private:
+public:
 	struct edge{
 		int from,to;
 		T cost;
 	};
-	int V,E;
+	int V;
 	vector&lt;int&gt; d;
 	vector&lt;edge&gt; es;
-
-public:
 	bellman_ford(int node_size) : V(node_size), d(V, numeric_limits&lt;T&gt;::max()){}
 	void add_edge(int from,int to,T cost){
 		es.push_back((edge){from,to,cost});
 	}
 	//sからの最短路長およびsからたどり着ける負の閉路の検出(trueなら負の閉路が存在する)
 	bool solve(int s){
-		E = (int)es.size();
 		int cnt = 0;
 		d[s] = 0;
 		while(cnt &lt; V){
 			bool update = false;
-			for(int i = 0; i &lt; E; i++){
-				edge e = es[i];
+			for(auto&amp; e : es){
 				if(d[e.from] != numeric_limits&lt;T&gt;::max() &amp;&amp; d[e.to] &gt; d[e.from] + e.cost){
 					d[e.to] = d[e.from] + e.cost;
 					update = true;
@@ -93,30 +89,26 @@ public:
 	}
 	//すべての負の閉路の検出(trueなら負の閉路が存在する)
 	bool find_negative_loop(){
-		E = (int)es.size();
-	    fill(d.begin(),d.end(),0);
+		fill(d.begin(),d.end(),0);
 		int cnt = 0;
 		while(cnt &lt; V){
- 		   bool update = false;
- 		   for(int i = 0; i &lt; E; i++){
- 			   edge e = es[i];
- 			   if(d[e.to] &gt; d[e.from] + e.cost){
- 				   d[e.to] = d[e.from] + e.cost;
- 				   update = true;
- 			   }
- 		   }
- 		   if(!update) break;
- 		   cnt++;
- 	   }
- 	   return (cnt == V);
+			bool update = false;
+			for(auto&amp; e : es){
+				if(d[e.to] &gt; d[e.from] + e.cost){
+					d[e.to] = d[e.from] + e.cost;
+					update = true;
+				}
+			}
+			if(!update) break;
+			cnt++;
+		}
+		return (cnt == V);
 	}
 	//sからtへの最短路上に存在する負の閉路の検出(trueなら負の閉路が存在する)
 	bool find_negative_loop(int s,int t){
-		E = (int)es.size();
 		d[s] = 0;
 		for(int i = 0; i &lt; 2*V; i++){
-			for(int j = 0; j &lt; E; j++){
-				edge e = es[j];
+			for(auto&amp; e : es){
 				if(d[e.from] != numeric_limits&lt;T&gt;::max() &amp;&amp; d[e.to] &gt; d[e.from] + e.cost){
 					d[e.to] = d[e.from] + e.cost;
 					if(i &gt;= V-1 &amp;&amp; e.to == t){

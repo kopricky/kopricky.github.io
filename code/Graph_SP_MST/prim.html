@@ -58,43 +58,41 @@ solve(): 最小全域木の重みを計算する
 <input type="checkbox" id="label" class="csscode" />
 <label for="label"></label>
 <pre class="prettyprint linenums">
-template&lt;typename T&gt; class Prim{
-private:
+template&lt;typename T&gt; class Prim {
+public:
 	struct edge{
 		int to;
 		T cost;
 	};
-    using pti = pair&lt;T, int&gt;;
-    int V;
+	using pti = pair&lt;T, int&gt;;
+	int V;
 	vector&lt;vector&lt;edge&gt; &gt; G;
-    vector&lt;T&gt; d;
-    vector&lt;bool&gt; used;
-
-public:
-    Prim(int node_size) : V(node_size), G(V), d(V, numeric_limits&lt;T&gt;::max()), used(V, false){}
-	void add_edge(int u, int v, T cost){
-        G[u].push_back((edge){v, cost}), G[v].push_back((edge){u, cost});
+	vector&lt;T&gt; d;
+	vector&lt;bool&gt; used;
+	Prim(int node_size) : V(node_size), G(V), d(V, numeric_limits&lt;T&gt;::max()), used(V, false){}
+	void add_edge(int u, int v, T val){
+		G[u].push_back((edge){v, val}), G[v].push_back((edge){u, val});
 	}
 	T solve(){
-        priority_queue&lt;pti, vector&lt;pti&gt;, greater&lt;pti&gt; &gt; que;
-        T res = 0;
+		priority_queue&lt;pti, vector&lt;pti&gt;, greater&lt;pti&gt; &gt; que;
+		T res = 0;
 		d[0] = 0;
-        que.push(pti(0, 0));
-        while(!que.empty()){
-            pti p = que.top();
-            que.pop();
-            int v = p.second;
-            if(used[v]) continue;
-            res += p.first;
-            used[v] = true;
-            for(auto&amp; e : G[v]){
-                if(!used[e.to] &amp;&amp; d[e.to] &gt; e.cost){
-                    d[e.to] = e.cost;
-                    que.push(pti(d[e.to], e.to));
-                }
-            }
-        }
-        return res;
+		que.push(pti(0, 0));
+		while(!que.empty()){
+			pti p = que.top();
+			que.pop();
+			int v = p.second;
+			if(used[v]) continue;
+			res += p.first;
+			used[v] = true;
+			for(auto&amp; e : G[v]){
+				if(!used[e.to] &amp;&amp; d[e.to] &gt; e.cost){
+					d[e.to] = e.cost;
+					que.push(pti(d[e.to], e.to));
+				}
+			}
+		}
+		return res;
 	}
 };
 </pre>
