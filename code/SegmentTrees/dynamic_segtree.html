@@ -129,8 +129,8 @@ public:
     	if(b &lt;= l || r &lt;= a) return;
     	if(a &lt;= l &amp;&amp; r &lt;= b){
             opr1(k-&gt;lazy, k-&gt;st_size * x);
-    		eval(k, l, r);
-    		return;
+            eval(k, l, r);
+            return;
     	}
         k-&gt;val = id2;
     	if(k-&gt;left){
