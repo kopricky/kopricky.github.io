@@ -41,12 +41,12 @@
 <h2>Max Flow Push Relabel</h2>
 <h3>コードについての説明</h3>
 <p>
-フロー f が s, t 間の最大フローであるとは (1) (v から出る量) = (v に入る量) (∀ v ∈ V / {s,t}), (2) augment path が存在しない の 2 つが成り立つことが必要十分条件である. <br>
-Edmonds-Karp, Dinic などは (1) の条件を常に満たしながら (2) の条件を成立させようとしていたのに対し, push-relabel は (2) の条件を常に満たしながら (1) の条件を成立させようとするアルゴリズムになっている. <br>
-活性点の解消など詳しいことは組合せ最適化(Korte, Fiegen)などを読むと良い. <br>
+フロー f が s, t 間の最大フローであるとは (1) (v から出る量) = (v に入る量) (∀ v ∈ V / {s,t}), (2) augment path(増加道) が存在しない の 2 つが成り立つことが必要十分条件である. <br>
+Edmonds-Karp, Dinic などは (1) の条件を常に満たしながら (2) の条件を成立させようとしていたのに対し, Push Relabel は (2) の条件を常に満たしながら (1) の条件を成立させようとするアルゴリズムになっている. <br>
+活性点の解消など詳しいことは <a href="https://www.amazon.co.jp/%E7%B5%84%E5%90%88%E3%81%9B%E6%9C%80%E9%81%A9%E5%8C%96-%E7%AC%AC2%E7%89%88-%E7%90%86%E8%AB%96%E3%81%A8%E3%82%A2%E3%83%AB%E3%82%B4%E3%83%AA%E3%82%BA%E3%83%A0-B-%E3%82%B3%E3%83%AB%E3%83%86/dp/4621062026/ref=sr_1_2?ie=UTF8&qid=1536456416&sr=8-2&keywords=%E7%B5%84%E5%90%88%E3%81%9B%E6%9C%80%E9%81%A9%E5%8C%96%E3%81%A8%E3%82%A2%E3%83%AB%E3%82%B4%E3%83%AA%E3%82%BA%E3%83%A0">組合せ最適化(Korte, Fiegen)</a> などを読むと良い. <br>
 元論文は <a href="http://akira.ruc.dk/~keld/teaching/algoritmedesign_f03/Artikler/08/Goldberg88.pdf">Goldberg and Tarjan 1988</a> で動的木を用いて計算量の改善が可能. <br>
 計算量は O(n^3) なので Dinic(計算量 O(n^2m)) よりも優秀だが, 実測はそんなに速くないです. 若干 Dinic より遅い. <br>
-ただ Dinic の性能が悪く出るようなグラフ((|V| = 628, |E| = 33491) で試してみると push-relabel 182 msec, Dinic 2243 msec という感じになったので push relabel の方が安定感はある.
+ただ Dinic の性能が悪く出るようなグラフ((|V| = 628, |E| = 33491) で試してみると push-relabel 182 msec, Dinic 2243 msec という感じになったので Push Relabel の方が安定感はある.
 </p>
 <p>
 (関数)<br>

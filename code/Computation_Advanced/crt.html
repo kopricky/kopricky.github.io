@@ -41,7 +41,7 @@
 <h2>Chinese Remainder Theorem</h2>
 <h3>コードについての説明</h3>
 <p>
-Chinese Remainder Theorem(中国剰余定理) は p_1 と p_2 が互いに素で x = q_1 (mod p_1), x = q_2 (mod p_2) が成り立つとき, これを満たす x は [0, p_1*p_2) にただ一つ存在するという主張. <br>
+Chinese Remainder Theorem(中国剰余定理) は p_1 と p_2 が互いに素で x = q_1 (mod p_1), x = q_2 (mod p_2) が成り立つとき, これを満たす x は [0, p_1*p_2) にただ一つ存在するという定理のことであり, 以下の実装は実際にその唯一の解を求めるアルゴリズムである <br>
 アルゴリズムは結局式変形すると拡張ユークリッドの互除法(extgcd)を解くことと同じであることが分かる. 以下の実装では一般の場合(法が互いに素でない場合)に拡張したものも含まれています.
 </p>
 <p>
@@ -114,7 +114,7 @@ pair&lt;T, T&gt; CRT(const pair&lt;T, T&gt;&amp; a1, const pair&lt;T, T&gt;&amp;
 </pre>
 <h3>verify 用の問題</h3>
 <p>Codeforces : <a href="https://codeforces.com/problemset/problem/982/E">Billiard</a>
-  <a href="https://codeforces.com/contest/982/submission/41429630">提出コード</a>(普通にやるとオーバーフローするので多倍長使うか, Python or Java で実装する)</p>
+  <a href="https://codeforces.com/contest/982/submission/41429630">提出コード</a>(普通にやるとオーバーフローするので <a href="../Type/multi_precision_integer.html">多倍長</a> 使うか, Python or Java で実装する)</p>
 </section>
 
 </div>

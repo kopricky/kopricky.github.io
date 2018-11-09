@@ -41,14 +41,13 @@
 <h2>Wavelet Matrix</h2>
 <h3>コードについての説明</h3>
 <p>
-WaveletMatrix は "一次元区間内のk番目に大きい要素", "一次元区間内に含まれる要素kの数", "2次元区間内に現れる要素の数" などのクエリに O(log(σ)) で答えるアルゴリズムである.(σは文字の種類数もしくは数字の上限) <br>
+WaveletMatrix は "1 次元区間内の k 番目に大きい要素", "1 次元区間内に含まれる要素 k の数", "2 次元区間内に現れる要素の数" などのクエリに O(log(σ)) で答えるアルゴリズムである.(σは文字の種類数もしくは数字の上限) <br>
 WaveletMatrix は省メモリで構築できることが知られているが, 本実装ではなんちゃって Bit Vector で実装している(基本的にそこまでメモリにこだわるシーンはない). <br>
 BitVector の実装については<a href="../Academic/bit_vector.html">こちら</a>を参照してください. <br>
 WaveletMatrix は基数ソートをするので深さがlog(σ)と文字の種類数依存である. そのためのせるデータがアルファベットなどなら深さは浅いが, 数字(特にnより大きい数字)をのせると深さが深くなる. <br>
 なので直交領域内の点の数を返す OrthogonalRangeCount では深さを浅くするため前もって座圧をおこなっている. <br>
 WaveletMatrix は理論上 "一次元区間内に含まれるkより大きい要素を報告する", "2次元区間内に現れる要素を報告する" などのクエリにも O(log(σ)) で答えることができるが select の実装が愚直にやると O(1) にならないので実装していません.(というか机上の空論では...
 <a href="../Academic/bit_vector.html">参考</a>) <br>
-なので上のようなクエリはフォローしていません <br>
 ちなみに<a href="http://d.hatena.ne.jp/takeda25/20130303/1362301095">このページ</a>や<a href="https://researchmap.jp/mufbonv4f-1587/?action=multidatabase_action_main_filedownload&download_flag=1&upload_id=159365&metadata_id=993">このpdf</a>などを参考にした.
 </p>
 <p>

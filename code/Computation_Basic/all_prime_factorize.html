@@ -38,7 +38,7 @@
 <div id="contents">
 
 <section>
-<h2>All Factorial</h2>
+<h2>All Prime Factorize</h2>
 <h3>コードについての説明</h3>
 <p>
 1~n のすべての数の素因数分解を高速に行うアルゴリズム. <br>
@@ -54,7 +54,9 @@
 <pre class="prettyprint linenums">
 #define MAX_N 100000
 
-//2〜MAX_N-1のすべての数の素因数分解を計算(O(MAX_Nlog(MAX_N)))
+// 2〜MAX_N-1のすべての数の素因数分解を計算(O(MAX_Nlog(MAX_N)))
+// pr[i]: i の素因数の配列
+// id[i]: i の素因数 pr[i][j] の指数部分
 vector&lt;int&gt; pr[MAX_N],id[MAX_N];
 bool is_prime[MAX_N];
 

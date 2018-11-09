@@ -42,7 +42,7 @@
 <h3>コードについての説明</h3>
 <p>
 木上の任意の 2 点間の LCA (lowest common ancestor) を効率的に求めることができるアルゴリズム. また同時に任意の 2 点間のキョリも効率的に求めることが可能になる. <br>
-実装は 2 種類あるが, 以下では euler tour 上での RMQ を用いて求める方法で実装している. <br>
+実装は 2 種類 (euler tour + RMQ か ダブリング) あるが, 以下では euler tour 上での RMQ を用いて求める方法で実装している. <br>
 アルゴリズムについては蟻本か<a href="https://www.npca.jp/works/magazine/2015_5/">この pdf</a> の説明がわかりやすい.
 </p>
 <p>
@@ -146,10 +146,11 @@ public:
 };
 </pre>
 <h3>verify 用の問題</h3>
+<p>
 lca の verify <br>
-<p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_5_C">Lowest Common Ancestor</a>
+AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_5_C">Lowest Common Ancestor</a>
   <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3125255#1">提出コード</a><br>
-lca 合ってたら dist も合ってるでしょう...
+dist は verify できていないが lca あってたら dist もあってるでしょう...
 </p>
 </section>
 
