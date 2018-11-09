@@ -1,2 +1,0 @@
-bit vector
-bit 2d を何とかする

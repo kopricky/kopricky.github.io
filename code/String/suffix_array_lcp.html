@@ -57,17 +57,16 @@ public:
     int sz,index1,index2;
     vector&lt;int&gt; rnk,tmp,sa,lcp;
     string recs;
-    suffixarray(string s){
+    suffixarray(string&amp; s){
         recs = s;
         sz = (int)s.size();
         rnk.resize(sz+1),tmp.resize(sz+1);
         make_sa();
-        // make_lcp();
     }
     void make_sa(){
         index1 = sz;
         sa.resize(index1+1);
-        for(int i = 0; i &lt; index1+1; i++){
+        rep(i,index1+1){
             sa[i] = i;
             rnk[i] = i&lt;index1?recs[i]:-1;
         }
@@ -86,19 +85,21 @@ public:
             for(int i=1;i&lt;=index1;i++){
                 tmp[sa[i]] = tmp[sa[i-1]]+(comp(sa[i-1],sa[i])?1:0);
             }
-            for(int i = 0; i &lt; index1+1; i++){
+            rep(i,index1+1){
                 rnk[i] = tmp[i];
             }
         }
     }
+    //lcp[i]???sa[i]??¨sa[i+1]???????????±?????\???????????\???
+    //??????????????????lca??????????????????????????????????????????sa???unzip????????°??????
     void make_lcp(){
         lcp.resize(sz+1);
-        for(int i = 0; i &lt; sz+1; i++){
+        rep(i,sz+1){
             rnk[sa[i]] = i;
         }
         int h = 0;
         lcp[0] = 0;
-        for(int i = 0; i &lt; sz; i++){
+        rep(i,sz){
             int j = sa[rnk[i]-1];
             if(h &gt; 0){
                 h--;
@@ -111,25 +112,24 @@ public:
             lcp[rnk[i]-1] = h;
         }
     }
+    int stsearch(string&amp; cri);
+    int edsearch(string&amp; cri);
 };
 
-//cri以上の値のスタートインデックス
-int stsearch(suffixarray&amp; ag,string&amp; cri)
+int suffixarray::stsearch(string&amp; cri)
 {
-    int n = ag.sz;
-    int l=0,r=n+1;
-    vector&lt;int&gt;&amp; sa = ag.sa;
+    int l=0,r=sz+1;
     while(r-l&gt;1){
         int mid = (l+r)/2;
-        if(n-sa[mid] &lt; (int)(cri.size())){
-            string t = ag.recs.substr(sa[mid],n-sa[mid]);
+        if(sz-sa[mid] &lt; len(cri)){
+            string t = recs.substr(sa[mid],sz-sa[mid]);
             if(t &lt;= cri){
                 l = mid;
             }else{
                 r = mid;
             }
         }else{
-            string t = ag.recs.substr(sa[mid],(int)(cri.size()));
+            string t = recs.substr(sa[mid],len(cri));
             if(t &lt; cri){
                 l = mid;
             }else{
@@ -140,23 +140,20 @@ int stsearch(suffixarray&amp; ag,string&amp; cri)
     return r;
 }
 
-//cri以下の値のエンドインデックス+1(開区間的な)
-int edsearch(suffixarray&amp; ag,string&amp; cri)
+int suffixarray::edsearch(string&amp; cri)
 {
-    int n = ag.sz;
-    int l=0,r=n+1;
-    vector&lt;int&gt;&amp; sa = ag.sa;
+    int l=0,r=sz+1;
     while(r-l&gt;1){
         int mid = (l+r)/2;
-        if(n-sa[mid] &lt; (int)(cri.size())){
-            string t = ag.recs.substr(sa[mid],n-sa[mid]);
+        if(sz-sa[mid] &lt; len(cri)){
+            string t = recs.substr(sa[mid],sz-sa[mid]);
             if(t &lt; cri){
                 l = mid;
             }else{
                 r = mid;
             }
         }else{
-            string t = ag.recs.substr(sa[mid],(int)(cri.size()));
+            string t = recs.substr(sa[mid],len(cri));
             if(t &lt;= cri){
                 l = mid;
             }else{
@@ -169,7 +166,7 @@ int edsearch(suffixarray&amp; ag,string&amp; cri)
 </pre>
 <h3>verify 用の問題</h3>
 <p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2644">Longest Match</a>
-  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=2639728#1">提出コード</a></p>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3230799#1">提出コード</a></p>
 </section>
 
 </div>
