@@ -42,21 +42,242 @@
 <h3>コードについての説明</h3>
 <p>
 簡潔データ構造の基本となる bit vector の実装コード(らしき何か). <br>
-<a href="https://researchmap.jp/mujkz01di-1587/?action=multidatabase_action_main_filedownload&download_flag=1&upload_id=157005&metadata_id=993"></a>
-</p>
+<a href="https://researchmap.jp/mujkz01di-1587/?action=multidatabase_action_main_filedownload&download_flag=1&upload_id=157005&metadata_id=993">このスライド</a> を参考に理論自体は理解できたが, 実装を行う上でいくつかの問題が生じた. <br>
+まず値を記憶するために確保するビットを自由に調節できないのが1つの問題. n 以下の非負整数を保持するのには ceil(logn) bit で十分だけど, 実際には short int (16 bit), int (32bit) などの型で保持する必要があるのできっちり ceil(logn) bit 確保するのが難しい(bitset も余分なメモリを食うので無理).<br>
+その点に目をつむれば rank はある程度省メモリで O(1) time の実装ができる. select の方は全体を log^2(n) 個の 1 を持つ block に分ける. このとき block のサイズが log^c(n) 以下の小さいものについては sqrt(logn) 分木を構築するのだが, ここで問題が生じる. <br>
+select を処理する際に木の親から子へ O(1) でたどれるようにするために表引きを持っておく必要があり, 木のすべての子についての情報は sqrt(logn)*2loglogn = O(logn) bit で表されるから 2^(sqrt(logn)*2loglogn) = O(n(loglogn/logn)) bit で表引きが持てると書かれている.<br>
+漸近的には 2^(sqrt(logn)*2loglogn) = o(n) かも知れないが実際には全体の bit の長さを 1*10^6 とかと考えると 2^50 近くになり到底持てない. 実用上は情報をたとえば 1/3 とか 1/4 とかに定数分割して表引きを構築するらしいのだがなかなかに泥沼な未来が見えたので親から子にたどる部分には二分探索を用いて O(loglogn) time での実装をした.<br>
+結論としては値に応じたビット長を確保するのは少なくとも C++ では難しいし, また select O(1) 実装は険しい&amp;実装したとしてもそんなに速くないだろうという感じ.
 <p>
-(関数)<br>
-add_edge(): 辺を追加する <br>
-</p>
-<p>
-時間計算量: O(mlogn)
+時間計算量: rank O(1), select O(loglogn) <br>
+(※ verify どころかほとんど動かしてもいないので高々有限個のバグが含まれています.)
 </p>
 <h3>コード</h3>
 <div class="codebox">
 <input type="checkbox" id="label" class="csscode" />
 <label for="label"></label>
 <pre class="prettyprint linenums">
-あ
+template &lt;int SIZE&gt; class BitVector
+{
+private:
+    struct block {
+        int ary_len;
+        int *one_pos;
+        short int *descendant_start_index, *subtree_count_sum;
+        block() : ary_len(0), one_pos(nullptr), descendant_start_index(nullptr), subtree_count_sum(nullptr){}
+        inline bool isSmall(){
+            return ary_len;
+        }
+    };
+
+    static constexpr int BIT_SIZE = SIZE, UNIT_SIZE = 32, SMALL_BLOCK_SIZE = ceil(log2(BIT_SIZE)/2.0), BLOCK_SIZE = 4*SMALL_BLOCK_SIZE*SMALL_BLOCK_SIZE,
+                            BIT_REST = BIT_SIZE%BLOCK_SIZE, BLOCK_COUNT = BIT_SIZE/BLOCK_SIZE+1, SMALL_BLOCK_COUNT = 4*SMALL_BLOCK_SIZE,
+                             REAL_BIT_SIZE = BLOCK_COUNT*BLOCK_SIZE, VECTOR_SIZE = REAL_BIT_SIZE/UNIT_SIZE+1, ALL_SMALL_BLOCK_COUNT = BLOCK_COUNT*SMALL_BLOCK_COUNT,
+                              BOUNDARY_INDEX = 3.5, BOUNDARY_LENGTH = ceil(pow(log2(BIT_SIZE),BOUNDARY_INDEX)), DESCENDANT_COUNT = ceil(sqrt(log2(BIT_SIZE)));
+
+    uint* bit_vector;
+    int* block_rank;
+    short int* small_block_rank;
+    char** lookup_table_rank;
+    block* block_select;
+    char** lookup_table_select;
+    int select_small_block_memory, select_large_block_memory;
+
+public:
+
+    void alloc_memory() {
+        // bit は右から左(←)の向きであることに注意する
+        bit_vector = new uint[VECTOR_SIZE];
+        std::cerr &lt;&lt; &quot;bit vector: &quot; &lt;&lt; VECTOR_SIZE*4 &lt;&lt; &quot;bytes\n&quot;;
+        // 本当は int(32bit) ではなく log(n)bit 長でなくてはならない
+        block_rank = new int[BLOCK_COUNT+1];
+        std::cerr &lt;&lt; &quot;block_rank: &quot; &lt;&lt; (BLOCK_COUNT+1)*4 &lt;&lt; &quot;bytes\n&quot;;
+        // 本当は int(32bit) ではなく log(log^2(n))bit 長でなくてはならない
+        small_block_rank = new short int[ALL_SMALL_BLOCK_COUNT+BLOCK_COUNT];
+        std::cerr &lt;&lt; &quot;small_block_rank: &quot; &lt;&lt; ALL_SMALL_BLOCK_COUNT+BLOCK_COUNT*2 &lt;&lt; &quot;bytes\n&quot;;
+        // 本当は char(32bit) ではなく log(1/2(log(n)))bit 長でなくてはならない
+        lookup_table_rank = new char*[1 &lt;&lt; SMALL_BLOCK_SIZE];
+        for(int i = 0; i &lt; (1 &lt;&lt; SMALL_BLOCK_SIZE); i++){
+            lookup_table_rank[i] = new char[SMALL_BLOCK_SIZE+1];
+        }
+        // 本当は char(32bit) ではなく log(1/2(log(n)))bit 長でなくてはならない
+        std::cerr &lt;&lt; &quot;lookup_table_table: &quot; &lt;&lt; (1 &lt;&lt; SMALL_BLOCK_SIZE)*(SMALL_BLOCK_SIZE+1) &lt;&lt; &quot;bytes\n&quot;;
+        lookup_table_select = new char*[1 &lt;&lt; SMALL_BLOCK_SIZE];
+        for(int i = 0; i &lt; (1 &lt;&lt; SMALL_BLOCK_SIZE); i++){
+            lookup_table_select[i] = new char[SMALL_BLOCK_SIZE];
+        }
+        std::cerr &lt;&lt; &quot;lookup_table_select: &quot; &lt;&lt; (1 &lt;&lt; SMALL_BLOCK_SIZE)*SMALL_BLOCK_SIZE &lt;&lt; &quot;bytes\n&quot;;
+    }
+
+    void init_() {
+        memset(bit_vector, 0, sizeof(uint)*VECTOR_SIZE);
+    }
+
+    BitVector() : select_small_block_memory(0), select_large_block_memory(0){
+        alloc_memory();
+        init_();
+    }
+
+    inline void set(int index) {
+        bit_vector[index/UNIT_SIZE] |= (1u &lt;&lt; index % UNIT_SIZE);
+    }
+
+    inline int isSet(int index) {
+        return (bit_vector[index/UNIT_SIZE] &gt;&gt; index % UNIT_SIZE) &amp; 1u;
+    }
+
+    inline int bit_mask(int start, int end) {
+        int left_id = start / UNIT_SIZE, right_id = (end - 1) / UNIT_SIZE;
+        int left_pos = start % UNIT_SIZE, right_pos = (end - 1) % UNIT_SIZE + 1;
+        return (left_id == right_id)
+                    ? ((bit_vector[left_id] &gt;&gt; left_pos) &amp; ((1u &lt;&lt; (right_pos-left_pos))-1u))
+                        : ((bit_vector[left_id] &gt;&gt; left_pos) | ((bit_vector[right_id] &amp; ((1u &lt;&lt; right_pos)-1u)) &lt;&lt; (UNIT_SIZE - left_pos)));
+    }
+
+    void build_rank_block() {
+        int bit_index = 0, small_block_index = 0;
+        block_rank[0] = 0;
+        for(int i = 0; i &lt; BLOCK_COUNT; i++){
+            block_rank[i+1] = block_rank[i];
+            small_block_rank[small_block_index++] = 0;
+            for(int j = 0; j &lt; SMALL_BLOCK_COUNT; j++){
+                small_block_rank[small_block_index] = small_block_rank[small_block_index-1];
+                for(int k = 0; k &lt; SMALL_BLOCK_SIZE; k++){
+                    small_block_rank[small_block_index] += isSet(bit_index++);
+                }
+                small_block_index++;
+            }
+            block_rank[i+1] += small_block_rank[small_block_index-1];
+        }
+    }
+
+    void build_rank_lookup_table() {
+        for(int i = 0; i &lt; (1 &lt;&lt; SMALL_BLOCK_SIZE); i++){
+            lookup_table_rank[i][0] = 0;
+            for(int j = 0; j &lt; SMALL_BLOCK_SIZE; j++){
+                lookup_table_rank[i][j+1] = lookup_table_rank[i][j] + ((i &gt;&gt; j) &amp; 1);
+            }
+        }
+    }
+
+    void build_logn_ary_rec(short int* st_count, short int* des_index, int left, int right) {
+        if(right - left == 1) return;
+        int cur_len = (right - left) / DESCENDANT_COUNT + 1;
+        int cur_index = left, nx_index = right;
+        for(int i = 0; i &lt; cur_len-1; i++){
+            des_index[nx_index] = cur_index;
+            st_count[nx_index] = st_count[cur_index += DESCENDANT_COUNT-1];
+            nx_index++;
+        }
+        des_index[nx_index] = cur_index;
+        st_count[nx_index] = st_count[right-1];
+        build_logn_ary_rec(st_count, des_index, right, nx_index+1);
+    }
+
+    // [left, right)
+    void build_select_logn_ary(block* bl, int left, int right) {
+        short int* st_count = bl-&gt;subtree_count_sum, *des_index = bl-&gt;descendant_start_index;
+        int leaf_count = (right - left) / SMALL_BLOCK_SIZE + 1;
+        int cur_len = leaf_count, node_len = cur_len;
+        while(cur_len &gt; 1){
+            cur_len = cur_len / DESCENDANT_COUNT + 1;
+            node_len += cur_len;
+        }
+        bl-&gt;ary_len = node_len;
+        st_count = new short int[node_len];
+        des_index = new short int[node_len];
+        select_small_block_memory += 4 * node_len;
+        memset(st_count, 0, sizeof(short int)*node_len);
+        memset(des_index, -1, sizeof(short int)*node_len);
+        int bit_index = left;
+        for(int i = 0; i &lt; leaf_count - 1; i++){
+            for(int j = 0; j &lt; SMALL_BLOCK_SIZE; j++){
+                st_count[i] += isSet(bit_index++);
+            }
+            st_count[i+1] += st_count[i];
+        }
+        // 余りを計算
+        for(;bit_index &lt; right; bit_index++) {
+            st_count[leaf_count-1] += isSet(bit_index++);
+        }
+        build_logn_ary_rec(st_count, des_index, 0, leaf_count);
+    }
+
+    void build_select_data_structure() {
+        int bit_length = 0, bit_sum = 0, block_index = 0;
+        int block_select_count = block_rank[BLOCK_COUNT] / BLOCK_SIZE + 1;
+        block_select = new block[block_select_count];
+        std::cerr &lt;&lt; &quot;block_pointer: &quot; &lt;&lt; block_select_count*4 &lt;&lt; &quot;bytes\n&quot;;
+        int* temp_pos = new int[BLOCK_SIZE];
+        select_large_block_memory += 4 * BLOCK_SIZE;
+        for(int i = 0; i &lt; BIT_SIZE; i++){
+            bit_length++;
+            if(isSet(i)){
+                temp_pos[bit_sum] = i;
+                bit_sum++;
+                if(bit_sum == BLOCK_SIZE){
+                    if(bit_length &lt;= BOUNDARY_LENGTH){
+                        build_select_logn_ary(&amp;block_select[block_index], i+1-bit_length, i+1);
+                    }else{
+                        block_select[block_index].one_pos = temp_pos;
+                        temp_pos = new int[BLOCK_SIZE];
+                        select_large_block_memory += 4 * BLOCK_SIZE;
+                    }
+                    bit_length = bit_sum = 0;
+                    block_index++;
+                }
+            }
+        }
+    }
+
+    void build_select_lookup_table() {
+        for(int i = 0; i &lt; (1 &lt;&lt; SMALL_BLOCK_SIZE); i++){
+            int num = 0;
+            for(int j = 0; j &lt; SMALL_BLOCK_SIZE; j++){
+                if((i &gt;&gt; j)&amp;1) lookup_table_select[i][num++] = j;
+            }
+        }
+    }
+
+    void build() {
+        build_rank_block();
+        build_rank_lookup_table();
+        build_select_data_structure();
+        build_select_lookup_table();
+        std::cerr &lt;&lt; &quot;SELECT_SMALL_BLOCK: &quot; &lt;&lt; select_small_block_memory &lt;&lt; &quot;bytes\n&quot;;
+        std::cerr &lt;&lt; &quot;SELECT_LARGE_BLOCK: &quot; &lt;&lt; select_large_block_memory &lt;&lt; &quot;bytes\n&quot;;
+    }
+
+    inline int rank(int x) {
+        return block_rank[x / BLOCK_SIZE] + small_block_rank[x / BLOCK_SIZE * (SMALL_BLOCK_COUNT+1) + x / SMALL_BLOCK_SIZE]
+                    + lookup_table_rank[bit_mask(x - x % SMALL_BLOCK_SIZE, x)][x % SMALL_BLOCK_SIZE];
+    }
+
+    int select_search(block* bl, const int start, const int target_pos, int cur_index) {
+        if(bl[index]-&gt;descendant_start_index &lt; 0){
+            return lookup_table_select[bit_mask(start + cur_index*SMALL_BLOCK_SIZE, start + (cur_index+1)*SMALL_BLOCK_SIZE)][target_pos];
+        }
+        short int* st_count = bl-&gt;subtree_count_sum, *des_index = bl-&gt;descendant_start_index;
+        int low = des_index[cur_index], high = low + DESCENDANT_COUNT - 1;
+        if(target_pos &lt;= st_count[low]) return select_search(bl, start, target_pos, low);
+        while(high - low &gt; 1){
+            int mid = (low + high) / 2;
+            if(target_pos &gt; st_count[mid]){
+                low = mid;
+            }else{
+                high = mid;
+            }
+        }
+        return select_search(bl, start, target_pos, high);
+    }
+
+    // x番目の1の位置を返す(0_indexed)
+    inline int select(int x) {
+        return block_select[x / BLOCK_SIZE]-&gt;isSmall()
+                    ? select_search(block_select[x / BLOCK_SIZE], x / BLOCK_SIZE * BLOCK_SIZE, x % BLOCK_SIZE + 1, block_select[x / BLOCK_SIZE]-&gt;ary_len)
+                     : block_select[x / BLOCK_SIZE]-&gt;one_pos[x % BLOCK_SIZE];
+    }
+};
 </pre>
 <h3>verify 用の問題</h3>
 <p>

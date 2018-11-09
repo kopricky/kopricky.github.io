@@ -41,10 +41,11 @@
 <h2>BIT 2D</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
+2次元の BIT. ""(i, j) に加算する" と "[0,i]×[0,j] の範囲の和を求める" の 2 つのクエリを効率よく処理するデータ構造. <br>
+x 軸方向に BIT の配列を持ってその配列の 1 つ 1 つの要素が y 軸方向の BIT 配列を持っている感じ.
 </p>
 <p>
-時間計算量: add, sum O(log^2n)
+時間計算量: add, sum O(lognlogm)
 </p>
 <h3>コード</h3>
 <div class="codebox">
@@ -55,21 +56,18 @@ template&lt;typename T&gt; class BIT {
 private:
     int n,m; vector&lt;vector&lt;T&gt; &gt; bit;
 public:
-    // (i, j) に val を足す
     void add(int i, int j, T val){
         for(int i_ = i+1; i_ &lt; n; i_ += i_ &amp; -i_)
             for(int j_ = j+1; j_ &lt; m; j_ += j_ &amp; -j_)
                 bit[i_][j_] += val;
     }
-    // [0,i]×[0,j]の範囲の和を求める
     T sum(int i, int j){
         T s = 0;
-            for(int i_ = i+1; i_ &gt; 0; i_ -= i_ &amp; -i_)
-                for(int j_ = j+1; j_ &gt; 0; j_ -= j_ &amp; -j_)
-                    s += bit[i_][j_];
-            return s;
+        for(int i_ = i+1; i_ &gt; 0; i_ -= i_ &amp; -i_)
+            for(int j_ = j+1; j_ &gt; 0; j_ -= j_ &amp; -j_)
+                s += bit[i_][j_];
+        return s;
     }
-    // [lx, rx)×[ly, ry)の範囲の和を求める
     T sum(int lx, int rx, int ly, int ry){
         return sum(rx-1, ry-1) - sum(lx-1, ry-1) - sum(rx-1, ly-1) + sum(lx-1, ly-1);   
     }
@@ -84,17 +82,27 @@ public:
             for(int j = 0; j &lt; m; j++)
                 add(i, j, v[i][j]);
     }
+    void print(){
+        for(int i = 0; i &lt; n; i++){
+            for(int j = 0; j &lt; m; j++){
+                cout&lt;&lt; sum(i-1, i, j-1, j) &lt;&lt; &quot; &quot;;
+            }
+            cout &lt;&lt; &quot;\n&quot;;
+        }
+    }
     void print_sum(){
-        for(int i = 0; i &lt; n; i++)
-            for(int j = 0; j &lt; m; j++)
+        for(int i = 0; i &lt; n; i++){
+            for(int j = 0; j &lt; m; j++){
                 cout&lt;&lt; sum(i-1, j-1) &lt;&lt; &quot; &quot;;
-        cout &lt;&lt; &quot;\n&quot;;
+            }
+            cout &lt;&lt; &quot;\n&quot;;
+        }
     }
 };
 </pre>
 <h3>verify 用の問題</h3>
 <p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0560">Planetary Exploration</a>
-  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3214019#1">提出コード</a>(非想定解)</p>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3230795#1">提出コード</a>(非想定解)</p>
 </section>
 
 </div>
