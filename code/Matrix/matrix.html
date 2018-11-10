@@ -63,10 +63,10 @@ template&lt;typename T&gt; class mat : public vector&lt;vector&lt;T&gt; &gt; {
 private:
     int r,c;    //行,列
 public:
-    int row() const {
+    inline int row() const {
         return r;
     }
-    int column() const {
+    inline int column() const {
         return c;
     }
     mat(int n,int m,T val = 0){
@@ -75,7 +75,7 @@ public:
             this-&gt;push_back(vector&lt;T&gt;(m,val));
         }
     }
-    mat operator+(const mat&amp; another){
+    mat operator+(const mat&amp; another) const {
         if(r != another.r &amp;&amp; c != another.c){
             cout &lt;&lt; &quot;足し算失敗(サイズ不一致)&quot; &lt;&lt; endl;
             exit(1);
@@ -88,7 +88,7 @@ public:
         }
         return X;
     }
-    mat operator+(const T val){
+    mat operator+(const T val) const {
         mat&lt;T&gt; X(r,c);
         for(int i = 0; i &lt; r; i++){
             for(int j = 0; j &lt; c; j++){
@@ -97,7 +97,7 @@ public:
         }
         return X;
     }
-    mat operator-(const mat&amp; another){
+    mat operator-(const mat&amp; another) const {
         if(r != another.r &amp;&amp; c != another.c){
             cout &lt;&lt; &quot;引き算失敗(サイズ不一致)&quot; &lt;&lt; endl;
             exit(1);
@@ -110,7 +110,7 @@ public:
         }
         return X;
     }
-    mat operator-(const T val){
+    mat operator-(const T val) const {
         mat&lt;T&gt; X(r,c);
         for(int i = 0; i &lt; r; i++){
             for(int j = 0; j &lt; c; j++){
@@ -119,7 +119,7 @@ public:
         }
         return X;
     }
-    vector&lt;T&gt; operator*(const vector&lt;T&gt;&amp; another){
+    vector&lt;T&gt; operator*(const vector&lt;T&gt;&amp; another) const {
         if(c != (int)another.size()){
             cout &lt;&lt; &quot;掛け算失敗(サイズ不一致)&quot; &lt;&lt; endl;
             exit(1);
@@ -132,7 +132,7 @@ public:
         }
         return vec;
     }
-    mat operator*(const mat&amp; another){
+    mat operator*(const mat&amp; another) const {
         if(c != another.r){
             cout &lt;&lt; &quot;掛け算失敗(サイズ不一致)&quot; &lt;&lt; endl;
             exit(1);
@@ -147,7 +147,7 @@ public:
         }
         return X;
     }
-    mat operator-(){
+    mat operator-() const {
         mat&lt;T&gt; X(r,c);
         for(int i = 0; i &lt; r; i++){
             for(int j = 0; j &lt; c; j++){
@@ -156,7 +156,7 @@ public:
         }
         return X;
     }
-    int rank(){
+    int rank() const {
         int res = 0;
         mat B(r, c);
         for(int i = 0; i &lt; r; i++){
@@ -186,7 +186,7 @@ public:
         }
         return res;
     }
-    T det(){
+    T det() const {
         if(r != c){
             cout &lt;&lt; &quot;正方行列でない(行列式定義不可)&quot; &lt;&lt; endl;
             exit(1);
@@ -213,7 +213,7 @@ public:
        }
        return ans;
     }
-    mat inverse(){
+    mat inverse() const {
         if(r != c){
             cout &lt;&lt; &quot;正方行列でない(逆行列定義不可)&quot; &lt;&lt; endl;
             exit(1);
@@ -258,7 +258,7 @@ public:
         }
         return res;
     }
-    void print(){
+    inline void print() const {
         for(int i = 0; i &lt; r; i++){
             for(int j = 0; j &lt; (c-1); j++){
                 cout &lt;&lt; (*this)[i][j] &lt;&lt; &quot;,&quot;;
