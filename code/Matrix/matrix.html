@@ -41,10 +41,15 @@
 <h2>Matrix</h2>
 <h3>コードについての説明</h3>
 <p>
-行列の基本的な演算 + rank, det, inverse, 連立方程式の求解をガウスの消去法を用いて実装している
+行列の基本的な演算(mat * vector も可能) + rank, det, inverse, 連立方程式の求解, pow, mod_pow の実装 <br>
+mat&lt;T&gt; は vector&lt;vector&lt;T&gt; &gt; の子クラスとして実装している.
 </p>
 <p>
-時間計算量: rank, det, inverse, 連立方程式の求解 O(n^3)
+(コンストラクタ)
+mat&lt;int&gt; A(n, n, val); で全要素が val の n × n の行列を構築(val はデフォルトで 0)
+</p>
+<p>
+時間計算量: rank, det, inverse, 連立方程式の求解 O(n^3), pow, mod_pow O(n^3logT) (T乗を求める場合)
 </p>
 <h3>コード</h3>
 <div class="codebox">
@@ -234,12 +239,12 @@ public:
                 exit(1);
             }
             swap(B[i],B[pivot]);
-            for(int j = i + 1; j &lt;= 2*r; j++){
+            for(int j = i + 1; j &lt; 2*r; j++){
                 B[i][j] /= B[i][i];
             }
             for(int j = 0; j &lt; r; j++){
                 if(i != j){
-                    for(int k = i + 1; k &lt;= 2*r; k++){
+                    for(int k = i + 1; k &lt; 2*r; k++){
                         B[j][k] -= B[j][i] * B[i][k];
                     }
                 }
@@ -280,7 +285,7 @@ template&lt;typename T&gt; vector&lt;T&gt; eq_solve(const mat&lt;T&gt;&amp; A,co
     }
     for(int i = 0; i &lt; n; i++){
         int pivot = i;
-        for(int j=i;j&lt;n;j++){
+        for(int j = i; j &lt; n;j++){
             if(abs(B[j][i]) &gt; abs(B[pivot][i])){
                 pivot = j;
             }
@@ -289,13 +294,13 @@ template&lt;typename T&gt; vector&lt;T&gt; eq_solve(const mat&lt;T&gt;&amp; A,co
             cout &lt;&lt; &quot;解なしor不定&quot; &lt;&lt; endl;
             exit(1);
         }
-        swap(B[i],B[pivot]);
-        for(int j=i+1;j&lt;=n;j++){
+        swap(B[i], B[pivot]);
+        for(int j = i + 1; j &lt;= n; j++){
             B[i][j] /= B[i][i];
         }
         for(int j = 0; j &lt; n; j++){
             if(i != j){
-                for(int k=i+1;k&lt;=n;k++){
+                for(int k = i + 1; k &lt;= n; k++){
                     B[j][k] -= B[j][i] * B[i][k];
                 }
             }
@@ -372,7 +377,10 @@ AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2315">Sh
 乗算, mod_pow の verify <br>
 yukicoder : <a href="https://yukicoder.me/problems/no/569">3 x N グリッドのパスの数</a>
     <a href="https://yukicoder.me/submissions/283500">提出コード</a><br>
-rank の verify はしていません (verify 問題を知らない)
+rank, inverse, pow の verify <br>
+AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2624">Graph Automata Player</a>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3230989#1">提出コード</a>
+</p>
 </section>
 
 </div>
