@@ -108,13 +108,13 @@ public:
                 }
             }
         }
-        return *min_element(dp[(1 &lt;&lt; t) - 1].begin(), dp[(1 &lt;&lt; t) - 1].end());
+        return dp[(1 &lt;&lt; t) - 1][terminal[0]];
     }
 };
 </pre>
 <h3>verify 用の問題</h3>
 <p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2732">Modern Announce Network</a>
-  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3239011#1">提出コード</a> (t = 3 の場合のみ)
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3239042#1">提出コード</a> (t = 3 の場合のみ)
 </p>
 </section>
 
