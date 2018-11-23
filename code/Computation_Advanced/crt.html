@@ -78,7 +78,13 @@ void extgcd(T a, T b, T&amp; x, T&amp; y)
     }
 }
 
-//modが10^6より大きい値を扱うときはm1*xを__int128にキャストする(10^12とかまで可能)
+// mod が long long のときに以下のようなものが使えるらしい (a * b % mod)
+long long mod_prod(long long a, long long b, long long mod) {
+    long long res = (a * b - (long long)((long double)a / mod * b) * mod) % mod;
+    return res &lt; 0 ? res + mod : res;
+}
+
+//modが10^6より大きい値を扱うときは m1 * x を__int128にキャストする(か上の mod_prod を用いる)(10^12とかまで可能)
 //(value, mod)
 template &lt;typename T&gt;
 pair&lt;T, T&gt; CRT(const pair&lt;T, T&gt;&amp; a1, const pair&lt;T, T&gt;&amp; a2)
@@ -94,7 +100,7 @@ pair&lt;T, T&gt; CRT(const pair&lt;T, T&gt;&amp; a1, const pair&lt;T, T&gt;&amp;
 }
 
 //modどうしが互いに素でないとき
-//modが10^6より大きい値を扱うときはm1*xを__int128にキャストする(10^12とかまで可能)
+//modが10^6より大きい値を扱うときは m1 * x を__int128にキャストする(10^12とかまで可能)
 //(value, mod)
 // template &lt;typename T&gt;
 // pair&lt;T, T&gt; CRT(const pair&lt;T, T&gt;&amp; a1, const pair&lt;T, T&gt;&amp; a2)
@@ -114,7 +120,7 @@ pair&lt;T, T&gt; CRT(const pair&lt;T, T&gt;&amp; a1, const pair&lt;T, T&gt;&amp;
 </pre>
 <h3>verify 用の問題</h3>
 <p>Codeforces : <a href="https://codeforces.com/problemset/problem/982/E">Billiard</a>
-  <a href="https://codeforces.com/contest/982/submission/41429630">提出コード</a>(普通にやるとオーバーフローするので <a href="../Type/multi_precision_integer.html">多倍長</a> 使うか, Python or Java で実装する)</p>
+  <a href="https://codeforces.com/contest/982/submission/46117585">提出コード</a></p>
 </section>
 
 </div>
