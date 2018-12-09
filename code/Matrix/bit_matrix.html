@@ -53,36 +53,78 @@ F_2上の行列のランクについても同様の高速化が可能.
 <input type="checkbox" id="label" class="csscode" />
 <label for="label"></label>
 <pre class="prettyprint linenums">
-#define MAX_N 2000
-
-class mat {
-public:
-    bitset&lt;MAX_N&gt;* a;
-    mat(){ a = new bitset&lt;MAX_N&gt;[MAX_N]; }
+template &lt;int COL_SIZE&gt; class mat {
+private:
+    // (or, and) の意味での積(正方かつ対称行列に限る(重みなし無向グラフの隣接行列とか))
     mat operator*(const mat&amp; m) const {
         mat ans;
-        for(int i = 0; i &lt; MAX_N; i++){
-            for(int j = 0; j &lt; MAX_N; j++){
+        for(int i = 0; i &lt; COL_SIZE; i++){
+            for(int j = 0; j &lt; COL_SIZE; j++){
                 if(this-&gt;a[i][j] == 0) continue;
                 ans.a[i] |= m.a[j];
             }
         }
         return ans;
     }
-    void set(int i, int j){
-        a[i].set(j);
+    
+public:
+    bitset&lt;COL_SIZE&gt;* a;
+    int r;
+    // 正方行列の場合
+    mat(){ a = new bitset&lt;COL_SIZE&gt;[COL_SIZE]; }
+    // 一般の行列の場合
+    mat(int row_size) : r(row_size){ a = new bitset&lt;COL_SIZE&gt;[r]; }
+    int rank() const {
+        int res = 0;
+        mat&lt;COL_SIZE&gt; b(r);
+        for(int i = 0; i &lt; r; i++) b[i] = a[i];
+        for(int i = 0; i &lt; COL_SIZE; i++){
+            if(res == r) return res;
+            int pivot = res;
+            if(!b[pivot][i]){
+                for(int j = res + 1; j &lt; r; j++){
+                    if(b[j][i]){
+                        pivot = j;
+                        break;
+                    }
+                }
+                if(!b[pivot][i]) continue;
+                swap(b[pivot], b[res]);
+            }
+            for(int j = res + 1; j &lt; r; j++){
+                if(b[j][i]) b[j] ^= b[res];
+            }
+            res++;
+        }
+        return res;
     }
-    int count(int i) const {
-        return a[i].count();
+    inline const bitset&lt;COL_SIZE&gt;&amp; operator[](size_t index) const {
+        return a[index];
     }
-    int get(int i, int j) const {
-        return a[i][j];
+    inline bitset&lt;COL_SIZE&gt;&amp; operator[](size_t index){
+        return a[index];
+    }
+    friend mat pow(mat m, long long cnt){
+        mat res;
+        for(int i = 0; i &lt; COL_SIZE; i++) res[i][i] = 1;
+        while(cnt){
+            if(cnt &amp; 1){
+                res = res * m;
+            }
+            m = m * m;
+            cnt &gt;&gt;= 1;
+        }
+        return res;
     }
 };
 </pre>
 <h3>verify 用の問題</h3>
+<p> pow について </p>
 <p>Atcoder : <a href="https://beta.atcoder.jp/contests/jag2017autumn/tasks/jag2017autumn_i">Revenge of the Endless BFS</a>
-  <a href="https://beta.atcoder.jp/contests/jag2017autumn/submissions/3518681">提出コード</a></p>
+  <a href="https://beta.atcoder.jp/contests/jag2017autumn/submissions/3768126">提出コード</a></p>
+<p> rank について </p>
+<p>yukicoder : <a href="https://yukicoder.me/problems/no/184">たのしい排他的論理和(HARD)</a>
+  <a href="https://yukicoder.me/submissions/303023">提出コード</a></p>
 </section>
 
 </div>
