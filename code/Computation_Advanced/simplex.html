@@ -59,7 +59,7 @@ Simplex(A,b,c): max c*x s.t. A*x &lt;= b, x &gt;= 0 で表される最適化問�
 <pre class="prettyprint linenums">
 #define EPS 1e-10
 
-// max c*x s.t. A*x &lt;= b, x &gt;= 0
+// max c * x s.t. A*x &lt;= b, x &gt;= 0
 class Simplex {
 private:
     using Arr = vector&lt;double&gt;;
@@ -79,8 +79,7 @@ private:
         for(i = 0; i &lt; row + 2; i++) a[i] = new double[column + 4];
         for(i = 0; i &lt; row; i++){
             for(j = 0; j &lt; column - 1; j++) a[i][j] = -A[i][j];
-            a[i][column-1] = 1;
-            a[i][column] = b[i];
+            a[i][column-1] = 1, a[i][column] = b[i];
             if(a[L][column] &gt; a[i][column]) L = i;
         }
         for(j = 0; j &lt; column - 1; j++) a[row][j] = c[j];
@@ -89,24 +88,28 @@ private:
 
     void solve(){
         int E, i, j;
+        int* ls = new int[column + 2];
         for(E = column - 1;;){
     	    if(L &lt; row){
                 swap(index[E], index[L + column]);
                 a[L][E] = 1 / a[L][E];
-                for(j = 0; j &lt; column + 1; j++) if(j != E) a[L][j] *= -a[L][E];
+                int prv = column + 1;
+                for(j = 0; j &lt; column + 1; j++){
+                    if(j != E){
+                        a[L][j] *= -a[L][E];
+                        if(abs(a[L][j]) &gt; EPS) ls[prv] = j, prv = j;
+                    }
+                }
+                ls[prv] = column + 1;
                 for(i = 0; i &lt; row + 2; i++){
                     if(abs(a[i][E]) &lt; EPS || i == L) continue;
-                    for(j = 0; j &lt; column + 1; j += 4){
-                        if(j != E) a[i][j] += a[i][E] * a[L][j];
-                        if(j+1 != E) a[i][j+1] += a[i][E] * a[L][j+1];
-                        if(j+2 != E) a[i][j+2] += a[i][E] * a[L][j+2];
-                        if(j+3 != E) a[i][j+3] += a[i][E] * a[L][j+3];
+                    for(j = ls[column + 1]; j &lt; column + 1; j = ls[j]){
+                        a[i][j] += a[i][E] * a[L][j];
                     }
                     a[i][E] *= a[L][E];
                 }
     	    }
     	    E = -1;
-            // １つめのコメントアウト(基底に入る変数を選択)
             // double pre = EPS;
     	    for(j = 0; j &lt; column; j++){
                 if(E &lt; 0 || index[E] &gt; index[j]){
@@ -117,7 +120,6 @@ private:
             }
             if(E &lt; 0) break;
             L = -1;
-            // 2つめのコメントアウト(基底から出る変数を選択)
             for(i = 0; i &lt; row; i++){
                 if(a[i][E] &lt; -EPS){
                     if(L &lt; 0) L = i;
@@ -153,7 +155,7 @@ public:
 </pre>
 <h3>verify 用の問題</h3>
 <p>Atcoder : <a href="https://jag2018summer-day3.contest.atcoder.jp/tasks/jag2018summer_day3_h">Enlarge Circles</a>
-  <a href="https://jag2018summer-day3.contest.atcoder.jp/submissions/3494773">提出コード</a>(非想定解)</p>
+  <a href="https://jag2018summer-day3.contest.atcoder.jp/submissions/3778367">提出コード</a>(非想定解)</p>
 </section>
 
 </div>
