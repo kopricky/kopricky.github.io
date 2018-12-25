@@ -48,6 +48,8 @@ Functional Graph とは各頂点の出次数がちょうど 1 の単純な有向
 (関数) <br>
 solve(): ループ上の頂点を loop の配列に入れる<br>
 make_graph(): (無向グラフと見たとき)ループ上の頂点を根とする木たちをループ側から端に向かう方向(元とは逆の方向)の有向森とみたグラフを構築する
+(変数) <br>
+st: make_graph で構築されるグラフ G の根となる頂点の集合
 </p>
 <p>
 時間計算量: O(n)
@@ -67,6 +69,7 @@ public:
     FunctionalGraph(int node_size)  : V(node_size), nx(V, 0), visit(V, 0){}
     void add_edge(int u,int v){
         nx[u] = v;
+        if(nx[u] == u) visit[u] = -1, loop.push_back({u});
     }
     void make_loop(const int st,int nw,int ch,vector&lt;int&gt;&amp; vec){
         while(nx[nw] != st){
