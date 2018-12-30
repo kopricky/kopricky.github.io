@@ -41,7 +41,15 @@
 <h2>List</h2>
 <h3>コードについての説明</h3>
 <p>
-
+イテレーターが不変な双方向リストコンテナの実装. <br>
+std::list は std::set や std::map と違い insert や (他の要素の)erase ではイテレーター破壊は起きないが自分自身が erase されるともちろんイテレーター破壊が起きる. <br>
+Minimum Vertex Cover の FPT アルゴリズムの実装などでこの問題がネックとなり std::list を用いることができなかったためイテレーター不変の自作コンテナを実装した. <br>
+例えばある探索する際に it2 = list.erase(it1); rec(); list.insert(it2, val); のように次の再帰に入る前にある要素を削除, 探索を終えた後にその要素を同じ位置に戻すみたいなことがしたくなる場合がある. <br>
+イテレーター it1(それが指す要素を val とする) が削除され次の要素のイテレーターである it2 が得られるが, 探索(rec())後に it2 の前に val を挿入しようとするとバグが発生しうる. it2 が探索(rec())中で破壊されて存在しない可能性があるからである. <br>
+以下の実装では各要素に不変のイテレーター(簡単に言うと添字)を割り振ることでこの問題を解消している. イテレーターを明示的にキャストしてやれば添字を表す int に型変換することも可能. <br>
+そのため Fibonacci Heap の実装の際に起きた異なる list のイテレーター同士を対応付けないといけない問題もこの自作コンテナを用いて(添字ベースで)直観的に行うことができる. <br>
+使い方は基本的には決まった台集合をコンストラクト時に vector の配列として渡してやる方法がやりやすい(添字と各要素の対応は常に不変である). <br>
+自作イテレーター(bidirectional iterator) によって for_each や max_element などの種々のアルゴリズムがそのまま使用可能である(いかんせん自作なので作りが甘く変な使い方をすると stl とは異なるような挙動を示すかもしれない).
 </p>
 <p>
 
@@ -192,7 +200,7 @@ public:
     ListIterator(const ListIterator&amp; itr){
         ls_ptr = itr.ls_ptr, index = itr.index;
     }
-    operator int() const noexcept { return index; }
+    explicit operator int() const noexcept { return index; }
     ListIterator&amp; operator=(const ListIterator&amp; itr) &amp; {
         ls_ptr = itr.ls_ptr, index = itr.index;
         return *this;
