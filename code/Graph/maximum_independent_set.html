@@ -48,7 +48,8 @@
 実装において高速化のためグラフの頂点や枝を削除していく部分を順序付き集合ではなくリストでおこなっている. (この実装は stl の std::list を用いてできないので <a href="../OriginalContainer/list.html">自作のリスト</a> を用いて実装した.) <br>
 ちなみに (最大独立集合のサイズ) = |V| - (最小頂点被覆のサイズ) = (G の補グラフのクリーク数) という関係が成り立つので(証明はそこまで難しくない), これらの問題に対してもこのアルゴリズムを用いることができる. <br>
 verify 問題で高速に通している人たちはおそらく <a href="https://www.jstage.jst.go.jp/article/ipsjjip/25/0/25_667/_pdf">富田らの論文</a> の最大クリーク問題を高速に解くアルゴリズムを用いているものと思われる. <br>
-(注) 多重辺が存在しないことを仮定している. gcc 拡張を用いているため gcc のみで動作する. また頂点数が 127 を超える場合は __int128 型で保持している頂点集合の部分を変更する必要がある.
+(注) 多重辺が存在しないことを仮定している. gcc 拡張を用いているため gcc のみで動作する. また頂点数が 127 を超える場合は __int128 型で保持している頂点集合の部分を変更する必要がある. <br>
+グラフのサイズが小さいので生配列で書いた方が vector で書くより多少速いかもしれない...
 </p>
 <p>
 (関数)<br>
@@ -398,7 +399,9 @@ public:
 </pre>
 <h3>verify 用の問題</h3>
 <p>yukicoder : <a href="https://yukicoder.me/problems/no/382">シャイな人たち (2)</a>
-  <a href="https://yukicoder.me/submissions/307241">提出コード</a></p>
+  <a href="https://yukicoder.me/submissions/307241">提出コード</a><br>
+Atcoder : <a href="https://code-thanks-festival-2017.contest.atcoder.jp/tasks/code_thanks_festival_2017_g">Mixture Drug</a>
+  <a href="https://code-thanks-festival-2017.contest.atcoder.jp/submissions/3898837">提出コード</a></p>
 </section>
 
 </div>

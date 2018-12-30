@@ -51,7 +51,7 @@
 <p>
 (関数)<br>
 add_edge(u, v): 無向辺(u, v) を追加する <br>
-judge(K): 頂点数 K 以下の頂点被覆集合は存在するかの答え (true / false) を返す (true ならば　ans_set に最適値を実現する頂点集合が格納される)
+solve(K): 頂点数 K 以下の頂点被覆集合は存在するかの答え (true / false) を返す (true ならば　ans_set に最適値を実現する頂点集合が格納される)
 </p>
 <p>
 時間計算量: O(1.467^k * n)
@@ -368,7 +368,7 @@ private:
         int next_ver = find_max_degree_ver();
         if(next_ver &lt; 0) return postprocessing(K, add_size, erase_ver);
         transition(K, next_ver, true);
-        if((int)cand.size() + (int)G[next_ver].size() &gt;= ans_size){
+        if((int)cand.size() + (int)G[next_ver].size() &lt; ans_size){
             transition(K, next_ver, false);
         }
         return postprocessing(K, add_size, erase_ver);
@@ -395,7 +395,12 @@ public:
 </pre>
 <h3>verify 用の問題</h3>
 <p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2558">Medical Inspection</a>
-  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3316913#1">提出コード</a></p>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3317124#1">提出コード</a><br>
+Atcoder : <a href="https://code-thanks-festival-2017.contest.atcoder.jp/tasks/code_thanks_festival_2017_g">Mixture Drug</a>
+  <a href="https://code-thanks-festival-2017.contest.atcoder.jp/submissions/3899184">提出コード</a><br>
+yukicoder : <a href="https://yukicoder.me/problems/no/382">シャイな人たち (2)</a>
+  <a href="https://yukicoder.me/submissions/307289">提出コード</a>(std::set を __int128 の bit 集合で実装)</p>
+</p>
 </section>
 
 </div>
