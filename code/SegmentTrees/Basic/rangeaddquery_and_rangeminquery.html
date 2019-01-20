@@ -44,7 +44,7 @@
 区間加算 (a_i ← a_i + val (i ∈ [l, r)), 区間最小値 (min_(l <= i < r) a_i) のクエリを効率的に処理できる. <br>
 区間加算のクエリを要素一つ一つに愚直にやっていると遅くなるが区間がセグ木のノードに対応する区間を含んだ場合そのノードにそれより下に伝播されるべき加算の記録を持っておく. そしてその後実際に区間最小値のクエリで探索された時に初めてその下に伝播させるようにしてやると O(logn) で効率よくクエリを処理できる. <br>
 このような処理は遅延評価と呼ばれ, Haskell などの言語で取り入れられているらしい. <br>
-以下の実装では高速化のため非再帰での実装にしている(非再帰で書かないほうが意味的には理解しやすいが...).
+以下の実装では高速化のため query 関数を非再帰での実装にしている(非再帰で書かないほうが意味的には理解しやすいが...).
 </p>
 <p>
 時間計算量: 構築 O(n), 各クエリ O(logn)
@@ -79,24 +79,19 @@ public:
              node[i] = min(node[2*i], node[2*i+1]);
         }
     }
-    void range(int a, int b, T x) {
-        a += n, b += n - 1;
-        for(int i = h; i &gt; 0; i--){
-            eval(a &gt;&gt; i), eval(b &gt;&gt; i);
+    void range(int a, int b, T x, int k=1, int l=0, int r=-1){
+        if(r &lt; 0) r = n;
+        eval(k);
+        if(b &lt;= l || r &lt;= a){
+            return;
         }
-        int ta = a, tb = b++;
-        while(a &lt; b){
-            if(a &amp; 1) lazy[a++] += x;
-            if(b &amp; 1) lazy[--b] += x;
-            a &gt;&gt;= 1, b &gt;&gt;= 1;
-        }
-        while(ta &gt;&gt;= 1, tb &gt;&gt;= 1, ta){
-            if(!lazy[ta]){
-                eval(2*ta), eval(2*ta+1), node[ta] = min(node[2*ta], node[2*ta+1]);
-            }
-            if(!lazy[tb]){
-                eval(2*tb), eval(2*tb+1), node[tb] = min(node[2*tb], node[2*tb+1]);
-            }
+        if(a &lt;= l &amp;&amp; r &lt;= b){
+            lazy[k] += x;
+            eval(k);
+        }else{
+            range(a, b, x, 2*k, l, (l+r)/2);
+            range(a, b, x, 2*k+1, (l+r)/2, r);
+            node[k] = min(node[2*k], node[2*k+1]);
         }
     }
     pair&lt;T, int&gt; query(int a, int b) {
@@ -123,7 +118,7 @@ public:
 </pre>
 <h3>verify 用の問題</h3>
 <p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=DSL_2_H">RMQ and RAQ</a>
-  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3177294#1">提出コード</a></p>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3345943#1">提出コード</a></p>
 </section>
 
 </div>

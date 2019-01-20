@@ -44,7 +44,7 @@
 区間加算 (a_i ← a_i + val (i ∈ [l, r)), 区間和 (min_(l <= i < r) a_i) のクエリを効率的に処理できる. <br>
 区間加算のクエリを要素一つ一つに愚直にやっていると遅くなるが区間がセグ木のノードに対応する区間を含んだ場合そのノードにそれより下に伝播されるべき加算の記録を持っておく. そしてその後実際に区間和のクエリで探索された時に初めてその下に伝播させるようにしてやると O(logn) で効率よくクエリを処理できる. <br>
 このような処理は遅延評価と呼ばれ, Haskell などの言語で取り入れられているらしい. <br>
-以下の実装では高速化のため非再帰での実装にしている(非再帰で書かないほうが意味的には理解しやすいが...).
+以下の実装では高速化のため query 関数を非再帰での実装にしている(非再帰で書かないほうが意味的には理解しやすいが...).
 </p>
 <p>
 時間計算量: 構築 O(n), 各クエリ O(logn)
@@ -111,7 +111,7 @@ public:
 </pre>
 <h3>verify 用の問題</h3>
 <p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=DSL_2_G">RSQ and RAQ</a>
-  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3177302#1">提出コード</a></p>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3345946#1">提出コード</a></p>
 </section>
 
 </div>
