@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>アルゴリズム名</h2>
+<h3>コードについての説明</h3>
+<p>
+元論文は <a href=""></a>
+</p>
+<p>
+(関数)<br>
+add_edge(): 辺を追加する <br>
+</p>
+<p>
+時間計算量: O(mlogn)
+</p>
+<h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
+<pre class="prettyprint linenums">
+template&lt;typename CapType, typename CostType&gt; class min_cost_flow_DAG {
+public:
+    using Cat = CapType;
+    using Cot = CostType;
+    using pti = pair&lt;Cot, int&gt;;
+    struct edge {
+        int to; Cat cap; Cot cost; int rev; bool is_for;
+    };
+    int V;
+    Cot inf;
+    vector&lt;vector&lt;edge&gt; &gt; G;
+    vector&lt;CostType&gt; h, dist;
+    vector&lt;int&gt; deg, ord, prevv, preve;
+    min_cost_flow_DAG(int node_size) : V(node_size), inf(numeric_limits&lt;Cot&gt;::max()),
+        G(V), h(V, inf), dist(V), deg(V, 0), prevv(V), preve(V){}
+    void add_edge(int from, int to, Cat cap, Cot cost){
+        G[from].push_back((edge){to, cap, cost, (int)G[to].size(), true});
+        G[to].push_back((edge){from, 0, -cost, (int)G[from].size() - 1, false});
+        deg[to]++;
+    }
+    bool tsort(){
+        queue&lt;int&gt; que;
+		for(int i = 0; i &lt; V; i++){
+			if(deg[i] == 0){
+				que.push(i);
+			}
+		}
+		while(!que.empty()){
+			int p = que.front();
+			que.pop();
+			ord.push_back(p);
+			for(auto&amp; e : G[p]){
+				if(e.is_for &amp;&amp; --deg[e.to] == 0){
+					que.push(e.to);
+				}
+			}
+		}
+		return (*max_element(deg.begin(),deg.end()) == 0);
+    }
+    void calc_potential(int s){
+        h[s] = 0;
+        for(int v : ord){
+            if(h[v] == inf) continue;
+            for(edge&amp; e : G[v]){
+                if(e.is_for) h[e.to] = min(h[e.to], h[v] + e.cost);
+            }
+        }
+    }
+    void Dijkstra(int s){
+        priority_queue&lt;pti,vector&lt;pti&gt;,greater&lt;pti&gt; &gt; que;
+        fill(dist.begin(), dist.end(), inf);
+        dist[s] = 0;
+        que.push(pti(0, s));
+        while(!que.empty()){
+            pti p = que.top();
+            que.pop();
+            int v = p.second;
+            if(dist[v] &lt; p.first) continue;
+            for(int i = 0; i &lt; (int)G[v].size(); i++){
+                edge&amp; e = G[v][i];
+                if(e.cap &gt; 0 &amp;&amp; dist[e.to] &gt; dist[v] + e.cost + h[v] - h[e.to]){
+                    dist[e.to] = dist[v] + e.cost + h[v] - h[e.to];
+                    prevv[e.to] = v, preve[e.to] = i;
+                    que.push(pti(dist[e.to], e.to));
+                }
+            }
+        }
+    }
+    void update(int s, int t, Cat&amp; f, Cot&amp; res){
+        for(int i = 0; i &lt; V; i++){
+            h[i] += dist[i];
+        }
+        int d = f;
+        for(int v = t; v != s; v = prevv[v]){
+            d = min(d, G[prevv[v]][preve[v]].cap);
+        }
+        f -= d;
+        res += d * h[t];
+        for(int v = t; v != s; v = prevv[v]){
+            edge&amp; e = G[prevv[v]][preve[v]];
+            e.cap -= d;
+            G[v][e.rev].cap += d;
+        }
+    }
+    Cot solve(int s, int t, Cat f){
+        tsort();
+        calc_potential(s);
+        Cot res = 0;
+        while(f &gt; 0){
+            Dijkstra(s);
+            if(dist[t] == inf){
+                return -1;
+            }
+            update(s, t, f, res);
+        }
+        return res;
+    }
+};
+</pre>
+<h3>verify 用の問題</h3>
+<p>Atcoder : <a href="https://atcoder.jp/contests/tdpc/tasks/tdpc_graph">グラフ</a>
+  <a href="https://atcoder.jp/contests/tdpc/submissions/4081877">提出コード(非想定解)</a></p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>

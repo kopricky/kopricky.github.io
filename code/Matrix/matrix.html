@@ -344,7 +344,7 @@ template&lt;typename T&gt; mat&lt;T&gt; mod_mul(mat&lt;T&gt;&amp; A,mat&lt;T&gt;
     for(int i = 0; i &lt; A.row(); i++){
         for(int k = 0; k &lt; A.column(); k++){
             for(int j = 0; j &lt; B.column(); j++){
-                X[i][j] = (X[i][j] + A[i][k]*B[k][j]) % MOD;
+                X[i][j] = (X[i][j] + (long long)A[i][k]*B[k][j]) % MOD;
             }
         }
     }
