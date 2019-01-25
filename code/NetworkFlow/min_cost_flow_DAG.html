@@ -38,17 +38,18 @@
 <div id="contents">
 
 <section>
-<h2>Min Cost Flow</h2>
+<h2>Min Cost Flow DAG</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
+<a href="./min_cost_flow.html">最小費用流を求めるアルゴリズム</a>のグラフが DAG の場合の改良版. <br>
+グラフが DAG である場合, 負辺が含まれていても初期ポテンシャルの計算がトポロジカル順序に沿って DP を行うことで求めることができるので愚直に <a href="../Graph_SP_MST/bellman_ford.html">Bellman Ford</a> 法を用いる場合(時間計算量 O(nm))よりも高速になる.
 </p>
 <p>
 (関数)<br>
-add_edge(): 辺を追加する <br>
+solve(s,t,f) : s から t へ流量 f 流すのにかかる最小費用<br>
 </p>
 <p>
-時間計算量: O(mlogn)
+時間計算量: O(|F|mlogn) (流量を |F| とする)
 </p>
 <h3>コード</h3>
 <div class="codebox">
@@ -77,22 +78,22 @@ public:
     }
     bool tsort(){
         queue&lt;int&gt; que;
-		for(int i = 0; i &lt; V; i++){
-			if(deg[i] == 0){
-				que.push(i);
-			}
-		}
-		while(!que.empty()){
-			int p = que.front();
-			que.pop();
-			ord.push_back(p);
-			for(auto&amp; e : G[p]){
-				if(e.is_for &amp;&amp; --deg[e.to] == 0){
-					que.push(e.to);
-				}
-			}
-		}
-		return (*max_element(deg.begin(),deg.end()) == 0);
+        for(int i = 0; i &lt; V; i++){
+            if(deg[i] == 0){
+                que.push(i);
+            }
+        }
+        while(!que.empty()){
+            int p = que.front();
+            que.pop();
+            ord.push_back(p);
+            for(auto&amp; e : G[p]){
+                if(e.is_for &amp;&amp; --deg[e.to] == 0){
+                    que.push(e.to);
+                }
+            }
+        }
+        return (*max_element(deg.begin(),deg.end()) == 0);
     }
     void calc_potential(int s){
         h[s] = 0;
