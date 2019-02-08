@@ -48,7 +48,7 @@
 <p>
 (関数)<br>
 insert(a, x): a に値 x をもつ要素を追加する <br>
-range(a, b, x): 区間[a,b)内の要素に値ｘを加える <br>
+range(a, b, x): 区間[a,b)内の要素に値 ｘ を加える <br>
 query(a, b): 区間[a,b)内の要素の合計を返す <br>
 POOL_SIZE(ノードの最大数), MAX_SIZE(範囲の最大値) は問題に応じて変更する.
 </p>
@@ -102,7 +102,7 @@ private:
     }
 public:
     dynamic_segtree() : nw_size(0){ root = alloc(); }
-    //a番目にxを追加
+    // a 番目に x を追加(すでに a 番目に値が存在すればそれに x を足す)
     void insert(int a, T x, node *k = root, int l = 0, int r = MAX_SIZE){
         eval(k, l, r);
         k-&gt;st_size++;
