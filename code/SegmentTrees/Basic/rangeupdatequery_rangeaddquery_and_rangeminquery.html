@@ -54,68 +54,67 @@
 <pre class="prettyprint linenums">
 template&lt;typename T&gt; class segtree {
 private:
-    int n,sz; vector&lt;T&gt; node, lazy_update, lazy_add; vector&lt;bool&gt; lazyFlag;
-    void eval(int k, int l, int r) {
+    int n,sz,h; vector&lt;T&gt; node, lazy_update, lazy_add; vector&lt;bool&gt; lazyFlag;
+public:
+    segtree(vector&lt;T&gt;&amp; v) : n(1), sz((int)v.size()), h(0){
+        while(n &lt; sz) n *= 2, h++;
+        node.resize(2*n, numeric_limits&lt;T&gt;::max());
+        lazy_update.resize(2*n, 0); lazyFlag.resize(2*n, false);
+        lazy_add.resize(2*n, 0);
+        for(int i = 0; i &lt; sz; i++) node[i+n] = v[i];
+        for(int i=n-1; i&gt;=1; i--) node[i] = min(node[2*i],node[2*i+1]);
+    }
+    void eval(int k) {
         if(lazyFlag[k]){
             lazy_update[k] += lazy_add[k];
             node[k] = lazy_update[k];
-            if(r - l &gt; 1) {
-                lazy_add[2*k+1] = lazy_add[2*k+2] = 0;
-                lazy_update[2*k+1] = lazy_update[2*k+2] = lazy_update[k];
-                lazyFlag[2*k+1] = lazyFlag[2*k+2] = true;
+            if(k &lt; n) {
+                lazy_add[2*k] = lazy_add[2*k+1] = 0;
+                lazy_update[2*k] = lazy_update[2*k+1] = lazy_update[k];
+                lazyFlag[2*k] = lazyFlag[2*k+1] = true;
             }
-            lazy_add[k] = 0;
-            lazyFlag[k] = false;
+            lazy_add[k] = 0, lazyFlag[k] = false;
         }else if(lazy_add[k] != 0){
             node[k] += lazy_add[k];
-            if(r - l &gt; 1){
-                lazy_add[2*k+1] += lazy_add[k]; lazy_add[2*k+2] += lazy_add[k];
+            if(k &lt; n){
+                lazy_add[2*k] += lazy_add[k]; lazy_add[2*k+1] += lazy_add[k];
             }
             lazy_add[k] = 0;
         }
     }
-
-public:
-    segtree(vector&lt;T&gt; v) : sz((int)v.size()){
-        n = 1;
-        while(n &lt; sz) n *= 2;
-        node.resize(2*n-1,numeric_limits&lt;T&gt;::max());
-        lazy_update.resize(2*n-1, 0); lazyFlag.resize(2*n-1,false);
-        lazy_add.resize(2*n-1, 0);
-        for(int i = 0; i &lt; sz; i++){
-            node[i+n-1] = v[i];
-        }
-        for(int i=n-2; i&gt;=0; i--) node[i] = min(node[2*i+1],node[2*i+2]);
-    }
-    void update(int a, int b, T x, int k=0, int l=0, int r=-1) {
+    void update(int a, int b, T x, int k=1, int l=0, int r=-1) {
         if(r &lt; 0) r = n;
-        eval(k, l, r);
+        eval(k);
         if(b &lt;= l || r &lt;= a) return;
         if(a &lt;= l &amp;&amp; r &lt;= b){
-            lazy_add[k] = 0; lazy_update[k] = x; lazyFlag[k] = true;
-            eval(k, l, r);
+            lazy_add[k] = 0; lazy_update[k] = x; lazyFlag[k] = true; eval(k);
         }else{
-            update(a, b, x, 2*k+1, l, (l+r)/2); update(a, b, x, 2*k+2, (l+r)/2, r);
-            node[k] = min(node[2*k+1],node[2*k+2]);
+            update(a, b, x, 2*k, l, (l+r)/2); update(a, b, x, 2*k+1, (l+r)/2, r);
+            node[k] = min(node[2*k],node[2*k+1]);
         }
     }
-    void add(int a, int b, T x, int k=0, int l=0, int r=-1){
+    void add(int a, int b, T x, int k=1, int l=0, int r=-1){
         if(r &lt; 0) r = n;
-        eval(k, l, r);
+        eval(k);
         if(b &lt;= l || r &lt;= a) return;
         if(a &lt;= l &amp;&amp; r &lt;= b){
-            lazy_add[k] += x; eval(k, l, r);
+            lazy_add[k] += x; eval(k);
         }else{
-            add(a, b, x, 2*k+1, l, (l+r)/2); add(a, b, x, 2*k+2, (l+r)/2, r);
-            node[k] = min(node[2*k+1],node[2*k+2]);
+            add(a, b, x, 2*k, l, (l+r)/2); add(a, b, x, 2*k+1, (l+r)/2, r);
+            node[k] = min(node[2*k],node[2*k+1]);
         }
     }
-    T query(int a, int b, int k=0, int l=0, int r=-1) {
-        if(r &lt; 0) r = n;
-        eval(k, l, r);
-        if(b &lt;= l || r &lt;= a) return numeric_limits&lt;T&gt;::max();
-        if(a &lt;= l &amp;&amp; r &lt;= b) return node[k];
-        return min(query(a, b, 2*k+1, l, (l+r)/2), query(a, b, 2*k+2, (l+r)/2, r));
+    T query(int a, int b) {
+        a += n, b += n - 1;
+        for(int i = h; i &gt; 0; i--) eval(a &gt;&gt; i), eval(b &gt;&gt; i);
+        b++;
+        T res1 = numeric_limits&lt;T&gt;::max(), res2 = numeric_limits&lt;T&gt;::max();
+        while(a &lt; b) {
+            if(a &amp; 1) eval(a), res1 = min(res1, node[a++]);
+            if(b &amp; 1) eval(--b), res2 = min(res2, node[b]);
+            a &gt;&gt;= 1, b &gt;&gt;= 1;
+        }
+        return min(res1, res2);
     }
     void print(){
         for(int i = 0; i &lt; sz; i++){
