@@ -38,10 +38,10 @@
 <div id="contents">
 
 <section>
-<h2>RangeUpdateQuery RangeAddQuery and RangeMinQuery</h2>
+<h2>RangeUpdateQuery RangeAddQuery and RangeSumQuery</h2>
 <h3>コードについての説明</h3>
 <p>
-区間更新 (a_i ← val (i ∈ [l, r)), 区間加算 (a_i ← a_i + val (i ∈ [l, r)), 区間最小値 (min_(l <= i < r) a_i) のクエリを効率的に処理できる. <br>
+区間更新 (a_i ← val (i ∈ [l, r)), 区間加算 (a_i ← a_i + val (i ∈ [l, r)), 区間和 (sum_(l <= i < r) a_i) のクエリを効率的に処理できる. <br>
 更新と加算の両方の遅延伝播をいい感じに処理すればできる.
 </p>
 <p>
@@ -56,13 +56,13 @@ template&lt;typename T&gt; class segtree {
 private:
     int n,sz,h; vector&lt;T&gt; node, lazy_update, lazy_add; vector&lt;bool&gt; lazyFlag;
 public:
-    segtree(vector&lt;T&gt;&amp; v) : n(1), sz((int)v.size()), h(0){
+    segtree(vector&lt;T&gt; v) : n(1), sz((int)v.size()), h(0){
         while(n &lt; sz) n *= 2, h++;
-        node.resize(2*n, numeric_limits&lt;T&gt;::max());
+        node.resize(2*n, 0);
         lazy_update.resize(2*n, 0); lazyFlag.resize(2*n, false);
         lazy_add.resize(2*n, 0);
         for(int i = 0; i &lt; sz; i++) node[i+n] = v[i];
-        for(int i=n-1; i&gt;=1; i--) node[i] = min(node[2*i],node[2*i+1]);
+        for(int i=n-1; i&gt;=1; i--) node[i] = node[2*i] + node[2*i+1];
     }
     void eval(int k) {
         if(lazyFlag[k]){
@@ -70,14 +70,14 @@ public:
             node[k] = lazy_update[k];
             if(k &lt; n) {
                 lazy_add[2*k] = lazy_add[2*k+1] = 0;
-                lazy_update[2*k] = lazy_update[2*k+1] = lazy_update[k];
+                lazy_update[2*k] = lazy_update[2*k+1] = lazy_update[k] / 2;
                 lazyFlag[2*k] = lazyFlag[2*k+1] = true;
             }
             lazy_add[k] = 0, lazyFlag[k] = false;
         }else if(lazy_add[k] != 0){
             node[k] += lazy_add[k];
             if(k &lt; n){
-                lazy_add[2*k] += lazy_add[k]; lazy_add[2*k+1] += lazy_add[k];
+                lazy_add[2*k] += lazy_add[k] / 2; lazy_add[2*k+1] += lazy_add[k] / 2;
             }
             lazy_add[k] = 0;
         }
@@ -87,10 +87,10 @@ public:
         eval(k);
         if(b &lt;= l || r &lt;= a) return;
         if(a &lt;= l &amp;&amp; r &lt;= b){
-            lazy_add[k] = 0; lazy_update[k] = x; lazyFlag[k] = true; eval(k);
+            lazy_add[k] = 0; lazy_update[k] = x*(r-l); lazyFlag[k] = true; eval(k);
         }else{
             update(a, b, x, 2*k, l, (l+r)/2); update(a, b, x, 2*k+1, (l+r)/2, r);
-            node[k] = min(node[2*k],node[2*k+1]);
+            node[k] = node[2*k] + node[2*k+1];
         }
     }
     void add(int a, int b, T x, int k=1, int l=0, int r=-1){
@@ -98,35 +98,31 @@ public:
         eval(k);
         if(b &lt;= l || r &lt;= a) return;
         if(a &lt;= l &amp;&amp; r &lt;= b){
-            lazy_add[k] += x; eval(k);
+            lazy_add[k] += x*(r-l); eval(k);
         }else{
             add(a, b, x, 2*k, l, (l+r)/2); add(a, b, x, 2*k+1, (l+r)/2, r);
-            node[k] = min(node[2*k],node[2*k+1]);
+            node[k] = node[2*k] + node[2*k+1];
         }
     }
     T query(int a, int b) {
         a += n, b += n - 1;
         for(int i = h; i &gt; 0; i--) eval(a &gt;&gt; i), eval(b &gt;&gt; i);
         b++;
-        T res1 = numeric_limits&lt;T&gt;::max(), res2 = numeric_limits&lt;T&gt;::max();
+        T res1 = 0, res2 = 0;
         while(a &lt; b) {
-            if(a &amp; 1) eval(a), res1 = min(res1, node[a++]);
-            if(b &amp; 1) eval(--b), res2 = min(res2, node[b]);
+            if(a &amp; 1) eval(a), res1 += node[a++];
+            if(b &amp; 1) eval(--b), res2 += node[b];
             a &gt;&gt;= 1, b &gt;&gt;= 1;
         }
-        return min(res1, res2);
+        return res1 + res2;
     }
-    void print(){
-        for(int i = 0; i &lt; sz; i++){
-            cout&lt;&lt;query(i,i+1)&lt;&lt; &quot; &quot;;
-        }
-        cout&lt;&lt;endl;
-    }
+    void print(){for(int i = 0; i &lt; sz; i++)cout&lt;&lt;query(i,i+1)&lt;&lt; &quot; &quot;;cout&lt;&lt;endl;}
 };
 </pre>
 <h3>verify 用の問題</h3>
 <p>
-verify していません(verify 問題を知らない)
+<p>Atcoder : <a href="https://atcoder.jp/contests/nikkei2019-final/tasks/nikkei2019_final_d">Deforestation</a>
+    <a href="https://atcoder.jp/contests/nikkei2019-final/submissions/4302281">提出コード</a></p>
 </p>
 </section>
 
