@@ -427,13 +427,13 @@ public:
     }
 
     MPI operator-(const MPI&amp; num) const {
+        MPI res; res.sign = sign;
         if(sign != num.sign){
-            MPI res; res.sign = sign;
             add(*this, num, res);
             return res;
         }
-        MPI res; res.sign = (abs_less(*this, num) ^ sign);
-        if(res.sign){
+        if(abs_less(*this, num)){
+            res.sign = !sign;
             sub(num, *this, res);
         }else{
             sub(*this, num, res);
