@@ -45,132 +45,185 @@ Link Cut Tree とは木の動的な変化(辺の挿入, 辺の削除)を効率�
 HL 分解に雰囲気は似ていて, HL 分解での heavy path の部分を平衡二分探索木(splay 木)で持っている. <br>
 あくまで木に対するデータ構造なので同じ連結成分内の頂点間に辺を貼ったりはできない. そういうことがしたい(一般のグラフの動的連結性を行いたい)なら, O(logn) 個の Link Cut Tree を持つ必要がある. <br>
 Link Cut Tree はパスを扱うのには適しているが, 部分木を扱うにはあまり適していないので実際に上記のデータ構造の実装をする際は同じく木の動的連結性を保持するデータ構造である <a href="http://web.stanford.edu/class/archive/cs/cs166/cs166.1166/lectures/17/Small17.pdf">Euler Tour Tree</a> を使ったほうがよいかもしれない. <br>
-Link Cut Tree の参考資料としては<a href="https://www.ioi-jp.org/camp/2013/2013-sp-tasks/2013-sp-day4-spaceships-review.pdf">このスライド</a>で雰囲気を理解し, 別の記事なりを読むと理解が早まるかもしれません. アルゴリズムの理解には時間がかかりますが, 実装自体はそこまで重くない. <br>
-正直なところなぜならしO(logn)になるかのポテンシャル部分の議論があまりよくわかっていない(ダメじゃん...)
+アルゴリズムの理解には時間がかかりますが, 実装自体はそこまで重くない. 以下ではパス上の頂点に対するクエリの処理を実現するデータ構造にしているが, 単に link, cut, connected だけなら各値の伝播や reverse などは必要ないのでもっと実装は簡潔になる.<br>
+部分木に対する演算も行いたい場合は各頂点から non-preferred child に辿れる必要がある. この問題は頂点の接続関係(ジョイント)をまた別の splay 木で管理することで解決できる(らしい)が実装がより複雑になる. 実際にパス, 部分木両方のクエリを処理したい場合は <a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.87.9754&rep=rep1&type=pdf">Top Tree (self-adjusting version)</a> を参考にするとよさそう. <br>
+(注1) link の実装は本来 access を使うべきだが, 入力の木が親子関係ではなく辺集合として与えられるときその親子関係をグラフを実際に構築して調べるのが面倒なので evert を用いて reroot を行う実装にしている. <br>
+(注2) 以下はパス上の加算・総和のクエリだが適宜他の演算に変更可
 </p>
 <p>
-時間計算量: 各クエリ ならし O(logn)
+時間計算量: 各クエリ ならし O(logn) <br>
+<s>正直なところなぜならしO(logn)になるかのポテンシャル部分の議論があまりよくわかっていない(ダメじゃん...)</s> 完全に理解した！
 </p>
 <h3>コード</h3>
 <div class="codebox">
 <input type="checkbox" id="label" class="csscode" />
 <label for="label"></label>
 <pre class="prettyprint linenums">
-struct node {
-    int id;
-    node *left, *right, *par;
-    bool rev;
-    node(int num) : id(num), left(nullptr), right(nullptr), par(nullptr), rev(false){}
-    bool isRoot(){
-        return (!par) || (par-&gt;left != this &amp;&amp; par-&gt;right != this);
-    }
-    //スプレー木を反転させる
-    void push(){
-        if(!rev) return;
-        rev = false;
-        swap(left,right);
-        if(left) left-&gt;rev = !(left-&gt;rev);
-        if(right) right-&gt;rev = !(right-&gt;rev);
-    }
-};
+template&lt;typename T&gt; class LinkCutTree {
+public:
+    struct node {
+        int id, sz;
+        T val, al, lazy;
+        node *left, *right, *par;
+        bool rev;
+        node(int num) : id(num), val(id2), al(id2), lazy(id1),
+            left(nullptr), right(nullptr), par(nullptr), rev(false){}
+        static const T id1 = (T)0;
+        static const T id2 = (T)0;
+        void opr1(T&amp; arg1, const T arg2) const {
+            arg1 += arg2;
+        }
+        T opr2(const T arg1, const T arg2) const {
+            return arg1 + arg2;
+        }
+        bool isRoot(){
+            return (!par) || (par-&gt;left != this &amp;&amp; par-&gt;right != this);
+        }
+        //スプレー木を反転させる
+        void push(){
+            if(lazy != id1){
+                opr1(val, lazy), al += lazy * sz;
+                if(left) opr1(left-&gt;lazy, lazy);
+                if(right) opr1(right-&gt;lazy, lazy);
+                lazy = id1;
+            }
+            if(!rev) return;
+            swap(left, right);
+            if(left) left-&gt;rev = !(left-&gt;rev);
+            if(right) right-&gt;rev = !(right-&gt;rev);
+            rev = false;
+        }
+        void eval(){
+            sz = 1, al = val;
+            if(left) left-&gt;push(), sz += left-&gt;sz, al = opr2(left-&gt;al, al);
+            if(right) right-&gt;push(), sz += right-&gt;sz, al = opr2(al, right-&gt;al);
+        }
+    };
 
-class LinkCutTree{
 private:
-    //chとpを親子関係にする(lch:左の子かどうか)
-    void connect(node* ch, node* p, bool lch){
-        if(ch) ch-&gt;par = p;
-        if(lch){
-            p-&gt;left = ch;
+    // 回転
+    void rotate(node* u, bool right){
+        node *p = u-&gt;par, *g = p-&gt;par;
+        if(right){
+            if((p-&gt;left = u-&gt;right)) u-&gt;right-&gt;par = p;
+            u-&gt;right = p, p-&gt;par = u;
         }else{
-            p-&gt;right = ch;
+            if((p-&gt;right = u-&gt;left)) u-&gt;left-&gt;par = p;
+            u-&gt;left = p, p-&gt;par = u;
         }
+        p-&gt;eval(), u-&gt;eval(), u-&gt;par = g;
+        if(!g) return;
+        if(g-&gt;left == p) g-&gt;left = u;
+        if(g-&gt;right == p) g-&gt;right = u;
+        g-&gt;eval();
     }
-    //zig, zig-zag, zig-zig の３種類の回転を表す
-    void rotate(node* u){
-        node *p = u-&gt;par, *gp  = p-&gt;par;
-        bool root = p-&gt;isRoot(), lch = (u == p-&gt;left);
-        connect(lch ? (u-&gt;right) : (u-&gt;left),p,lch);
-        connect(p,u,!lch);
-        if(root){
-            if(u) u-&gt;par = gp;
-        }else{
-            connect(u,gp,!root &amp;&amp; (p == gp-&gt;left));
-        }
-    }
-    //uをスプレー木の根にする
+    // u を splay 木の根にする
     void splay(node* u){
         while(!(u-&gt;isRoot())){
-            node* p = u-&gt;par;
-            node* gp = p-&gt;par;
-            if(!(p-&gt;isRoot())) gp-&gt;push();
-            p-&gt;push(), u-&gt;push();
-            if(!(p-&gt;isRoot())) rotate((u == p-&gt;left) == (p == gp-&gt;left) ? p : u);
-            rotate(u);
+            node *p = u-&gt;par, *gp = p-&gt;par;
+            if(p-&gt;isRoot()){ // zig
+                p-&gt;push(), u-&gt;push();
+                rotate(u, (u == p-&gt;left));
+            }else{
+                gp-&gt;push(), p-&gt;push(), u-&gt;push();
+                bool flag = (u == p-&gt;left);
+                if((u == p-&gt;left) == (p == gp-&gt;left)){ // zig-zig
+                    rotate(p, flag), rotate(u, flag);
+                }else{ // zig-zag
+                    rotate(u, flag), rotate(u, !flag);
+                }
+            }
         }
         u-&gt;push();
     }
-    node* expose(node* u){
+    node* access(node* u){
         node* last = nullptr;
-        for(node* v = u; v; v=v-&gt;par){
+        for(node* v = u; v; v = v-&gt;par){
             splay(v);
-            v-&gt;left = last;
+            v-&gt;right = last;
+            v-&gt;eval();
             last = v;
         }
         splay(u);
         return last;
     }
-    //uを全体の根にする
-    void evert(node* u){
-        expose(u);
-        u-&gt;rev = !(u-&gt;rev);
-    }
-    bool connected(node* u,node* v){
-        expose(u), expose(v);
+    bool connected(node* u, node* v){
+        access(u), access(v);
         return u-&gt;par;
     }
-    void link(node* u,node* v){
-        // u, v が同じ連結成分にないか
-        // assert(!connected(u, v));
-        evert(u);
-        u-&gt;par = v;
+    void link(node* u, node* v){
+        evert(u), u-&gt;par = v;
     }
-    void cut(node* u, node* v){
-        evert(u);
-        expose(v);
-        // u, v の間に辺があるか
-        // assert(v-&gt;right == u &amp;&amp; !(u-&gt;left));
-        v-&gt;right-&gt;par = nullptr, v-&gt;right = nullptr;
+    void cut(node* u){
+        access(u);
+        u-&gt;left-&gt;par = nullptr, u-&gt;left = nullptr, u-&gt;eval();
     }
     node* lca(node* u, node* v){
-        // u,v が同じ連結成分内にあるか
-        // assert(connected(u, v));
-        expose(u);
-        return expose(v);
+        access(u);
+        return access(v);
+    }
+    void evert(node* u){
+        access(u);
+        u-&gt;rev = !(u-&gt;rev), u-&gt;push();
+    }
+    int depth(node* u){
+        access(u);
+        return u-&gt;sz - 1;
+    }
+    void toRoot_range(node* u, const T x){
+        access(u);
+        u-&gt;opr1(u-&gt;lazy, x), u-&gt;push();
+    }
+    void toRoot_query(node* u){
+        access(u);
+        return u-&gt;al;
+    }
+    void range(node* u, node* v, const T x){
+        evert(u), access(v);
+        v-&gt;opr1(v-&gt;lazy, x), v-&gt;push();
+    }
+    T query(node* u, node* v){
+        evert(u), access(v);
+        return v-&gt;al;
     }
 
 public:
     node** arr;
     LinkCutTree(int node_size){
-        arr = new node* [node_size];
+        arr = new node*[node_size];
         for(int i = 0; i &lt; node_size; i++){
             arr[i] = new node(i);
         }
     }
     // id1 と id2 が同じ木(連結成分)に属するか
-    bool connected(int id1, int id2){ return connected(arr[id1],arr[id2]); }
-    // 木(連結成分)の根 id1 の親を id2 にする
-    void link(int id1, int id2){ link(arr[id1],arr[id2]); }
-    // id1 と その親 id2 の間の辺を削除する
-    void cut(int id1, int id2){ cut(arr[id1], arr[id2]); }
+    bool connected(int id1, int id2){ return connected(arr[id1], arr[id2]); }
+    // id1 を id2 の non-preferred edge にする
+    void link(int id1, int id2){ return link(arr[id1], arr[id2]); }
+    // id とその親の間の辺を削除する
+    void cut(int id){ return cut(arr[id]); }
     // id1 と id2 の LCA を求める
-    int lca(int id1, int id2){ return lca(arr[id1],arr[id2])-&gt;id; }
+    int lca(int id1, int id2){ return lca(arr[id1], arr[id2])-&gt;id; }
+    // 元の木の根を id にする
+    void evert(int id){ return evert(arr[id]); }
+    // id の深さを求める
+    int depth(int id){ return depth(arr[id]); }
+    // id から根までの間にある頂点すべてに x を足す
+    void toRoot_range(int id, const T x){ return toRoot_range(arr[id], x); }
+    // id から根までの間にある頂点すべてのコストの総和を求める
+    void toRoot_query(int id){ return toRoot_query(arr[id]); }
+    // id1 と id2 の間にある頂点すべてに x を足す
+    void range(int id1, int id2, const T x){ return range(arr[id1], arr[id2], x); }
+    // id1 と id2 の間にある頂点すべてのコストの総和を求める
+    T query(int id1, int id2){ return query(arr[id1], arr[id2]); }
 };
 </pre>
 <h3>verify 用の問題</h3>
 <p>
-connected, link, cut の verify <br>
 Atcoder : <a href="https://beta.atcoder.jp/contests/njpc2017/tasks/njpc2017_h">白黒ツリー</a>
-  <a href="https://beta.atcoder.jp/contests/njpc2017/submissions/3165804">提出コード</a></p>
+  <a href="https://atcoder.jp/contests/njpc2017/submissions/4644290">提出コード</a><br>
+yukicoder : <a href="https://yukicoder.me/problems/no/399">動的な領主</a>
+  <a href="https://yukicoder.me/submissions/326667">提出コード</a>
+</p>
 </section>
 
 </div>
