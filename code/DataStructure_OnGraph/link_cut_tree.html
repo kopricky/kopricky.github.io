@@ -49,10 +49,11 @@ Link Cut Tree とは木の動的な変化(辺の挿入, 辺の削除)を効率�
 部分木に対する演算も行いたい場合は各頂点から non-preferred child に辿れる必要がある. この問題は頂点の接続関係(ジョイント)をまた別の splay 木で管理することで解決できる(らしい)が実装がより複雑になる. 実際にパス, 部分木両方のクエリを処理したい場合は <a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.87.9754&rep=rep1&type=pdf">Top Tree (self-adjusting version)</a> を参考にするとよさそう. <br>
 (注1) link の実装は本来 access を使うべきだが, 入力の木が親子関係ではなく辺集合として与えられるときその親子関係をグラフを実際に構築して調べるのが面倒なので evert を用いて reroot を行う実装にしている. <br>
 (注2) 以下はパス上の加算・総和のクエリだが適宜他の演算に変更可 <br>
+(雑なメモ) <a href="./splay.pdf">splay tree について</a><br>
 (追記) <br>
 <a href="https://courses.csail.mit.edu/6.851/spring12/lectures/L19.html">この講義</a>を参考にしました. <br>
 スプレー木がならし O(logn) になる理由(Access Lemma) が分かっていればそこまで非自明ではない感じ. access(x) の際各パスに対応する二分木でくるくるするし深さ自体も最悪 Ω(n) だから嘘じゃねとか思ったが結局 Access Lemma と似た考えでポテンシャル部分が O(rank(root) - rank(x)) になるのと
-access(x) で一つ上に登るごとに preferred child が変化する性質に注目し preferred child が変化する回数がならし O(logn) 回であることが解析に HL 分解を考えることで言える(heavy かつ preferred な辺が消える回数と light かつ preferred な辺が生まれる回数は考察すると bound できることが分かる).
+access(x) で一つ上に登るごとに preferred child が変化する性質に注目し preferred child が変化する回数がならし O(logn) 回であることが解析に HL 分解を考えることで言える(heavy かつ preferred な辺が消える回数と light かつ preferred な辺が生まれる回数は考察すると bound できることが分かる). <br>
 </p>
 <p>
 時間計算量: 各クエリ ならし O(logn) <br>
