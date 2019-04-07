@@ -47,7 +47,8 @@
 加えてヒープの併合も簡単に行うことができる.<br>
 <a href="https://www.cs.princeton.edu/~wayne/teaching/fibonacci-heap.pdf">このスライド</a>の説明をもとに実装しました. <br>
 最大値を numeric_limits&lt;KeyType&gt;::max() にして実装しているので int, long long, double 以外を使う場合は適宜変更してください. (pair&lt;int, int&gt; とかだと max() がデフォで (0,0) になるので自分で (INF, INF) とかに変更しましょう) <br>
-元論文は <a href="http://www.bioinfo.org.cn/~dbu/AlgorithmCourses/Lectures/Fibonacci-Heap-Tarjan.pdf">Fredman, Tarjan 1984</a>
+元論文は <a href="http://www.bioinfo.org.cn/~dbu/AlgorithmCourses/Lectures/Fibonacci-Heap-Tarjan.pdf">Fredman, Tarjan 1984</a><br>
+(注)実装があまりきれいでないのでなんとかしたみがある.
 </p>
 <p>
 (関数)<br>
@@ -77,11 +78,11 @@ public:
                 par(nullptr), prv(nullptr), nx(nullptr), mark(false){}
         node() : key(numeric_limits&lt;KeyType&gt;::max()), prv(this), nx(this){}
     };
-    
+
 private:
     int _size;
     node *minimum, *sentinel;
-    
+
     inline void _insert(node *_node1, node *_node2){
         _node1-&gt;prv = _node2-&gt;prv, _node1-&gt;nx = _node2;
         _node1-&gt;prv-&gt;nx = _node1, _node2-&gt;prv = _node1;
@@ -89,7 +90,7 @@ private:
     inline void _erase(node *_node){
         _node-&gt;prv-&gt;nx = _node-&gt;nx, _node-&gt;nx-&gt;prv = _node-&gt;prv;
     }
-    
+
 public:
     Fibonacci_Heap() : _size(0){
         minimum = sentinel = new node();
