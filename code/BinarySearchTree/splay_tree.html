@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>Splay Tree</h2>
+<h3>コードについての説明</h3>
+<p>
+lookup, insert, erase などの操作をならし計算量 O(log n) で実現する平衡二分探索木([Sleator, Tarjan '83]). 動的連結性を高速に解く手法(<a href="../DataStructure_OnGraph/link_cut_tree.html">Link Cut Tree<a>)を考案する過程で得られたデータ構造.<br>
+self-adjusting な構造である. つまり事前に lookup クエリの確率分布を知らなくても動的によく参照されるノードは根に近く, そうでないものは根から遠い位置になるように変形される(union-find と同じ).<br>
+zig, zig-zig, zig-zag の 3 つの回転を用いてあるノードを根にする splay と呼ばれる操作が基本になっていて, これが実装できればあとは lookup, insert, erase などは容易に実装できる.<br>
+また以下では遅延処理(区間加算, 区間総和)を施した実装にしている.<br>
+ならし計算量については頂点 i のポテンシャル r_i を r_i = log (頂点 i を根とする部分木内の頂点数) としてやることで splay 操作が(頂点数を n として)ならし O(log n) となることが言える(Access Lemma).<br>
+情報理論的な観点から優れたデータ構造であるという裏付けがある(メモ). しかしスプレー木の解析は往々にして困難であり, 計算量の最適性に関する未解決な命題も複数ある(特に動的平衡二分探索木についての最適性).<br>
+競技プログラミングの問題をいくつか解いた経験則で言うと, RBST より Splay Tree の方が基本速い(やはり 2 回連続同じノードを参照したりみたいなことをするとき Splay Tree の方が優位なのが効いている).<br>
+(雑なメモ) <a href="./splay.pdf">Splay Tree について</a><br>
+</p>
+<p>
+時間計算量: 各クエリ O(logn) (ならし計算量)
+</p>
+<h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
+<pre class="prettyprint linenums">
+// root ポインタは nullptr 初期化することを忘れない
+template&lt;typename KeyType, typename ValueType&gt; class node {
+public:
+    using KT =  KeyType;
+    using VT = ValueType;
+    KT key;
+    int sz;
+    VT value, al, lazy;
+    node *left, *right, *par;
+    node(KT _key, VT _value) : key(_key), sz(1), value(_value), al(id2), lazy(id1),
+        left(nullptr), right(nullptr), par(nullptr){}
+    static const VT id1 = (VT)0;
+    static const VT id2 = (VT)0;
+    void opr1(VT&amp; arg1, const VT arg2) const {
+        arg1 += arg2;
+    }
+    VT opr2(const VT arg1, const VT arg2) const {
+        return arg1 + arg2;
+    }
+    bool isRoot() const {
+        return !par;
+    }
+    void push(){
+        if(lazy != id1){
+            opr1(value, lazy), al += lazy * sz;
+            if(left) opr1(left-&gt;lazy, lazy);
+            if(right) opr1(right-&gt;lazy, lazy);
+            lazy = id1;
+        }
+    }
+    void eval(){
+        sz = 1, al = value;
+        if(left) left-&gt;push(), sz += left-&gt;sz, al = opr2(left-&gt;al, al);
+        if(right) right-&gt;push(), sz += right-&gt;sz, al = opr2(al, right-&gt;al);
+    }
+    void rotate(bool right_){
+        node&lt;KT, VT&gt; *p = par, *g = p-&gt;par;
+        if(right_){
+            if((p-&gt;left = right)) right-&gt;par = p;
+            right = p, p-&gt;par = this;
+        }else{
+            if((p-&gt;right = left)) left-&gt;par = p;
+            left = p, p-&gt;par = this;
+        }
+        p-&gt;eval(), eval();
+        if(!(par = g)) return;
+        if(g-&gt;left == p) g-&gt;left = this;
+        if(g-&gt;right == p) g-&gt;right = this;
+        g-&gt;eval();
+    }
+};
+
+template&lt;typename KT, typename VT&gt;
+static int size(node&lt;KT, VT&gt;* u){ return u ? u-&gt;sz : 0; }
+
+// 頂点 u を木の根にする
+template&lt;typename KT, typename VT&gt;
+node&lt;KT, VT&gt;* splay(node&lt;KT, VT&gt;* u){
+    if(!u) return nullptr;
+    while(!(u-&gt;isRoot())){
+        node&lt;KT, VT&gt; *p = u-&gt;par, *gp = p-&gt;par;
+        if(p-&gt;isRoot()){ // zig
+            p-&gt;push(), u-&gt;push();
+            u-&gt;rotate((u == p-&gt;left));
+        }else{
+            gp-&gt;push(), p-&gt;push(), u-&gt;push();
+            bool flag = (u == p-&gt;left);
+            if((u == p-&gt;left) == (p == gp-&gt;left)){ // zig-zig
+                p-&gt;rotate(flag), u-&gt;rotate(flag);
+            }else{ // zig-zag
+                u-&gt;rotate(flag), u-&gt;rotate(!flag);
+            }
+        }
+    }
+    u-&gt;push();
+    return u;
+}
+
+// root を根とする木の頂点で k 番目(0 indexed)に小さいキー値のものを探索する
+// 返り値は (木の根, k 番目が存在するかしないか(0/1))
+template&lt;typename KT, typename VT&gt;
+pair&lt;node&lt;KT, VT&gt;*, bool&gt; get(int k, node&lt;KT, VT&gt;* root){
+    if(size(root) &lt; k+1) return make_pair(root, false);
+    node&lt;KT, VT&gt; *cur = nullptr, *nx = root;
+    while(true){
+        cur = nx, cur-&gt;push();
+        if(size(cur-&gt;left) &lt; k){
+            nx = cur-&gt;right, k -= size(cur-&gt;left) + 1;
+        }else if(size(cur-&gt;left) &gt; k){
+            nx = cur-&gt;left;
+        }else break;
+    }
+    return make_pair(splay(cur), true);
+}
+
+// root を根とする木の頂点でキーが _key であるものを探索する
+// 返り値は (木の根, 存在するかしないか(0/1))
+template&lt;typename KT, typename VT&gt;
+pair&lt;node&lt;KT, VT&gt;*, bool&gt; find(const KT _key, node&lt;KT, VT&gt;* root){
+    node&lt;KT, VT&gt; *cur = nullptr, *nx = root;
+    while(nx){
+        cur = nx, cur-&gt;push();
+        if(cur-&gt;key == _key) break;
+        if(cur-&gt;key &gt; _key) nx = cur-&gt;left;
+        else nx = cur-&gt;right;
+    }
+    return make_pair(splay(cur), cur &amp;&amp; cur-&gt;key == _key);
+}
+
+// root を根とする木の頂点でキーが _key 以上で最小のものを返す(bool は _key 以上のものがあるかないか)
+// _key 以上のものがなくても返り値のノードは nullptr とは限らないことに注意(_key 以上がなくても木の根は変わるので)
+template&lt;typename KT, typename VT&gt;
+pair&lt;node&lt;KT, VT&gt;*, bool&gt; lower_bound(const KT _key, node&lt;KT, VT&gt;* root){
+    node&lt;KT, VT&gt; *cur = nullptr, *nx = root, *res = nullptr;
+    while(nx){
+        cur = nx, cur-&gt;push();
+        if(cur-&gt;key &gt;= _key){
+            nx = cur-&gt;left;
+            if(!res || cur-&gt;key &lt;= res-&gt;key) res = cur;
+        }else nx = cur-&gt;right;
+    }
+    node&lt;KT, VT&gt;* tmp = splay(cur);
+    return res ? make_pair(splay(res), res) : make_pair(tmp, res);
+}
+
+// root を根とする木の頂点でキーが _key を超える最小のものを返す(bool は _key を超えるものがあるかないか)
+// _key を超えるものがなくても返り値のノードは nullptr とは限らないことに注意(_key を超えるものがなくても木の根は変わるので)
+template&lt;typename KT, typename VT&gt;
+pair&lt;node&lt;KT, VT&gt;*, bool&gt; upper_bound(const KT _key, node&lt;KT, VT&gt;* root){
+    node&lt;KT, VT&gt; *cur = nullptr, *nx = root, *res = nullptr;
+    while(nx){
+        cur = nx, cur-&gt;push();
+        if(cur-&gt;key &gt; _key){
+            nx = cur-&gt;left;
+            if(!res || cur-&gt;key &lt;= res-&gt;key) res = cur;
+        }else nx = cur-&gt;right;
+    }
+    node&lt;KT, VT&gt;* tmp = splay(cur);
+    return res ? make_pair(splay(res), res) : make_pair(tmp, res);
+}
+
+// root1 を根とする木のすべての要素が root 2 を根とする木のすべての要素より小さいときの merge
+template&lt;typename KT, typename VT&gt;
+node&lt;KT, VT&gt;* join(node&lt;KT, VT&gt;* root1, node&lt;KT, VT&gt;* root2){
+    if(!root1 || !root2) return root1 ? root1 : root2;
+    node&lt;KT, VT&gt; *cur = nullptr, *nx = root1;
+    while(nx){
+        cur = nx, cur-&gt;push(), nx = cur-&gt;right;
+    }
+    node&lt;KT, VT&gt;* ver = splay(cur);
+    ver-&gt;right = root2, ver-&gt;eval(), root2-&gt;par = ver;
+    return ver;
+}
+
+// root を根とする木に ver を insert する
+template&lt;typename KT, typename VT&gt;
+node&lt;KT, VT&gt;* insert(node&lt;KT, VT&gt;* ver, node&lt;KT, VT&gt;* root){
+    if(!root) return ver;
+    node&lt;KT, VT&gt; *cur = nullptr, *nx = root;
+    while(nx){
+        cur = nx, cur-&gt;push();
+        if(cur-&gt;key &gt; ver-&gt;key) nx = cur-&gt;left;
+        else nx = cur-&gt;right;
+    }
+    if(cur-&gt;key &gt; ver-&gt;key) cur-&gt;left = ver, ver-&gt;par = cur;
+    else cur-&gt;right = ver, ver-&gt;par = cur;
+    cur-&gt;eval();
+    return splay(ver);
+}
+
+// root を根とする木から _key をキーとする要素を erase する(同一キーの要素が複数ある場合はどれかひとつだけ消す)
+// _key をキーとする要素がない場合は第 2 引数として false を返す.
+template&lt;typename KT, typename VT&gt;
+pair&lt;node&lt;KT, VT&gt;*, bool&gt; erase(const KT _key, node&lt;KT, VT&gt;* root){
+    pair&lt;node&lt;KT, VT&gt;*, bool&gt; ver = find(_key, root);
+    if(!ver.second) return ver;
+    node&lt;KT, VT&gt; *l = ver.first-&gt;left, *r = ver.first-&gt;right;
+    if(l) l-&gt;par = nullptr;
+    if(r) r-&gt;par = nullptr;
+    delete ver.first;
+    node&lt;KT, VT&gt;* res = join(l, r);
+    return make_pair(res, true);
+}
+
+// root1 を根とする木と root 2 を根とする木の merge
+template&lt;typename KT, typename VT&gt;
+node&lt;KT, VT&gt;* merge(node&lt;KT, VT&gt;* root1, node&lt;KT, VT&gt;* root2){
+    if(!root2) return root1;
+    return insert(root2, root1);
+}
+
+// root を根とする木を (_key 未満, _key 以上) の木に split する.
+// lower_bound ⇒ get に変えるとキー値ベースではなく個数ベースで split できる.
+template&lt;typename KT, typename VT&gt;
+pair&lt;node&lt;KT, VT&gt;*, node&lt;KT, VT&gt;*&gt; split(const KT _key, node&lt;KT, VT&gt;* root){
+    pair&lt;node&lt;KT, VT&gt;*, bool&gt; res = lower_bound(_key, root);
+    if(!res.second) return make_pair(res.first, nullptr);
+    node&lt;KT, VT&gt; *res1 = nullptr, *res2 = res.first;
+    res1 = res2-&gt;left, res2-&gt;left = nullptr, res2-&gt;eval();
+    if(res1) res1-&gt;par = nullptr;
+    return make_pair(res1, res2);
+}
+
+// root を根とする木のうちキー値が [lvalue, rvalue) のものに対して x の更新を行う.
+template&lt;typename KT, typename VT&gt;
+node&lt;KT, VT&gt;* range(KT lvalue, KT rvalue, const VT x, node&lt;KT, VT&gt;* root){
+    auto pnn1 = split(lvalue, root);
+    auto pnn2 = split(rvalue, pnn1.second);
+    if(pnn2.first) opr1(pnn2.first-&gt;lazy, x), pnn2.first-&gt;push();
+    return join(pnn1.first, join(pnn2.first, pnn2.second));
+}
+
+// root を根とする木のうちキー値が [lvalue, rvalue) のものに対するクエリに答える.
+// 返り値は(木の根, 値)
+template&lt;typename KT, typename VT&gt;
+pair&lt;node&lt;KT, VT&gt;*, VT&gt; query(KT lvalue, KT rvalue, node&lt;KT, VT&gt;* root){
+    auto pnn1 = split(lvalue, root);
+    auto pnn2 = split(rvalue, pnn1.second);
+    VT res = (pnn2.first ? pnn2.first-&gt;al : node&lt;KT, VT&gt;::id2);
+    return make_pair(join(pnn1.first, join(pnn2.first, pnn2.second)), res);
+}
+</pre>
+<h3>verify 用の問題</h3>
+<p>Atcoder : <a href="https://beta.atcoder.jp/contests/arc033/tasks/arc033_3">データ構造</a>
+  <a href="https://atcoder.jp/contests/arc033/submissions/4931597">提出コード</a>(非想定解)<br>
+Atcoder : <a href="https://beta.atcoder.jp/contests/soundhound2018-summer-final-open/tasks/soundhound2018_summer_final_e">Hash Swapping</a>
+    <a href="https://atcoder.jp/contests/soundhound2018-summer-final-open/submissions/4931622">提出コード</a></p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>
