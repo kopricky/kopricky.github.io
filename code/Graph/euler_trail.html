@@ -41,86 +41,124 @@
 <h2>Eulerian Trail</h2>
 <h3>コードについての説明</h3>
 <p>
-準オイラーグラフ(一筆書きできるようなグラフ)かの判定および準オイラーグラフについては実際にオイラー路を求めるアルゴリズムになっている. <br>
-頑張ったら O(m) で求められるが以下では O(mlogn) の実装になっている.
+準オイラーグラフ(一筆書きできるようなグラフ)かの判定および準オイラーグラフについては実際にオイラー路を求めるアルゴリズム(Hierholzer's Algorithm). <br>
+無向グラフの場合と有向グラフの場合の 2 のコードを置いています.
+(注) グラフが連結であることを仮定しています.
 </p>
 <p>
 (関数) <br>
-solve(): 準オイラーグラフかどうか(true/false)を返し, true なら path にオイラー路が格納される
+solve(): 準オイラーグラフかどうか(true/false)を返し, true なら ans にオイラー路が格納される
 </p>
 <p>
-時間計算量: O(mlogn)(この実装では)
+時間計算量: O(m)
 </p>
-<h3>コード</h3>
+<h3>コード(無向グラフの場合)</h3>
 <div class="codebox">
 <input type="checkbox" id="label" class="csscode" />
 <label for="label"></label>
 <pre class="prettyprint linenums">
-class EulerPath {
+class EulerPath
+{
+private:
+    struct edge {
+        int to;
+        list&lt;edge&gt;::const_iterator rev;
+        edge(int to_) : to(to_){}
+    };
 public:
-    int V; bool directed;
-    vector&lt;map&lt;int,int&gt; &gt; G;
-    vector&lt;int&gt; degree, path;
-    EulerPath(int node_size, bool isdirected=false) :
-            V(node_size), directed(isdirected), G(V), degree(V, 0){}
-    void add_edge(int u,int v){
-        if(directed){
-            G[u][v]++;
-            degree[u]++,degree[v]--;
-        }else{
-            G[u][v]++,G[v][u]++;
-            degree[u]++,degree[v]++;
-        }
+    int V;
+    list&lt;edge&gt;* G;
+    vector&lt;int&gt; ans;
+    EulerPath(int node_size) : V(node_size){ G = new list&lt;edge&gt;[V]; }
+    void add_edge(int u, int v){
+        G[u].push_back((edge){v}); list&lt;edge&gt;::const_iterator revu = (--G[u].end());
+        G[v].push_back((edge){u}); list&lt;edge&gt;::const_iterator revv = (--G[v].end());
+        G[u].back().rev = revv, G[v].back().rev = revu;
     }
-    void dfs(int u){
-        while(!G[u].empty()){
-            auto it = G[u].begin();
-            int p = (*it).first,q = (*it).second;
-            if(q &gt; 0){
-                if(directed){
-                    G[u][p]--;
-                }else{
-                    G[u][p]--,G[p][u]--;
-                }
-                dfs(p);
-            }else{
-                it = G[u].erase(it);
+    int judge(){
+        int s = -1, odd = 0;
+        for(int i = 0; i &lt; V; i++){
+            if((int)G[i].size() % 2){
+                if(++odd &gt;= 3) return -1;
+                s = i;
             }
         }
-        path.push_back(u);
+        return max(s, 0);
     }
     bool solve(){
-        int s = -1, t = -1;
-        if(directed){
-            for(int i = 0; i &lt; V; i++){
-                if(degree[i] != 0){
-                    if(degree[i] == 1){
-                        if(s &gt;= 0) return false;
-                        s = i;
-                    }else if(degree[i] == -1){
-                        if(t &gt;= 0) return false;
-                        t = i;
-                    }else return false;
-                }
-            }
-        }else{
-            for(int i = 0; i &lt; V; i++){
-                if(degree[i] % 2){
-                    if(s &lt; 0) s = i;
-                    else if(t &lt; 0) t = i;
-                    else return false;
-                }
+        int cur = judge();
+        if(V == 0 || cur &lt; 0) return false;
+        stack&lt;int&gt; cur_path;
+        cur_path.push(cur);
+        while(!cur_path.empty()){
+            if(!G[cur].empty()){
+                cur_path.push(cur);
+                auto nx = G[cur].back();
+                G[cur].pop_back(), G[nx.to].erase(nx.rev);
+                cur = nx.to;
+            }else{
+                ans.push_back(cur);
+                cur = cur_path.top(), cur_path.pop();
             }
         }
-        if(s &lt; 0) s = 0;
-        dfs(s);
+        return true;
+    }
+};
+</pre>
+<h3>コード(有向グラフの場合)</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
+<pre class="prettyprint linenums">
+class EulerPath
+{
+public:
+    int V;
+    vector&lt;vector&lt;int&gt; &gt; G;
+    vector&lt;int&gt; degree, ans;
+    EulerPath(int node_size) : V(node_size), G(V), degree(V, 0){}
+    void add_edge(int u, int v){
+        G[u].push_back(v), degree[u]++, degree[v]--;
+    }
+    int judge(){
+        int s = -1; bool out = false, in = false;
+        for(int i = 0; i &lt; V; i++){
+            if(degree[i] == 0) continue;
+            if(degree[i] == 1){
+                if(out) return -1;
+                out = true, s = i;
+            }else if(degree[i] == -1){
+                if(in) return -1;
+                in = true;
+            }else return -1;
+        }
+        return max(s, 0);
+    }
+    bool solve(){
+        int cur = judge();
+        if(V == 0 || cur &lt; 0) return false;
+        stack&lt;int&gt; cur_path;
+        cur_path.push(cur);
+        while(!cur_path.empty()){
+            if(!G[cur].empty()){
+                cur_path.push(cur);
+                int nx = G[cur].back();
+                G[cur].pop_back();
+                cur = nx;
+            }else{
+                ans.push_back(cur);
+                cur = cur_path.top(), cur_path.pop();
+            }
+        }
+        reverse(ans.begin(), ans.end());
         return true;
     }
 };
 </pre>
 <h3>verify 用の問題</h3>
 <p>
-verify していません(verify 問題を知らない)
+Codeforces : <a href="https://codeforces.com/contest/1152/problem/E">Neko and Flashback</a>
+<a href=https://codeforces.com/contest/1152/submission/53262955>提出コード</a>(無向の場合)
 </p>
 </section>
 
