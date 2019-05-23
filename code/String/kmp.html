@@ -38,66 +38,51 @@
 <div id="contents">
 
 <section>
-<h2>kmp</h2>
+<h2>KMP</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
+検索する文字列を S としたとき前処理 O(|S|) 時間でテーブルを構築し, テキスト T の中の S の含まれる位置を O(|T|) 時間で求めるアルゴリズム. <br>
+これは<a href="./mp.html">MP 法</a>を用いて 0 <= i < n について S[0:i] の接頭辞と接尾辞が最大何文字一致しているかを表す配列を前処理で求めておけば可能である. KMP 法ではさらに MP 法で述べたように遷移を省略することで定数倍の改善が可能になるとともにテキストの 1 つの文字について最大でも O(log n) 回しか比較しないということも保証される<a href="https://snuke.hatenablog.com/entry/2017/07/18/101026">(参考)</a>.<br>
+例えば S = "aabaabaaa", T="aabaabcaaabaa" みたいな比較をするとき初め S[6] != T[6] となり一致判定が失敗した後 MP 法では S[0:5] の接頭辞と接尾辞が最大 3 文字一致することから head を 0 から 3 に変えるのに対し, KMP 法では S[6] と T[6] が一致しないことから head を 3 から初めても S[3] = S[6] より同じ位置(S[3] != T[6])で失敗することが分かっているので head を 7 にするというようなスキップを行う. <br>
+KMP 法では O(|T|) の空間計算量を割いて table を確保していますが, そのような追加領域を O(1) サイズのみで文字列検索を行うことのできる Crochemore-Perrin algorithm というものもあります(理論証明は追っていないのでよく分かっていない).
 </p>
 <p>
-(関数)<br>
-add_edge(): 辺を追加する <br>
-</p>
-<p>
-時間計算量: O(mlogn)
+時間計算量: 前処理 O(|S|), 検索 O(|T|)
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">
+// res に文字列 text の中にある検索文字列 pattern のすべての一致箇所の開始位置が入る(0_indexed).
 class KMP
 {
 public:
-    vector&lt;int&gt; table, res;
     string pattern;
     int plen;
-    KMP(const string s){
-        pattern = s;
-        plen = (int)pattern.size();
-        table.resize(plen+1);
+    vector&lt;int&gt; table;
+    KMP(const string s) : pattern(s), plen((int)pattern.size()), table(plen+1){
         table[0] = -1;
         int j = -1;
         for(int i = 0; i &lt; plen; i++){
-            while(j &gt;= 0 &amp;&amp; pattern[i] != pattern[j]){
-                j = table[j];
-            }
-            j++;
-            if(pattern[i+1] == pattern[j]){
-                table[i+1] = table[j];
-            }else{
-                table[i+1] = j;
-            }
+            while(j &gt;= 0 &amp;&amp; pattern[i] != pattern[j]) j = table[j];
+            if(pattern[i+1] == pattern[++j]) table[i+1] = table[j];
+            else table[i+1] = j;
         }
     }
-    void search(const string&amp; text){
+    void search(const string&amp; text, vector&lt;int&gt;&amp; res){
         int head = 0, j = 0, tlen = (int)text.size();
         while(head + j &lt; tlen){
-            if(pattern[j] == text[head + j]) {
-                if(++j == plen){
-                    res.push_back(head);
-                    head = head + j - table[j];
-                    j = table[j];
-                }
-            }else{
-                head = head + j - table[j];
-                if(j){
-                    j = table[j];
-                }
+            if(pattern[j] == text[head + j]){
+                if(++j != plen) continue;
+                res.push_back(head);
             }
+            head += j - table[j], j = max(table[j], 0);
         }
     }
 };
 </pre>
 <h3>verify 用の問題</h3>
 <p>
-1,2回問題で使用して AC した記憶があるので多分大丈夫(コードがもう残ってない...)
+<p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=ALDS1_14_B">String Search</a>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3565449#1">提出コード</a></p>
 </p>
 </section>
 

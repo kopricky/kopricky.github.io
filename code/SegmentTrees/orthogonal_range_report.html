@@ -83,7 +83,7 @@ private:
         }
     }
 public:
-    OrthogonalRangeReport(vector&lt;pcc&gt;&amp; cand) : sz((int)cand.size()), sorted(sz), xs(sz){
+    OrthogonalRangeReport(const vector&lt;pcc&gt;&amp; cand) : sz((int)cand.size()), sorted(sz), xs(sz){
         n = 1;
         while(n &lt; sz){
             n *= 2;

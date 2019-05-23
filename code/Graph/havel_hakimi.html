@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>Havel-Hakimi</h2>
+<h3>コードについての説明</h3>
+<p>
+グラフの次数列が与えられたときにそれに対応する単純グラフを構成するアルゴリズムである. <br>
+次数列を降順に D = {d_1,...,d_n} のように並べたときに (d_1, d_2),...,(d_1, d_{d_1+1}) の辺を張り, 残りの次数列 d_2-1,..,d_{d_1+1}-1,d_{d_1+2},...d_n を降順に並べたもの(D' とする)に再帰的に同様の操作を繰り返す. <br>
+次数列に対応する単純グラフが存在することを graphical であるということにしたとき, D' が graphical なら D も graphical になることは明らかである. <br>
+D が graphical なら D' も graphical となることを背理法で示す.<br>
+G (V(G) = {v_1,..,v_n}) を 1 <= i <= n で deg(v_i) = d_i を満たす単純グラフのうち v_1 と隣接している頂点の次数の総和が最大となるようなものとする. このときこのようなグラフ G において v_1 に隣接している頂点の次数の集合は必ず {d_2,...d_{d_1+1}} となることを示す. これが示せれば上記の再帰的に頂点を削っていく操作によって graphical 性を損うことがないことが分かる. <br>
+これが成り立たないとすると d_j > d_k となるような異なる 2 頂点 v_j, v_k で辺 (v_1, v_k) は存在するが, 辺 (v_1, v_j) は存在しないというようなものが取れる. また d_j > d_k よりある頂点 v_l で辺 (v_j, v_l) は存在するが, 辺 (v_j, v_k) は存在しないというようなものが取れる. <br>
+ここで辺 (v_1, v_k), 辺 (v_j, v_l) を辺 (v_1, v_j), 辺 (v_k, v_l) に付け替える操作を行っても次数は変化せず, また単純性も保たれる. このような操作を行うと, 頂点 v_1 に隣接している頂点の次数の総和が変更前よりも大きなグラフが得られることになり矛盾. よって示せた. <br>
+言い換えると, 次数列 D を満たす任意の単純グラフについて上記の辺 swap を繰り返すことで次数の条件, 単純の条件を保ったまま v_1 に隣接している頂点の次数の集合が {d_2,...d_{d_1+1}} となるようなグラフに変形することができるとも言える. <br>
+計算量は並び替えをバケットソートの要領で行ってやると, 線形時間で構築可能. <br>
+</p>
+<p>
+(関数)<br>
+given_degree_simple_graph(degree, graph): 次数列 degree を満たす単純グラフが構成可能かどうか (true / false) を返し, 可能な場合 graph に結果を格納.
+</p>
+<p>
+時間計算量: O(n+m)
+</p>
+<h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
+<pre class="prettyprint linenums">
+bool given_degree_simple_graph(const vector&lt;int&gt;&amp; degree, vector&lt;vector&lt;int&gt; &gt;&amp; graph){
+    int node_size = (int)degree.size(), cur, ver, num;
+    int pos = *max_element(degree.begin(), degree.end());
+    if(pos &gt;= node_size) return false;
+    if(accumulate(degree.begin(), degree.end(), 0LL) % 2) return false;
+    vector&lt;stack&lt;int&gt; &gt; bucket(node_size);
+    for(int i = 0; i &lt; node_size; i++) bucket[degree[i]].push(i);
+    queue&lt;pair&lt;int, int&gt; &gt; memo;
+    while(pos &gt;= 1){
+        if(bucket[pos].empty()){
+            pos--;
+            continue;
+        }
+        ver = bucket[pos].top(), num = pos;
+        bucket[pos].pop();
+        for(cur = pos; cur &gt;= 1; cur--){
+            while(num &gt; 0 &amp;&amp; !bucket[cur].empty()){
+                int tmp = bucket[cur].top();
+                bucket[cur].pop();
+                graph[ver].push_back(tmp), graph[tmp].push_back(ver);
+                memo.push({cur-1, tmp});
+                num--;
+            }
+            if(num == 0) break;
+        }
+        if(cur == 0) return false;
+        while(!memo.empty()){
+            pair&lt;int, int&gt; p = memo.front();
+            memo.pop();
+            if(p.first &gt;= 1) bucket[p.first].push(p.second);
+        }
+    }
+    return true;
+}
+</pre>
+<h3>verify 用の問題</h3>
+<p>
+verify していません(verify 問題を知らない)
+</p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>

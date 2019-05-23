@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>Map</h2>
+<h3>コードについての説明</h3>
+<p>
+Splay Tree ベースの map(連想コンテナ) の実装. stl の std::map は Red Black Tree をベースとして書かれており, 検索, 挿入, 削除などにかかる最悪計算量が O(log n) という強みを持っている. <br>
+一方 <a href="../BinarySearchTree/splay_tree.html">Splay Tree</a> はならし計算量で O(log n) であるもののクエリ列の確率分布に対して計算量が最適になるように adjust するため, 分布によっては o(log n) になりうるという強みがある(Red Black Tree の場合の計算量は Ω(log n)). <br>
+以下の実装では std:map ライクな実装をしており, 一部の関数を除き std::map と同様に動作する(同じキーの要素を挿入しても問題ないが std::multimap ほどの仕様にはなっていない).
+</p>
+<p>
+時間計算量: 各クエリ O(logn) (ならし計算量)
+</p>
+<h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
+<pre class="prettyprint linenums">
+template&lt;typename _Key, typename _Tp&gt; class MapIterator;
+
+template&lt;typename _Key, typename _Tp&gt; class Map {
+private:
+    using iterator = MapIterator&lt;_Key, _Tp&gt;;
+    struct node {
+        pair&lt;const _Key, _Tp&gt; data;
+        node *_M_left, *_M_right, *_M_parent;
+        node(const _Key _key, const _Tp _value) noexcept
+         : data(_key, _value), _M_left(nullptr), _M_right(nullptr), _M_parent(nullptr){}
+        inline bool isRoot() const noexcept { return !_M_parent; }
+        void rotate(const bool right) noexcept {
+            node *p = _M_parent, *g = p-&gt;_M_parent;
+            if(right){
+                if((p-&gt;_M_left = _M_right)) _M_right-&gt;_M_parent = p;
+                _M_right = p, p-&gt;_M_parent = this;
+            }else{
+                if((p-&gt;_M_right = _M_left)) _M_left-&gt;_M_parent = p;
+                _M_left = p, p-&gt;_M_parent = this;
+            }
+            if(!(_M_parent = g)) return;
+            if(g-&gt;_M_left == p) g-&gt;_M_left = this;
+            if(g-&gt;_M_right == p) g-&gt;_M_right = this;
+        }
+    };
+    friend MapIterator&lt;_Key, _Tp&gt;;
+    node *root, *_M_header, *start;
+    size_t _M_node_count;
+    node *splay(node *u) noexcept {
+        while(!(u-&gt;isRoot())){
+            node *p = u-&gt;_M_parent, *gp = p-&gt;_M_parent;
+            if(p-&gt;isRoot()){
+                u-&gt;rotate((u == p-&gt;_M_left));
+            }else{
+                bool flag = (u == p-&gt;_M_left);
+                if((u == p-&gt;_M_left) == (p == gp-&gt;_M_left)){
+                    p-&gt;rotate(flag), u-&gt;rotate(flag);
+                }else{
+                    u-&gt;rotate(flag), u-&gt;rotate(!flag);
+                }
+            }
+        }
+        return root = u;
+    }
+    static node *increment(node *ver) noexcept {
+        if(ver-&gt;_M_right){
+            ver = ver-&gt;_M_right;
+            while(ver-&gt;_M_left) ver = ver-&gt;_M_left;
+        }else{
+            node *nx = ver-&gt;_M_parent;
+            while(ver == nx-&gt;_M_right) ver = nx, nx = nx-&gt;_M_parent;
+            ver = nx;
+        }
+        return ver;
+    }
+    static node *decrement(node *ver) noexcept {
+        if(ver-&gt;_M_left){
+            ver = ver-&gt;_M_left;
+            while(ver-&gt;_M_right) ver = ver-&gt;_M_right;
+        }else{
+            node *nx = ver-&gt;_M_parent;
+            while(ver == nx-&gt;_M_left) ver = nx, nx = nx-&gt;_M_parent;
+            ver = nx;
+        }
+        return ver;
+    }
+    node *join(node *ver1, node *ver2, const node *ver) noexcept {
+        while(ver2-&gt;_M_left) ver2 = ver2-&gt;_M_left;
+        splay(ver2)-&gt;_M_left = ver1;
+        return ver1 ? (ver1-&gt;_M_parent = ver2) : (start = ver2);
+    }
+    node *_find(const _Key&amp; _key, bool push=false) noexcept {
+        node *cur = nullptr, *nx = root;
+        do {
+            cur = nx;
+            if(cur == _M_header || cur-&gt;data.first &gt; _key) nx = cur-&gt;_M_left;
+            else if(cur-&gt;data.first &lt; _key) nx = cur-&gt;_M_right;
+            else return splay(cur);
+        }while(nx);
+        if(!push) return _M_header;
+        if(cur == _M_header || cur-&gt;data.first &gt; _key){
+            nx = new node(_key, _Tp());
+            cur-&gt;_M_left = nx, nx-&gt;_M_parent = cur;
+            if(cur == start) start = nx;
+            return _M_node_count++, splay(nx);
+        }else{
+            nx = new node(_key, _Tp());
+            cur-&gt;_M_right = nx, nx-&gt;_M_parent = cur;
+            return _M_node_count++, splay(nx);
+        }
+    }
+    node *_insert(node *ver) noexcept {
+        node *cur = nullptr, *nx = root;
+        do {
+            cur = nx;
+            if(cur == _M_header || cur-&gt;data.first &gt; ver-&gt;data.first) nx = cur-&gt;_M_left;
+            else nx = cur-&gt;_M_right;
+        }while(nx);
+        if(cur == _M_header || cur-&gt;data.first &gt; ver-&gt;data.first){
+            cur-&gt;_M_left = ver, ver-&gt;_M_parent = cur;
+            if(cur == start) start = ver;
+            return _M_node_count++, splay(ver);
+        }else{
+            cur-&gt;_M_right = ver, ver-&gt;_M_parent = cur;
+            return _M_node_count++, splay(ver);
+        }
+    }
+    node *_erase(node *root_ver){
+        assert(root_ver != _M_header);
+        if(root_ver-&gt;_M_left) root_ver-&gt;_M_left-&gt;_M_parent = nullptr;
+        if(root_ver-&gt;_M_right) root_ver-&gt;_M_right-&gt;_M_parent = nullptr;
+        node *res = join(root_ver-&gt;_M_left, root_ver-&gt;_M_right, root_ver);
+        delete root_ver;
+        return _M_node_count--, res;
+    }
+    node *_erase(const _Key&amp; _key){
+        node *ver = _find(_key);
+        return _erase(ver);
+    }
+    node *_lower_bound(const _Key&amp; _key) noexcept {
+        node *cur = nullptr, *nx = root, *res = nullptr;
+        do {
+            cur = nx;
+            if(cur == _M_header){ nx = cur-&gt;_M_left; continue; }
+            else if(cur-&gt;data.first &gt;= _key){
+                nx = cur-&gt;_M_left;
+                if(!res || cur-&gt;data.first &lt;= res-&gt;data.first) res = cur;
+            }else nx = cur-&gt;_M_right;
+        }while(nx);
+        splay(cur);
+        return res ? res : _M_header;
+    }
+    node *_upper_bound(const _Key&amp; _key) noexcept {
+        node *cur = nullptr, *nx = root, *res = nullptr;
+        do {
+            cur = nx;
+            if(cur == _M_header){ nx = cur-&gt;_M_left; continue; }
+            else if(cur-&gt;data.first &gt; _key){
+                nx = cur-&gt;_M_left;
+                if(!res || cur-&gt;data.first &lt;= res-&gt;data.first) res = cur;
+            }else nx = cur-&gt;_M_right;
+        }while(nx);
+        splay(cur);
+        return res ? res : _M_header;
+    }
+    void clear_dfs(node *cur) noexcept {
+        if(cur-&gt;_M_left) clear_dfs(cur-&gt;_M_left);
+        if(cur-&gt;_M_right) clear_dfs(cur-&gt;_M_right);
+        delete cur;
+    }
+
+public:
+    Map() noexcept : _M_node_count(0){ root = _M_header = start = new node(_Key(), _Tp()); }
+    ~Map() noexcept { clear_dfs(root); }
+    friend ostream&amp; operator&lt;&lt; (ostream&amp; os, Map&amp; mp) noexcept {
+        for(auto&amp; val : mp) os &lt;&lt; '{' &lt;&lt; val.first &lt;&lt; ',' &lt;&lt; val.second &lt;&lt; &quot;} &quot;;
+        return os;
+    }
+    _Tp&amp; operator[](const _Key _key) noexcept { return _find(_key, true)-&gt;data.second; }
+    const _Tp&amp; at(const _Key&amp; _key){
+        node *res = _find(_key);
+        if(res == _M_header) __throw_out_of_range(__N(&quot;Map::at&quot;));
+        return res-&gt;data.second;
+    }
+    size_t size() const noexcept { return _M_node_count; }
+    bool empty() const noexcept { return size() == 0; }
+    iterator begin() const noexcept { return iterator(start); }
+    iterator end() const noexcept { return iterator(_M_header); }
+    void clear() noexcept { clear_dfs(root), _M_node_count = 0, root = _M_header = start = new node(_Key(), _Tp()); }
+    iterator find(const _Key&amp; _key) noexcept { return iterator(_find(_key)); }
+    iterator insert(const _Key&amp; _key, const _Tp&amp; _value) noexcept
+        { return iterator(_insert(new node(_key, _value))); }
+    iterator erase(const _Key&amp; _key){ return iterator(_erase(_key)); }
+    iterator erase(const iterator&amp; itr){ return iterator(_erase(splay(itr.map_ptr))); }
+    iterator lower_bound(const _Key&amp; _key) noexcept { return iterator(_lower_bound(_key)); }
+    iterator upper_bound(const _Key&amp; _key) noexcept { return iterator(_upper_bound(_key)); }
+};
+
+template&lt;typename _Key, typename _Tp&gt;
+class MapIterator
+    : public std::iterator&lt;bidirectional_iterator_tag, pair&lt;const _Key, _Tp&gt;,
+        ptrdiff_t, pair&lt;const _Key, _Tp&gt;*, pair&lt;const _Key, _Tp&gt;&amp;&gt; {
+private:
+    friend Map&lt;_Key, _Tp&gt;;
+    typename Map&lt;_Key, _Tp&gt;::node *map_ptr;
+    using base = std::iterator&lt;bidirectional_iterator_tag, pair&lt;const _Key, _Tp&gt;,
+        ptrdiff_t, pair&lt;const _Key, _Tp&gt;*, pair&lt;const _Key, _Tp&gt;&amp;&gt;;
+    using value_type = typename base::value_type;
+    using pointer = typename base::pointer;
+    using reference = typename base::reference;
+
+private:
+    MapIterator(typename Map&lt;_Key, _Tp&gt;::node *mp) noexcept : map_ptr(mp){}
+
+public:
+    MapIterator() noexcept : map_ptr(){}
+    MapIterator(const MapIterator&amp; itr) noexcept : map_ptr(itr.map_ptr){}
+    MapIterator&amp; operator=(const MapIterator&amp; itr) &amp; { return map_ptr = itr.map_ptr, *this; }
+    MapIterator&amp; operator=(const MapIterator&amp;&amp; itr) &amp; noexcept { return map_ptr = itr.map_ptr, *this; }
+    reference operator*() const { return map_ptr-&gt;data; }
+    pointer operator-&gt;() const { return &amp;(map_ptr-&gt;data); }
+    MapIterator&amp; operator++() noexcept { return map_ptr = Map&lt;_Key, _Tp&gt;::increment(map_ptr), *this; }
+    MapIterator operator++(int) noexcept { return MapIterator(Map&lt;_Key, _Tp&gt;::increment(this-&gt;map_ptr)); }
+    MapIterator&amp; operator--() noexcept { return map_ptr = Map&lt;_Key, _Tp&gt;::decrement(map_ptr), *this; }
+    MapIterator operator--(int) noexcept { return MapIterator(Map&lt;_Key, _Tp&gt;::decrement(this-&gt;map_ptr)); }
+    bool operator==(const MapIterator&amp; itr) const noexcept { return !(*this != itr); };
+    bool operator!=(const MapIterator&amp; itr) const noexcept { return map_ptr != itr.map_ptr; }
+};
+</pre>
+<h3>verify 用の問題</h3>
+<p>Codeforces : <a href="https://codeforces.com/problemset/problem/505/C">Mr. Kitayuta, the Treasure Hunter</a>
+  <a href="https://codeforces.com/gym/238854/submission/53787931">提出コード</a>(非想定解)</p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>

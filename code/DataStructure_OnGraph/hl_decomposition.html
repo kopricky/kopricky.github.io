@@ -48,7 +48,7 @@ HL 分解とは木上のパス(+部分木)についてのクエリに効率よ�
 詳しくは<a href="http://codeforces.com/blog/entry/53170">こちらのブログ</a>を参考にしてください.
 </p>
 <p>
-時間計算量: 構築 O(nlogn), クエリ O(log^2n)
+時間計算量: 構築 O(nlogn), 部分木クエリ O(log n), パスクエリ O(log^2 n)
 </p>
 <h3>コード</h3>
 <div class="codebox">
@@ -60,6 +60,7 @@ public:
     int V;
     vector&lt;vector&lt;int&gt; &gt; G;
     vector&lt;int&gt; stsize, parent, pathtop, in, out;
+    int root;
     void BuildStsize(int u, int p){
         stsize[u] = 1, parent[u] = p;
         for(int&amp; v : G[u]){
@@ -85,9 +86,10 @@ public:
     void add_edge(int u, int v){
         G[u].push_back(v), G[v].push_back(u);
     }
-    void build(){
+    void build(int _root){
+        root = _root;
         int tm = 0;
-        BuildStsize(0, -1), BuildPath(0, -1, tm);
+        BuildStsize(root, -1), BuildPath(root, -1, tm);
     }
     //元の頂点のインデックスの配列上でのidを返す
     inline int get(int a){
@@ -127,8 +129,8 @@ public:
 };
 </pre>
 <h3>verify 用の問題</h3>
-<p>yukicoder : <a href="https://yukicoder.me/problems/no/529">帰省ラッシュ</a>
-  <a href="https://yukicoder.me/submissions/283076">提出コード</a></p>
+<p>Atcoder : <a href="https://atcoder.jp/contests/iroha2019-day2/tasks/iroha2019_day2_k">虫取り</a>
+  <a href="https://atcoder.jp/contests/iroha2019-day2/submissions/5217383">提出コード</a></p>
 </section>
 
 </div>

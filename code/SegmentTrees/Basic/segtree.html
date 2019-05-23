@@ -57,7 +57,7 @@ private:
     int n,sz;
     vector&lt;T&gt; node;
 public:
-    segtree(vector&lt;T&gt;&amp; v) : sz((int)v.size()){
+    segtree(const vector&lt;T&gt;&amp; v) : sz((int)v.size()){
         n = 1;
         while(n &lt; sz){
             n *= 2;

@@ -54,9 +54,9 @@ private:
     function&lt;T(const T&amp;, const T&amp;)&gt; binary_opr;
 	T id_element;
     vector&lt;T&gt; node;
-	
+
 public:
-    segtree(vector&lt;T&gt;&amp; init_vec, function&lt;T(const T&amp;, const T&amp;)&gt; func, T ie) : 
+    segtree(const vector&lt;T&gt;&amp; init_vec, const function&lt;T(const T&amp;, const T&amp;)&gt; func, T ie) : 
 		n(1), sz((int)init_vec.size()), binary_opr(func), id_element(ie){
         while(n &lt; sz){
             n *= 2;

@@ -38,52 +38,47 @@
 <div id="contents">
 
 <section>
-<h2>Rolling Hash</h2>
+<h2>Eldös Gallai's Theorem</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
+Eldös Gallai の定理はグラフの次数列が与えられたときにそれに対応する単純グラフが存在するかどうかの必要十分条件を与える定理である. <br>
+具体的には降順に並べた次数列 d_1,...,d_n の総和が偶数であることと以下の関係式が 1 <= k <= n について成り立つことが必要十分条件である. <br>
+<img src="./texclip20190506173214.png" height="100" width="300"> <br>
+必要条件であることは難しくなく, 十分条件であることは <a href="./havel_hakimi.html">Havel-Hakimi</a> アルゴリズム + 帰納法を用いることで構成的に示すことができる. <br>
+このような頂点集合に接続する辺の意味での必要条件を書き並べると十分条件になっているというのを見ると Hall の結婚定理が想起される. <br>
+(注)実装は std::sort を用いているため計算量は O(nlogn) である(バケットソートなどで O(n) time に改善できる).
 </p>
 <p>
 (関数)<br>
-add_edge(): 辺を追加する <br>
+IsExist(d): 次数列を引数に存在するかどうか (true / false) を返す. <br>
 </p>
 <p>
-時間計算量: O(mlogn)
+時間計算量: O(nlogn) (ソートされていれば O(n))
 </p>
 <h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
 <pre class="prettyprint linenums">
-struct RH {
-	static long long mod[2], mul[2];
-    static vector&lt;long long&gt; pm[2];
-	string s; int sz; vector&lt;long long&gt; hs[2];
-	void init(string&amp; s){
-		this-&gt;s = s; sz = (int)s.size();
-        for(int i = 0; i &lt; 2; i++){
-            hs[i].resize(sz+1,0);
-            if(pm[i].empty()) pm[i].push_back(1);
-            for(int j = 0; j &lt; sz; j++){
-                hs[i][j+1] = (hs[i][j]*mul[i]+s[j])%mod[i];
-            }
+bool IsExist(vector&lt;int&gt; d){
+    int n = (int)d.size();
+    vector&lt;long long&gt; sm(n+1, 0);
+    sort(d.begin(), d.end(), greater&lt;int&gt;());
+    for(int i = 0; i &lt; n; i++) sm[i+1] = sm[i] + d[i];
+    if(sm[n] % 2) return false;
+    int pos = n-1;
+    for(int i = 0; i &lt; n; i++){
+        while(pos &gt;= 0 &amp;&amp; d[pos] &lt; i+1) pos--;
+        if(sm[i+1]&gt;(long long)(i+1)*i+sm[n]-sm[max(i, pos)+1]+(long long)(i+1)*max(pos-i,0)){
+            return false;
         }
-	}
-	pair&lt;long long,long long&gt; hash(int l, int r){	//文字列sのインデックス[l,r)の部分文字列のハッシュ値
-		if(l&gt;=r) return make_pair(0,0);
-        long long res[2];
-        for(int i = 0; i &lt; 2; i++){
-            while((int)pm[i].size() &lt;= r){
-                pm[i].push_back(pm[i].back()*mul[i]%mod[i]);
-            }
-            res[i] = (hs[i][r] + mod[i] - hs[i][l] * pm[i][r-l] % mod[i]) % mod[i];
-        }
-		return make_pair(res[0],res[1]);
-	}
-};
-vector&lt;long long&gt; RH::pm[2];
-long long RH::mod[2]={1000000007, 1000000009}, RH::mul[2]={10009, 10007};
+    }
+    return true;
+}
 </pre>
 <h3>verify 用の問題</h3>
-<p>yukicoder : <a href="https://yukicoder.me/problems/no/430">文字列検索</a>
-  <a href="https://yukicoder.me/submissions/270129">提出コード</a></p>
+<p>Atcoder : <a href="https://yahoo-procon2018-qual.contest.atcoder.jp/tasks/yahoo_procon2018_qual_e">グラフの問題</a>
+  <a href="https://yahoo-procon2018-qual.contest.atcoder.jp/submissions/5294244">提出コード</a></p>
 </section>
 
 </div>

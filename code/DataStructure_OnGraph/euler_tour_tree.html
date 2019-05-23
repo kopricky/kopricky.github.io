@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>Euler Tour Tree</h2>
+<h3>コードについての説明</h3>
+<p>
+木のオイラーツアー(DFS で探索するときの頂点順)を動的に管理するデータ構造. 辺の追加, 削除, 頂点間の連結性判定, 根の付け替えおよび連結成分内の全ての頂点に対する演算もしくはある部分木内の全ての頂点に対する演算などが O(log n) で行える. 辺の追加はもちろん閉路ができないような追加のみ許される.<br>
+LinkCutTree とは異なり, 部分木もしくは連結成分全体に対する処理が効率よく行え, <a href="../Academic/dynamic_connectivity.html">動的連結性クエリに対するアルゴリズム</a>にも用いられている. <br>
+実装平衡二分木の split, merge を用いてでき, 説明は<a href="http://web.stanford.edu/class/archive/cs/cs166/cs166.1166/lectures/17/Small17.pdf">このスライド</a>がわかりやすいです. <br>
+以下の実装では平衡二分木として splay 木を用いているためならし O(log n) となっています. また頂点数を n, 辺数を m とすると n+2*m 個のノードからなる平衡二分探索木を保持するため定数倍が少々重い. 平衡二分探索木ではなく O(log n)-分木で保持することで計算量上では O(log log n) factor の改善が可能になる<br>
+部分木内の頂点集合に対する演算は op(node v, function f) みたいな形で呼べたらうれしいのですが, EulerTourTree の構造上の問題でそれが難しいです. これは根の付け替えが行われたあとに頂点 v の親 p が何であるかを捕捉することが難しいことに由来しています.<br>
+そのため部分木内の頂点集合に対する演算は op(node v, node p, function f) の形(v が根なら p は -1 とする) で与えることにしています(どうしても op(node v, function f) にしたいなら並行して <a href="./link_cut_tree.html">LinkCutTree</a> を持つとできます). <br>
+ヘルパー関数は例えば最初辺数 0 からスタートではなくある木や森からスタートというときにそのグラフに対応する完全平衡二分木を効率よく構築し, それを初めの splay 木としてやることでそれ以降の操作の高速化が望めそう(？)なので置いてある. <br>
+元論文は <a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.192.8615&rep=rep1&type=pdf">Henzinger, King 1995</a>.
+</p>
+<p>
+時間計算量: 各クエリならし O(log n) (本来は最悪 O(log n))
+</p>
+<h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
+<pre class="prettyprint linenums">
+template&lt;typename _Tp&gt; class BSTNode {
+public:
+    int from, to, sz;
+    _Tp value, al, lazy;
+    BSTNode *left, *right, *par;
+    BSTNode(const int _from, const int _to) noexcept
+        : from(_from), to(_to), sz(0), value(id1), al(id2), lazy(id1),
+            left(nullptr), right(nullptr), par(nullptr){}
+    BSTNode(const int _from, const int _to, const _Tp&amp; _value) noexcept
+        : from(_from), to(_to), sz(1), value(_value), al(id2), lazy(id1),
+            left(nullptr), right(nullptr), par(nullptr){}
+    static const _Tp id1 = (_Tp)0;
+    static const _Tp id2 = (_Tp)0;
+    static void opr1(_Tp&amp; arg1, const _Tp arg2) noexcept { arg1 += arg2; }
+    static _Tp opr2(const _Tp arg1, const _Tp arg2) noexcept { return arg1 + arg2; }
+    inline bool IsRoot() const noexcept { return !par; }
+    inline bool IsVertex() const noexcept { return from == to; }
+    void push() noexcept {
+        if(lazy != id1){
+            if(IsVertex()) opr1(value, lazy);
+            al += lazy * sz;
+            if(left) opr1(left-&gt;lazy, lazy);
+            if(right) opr1(right-&gt;lazy, lazy);
+            lazy = id1;
+        }
+    }
+    void eval() noexcept {
+        sz = IsVertex(), al = value;
+        if(left) left-&gt;push(), sz += left-&gt;sz, al = opr2(left-&gt;al, al);
+        if(right) right-&gt;push(), sz += right-&gt;sz, al = opr2(al, right-&gt;al);
+    }
+    void rotate(const bool right_) noexcept {
+        BSTNode *p = par, *g = p-&gt;par;
+        if(right_){
+            if((p-&gt;left = right)) right-&gt;par = p;
+            right = p, p-&gt;par = this;
+        }else{
+            if((p-&gt;right = left)) left-&gt;par = p;
+            left = p, p-&gt;par = this;
+        }
+        p-&gt;eval(), eval();
+        if(!(par = g)) return;
+        if(g-&gt;left == p) g-&gt;left = this;
+        if(g-&gt;right == p) g-&gt;right = this;
+        g-&gt;eval();
+    }
+};
+
+template&lt;typename _Tp&gt;
+BSTNode&lt;_Tp&gt;* splay(BSTNode&lt;_Tp&gt; *u) noexcept {
+    if(!u) return nullptr;
+    while(!(u-&gt;IsRoot())){
+        BSTNode&lt;_Tp&gt; *p = u-&gt;par, *gp = p-&gt;par;
+        if(p-&gt;IsRoot()){
+            p-&gt;push(), u-&gt;push();
+            u-&gt;rotate((u == p-&gt;left));
+        }else{
+            gp-&gt;push(), p-&gt;push(), u-&gt;push();
+            bool flag = (u == p-&gt;left);
+            if((u == p-&gt;left) == (p == gp-&gt;left)){
+                p-&gt;rotate(flag), u-&gt;rotate(flag);
+            }else{
+                u-&gt;rotate(flag), u-&gt;rotate(!flag);
+            }
+        }
+    }
+    u-&gt;push();
+    return u;
+}
+
+template&lt;typename _Tp&gt;
+BSTNode&lt;_Tp&gt;* join(BSTNode&lt;_Tp&gt; *root1, BSTNode&lt;_Tp&gt; *root2) noexcept {
+    if(!root1 || !root2) return root1 ? root1 : root2;
+    BSTNode&lt;_Tp&gt; *cur = nullptr, *nx = root1;
+    do{ cur = nx, cur-&gt;push(), nx = cur-&gt;right; }while(nx);
+    BSTNode&lt;_Tp&gt; *ver = splay(cur);
+    ver-&gt;right = root2, ver-&gt;eval(), root2-&gt;par = ver;
+    return ver;
+}
+
+template&lt;typename _Tp&gt;
+pair&lt;BSTNode&lt;_Tp&gt;*, BSTNode&lt;_Tp&gt;*&gt; split_lower_bond(BSTNode&lt;_Tp&gt; *ver) noexcept {
+    BSTNode&lt;_Tp&gt; *res = splay(ver)-&gt;left;
+    ver-&gt;left = nullptr, ver-&gt;eval();
+    if(res) res-&gt;par = nullptr;
+    return make_pair(res, ver);
+}
+
+template&lt;typename _Tp&gt;
+pair&lt;BSTNode&lt;_Tp&gt;*, BSTNode&lt;_Tp&gt;*&gt; split_upper_bond(BSTNode&lt;_Tp&gt; *ver) noexcept {
+    BSTNode&lt;_Tp&gt; *res = splay(ver)-&gt;right;
+    ver-&gt;right = nullptr, ver-&gt;eval();
+    if(res) res-&gt;par = nullptr;
+    return make_pair(ver, res);
+}
+
+template&lt;typename T&gt; class EulerTourTree {
+private:
+    struct pair_hash {
+        template &lt;class T1, class T2&gt;
+        size_t operator() (const pair&lt;T1, T2&gt;&amp; p) const {
+            size_t lhs = hash&lt;T1&gt;()(p.first), rhs = hash&lt;T2&gt;()(p.second);
+            return lhs^(rhs+0x9e3779b9+(lhs&lt;&lt;6)+(lhs&gt;&gt;2));
+        }
+    };
+    BSTNode&lt;T&gt;** vertex_set;
+    unordered_map&lt;pair&lt;int, int&gt;, pair&lt;BSTNode&lt;T&gt;*, BSTNode&lt;T&gt;*&gt;, pair_hash&gt; edge_set;
+    BSTNode&lt;T&gt; *reroot(BSTNode&lt;T&gt; *ver) noexcept {
+        BSTNode&lt;T&gt; *res = splay(ver)-&gt;left;
+        if(!res) return ver;
+        ver-&gt;left = nullptr, ver-&gt;eval();
+        while(ver-&gt;right) ver-&gt;push(), ver = ver-&gt;right;
+        splay(ver), ver-&gt;right = res, ver-&gt;eval(), res-&gt;par = ver;
+        return ver;
+    }
+    void link(BSTNode&lt;T&gt; *ver1, BSTNode&lt;T&gt; *ver2) noexcept {
+        BSTNode&lt;T&gt;* e1 = new BSTNode&lt;T&gt;(ver1-&gt;from, ver2-&gt;from);
+        BSTNode&lt;T&gt;* e2 = new BSTNode&lt;T&gt;(ver2-&gt;from, ver1-&gt;from);
+        edge_set[{ver1-&gt;from, ver2-&gt;from}] = {e1, e2};
+        join(join(reroot(ver1), e1), join(reroot(ver2), e2));
+    }
+    void cut(BSTNode&lt;T&gt; *edge1, BSTNode&lt;T&gt; *edge2) noexcept {
+        splay(edge1), splay(edge2);
+        BSTNode&lt;T&gt; *p = edge1-&gt;par;
+        bool _right = (edge1 == edge2-&gt;right);
+        if(p != edge2){
+            _right = (p == edge2-&gt;right);
+            p-&gt;par = nullptr, edge1-&gt;rotate((edge1 == p-&gt;left));
+        }
+        if(edge1-&gt;left) edge1-&gt;left-&gt;par = nullptr;
+        if(edge1-&gt;right) edge1-&gt;right-&gt;par = nullptr;
+        if(_right){
+            if(edge2-&gt;left) edge2-&gt;left-&gt;par = nullptr;
+            join(edge2-&gt;left, edge1-&gt;right);
+        }else{
+            if(edge2-&gt;right) edge2-&gt;right-&gt;par = nullptr;
+            join(edge1-&gt;left, edge2-&gt;right);
+        }
+        delete edge1; delete edge2;
+    }
+    bool IsConnected(BSTNode&lt;T&gt; *ver1, BSTNode&lt;T&gt; *ver2) noexcept {
+        splay(ver1), splay(ver2);
+        return ver1-&gt;par;
+    }
+    T&amp; get(BSTNode&lt;T&gt; *ver) noexcept { return splay(ver)-&gt;value; }
+    void range(BSTNode&lt;T&gt; *edge1, BSTNode&lt;T&gt; *edge2, const T&amp; val) noexcept {
+        auto res1 = split_lower_bond(edge1);
+        auto res2 = split_upper_bond(edge2);
+        BSTNode&lt;T&gt;::opr1(res2.first-&gt;lazy, val);
+        join(join(res1.first,res2.first), res2.second);
+    }
+    T query(BSTNode&lt;T&gt; *edge1, BSTNode&lt;T&gt; *edge2) noexcept {
+        auto res1 = split_lower_bond(edge1);
+        auto res2 = split_upper_bond(edge2);
+        T res = res2.first-&gt;al;
+        return join(join(res1.first,res2.first), res2.second), res;
+    }
+public:
+    int V;
+    EulerTourTree(const vector&lt;T&gt;&amp; ver_value, bool helper=false) noexcept : V((int)ver_value.size()){
+        vertex_set = new BSTNode&lt;T&gt;*[V];
+        for(int i = 0; i &lt; V; i++) vertex_set[i] = new BSTNode&lt;T&gt;(i, i, ver_value[i]);
+        if(helper) G.resize(V);
+    }
+    // 根を node_id にする
+    void reroot(const int node_id) noexcept { reroot(vertex_set[node_id]); }
+    // 辺(node1_id, node2_id) を追加
+    void link(int node1_id, int node2_id) noexcept {
+        if(node1_id &gt; node2_id) swap(node1_id, node2_id);
+        link(vertex_set[node1_id], vertex_set[node2_id]);
+    }
+    // 辺(node1_id, node2_id) を削除(逆向きでも問題ない)
+    void cut(int node1_id, int node2_id){
+        if(node1_id &gt; node2_id) swap(node1_id, node2_id);
+        auto it = edge_set.find({node1_id, node2_id});
+        assert(it != edge_set.end());
+        cut((it-&gt;second).first, (it-&gt;second).second);
+    }
+    // node1_id と node2_id が同じ木(連結成分)に属するか
+    bool IsConnected(const int node1_id, const int node2_id) noexcept {
+        if(node1_id == node2_id) return true;
+        return IsConnected(vertex_set[node1_id], vertex_set[node2_id]);
+    }
+    // 頂点 ver_id の値を取得
+    T&amp; get(int ver_id) noexcept { return get(vertex_set[ver_id]); }
+    // 頂点 ver_id の存在する連結成分内の頂点全体に val を加える
+    void component_range(const int ver_id, const T&amp; val){ range(ver_id, -1, val); }
+    // 親が par_id であるような頂点 ver_id の部分木内に存在する頂点全体に val を加える
+    void range(const int ver_id, const int par_id, const T&amp; val){
+        if(par_id &lt; 0) return BSTNode&lt;T&gt;::opr1(splay(vertex_set[ver_id])-&gt;lazy, val);
+        if(ver_id &lt; par_id){
+            auto it = edge_set.find({ver_id, par_id});
+            assert(it != edge_set.end());
+            range((it-&gt;second).second, (it-&gt;second).first, val);
+        }else{
+            auto it = edge_set.find({par_id, ver_id});
+            assert(it != edge_set.end());
+            range((it-&gt;second).first, (it-&gt;second).second, val);
+        }
+    }
+    // 頂点 ver_id の存在する連結成分内の頂点全体の総和を取得
+    T component_query(const int ver_id){ return query(ver_id, -1); }
+    // 親が par_id であるような頂点 ver_id の部分木内に存在する頂点全体の総和を取得
+    T query(const int ver_id, const int par_id){
+        if(par_id &lt; 0) return splay(vertex_set[ver_id])-&gt;al;
+        if(ver_id &lt; par_id){
+            auto it = edge_set.find({ver_id, par_id});
+            assert(it != edge_set.end());
+            return query((it-&gt;second).second, (it-&gt;second).first);
+        }else{
+            auto it = edge_set.find({par_id, ver_id});
+            assert(it != edge_set.end());
+            return query((it-&gt;second).first, (it-&gt;second).second);
+        }
+    }
+
+// ヘルパー関数
+    vector&lt;vector&lt;int&gt; &gt; G;
+    void add_edge(const int u, const int v) noexcept { G[u].push_back(v), G[v].push_back(u); }
+    void dfs(const int u, const int p, const BSTNode&lt;T&gt; *cur,
+        vector&lt;int&gt;&amp; parent, vector&lt;BSTNode&lt;T&gt;*&gt;&amp; nodes) noexcept {
+        parent[u] = p;
+        nodes.push_back(vertex_set[u]);
+        for(auto&amp; v : G[u]){
+            if(v != p){
+                BSTNode&lt;T&gt;* e1 = new BSTNode&lt;T&gt;(u, v);
+                nodes.push_back(e1);
+                dfs(v, u, cur, parent, nodes);
+                BSTNode&lt;T&gt;* e2 = new BSTNode&lt;T&gt;(v, u);
+                if(u &lt; v) edge_set[{u, v}] = {e1, e2};
+                else edge_set[{v, u}] = {e2, e1};
+                nodes.push_back(e2);
+            }
+        }
+    }
+    void bst_build(vector&lt;BSTNode&lt;T&gt;* &gt;&amp; nodes) noexcept {
+        int i, n = (int)nodes.size(), st = 2, isolate = ((n % 4 == 1) ? (n-1) : -1);
+        while(st &lt;= n){
+            for(i = st-1; i &lt; n; i += 2*st){
+                nodes[i]-&gt;left = nodes[i-st/2], nodes[i-st/2]-&gt;par = nodes[i];
+                if(i+st/2 &lt; n) nodes[i]-&gt;right = nodes[i+st/2], nodes[i+st/2]-&gt;par = nodes[i];
+                else if(isolate &gt;= 0) nodes[i]-&gt;right = nodes[isolate], nodes[isolate]-&gt;par = nodes[i];
+                nodes[i]-&gt;eval();
+            }
+            isolate = ((n % (4*st) &gt;= st &amp;&amp; (n % (4*st) &lt; 2*st)) ? (i-2*st): isolate);
+            st &lt;&lt;= 1;
+        }
+    }
+    // _root を根とする木を構築(親の vector を返す(reroot しなければ range や query で使える))
+    vector&lt;int&gt; build_tree(const int _root) noexcept {
+        vector&lt;int&gt; parent(V, -1);
+        vector&lt;BSTNode&lt;T&gt;* &gt; nodes;
+        BSTNode&lt;T&gt; *cur = nullptr;
+        dfs(_root, -1, cur, parent, nodes);
+        bst_build(nodes);
+        return parent;
+    }
+    // 森を構築
+    vector&lt;int&gt; build_forest() noexcept {
+        vector&lt;int&gt; parent(V, -1);
+        for(int i = 0; i &lt; V; i++){
+            if(parent[i] &lt; 0){
+                vector&lt;BSTNode&lt;T&gt;* &gt; nodes;
+                BSTNode&lt;T&gt; *cur = nullptr;
+                dfs(i, -1, cur, parent, nodes);
+                bst_build(nodes);
+            }
+        }
+        return parent;
+    }
+
+private:
+    void check_dfs(const BSTNode&lt;T&gt;* cur) const noexcept {
+        cur-&gt;push();
+        if(cur-&gt;left) check_dfs(cur-&gt;left);
+        if(cur-&gt;IsVertex()) cout &lt;&lt;&quot;{&quot; &lt;&lt; (cur-&gt;from) &lt;&lt; &quot;,&quot; &lt;&lt; (cur-&gt;value) &lt;&lt; &quot;} &quot;;
+        if(cur-&gt;right) check_dfs(cur-&gt;right);
+    }
+};
+</pre>
+<h3>verify 用の問題</h3>
+<p>yukicoder : <a href="https://yukicoder.me/problems/no/828">全方位神童数</a>
+  <a href="https://yukicoder.me/submissions/345770">提出コード</a></p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>

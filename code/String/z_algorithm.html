@@ -38,40 +38,46 @@
 <div id="contents">
 
 <section>
-<h2>Manacher</h2>
+<h2>Z algorithm</h2>
 <h3>コードについての説明</h3>
 <p>
-文字列 S が与えられたとき 0 <= i < n について S[i] を中心とする最長の(奇数長の)回文の半径を求める線形時間アルゴリズム(<a href="https://snuke.hatenablog.com/entry/2014/12/02/235837">参考</a>). <br>
-1 つ目の while 文では愚直に i を中心とする回文の半径を求めています. これだけだと線形にならないので 2 つ目の while 文で i を中心とする最長回文の中に S[i-k] を中心とする最長の回文が含まれている(k + res[i-k] < j)なら S[i+k] と S[i-k] を中心とする最長の回文はそれぞれ同じなので更新する.
-完全に含まれていなくても部分的に含まれていればその情報は利用できるので while 文を抜けた後は j ← j - k とし次のループ時に S[i+k] を中心とする最長回文を調べるときにキョリ j - k + 1 番目の部分から始めることにする. <br>
-計算量を考える. まず 1 つ目の while ループは i + j の値に注目することで bound できる. i + j は 1 つ目のループを回るごとに 1 増え, 2 つ目のループでは変化しない. i + j は(位置)+(半径)より |S| 以下なので 1 つ目の while ループを回る回数は高々 |S| 回.
+文字列 S が与えられたとき 0 <= i < n について S と S[i:|S|-1] の最長共通接頭辞の長さを求める線形時間アルゴリズム(<a href="https://snuke.hatenablog.com/entry/2014/12/03/214243">参考</a>). <br>
+1 つ目の while 文では愚直に S と S[i:|S|-1] の最長共通接頭辞を求めています. これだけだと線形にならないので 2 つ目の while 文では S と S[k:|S|-1] の最長共通接頭辞が S と S[i:|S|-1] の最長共通接頭辞に含まれている(k + res[k] < j) とき S と S[i+k:|S|-1] の最長共通接頭辞はそれと一致するので res[i+k] を更新する.
+完全に含まれていない場合でも部分的に含まれていればその情報は利用できるので while 文を抜けた後は j ← j - k とし次のループ時に i+k を始点とする最長共通接頭辞を調べるときにキョリ j - k + 1 番目の部分から始めることにする. <br>
+計算量を考える. まず 1 つ目の while ループは i + j の値に注目することで bound できる. i + j は 1 つ目のループを回るごとに 1 増え, 2 つ目のループでは変化しない. i + j は |S| 以下なので 1 つ目の while ループを回る回数は高々 |S| 回.
 2 つ目の while ループは i の値に注目することで bound できる. i は 1 つ目のループでは変化せず 2 つ目の while ループでは回るごとに 1 増える. i は |S| 以下なので 2 つ目の while ループを回る回数は高々 |S| 回. よって合わせて O(|S|) となる.
 </p>
 <p>
 時間計算量: O(|S|)
 </p>
 <h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
 <pre class="prettyprint linenums">
-// i を中心とする最長の回文の半径を res[i] に格納
-// S = ababa ⇒ res = {1,2,3,2,1}
-// abaab を $a$b$a$a$b$ みたいにすることで偶数長の最長回文も求められる.
-void manacher(const string&amp; S,vector&lt;int&gt;&amp; res)
+void z_algorithm(const string&amp; S, vector&lt;int&gt;&amp; res)
 {
-    int sz = (int)S.size(), i = 0, j = 0, k;
-    res.resize(sz);
+    int sz = (int)S.size();
+    res.resize(sz, 0);
+    int i = 1, j = 0;
     while(i &lt; sz){
-        while(i-j &gt;= 0 &amp;&amp; i+j &lt; sz &amp;&amp; S[i-j] == S[i+j]) j++;
-        res[i] = j, k = 1;
-        while(i-k &gt;= 0 &amp;&amp; i+k &lt; sz &amp;&amp; k+res[i-k] &lt; j){
-            res[i+k] = res[i-k], k++;
+        while(i+j &lt; sz &amp;&amp; S[j] == S[i+j]) j++;
+        res[i] = j;
+        if(j == 0){
+            i++;
+            continue;
+        }
+        int k = 1;
+        while(i+k &lt; sz &amp;&amp; k+res[k] &lt; j){
+            res[i+k] = res[k], k++;
         }
         i += k; j -= k;
     }
 }
 </pre>
 <h3>verify 用の問題</h3>
-<p>Atcoder : <a href="https://beta.atcoder.jp/contests/ukuku09/tasks/ukuku09_d">ukuku</a>
-  <a href="https://atcoder.jp/contests/ukuku09/submissions/5393036">提出コード</a></p>
+<p>Atcoder : <a href="https://atcoder.jp/contests/jag2018summer-day2/tasks/jag2018summer_day2_h">Prefix Suffix Free</a>
+  <a href="https://atcoder.jp/contests/jag2018summer-day2/submissions/5393075">提出コード</a></p>
 </section>
 
 </div>

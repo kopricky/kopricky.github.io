@@ -69,7 +69,7 @@ private:
     }
 
 public:
-    segtree(vector&lt;T&gt;&amp; v) : sz((int)v.size()), h(0) {
+    segtree(const vector&lt;T&gt;&amp; v) : sz((int)v.size()), h(0) {
         n = 1;
         while(n &lt; sz) n *= 2, h++;
         node.resize(2*n, 0), lazy.resize(2*n, 0);

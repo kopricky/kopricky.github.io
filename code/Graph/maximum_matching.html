@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>Maximum Matching</h2>
+<h3>コードについての説明</h3>
+<p>
+(一般の)グラフの(重みなし)最大マッチングを求める乱択アルゴリズム. 最大マッチングを求めるアルゴリズムとしては Edmonds の花分解アルゴリズムが有名であるが, 同時に O(n^3) の乱択アルゴリズムも知られており, 以下はその実装となっている(<a href="http://theory.stanford.edu/~virgi/cs367/oldlecs/lecture9.pdf">参考1</a>, <a href="http://theory.stanford.edu/~virgi/cs367/oldlecs/lecture10.pdf">参考2</a>).<br>
+グラフ G が完全マッチングを持つことと G の Tutte 行列の行列式が恒等的に非ゼロであることの同値性を用いる. これは det 計算における置換に注目すると奇閉路(奇数位数の軌道)の存在する項は打ち消し合って消え, 偶数閉路のみからなる項のみ残ることから分かる. <br>
+よって　O(n^2) 次の多変数多項式(det T) が恒等的に 0 であることが判定できれば良いのだが deterministic に行おうとすると効率的に解けないため各変数に乱数を代入し, その結果が 0 に等しいかどうかで判定する(Zp 上で行う). <br>
+Shwartz-Zippel Lemma(帰納法より導出可能) より det T が恒等的に 0 でないのに上記の計算結果が 0 になってしまう(完全マッチングを持つのに持たないと判定する)確率は O(n^2 / p) となり, 例えば n = 10^2, p = 10^9+7 のときは 1 度の試行で十分である(念のため LOOP = 2 にしている). <br>
+(注) G の最大マッチングの数は rank(T) / 2 に等しい(rank が r の交代行列は r × r の正則な主小行列を持つことから言える). <br>
+(構築の話) <br>
+構築だがグラフが完全マッチングを持つという条件を保ったまま縮小していく. 愚直に全辺についてそれを除いたグラフが完全マッチングを持つかどうかを調べていくと O(n^5) かかる. <br>
+行列 T から U ⊆ [1,..n] に含まれる添字の行および V ⊆ [1,..n] に含まれる添字の列を削除したものを T_{U},{V} と書くことにする. det T を 1 行目で余因子展開して<br>
+<img src="./texclip20190503140758.png" height="100" width="300"> と表せ, det T ≠ 0 なら T_1,j ≠ 0(辺(1, j) が存在して), det (T_{1},{j}) ≠ 0 となるものが存在する. <br>
+また det (T_{1},{j}) ≠ 0 ⇒ det (T_{1,j},{1,j}) ≠ 0 より辺 (1, j) を取り除いた後のグラフは完全マッチングを持つ. <br>
+あとは det (T_{1},{j}) ≠ 0 となるような j をどうやって見つけてくるかだが <img src="./texclip20190503141307.png" height="100" width="250"> より, det (T_{1},{j}) ≠ 0 ⇔ T^{-1}_i,j ≠ 0 が得られるので T の逆行列を計算することで j を求めることができる. <br>
+これを再帰的に繰り返すことで O(n^4) で構築することが可能になった(正確には O(n^(ω-1) time). <br>
+ここで逆行列計算を毎回する必要はなく T^{-1} から Shur 補行列 T^{-1}_{i,j},{i,j} を O(n^2) 時間で構築することができるので O(n^3) time で計算可能. ちなみにもっと頑張ると O(n^ω) まで落ちるらしい<br>
+(注) 完全マッチングを持たないグラフの場合 n - rank(T) 個の頂点を加えて元の頂点に辺を貼ることで完全マッチングを持つグラフに変形可能(構成したマッチングのうち元からあった辺のものが最大マッチングに対応).
+</p>
+<p>
+(関数)<br>
+add_edge(): 辺を追加する <br>
+perfect_matchching(): 完全マッチングがどうかの判定 <br>
+maximum_matching(): 最大マッチングの数を返す <br>
+find_maximum_matching(): 最大マッチングの数を計算し, その組を返す <br>
+</p>
+<p>
+時間計算量: O(n^3)
+</p>
+<h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
+<pre class="prettyprint linenums">
+template &lt;uint mod&gt;
+class ModInt {
+private:
+    uint v;
+    static uint norm(const uint&amp; x){ return x &lt; mod ? x : x - mod; }
+    static ModInt make(const uint&amp; x){ ModInt m; return m.v = x, m; }
+    static ModInt inv(const ModInt&amp; x){ return make(inverse(x.v, mod)); }
+    static uint inverse(int a, int m){
+        int u[] = {a, 1, 0}, v[] = {m, 0, 1}, t;
+        while(*v){
+            t = *u / *v;
+            swap(u[0] -= t * v[0], v[0]), swap(u[1] -= t * v[1], v[1]), swap(u[2] -= t * v[2], v[2]);
+        }
+        return (u[1] % m + m) % m;
+    }
+
+public:
+    ModInt() : v{0}{}
+    ModInt(const long long val) : v{norm(val % mod + mod)} {}
+    ModInt(const ModInt&lt;mod&gt;&amp; n) : v{n()} {}
+	explicit operator bool() const noexcept { return v != 0; }
+    bool operator!() const noexcept { return !static_cast&lt;bool&gt;(*this); }
+    ModInt&amp; operator=(const ModInt&amp; n){ return v = n(), (*this); }
+    ModInt&amp; operator=(const long long val){ return v = norm(val % mod + mod), (*this); }
+    ModInt operator+() const { return *this; }
+    ModInt operator-() const { return v == 0 ? 0 : mod - v; }
+    ModInt operator+(const ModInt&amp; val) const { return make(norm(v + val())); }
+    ModInt operator-(const ModInt&amp; val) const { return make(norm(v + mod - val())); }
+    ModInt operator*(const ModInt&amp; val) const { return make((long long)v * val() % mod); }
+    ModInt operator/(const ModInt&amp; val) const { return *this * inv(val); }
+    ModInt&amp; operator+=(const ModInt&amp; val){ return *this = *this + val; }
+    ModInt&amp; operator-=(const ModInt&amp; val){ return *this = *this - val; }
+    ModInt&amp; operator*=(const ModInt&amp; val){ return *this = *this * val; }
+    ModInt&amp; operator/=(const ModInt&amp; val){ return *this = *this / val; }
+    ModInt operator+(const long long val) const { return ModInt{v + val}; }
+    ModInt operator-(const long long val) const { return ModInt{v - val}; }
+    ModInt operator*(const long long val) const { return ModInt{(long long)v * (val % mod)}; }
+    ModInt operator/(const long long val) const { return ModInt{(long long)v * inv(val)}; }
+    ModInt&amp; operator+=(const long long val){ return *this = *this + val; }
+    ModInt&amp; operator-=(const long long val){ return *this = *this - val; }
+    ModInt&amp; operator*=(const long long val){ return *this = *this * val; }
+    ModInt&amp; operator/=(const long long val){ return *this = *this / val; }
+    bool operator==(const ModInt&amp; val) const { return v == val.v; }
+    bool operator!=(const ModInt&amp; val) const { return !(*this == val); }
+    bool operator==(const long long val) const { return v == norm(val % mod + mod); }
+    bool operator!=(const long long val) const { return !(*this == val); }
+    uint operator()() const { return v; }
+    friend ModInt operator+(const long long val, const ModInt&amp; n) { return n + val; }
+    friend ModInt operator-(const long long val, const ModInt&amp; n) { return ModInt{val - n()}; }
+    friend ModInt operator*(const long long val, const ModInt&amp; n) { return n * val; }
+    friend ModInt operator/(const long long val, const ModInt&amp; n) { return ModInt{val} / n; }
+    friend bool operator==(const long long val, const ModInt&amp; n) { return n == val; }
+    friend bool operator!=(const long long val, const ModInt&amp; n) { return !(val == n); }
+    friend istream&amp; operator&gt;&gt;(istream&amp; is, ModInt&amp; n){
+        uint v;
+        return is &gt;&gt; v, n = v, is;
+    }
+    friend ostream&amp; operator&lt;&lt;(ostream&amp; os, const ModInt&amp; n){ return (os &lt;&lt; n()); }
+    friend ModInt power(ModInt x, long long n){
+        ModInt ans = 1;
+        while(n){
+            if(n &amp; 1) ans *= x;
+            x *= x, n &gt;&gt;= 1;
+        }
+        return ans;
+    }
+};
+
+template&lt;typename T&gt; class mat : public vector&lt;vector&lt;T&gt; &gt; {
+private:
+    int r, c;    //行,列
+public:
+    inline int row() const { return r; }
+    inline int column() const { return c; }
+    mat(const int n) : mat(n, n, 0){}
+    mat(const int n, const int m, T val = 0)
+        : vector&lt;vector&lt;T&gt; &gt;(n, vector&lt;T&gt;(m, val)), r{n}, c{m}{}
+    mat operator+(const mat&amp; another) const {
+        mat&lt;T&gt; X(r, c);
+        for(int i = 0; i &lt; r; i++){
+            for(int j = 0; j &lt; c; j++){
+                X[i][j] = (*this)[i][j] + another[i][j];
+            }
+        }
+        return X;
+    }
+    mat operator-(const mat&amp; another) const {
+        mat&lt;T&gt; X(r,c);
+        for(int i = 0; i &lt; r; i++){
+            for(int j = 0; j &lt; c; j++){
+                X[i][j] = (*this)[i][j] - another[i][j];
+            }
+        }
+        return X;
+    }
+    mat operator*(const mat&amp; another) const {
+        mat&lt;T&gt; X(r, another.c);
+        for(int i = 0; i &lt; r; i++){
+            for(int k = 0; k &lt; c; k++){
+                if(!(*this)[i][k]) continue;
+                for(int j = 0; j &lt; (another.c); j++){
+                    X[i][j] += (*this)[i][k] * another[k][j];
+                }
+            }
+        }
+        return X;
+    }
+    int rank(){
+        mat&lt;T&gt; X(r, c);
+        for(int i = 0; i &lt; r; i++){
+            for(int j = 0; j &lt; c; j++){
+                X[i][j] = (*this)[i][j];
+            }
+        }
+        int res = 0;
+        for(int i = 0; i &lt; c; i++){
+            if(res == r) return res;
+            if(!X[res][i]){
+                int pivot = res + 1;
+                for(; pivot &lt; r; pivot++){
+                    if(X[pivot][i]){
+                        swap(X[res], X[pivot]);
+                        break;
+                    }
+                }
+                if(pivot == r) continue;
+            }
+            const T p = (T)1 / X[res][i];
+            for(int j = i + 1; j &lt; c; j++){ X[res][j] *= p; }
+            for(int j = res + 1; j &lt; r; j++){
+                if(!X[j][i]) continue;
+                for(int k = i + 1; k &lt; c; k++){
+                    X[j][k] -= X[res][k] * X[j][i];
+                }
+            }
+            res++;
+        }
+        return res;
+    }
+    bool det_zero() const {
+        mat&lt;T&gt; X(r);
+        for(int i = 0; i &lt; r; i++){
+            for(int j = 0; j &lt; c; j++){
+                X[i][j] = (*this)[i][j];
+            }
+        }
+        for(int i = 0; i &lt; c; i++){
+            if(!X[i][i]){
+                int pivot = i + 1;
+                for(; pivot &lt; r; pivot++){
+                    if(X[pivot][i]){
+                        swap(X[i], X[pivot]);
+                        break;
+                    }
+                }
+                if(pivot == r) return true;
+            }
+            const T p = (T)1 / X[i][i];
+            for(int j = i + 1; j &lt; c; j++){ X[i][j] *= p; }
+            for(int j = i + 1; j &lt; r; j++){
+                if(!X[j][i]) continue;
+                for(int k = i + 1; k &lt; c; k++){
+                    X[j][k] -= X[i][k] * X[j][i];
+                }
+            }
+        }
+        return false;
+    }
+    mat inverse() const {
+        mat X(r, 2*r);
+        for(int i = 0; i &lt; r; i++){
+            for(int j = 0; j &lt; r; j++){
+                X[i][j] = (*this)[i][j];
+            }
+        }
+        for(int i = 0; i &lt; r; i++){
+            X[i][r+i] = 1;
+        }
+        for(int i = 0; i &lt; r; i++){
+            if(!X[i][i]){
+                int pivot = i + 1;
+                for(; pivot &lt; r; pivot++){
+                    if(X[pivot][i]){
+                        swap(X[i],X[pivot]);
+                        break;
+                    }
+                }
+                assert(pivot &lt; r);
+            }
+            const T p = (T)1 / X[i][i];
+            for(int j = i + 1; j &lt; 2*r; j++){ X[i][j] *= p; }
+            for(int j = 0; j &lt; r; j++){
+                if(i == j || !X[j][i]) continue;
+                for(int k = i + 1; k &lt; 2*r; k++){
+                    X[j][k] -= X[i][k] * X[j][i];
+                }
+            }
+        }
+        mat res(r, r);
+        for(int i = 0; i &lt; r; i++){
+            for(int j = 0; j &lt; r; j++){
+                res[i][j] = X[i][r+j];
+            }
+        }
+        return res;
+    }
+};
+
+class Matching {
+private:
+    int V;
+    vector&lt;pair&lt;int, int&gt; &gt; es;
+    vector&lt;int&gt; cnt;
+    random_device rnd;
+    mt19937 mt;
+    uniform_int_distribution&lt;&gt; randval;
+    static constexpr int LOOP = 2;
+    static constexpr uint mod = 1000000007;
+    mat&lt;ModInt&lt;mod&gt; &gt; inverse_22(const int id, const mat&lt;ModInt&lt;mod&gt; &gt;&amp; invT){
+        ModInt&lt;mod&gt; invdev = (ModInt&lt;mod&gt;)1 / (invT[0][0]*invT[id][id] - invT[0][id]*invT[id][0]);
+        mat&lt;ModInt&lt;mod&gt; &gt; invN_3n_3n(2, 2);
+        invN_3n_3n[0][0] = invT[id][id] * invdev, invN_3n_3n[0][1] = -invT[0][id] * invdev;
+        invN_3n_3n[1][0] = -invT[id][0] * invdev, invN_3n_3n[1][1] = invT[0][0] * invdev;
+        return invN_3n_3n;
+    }
+    void shur_complement(const int id, mat&lt;ModInt&lt;mod&gt; &gt;&amp; invT){
+        int sz = invT.row(), x = 0;
+        mat&lt;ModInt&lt;mod&gt; &gt;N_12_12(sz-2), N_12_3n(sz-2, 2), N_3n_12(2, sz-2);
+        for(int i = 1; i &lt; sz; i++){
+            if(i == id) continue;
+            int y = 0;
+            for(int j = 1; j &lt; sz; j++){
+                if(j == id) continue;
+                N_12_12[x][y] = invT[i][j];
+                N_3n_12[0][y] = invT[0][j], N_3n_12[1][y++] = invT[id][j];
+            }
+            N_12_3n[x][0] = invT[i][0], N_12_3n[x++][1] = invT[i][id];
+        }
+        invT = N_12_12 - N_12_3n * inverse_22(id, invT) * N_3n_12;
+    }
+    vector&lt;pair&lt;int, int&gt; &gt; find_matching(const mat&lt;ModInt&lt;mod&gt; &gt;&amp; T){
+        int sz = T.row();
+        vector&lt;pair&lt;int, int&gt; &gt; res;
+        mat&lt;ModInt&lt;mod&gt; &gt; invT = T.inverse();
+        vector&lt;int&gt; vset(sz); iota(vset.begin(), vset.end(), 0);
+        for(int i = sz; i &gt; 0; i -= 2){
+            for(int j = 1; j &lt; i; j++){
+                if(invT[0][j] &amp;&amp; T[vset[0]][vset[j]]){
+                    if(vset[j] &lt; V) res.emplace_back(vset[0], vset[j]);
+                    vset.erase(vset.begin()), vset.erase(vset.begin() + j - 1);
+                    shur_complement(j, invT);
+                    break;
+                }
+            }
+        }
+        return res;
+    }
+
+public:
+    Matching(int node_size) : V(node_size), cnt(V+1, 0), mt(rnd()), randval(0, mod-1){}
+    void add_edge(int u, int v){
+        es.push_back(make_pair(u, v));
+    }
+    bool perfect_matchching(){
+        for(int i = 0; i &lt; LOOP; i++){
+            mat&lt;ModInt&lt;mod&gt; &gt; A(V);
+            for(auto e : es){
+                int r = randval(mt);
+                A[e.first][e.second] = r, A[e.second][e.first] = -r;
+            }
+            if(!A.det_zero()) return true;
+        }
+        return false;
+    }
+    int maximum_matchching(){
+        for(int i = 0; i &lt; LOOP; i++){
+            mat&lt;ModInt&lt;mod&gt; &gt; A(V);
+            for(auto e : es){
+                int r = randval(mt);
+                A[e.first][e.second] = r, A[e.second][e.first] = -r;
+            }
+            cnt[A.rank()]++;
+        }
+        return (int)(max_element(cnt.begin(), cnt.end()) - cnt.begin()) / 2;
+    }
+    vector&lt;pair&lt;int, int&gt; &gt; find_maximum_matching(){
+        int res = maximum_matchching();
+        int newV = 2*(V-res);
+        for(int i = 0; i &lt; V; i++) for(int j = V; j &lt; newV; j++) add_edge(i, j);
+        for(int i = 0; i &lt; LOOP; i++){
+            mat&lt;ModInt&lt;mod&gt; &gt; A(newV);
+            for(auto e : es){
+                int r = randval(mt);
+                A[e.first][e.second] = r, A[e.second][e.first] = -r;
+            }
+            if(!A.det_zero()) return find_matching(A);
+        }
+    }
+};
+</pre>
+<h3>verify 用の問題</h3>
+<p>Atcoder : <a href="https://joisc2016matching.contest.atcoder.jp/tasks/joisc2016matching_a">一般最大マッチング</a>
+  <a href="https://joisc2016matching.contest.atcoder.jp/submissions/5238195">提出コード</a>(非想定解のため TLE しています.)</p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>

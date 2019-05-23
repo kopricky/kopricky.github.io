@@ -59,42 +59,34 @@ zig, zig-zig, zig-zag の 3 つの回転を用いてあるノードを根にす�
 <label for="label"></label>
 <pre class="prettyprint linenums">
 // root ポインタは nullptr 初期化することを忘れない
-template&lt;typename KeyType, typename ValueType&gt; class node {
+template&lt;typename _Key, typename _Tp&gt; class node {
 public:
-    using KT =  KeyType;
-    using VT = ValueType;
-    KT key;
     int sz;
-    VT value, al, lazy;
+    _Key key;
+    _Tp val, al, lazy;
     node *left, *right, *par;
-    node(KT _key, VT _value) : key(_key), sz(1), value(_value), al(id2), lazy(id1),
+    node(_Key _key, _Tp _val) noexcept : sz(1), key(_key), val(_val), al(id2), lazy(id1),
         left(nullptr), right(nullptr), par(nullptr){}
-    static const VT id1 = (VT)0;
-    static const VT id2 = (VT)0;
-    void opr1(VT&amp; arg1, const VT arg2) const {
-        arg1 += arg2;
-    }
-    VT opr2(const VT arg1, const VT arg2) const {
-        return arg1 + arg2;
-    }
-    bool isRoot() const {
-        return !par;
-    }
+    static const _Tp id1 = (_Tp)0;
+    static const _Tp id2 = (_Tp)0;
+    static void opr1(_Tp&amp; arg1, const _Tp arg2){ arg1 += arg2; }
+    static _Tp opr2(const _Tp arg1, const _Tp arg2){ return arg1 + arg2; }
+    inline bool isRoot() const { return !par; }
     void push(){
         if(lazy != id1){
-            opr1(value, lazy), al += lazy * sz;
+            opr1(val, lazy), al += lazy * sz;
             if(left) opr1(left-&gt;lazy, lazy);
             if(right) opr1(right-&gt;lazy, lazy);
             lazy = id1;
         }
     }
     void eval(){
-        sz = 1, al = value;
+        sz = 1, al = val;
         if(left) left-&gt;push(), sz += left-&gt;sz, al = opr2(left-&gt;al, al);
         if(right) right-&gt;push(), sz += right-&gt;sz, al = opr2(al, right-&gt;al);
     }
     void rotate(bool right_){
-        node&lt;KT, VT&gt; *p = par, *g = p-&gt;par;
+        node&lt;_Key, _Tp&gt; *p = par, *g = p-&gt;par;
         if(right_){
             if((p-&gt;left = right)) right-&gt;par = p;
             right = p, p-&gt;par = this;
@@ -110,15 +102,15 @@ public:
     }
 };
 
-template&lt;typename KT, typename VT&gt;
-static int size(node&lt;KT, VT&gt;* u){ return u ? u-&gt;sz : 0; }
+template&lt;typename _Key, typename _Tp&gt;
+int size(node&lt;_Key, _Tp&gt;* u){ return u ? u-&gt;sz : 0; }
 
 // 頂点 u を木の根にする
-template&lt;typename KT, typename VT&gt;
-node&lt;KT, VT&gt;* splay(node&lt;KT, VT&gt;* u){
+template&lt;typename _Key, typename _Tp&gt;
+node&lt;_Key, _Tp&gt;* splay(node&lt;_Key, _Tp&gt;* u) noexcept {
     if(!u) return nullptr;
     while(!(u-&gt;isRoot())){
-        node&lt;KT, VT&gt; *p = u-&gt;par, *gp = p-&gt;par;
+        node&lt;_Key, _Tp&gt; *p = u-&gt;par, *gp = p-&gt;par;
         if(p-&gt;isRoot()){ // zig
             p-&gt;push(), u-&gt;push();
             u-&gt;rotate((u == p-&gt;left));
@@ -136,42 +128,44 @@ node&lt;KT, VT&gt;* splay(node&lt;KT, VT&gt;* u){
     return u;
 }
 
-// root を根とする木の頂点で k 番目(0 indexed)に小さいキー値のものを探索する
+// root を根とする木の頂点で k 番目に小さいキー値のものを探索する
 // 返り値は (木の根, k 番目が存在するかしないか(0/1))
-template&lt;typename KT, typename VT&gt;
-pair&lt;node&lt;KT, VT&gt;*, bool&gt; get(int k, node&lt;KT, VT&gt;* root){
-    if(size(root) &lt; k+1) return make_pair(root, false);
-    node&lt;KT, VT&gt; *cur = nullptr, *nx = root;
-    while(true){
+template&lt;typename _Key, typename _Tp&gt;
+pair&lt;node&lt;_Key, _Tp&gt;*, bool&gt; get(const int k, node&lt;_Key, _Tp&gt;* root) noexcept {
+    if(size(root) &lt; k) return make_pair(root, false);
+    int sum = 0;
+    node&lt;_Key, _Tp&gt; *cur = nullptr, *nx = root;
+    while(nx){
         cur = nx, cur-&gt;push();
-        if(size(cur-&gt;left) &lt; k){
-            nx = cur-&gt;right, k -= size(cur-&gt;left) + 1;
-        }else if(size(cur-&gt;left) &gt; k){
+        if(size(cur-&gt;left) &lt; sum - 1){
+            nx = cur-&gt;right, sum -= size(cur-&gt;left) + 1;
+        }else if(size(cur-&gt;left) &gt;= sum){
             nx = cur-&gt;left;
-        }else break;
+        }else{
+            return make_pair(splay(cur), true);
+        }
     }
-    return make_pair(splay(cur), true);
 }
 
 // root を根とする木の頂点でキーが _key であるものを探索する
 // 返り値は (木の根, 存在するかしないか(0/1))
-template&lt;typename KT, typename VT&gt;
-pair&lt;node&lt;KT, VT&gt;*, bool&gt; find(const KT _key, node&lt;KT, VT&gt;* root){
-    node&lt;KT, VT&gt; *cur = nullptr, *nx = root;
+template&lt;typename _Key, typename _Tp&gt;
+pair&lt;node&lt;_Key, _Tp&gt;*, bool&gt; find(const _Key _key, node&lt;_Key, _Tp&gt;* root) noexcept {
+    node&lt;_Key, _Tp&gt; *cur = nullptr, *nx = root;
     while(nx){
         cur = nx, cur-&gt;push();
-        if(cur-&gt;key == _key) break;
+        if(cur-&gt;key == _key) return make_pair(splay(cur), true);
         if(cur-&gt;key &gt; _key) nx = cur-&gt;left;
         else nx = cur-&gt;right;
     }
-    return make_pair(splay(cur), cur &amp;&amp; cur-&gt;key == _key);
+    return make_pair(splay(cur), false);
 }
 
 // root を根とする木の頂点でキーが _key 以上で最小のものを返す(bool は _key 以上のものがあるかないか)
 // _key 以上のものがなくても返り値のノードは nullptr とは限らないことに注意(_key 以上がなくても木の根は変わるので)
-template&lt;typename KT, typename VT&gt;
-pair&lt;node&lt;KT, VT&gt;*, bool&gt; lower_bound(const KT _key, node&lt;KT, VT&gt;* root){
-    node&lt;KT, VT&gt; *cur = nullptr, *nx = root, *res = nullptr;
+template&lt;typename _Key, typename _Tp&gt;
+pair&lt;node&lt;_Key, _Tp&gt;*, bool&gt; lower_bound(const _Key _key, node&lt;_Key, _Tp&gt;* root) noexcept {
+    node&lt;_Key, _Tp&gt; *cur = nullptr, *nx = root, *res = nullptr;
     while(nx){
         cur = nx, cur-&gt;push();
         if(cur-&gt;key &gt;= _key){
@@ -179,15 +173,15 @@ pair&lt;node&lt;KT, VT&gt;*, bool&gt; lower_bound(const KT _key, node&lt;KT, VT&
             if(!res || cur-&gt;key &lt;= res-&gt;key) res = cur;
         }else nx = cur-&gt;right;
     }
-    node&lt;KT, VT&gt;* tmp = splay(cur);
-    return res ? make_pair(splay(res), res) : make_pair(tmp, res);
+    node&lt;_Key, _Tp&gt;* tmp = splay(cur);
+    return res ? make_pair(splay(res), true) : make_pair(tmp, false);
 }
 
 // root を根とする木の頂点でキーが _key を超える最小のものを返す(bool は _key を超えるものがあるかないか)
 // _key を超えるものがなくても返り値のノードは nullptr とは限らないことに注意(_key を超えるものがなくても木の根は変わるので)
-template&lt;typename KT, typename VT&gt;
-pair&lt;node&lt;KT, VT&gt;*, bool&gt; upper_bound(const KT _key, node&lt;KT, VT&gt;* root){
-    node&lt;KT, VT&gt; *cur = nullptr, *nx = root, *res = nullptr;
+template&lt;typename _Key, typename _Tp&gt;
+pair&lt;node&lt;_Key, _Tp&gt;*, bool&gt; upper_bound(const _Key _key, node&lt;_Key, _Tp&gt;* root) noexcept {
+    node&lt;_Key, _Tp&gt; *cur = nullptr, *nx = root, *res = nullptr;
     while(nx){
         cur = nx, cur-&gt;push();
         if(cur-&gt;key &gt; _key){
@@ -195,28 +189,26 @@ pair&lt;node&lt;KT, VT&gt;*, bool&gt; upper_bound(const KT _key, node&lt;KT, VT&
             if(!res || cur-&gt;key &lt;= res-&gt;key) res = cur;
         }else nx = cur-&gt;right;
     }
-    node&lt;KT, VT&gt;* tmp = splay(cur);
-    return res ? make_pair(splay(res), res) : make_pair(tmp, res);
+    node&lt;_Key, _Tp&gt;* tmp = splay(cur);
+    return res ? make_pair(splay(res), true) : make_pair(tmp, false);
 }
 
 // root1 を根とする木のすべての要素が root 2 を根とする木のすべての要素より小さいときの merge
-template&lt;typename KT, typename VT&gt;
-node&lt;KT, VT&gt;* join(node&lt;KT, VT&gt;* root1, node&lt;KT, VT&gt;* root2){
+template&lt;typename _Key, typename _Tp&gt;
+node&lt;_Key, _Tp&gt;* join(node&lt;_Key, _Tp&gt;* root1, node&lt;_Key, _Tp&gt;* root2) noexcept {
     if(!root1 || !root2) return root1 ? root1 : root2;
-    node&lt;KT, VT&gt; *cur = nullptr, *nx = root1;
-    while(nx){
-        cur = nx, cur-&gt;push(), nx = cur-&gt;right;
-    }
-    node&lt;KT, VT&gt;* ver = splay(cur);
+    node&lt;_Key, _Tp&gt; *cur = nullptr, *nx = root1;
+    while(nx) cur = nx, cur-&gt;push(), nx = cur-&gt;right;
+    node&lt;_Key, _Tp&gt;* ver = splay(cur);
     ver-&gt;right = root2, ver-&gt;eval(), root2-&gt;par = ver;
     return ver;
 }
 
 // root を根とする木に ver を insert する
-template&lt;typename KT, typename VT&gt;
-node&lt;KT, VT&gt;* insert(node&lt;KT, VT&gt;* ver, node&lt;KT, VT&gt;* root){
+template&lt;typename _Key, typename _Tp&gt;
+node&lt;_Key, _Tp&gt;* insert(node&lt;_Key, _Tp&gt;* ver, node&lt;_Key, _Tp&gt;* root) noexcept {
     if(!root) return ver;
-    node&lt;KT, VT&gt; *cur = nullptr, *nx = root;
+    node&lt;_Key, _Tp&gt; *cur = nullptr, *nx = root;
     while(nx){
         cur = nx, cur-&gt;push();
         if(cur-&gt;key &gt; ver-&gt;key) nx = cur-&gt;left;
@@ -230,53 +222,52 @@ node&lt;KT, VT&gt;* insert(node&lt;KT, VT&gt;* ver, node&lt;KT, VT&gt;* root){
 
 // root を根とする木から _key をキーとする要素を erase する(同一キーの要素が複数ある場合はどれかひとつだけ消す)
 // _key をキーとする要素がない場合は第 2 引数として false を返す.
-template&lt;typename KT, typename VT&gt;
-pair&lt;node&lt;KT, VT&gt;*, bool&gt; erase(const KT _key, node&lt;KT, VT&gt;* root){
-    pair&lt;node&lt;KT, VT&gt;*, bool&gt; ver = find(_key, root);
-    if(!ver.second) return ver;
-    node&lt;KT, VT&gt; *l = ver.first-&gt;left, *r = ver.first-&gt;right;
+template&lt;typename _Key, typename _Tp&gt;
+pair&lt;node&lt;_Key, _Tp&gt;*, bool&gt; erase(const _Key _key, node&lt;_Key, _Tp&gt;* root){
+    pair&lt;node&lt;_Key, _Tp&gt;*, bool&gt; ver = find(_key, root);
+    assert(ver.second);
+    node&lt;_Key, _Tp&gt; *l = ver.first-&gt;left, *r = ver.first-&gt;right;
     if(l) l-&gt;par = nullptr;
     if(r) r-&gt;par = nullptr;
     delete ver.first;
-    node&lt;KT, VT&gt;* res = join(l, r);
-    return make_pair(res, true);
+    return make_pair(join(l, r), true);
 }
 
 // root1 を根とする木と root 2 を根とする木の merge
-template&lt;typename KT, typename VT&gt;
-node&lt;KT, VT&gt;* merge(node&lt;KT, VT&gt;* root1, node&lt;KT, VT&gt;* root2){
+template&lt;typename _Key, typename _Tp&gt;
+node&lt;_Key, _Tp&gt;* merge(node&lt;_Key, _Tp&gt;* root1, node&lt;_Key, _Tp&gt;* root2) noexcept {
     if(!root2) return root1;
     return insert(root2, root1);
 }
 
 // root を根とする木を (_key 未満, _key 以上) の木に split する.
 // lower_bound ⇒ get に変えるとキー値ベースではなく個数ベースで split できる.
-template&lt;typename KT, typename VT&gt;
-pair&lt;node&lt;KT, VT&gt;*, node&lt;KT, VT&gt;*&gt; split(const KT _key, node&lt;KT, VT&gt;* root){
-    pair&lt;node&lt;KT, VT&gt;*, bool&gt; res = lower_bound(_key, root);
+template&lt;typename _Key, typename _Tp&gt;
+pair&lt;node&lt;_Key, _Tp&gt;*, node&lt;_Key, _Tp&gt;*&gt; split_key(const _Key _key, node&lt;_Key, _Tp&gt;* root) noexcept {
+    pair&lt;node&lt;_Key, _Tp&gt;*, bool&gt; res = lower_bound(_key, root);
     if(!res.second) return make_pair(res.first, nullptr);
-    node&lt;KT, VT&gt; *res1 = nullptr, *res2 = res.first;
+    node&lt;_Key, _Tp&gt; *res1 = nullptr, *res2 = res.first;
     res1 = res2-&gt;left, res2-&gt;left = nullptr, res2-&gt;eval();
     if(res1) res1-&gt;par = nullptr;
     return make_pair(res1, res2);
 }
 
-// root を根とする木のうちキー値が [lvalue, rvalue) のものに対して x の更新を行う.
-template&lt;typename KT, typename VT&gt;
-node&lt;KT, VT&gt;* range(KT lvalue, KT rvalue, const VT x, node&lt;KT, VT&gt;* root){
-    auto pnn1 = split(lvalue, root);
-    auto pnn2 = split(rvalue, pnn1.second);
-    if(pnn2.first) opr1(pnn2.first-&gt;lazy, x), pnn2.first-&gt;push();
+// root を根とする木のうちキー値が [lval, rval) のものに対して x の更新を行う.
+template&lt;typename _Key, typename _Tp&gt;
+node&lt;_Key, _Tp&gt;* range(_Key lval, _Key rval, _Tp x, node&lt;_Key, _Tp&gt;* root) noexcept {
+    auto pnn1 = split(lval, root);
+    auto pnn2 = split(rval, pnn1.second);
+    if(pnn2.first) opr1(pnn2.first-&gt;lazy, x);
     return join(pnn1.first, join(pnn2.first, pnn2.second));
 }
 
-// root を根とする木のうちキー値が [lvalue, rvalue) のものに対するクエリに答える.
+// root を根とする木のうちキー値が [lval, rval) のものに対するクエリに答える.
 // 返り値は(木の根, 値)
-template&lt;typename KT, typename VT&gt;
-pair&lt;node&lt;KT, VT&gt;*, VT&gt; query(KT lvalue, KT rvalue, node&lt;KT, VT&gt;* root){
-    auto pnn1 = split(lvalue, root);
-    auto pnn2 = split(rvalue, pnn1.second);
-    VT res = (pnn2.first ? pnn2.first-&gt;al : node&lt;KT, VT&gt;::id2);
+template&lt;typename _Key, typename _Tp&gt;
+pair&lt;node&lt;_Key, _Tp&gt;*, _Tp&gt; query(_Key lval, _Key rval, node&lt;_Key, _Tp&gt;* root) noexcept {
+    auto pnn1 = split(lval, root);
+    auto pnn2 = split(rval, pnn1.second);
+    _Tp res = (pnn2.first ? pnn2.first-&gt;al : node&lt;_Key, _Tp&gt;::id2);
     return make_pair(join(pnn1.first, join(pnn2.first, pnn2.second)), res);
 }
 </pre>

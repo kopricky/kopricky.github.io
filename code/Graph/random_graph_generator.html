@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>Random Graph Generator</h2>
+<h3>コードについての説明</h3>
+<p>
+ランダムグラフを生成するアルゴリズム. 1 つ目は簡単なものの寄せ集め(Erdős–Rényi (ER)モデルとか)で 2 つ目は次数列が与えられたときにそれを満たすようなグラフを一様ランダムで生成するアルゴリズムになっている. 元論文は <a href="https://kops.uni-konstanz.de/bitstream/handle/123456789/5799/random.pdf?sequence=1">Batagelj Brandes 2005</a> および <a href="http://complexnetworks.fr/wp-content/uploads/2011/01/random.pdf">Viger, Latapy 2011</a>.
+前半は G(n, p) が愚直にやると O(n^2) かかるが次にどの辺を取るかを幾何分布に従う乱数によって決める(次に取るのが i 個先となる確率は p(1-p)^(i-1) なので)ことで平均計算量 O(np) で求めることができることぐらいでほかは普通. <br>
+後半のアルゴリズムは出力されるグラフが非連結を許さない場合(こちらのほうが難しい)について説明する(以下の 3 つのステップからなる). <br>
+(I) 与えられた次数列を満たすグラフを構築する(<a href="./havel_hakimi.html">Havel-Hakimi</a> アルゴリズム). (II) 得られたグラフを swap 操作(グラフ G_1 内の辺(a, b), G_2 内の辺(c, d)を ⇒ 辺(a, c), 辺(b, d) に付け替える操作)を繰り返すことで連結にする. swap 操作は各頂点の次数を変化させないことに注意する.<br>
+(I), (II) は線形時間で行うことができる. 最後に (III) 連結なグラフの異なる 2 辺をランダムに選んで swap するという操作を繰り返す. を行う. (III) の操作によってグラフが非連結になる場合は invalid ととして自分自身に移るとする. このとき swap 操作を繰り返すことで与えられた次数列を満たすグラフ間を移りあえることから既約かつ正再帰的であることが言え,
+また自分自身に移る遷移が存在することから非周期的であるのでこのマルコフ連鎖は極限分布を持ちまたその分布はよく知られた事実から一様分布となる. そのため swap 操作十分な回数繰り返すことで一様ランダムなグラフが得られる(収束速度はグラフ依存). <br>
+ここで swap 操作を行った影響でグラフが非連結になる可能性があり, またそれを特定するのには<a href="../Academic/dynamic_connectivity.html">複雑なアルゴリズム</a>を使わないとすると O(m) 時間を要する. そのため元論文では window size T を定め, T 回 swap を繰り返した後に非連結なら T 回の swap 操作をなしにして T *= 0.923..., 連結なら T *= 1.131... として操作を続けることにする.
+定数は著者たちがヒューリスティックに決めたものである. ただこうすると一回非連結になった後連結になったみたいなケースが起こると本当の意味でのマルコフ連鎖の遷移になっていないがまあご愛嬌と言った感じか. 実際に動かしてみると結構速く動作する(TIME を適宜設定しその間回し続けるという実装にしている). ちなみに非連結を許すならただ回すだけでいい.
+</p>
+<h3>Random Graph Generator</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
+<pre class="prettyprint linenums">
+struct pair_hash {
+    template &lt;class T1, class T2&gt;
+    size_t operator() (const pair&lt;T1, T2&gt;&amp; p) const {
+        size_t lhs = hash&lt;T1&gt;()(p.first), rhs = hash&lt;T2&gt;()(p.second);
+        return lhs^(rhs+0x9e3779b9+(lhs&lt;&lt;6)+(lhs&gt;&gt;2));
+    }
+};
+
+// G(n, m) (計算量 O(m))
+void random_graph(const int node_size, const int edge_size, vector&lt;vector&lt;int&gt; &gt;&amp; graph){
+    random_device rnd;
+    mt19937 mt(rnd());
+    uniform_int_distribution&lt;&gt; _rand(0, node_size-1);
+    for(int i = 0; i &lt; edge_size; i++){
+        int from = _rand(mt), to = _rand(mt);
+        graph[from].push_back(to), graph[to].push_back(from);
+    }
+}
+
+// G(n, p) (各辺が確率 p で存在) (平均計算量 O(np))
+void given_probability_random_simple_graph(const int node_size, const double prob, vector&lt;vector&lt;int&gt; &gt;&amp; graph){
+    random_device rnd;
+    mt19937 mt(rnd());
+    uniform_real_distribution&lt;double&gt; _rand(0.0,1.0);
+    int v = 1, w = -1;
+    while(v &lt; node_size){
+        w += 1 + floor(log(1.0 -_rand(mt))/log(1.0 - prob));
+        while(w &gt;= v &amp;&amp; v &lt; node_size) w -= v, v++;
+        if(v &lt; node_size) graph[v].push_back(w), graph[w].push_back(v);
+    }
+}
+
+// ランダムな単純グラフ (平均計算量 O(nlogn))
+void random_simple_graph(const int node_size, const int edge_size, vector&lt;vector&lt;int&gt; &gt;&amp; graph){
+    assert(edge_size &lt;= (long long)(node_size)*(node_size-1)/2);
+    unordered_set&lt;pair&lt;int, int&gt;, pair_hash&gt; edge_set;
+    random_device rnd;
+    mt19937 mt(rnd());
+    uniform_int_distribution&lt;&gt; rand1(0, node_size-1), rand2(0, node_size-2);
+    for(int i = 0; i &lt; edge_size; i++){
+        while(true){
+            int from = rand1(mt), to = rand2(mt);
+            if(to &lt; from) swap(from, to); else to++;
+            if(edge_set.find({from, to}) != edge_set.end()) continue;
+            graph[from].push_back(to), graph[to].push_back(from);
+            edge_set.insert({from, to});
+            break;
+        }
+    }
+}
+
+// ランダムな単純グラフ (平均計算量 O(nlogn))
+void random_simple_connected_graph(const int node_size, const int edge_size, vector&lt;vector&lt;int&gt; &gt;&amp; graph){
+    assert(edge_size &gt;= node_size - 1);
+    unordered_set&lt;pair&lt;int, int&gt;, pair_hash&gt; edge_set;
+    random_device rnd;
+    mt19937 mt(rnd());
+    vector&lt;int&gt; ver(node_size);
+    iota(ver.begin(), ver.end(), 0);
+    shuffle(ver.begin(), ver.end(), mt);
+    for(int i = 1; i &lt; node_size; i++){
+        int u = mt() % i;
+        graph[ver[u]].push_back(ver[i]), graph[ver[i]].push_back(ver[u]);
+        edge_set.insert({min(ver[i], ver[u]), max(ver[i], ver[u])});
+    }
+    uniform_int_distribution&lt;&gt; rand1(0, node_size-1), rand2(0, node_size-2);
+    for(int i = 0; i &lt; edge_size - node_size + 1; i++){
+        while(true){
+            int from = rand1(mt), to = rand2(mt);
+            if(to &lt; from) swap(from, to); else to++;
+            if(edge_set.find({from, to}) != edge_set.end()) continue;
+            graph[from].push_back(to), graph[to].push_back(from);
+            edge_set.insert({from, to});
+            break;
+        }
+    }
+}
+
+// ランダムな木 (計算量 O(n))
+void random_tree(const int node_size, const int edge_size, vector&lt;vector&lt;int&gt; &gt;&amp; graph){
+    random_device rnd;
+    mt19937 mt(rnd());
+    vector&lt;int&gt; ver(node_size);
+    iota(ver.begin(), ver.end(), 0);
+    shuffle(ver.begin(), ver.end(), mt);
+    for(int i = 1; i &lt; node_size; i++){
+        int u = mt() % i;
+        graph[ver[u]].push_back(ver[i]), graph[ver[i]].push_back(ver[u]);
+    }
+}
+</pre>
+<h3>Random Simple Connected Graphs with Prescribed Degree Sequence</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
+<pre class="prettyprint linenums">
+// 次数列 d とグラフ G(vector&lt;vecotr&lt;int&gt; &gt;型で予め頂点数分の配列を確保する), 連結であるべきかを与える.
+// TIME は適宜設定する. (計算量 o(m^2))
+class GraphGenerator {
+private:
+    int V;
+    bool connected;
+    vector&lt;unordered_set&lt;int&gt; &gt; G;
+    vector&lt;vector&lt;pair&lt;int, int&gt; &gt; &gt; off_tree;
+    vector&lt;pair&lt;int, int&gt; &gt; population;
+    vector&lt;int&gt; visit, non_tree, tree;
+    chrono::high_resolution_clock::time_point start;
+    random_device rnd;
+    mt19937 mt;
+    const int TIME = 1000; // (ms)
+    static constexpr double UP = 1.13108324944;
+    static constexpr double DOWN = 0.92371260217;
+    int _time() const noexcept {
+        chrono::high_resolution_clock::time_point end = chrono::high_resolution_clock::now();
+        return (int)chrono::duration_cast&lt;chrono::milliseconds&gt;(end - start).count();
+    }
+    bool check() const noexcept {
+        if(*max_element(degree.begin(), degree.end()) &gt;= V) return false;
+        if(*min_element(degree.begin(), degree.end()) &lt;= -(!connected)) return false;
+        long long edge_size = accumulate(degree.begin(), degree.end(), 0LL);
+        if(edge_size % 2 || (connected &amp;&amp; edge_size &lt; 2 * (V - 1))) return false;
+        return true;
+    }
+    void add_edge(const int u, const int v) noexcept { G[u].insert(v), G[v].insert(u); }
+    void erase_edge(const int u, const int v) noexcept { G[u].erase(v), G[v].erase(u); }
+    void swap_edge(const pair&lt;int, int&gt;&amp; p, const pair&lt;int, int&gt;&amp; q) noexcept {
+        erase_edge(p.first, p.second), erase_edge(q.first, q.second);
+        add_edge(p.first, q.first), add_edge(p.second, q.second);
+    }
+    bool construct_init_graph() noexcept {
+        int cur, ver, num, pos = *max_element(degree.begin(), degree.end());
+        vector&lt;stack&lt;int&gt; &gt; bucket(V);
+        for(int i = 0; i &lt; V; i++) bucket[degree[i]].push(i);
+        queue&lt;pair&lt;int, int&gt; &gt; memo;
+        while(pos &gt;= 1){
+            if(bucket[pos].empty()){
+                pos--;
+                continue;
+            }
+            ver = bucket[pos].top(), num = pos;
+            bucket[pos].pop();
+            for(cur = pos; cur &gt;= 1; cur--){
+                while(num &gt; 0 &amp;&amp; !bucket[cur].empty()){
+                    int tmp = bucket[cur].top();
+                    bucket[cur].pop();
+                    add_edge(ver, tmp);
+                    memo.push({cur-1, tmp});
+                    num--;
+                }
+                if(num == 0) break;
+            }
+            if(cur == 0) return false;
+            while(!memo.empty()){
+                pair&lt;int, int&gt; p = memo.front();
+                memo.pop();
+                if(p.first &gt;= 1) bucket[p.first].push(p.second);
+            }
+        }
+        return true;
+    }
+    void dfs(const int u, const int p, const int c) noexcept {
+        visit[u] = 1;
+        for(int v : G[u]){
+            if(!visit[v]) dfs(v, u, c);
+            else if(v != p &amp;&amp; visit[v] == 1) off_tree[c].emplace_back(u, v);
+        }
+        visit[u] = 2;
+    }
+    void detect_component() noexcept {
+        int comp_size = 0;
+        for(int i = 0; i &lt; V; i++){
+            if(!visit[i]){
+                off_tree.push_back(vector&lt;pair&lt;int, int&gt; &gt;());
+                dfs(i, -1, comp_size++);
+                if(off_tree.back().empty()){
+                    off_tree.back().emplace_back(min(i, *G[i].begin()), -max(i, *G[i].begin()));
+                }
+            }
+        }
+        for(int i = 0; i &lt; comp_size; i++){
+            if(off_tree[i][0].second &lt; 0) tree.push_back(i);
+            else non_tree.push_back(i);
+        }
+    }
+    void transform_to_connected_graph() noexcept {
+        detect_component();
+        while(!tree.empty()){
+            int id = non_tree.back();
+            while(!off_tree[id].empty() &amp;&amp; !tree.empty()){
+                pair&lt;int, int&gt; p = off_tree[id].back(), q = off_tree[tree.back()][0];
+                q.second = -q.second;
+                swap_edge(p, q);
+                off_tree[id].pop_back(), tree.pop_back();
+            }
+            if(off_tree[id].empty()) non_tree.pop_back();
+        }
+        while((int)non_tree.size() &gt;= 2){
+            int q = non_tree.back(); non_tree.pop_back();
+            int p = non_tree.back(); non_tree.pop_back();
+            pair&lt;int, int&gt; e1 = off_tree[p].back(), e2 = off_tree[q].back();
+            off_tree[p].pop_back(), off_tree[q].pop_back();
+            swap_edge(e1, e2);
+            off_tree[q].emplace_back(e1.first, e2.first);
+            for(auto&amp; e : off_tree[p]) off_tree[q].push_back(e);
+            non_tree.push_back(q);
+        }
+    }
+    void dfs(const int u, const int p, int&amp; ver_sm, vector&lt;bool&gt;&amp; _visit) const noexcept {
+        _visit[u] = true, ver_sm++;
+        for(int v : G[u]) if(!_visit[v]) dfs(v, u, ver_sm, _visit);
+    }
+    bool IsConnected() const noexcept {
+        int ver_sm = 0;
+        vector&lt;bool&gt; _visit(V, false);
+        dfs(0, -1, ver_sm, _visit);
+        return (ver_sm == V);
+    }
+    bool check_swap_edge(const pair&lt;int, int&gt;&amp; p, const pair&lt;int, int&gt;&amp; q) noexcept {
+        if(G[p.first].find(q.first) != G[p.first].end()) return false;
+        if(G[p.second].find(q.second) != G[p.second].end()) return false;
+        erase_edge(p.first, p.second), erase_edge(q.first, q.second);
+        add_edge(p.first, q.first), add_edge(p.second, q.second);
+        return true;
+    }
+    bool transition(pair&lt;int, int&gt; p, pair&lt;int, int&gt; q, bool flag) noexcept {
+        if(p.first == q.second || p.second == q.first || p.second == q.second) return false;
+        if(flag) swap(q.first, q.second);
+        return check_swap_edge(p, q);
+    }
+    void shuffle_graph() noexcept {
+        for(int i = 0; i &lt; V; i++) for(int j = 0; j &lt; degree[i]; j++) population.emplace_back(i, j);
+        uniform_int_distribution&lt;&gt; _rand(0, (int)population.size()-1);
+        int window = 1;
+        double ex_window = 1.0;
+        while(true){
+            vector&lt;unordered_set&lt;int&gt; &gt; tmpG;
+            if(connected) tmpG = G;
+            bool finish = false, done = false;
+            for(int i = 0; i &lt; window; i++){
+                pair&lt;int, int&gt; id1 = {0, 0}, id2 = {0, 0};
+                while(id1.first == id2.first) id1 = population[_rand(mt)], id2 = population[_rand(mt)];
+                unordered_set&lt;int&gt;::iterator it1 = G[id1.first].begin(), it2 = G[id2.first].begin();
+                advance(it1, id1.second), advance(it2, id2.second);
+                done |= transition({id1.first, *it1}, {id2.first, *it2}, mt() % 2);
+                if(_time() &gt; TIME){ finish = true; break; }
+            }
+            if(!connected || !done || IsConnected()){
+                loop_count += window, ex_window *= UP, window = round(ex_window);
+            }
+            else G = tmpG, ex_window *= DOWN, window = max((int)round(ex_window), 1);
+            if(finish) break;
+        }
+    }
+    void construct_graph() noexcept {
+        vector&lt;int&gt; index(V);
+        iota(index.begin(), index.end(), 0);
+        shuffle(index.begin(), index.end(), mt);
+        for(int i : index) for(int to : G[i]) graph[i].push_back(index[to]);
+    }
+
+public:
+    int loop_count;
+    vector&lt;vector&lt;int&gt; &gt;&amp; graph;
+    const vector&lt;int&gt;&amp; degree;
+    GraphGenerator(const vector&lt;int&gt;&amp; d, vector&lt;vector&lt;int&gt; &gt;&amp; g, bool _connected=false) noexcept
+        : V((int)d.size()), connected(_connected), G(V), visit(V, 0),
+            start(chrono::high_resolution_clock::now()), mt(rnd()), loop_count(0), graph{g}, degree{d}{
+        assert(check());
+        assert(construct_init_graph());
+        if(connected) transform_to_connected_graph();
+        shuffle_graph();
+        construct_graph();
+    }
+};
+</pre>
+<h3>verify 用の問題</h3>
+<p>
+verify していません(verify 問題を知らない)
+</p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>

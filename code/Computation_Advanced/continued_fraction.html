@@ -38,16 +38,26 @@
 <div id="contents">
 
 <section>
-<h2>Rational Number</h2>
+<h2>Continued Fraction</h2>
 <h3>コードについての説明</h3>
 <p>
-有理数型のコード. 計算幾何や確率の問題で誤差落ちが怖いときに用いたくなるかもしれない(実際に使ったことはない). <br>
-整数型との演算も Rational Number にキャストされて上手く行えるはず.
+"有理数→連分数展開", "連分数展開→有理数" の変換および ２ つの有理数 p, q が与えられたときに p と q の真に間に存在する有理数 r で (分子) + (分母) が最も小さいものを返す(注: 本文では有理数と言ったとき(非負の)有理数を指すこととする). <br>
+すべての有理数はちょうど 2 つの連分数展開形(初めは整数で, その後自然数が続く形)を持つ. 例えば 13 / 36 なら {0; 2, 1, 3, 2, 1} と {0; 2, 1, 3, 3} である. この列は (13, 36) の組についてユークリッドの互除法を計算したときの商の列に等しく, 実際 {0, 2, 1, 3, 3} になることが分かる.
+そのため連分数展開したときの長さは log (max(分子, 分母)) で計算量もこれに等しくなる. <br>
+Stern-Brocot 木との関係も深く例えば Stern-Brocot 木上の分数 q = {a_0; a_1,..., a_k} = {a_0; a_1,..., (a_k)-1, 1} についてその 2 つの子は {a_0; a_1,..., (a_k)+1}, {a_0; a_1,..., (a_k)-1, 2} となる. ここで k が奇数のときは前者が左の子, k が偶数のときは後者が左の子となる(連分数展開は辞書順の大小と一致しないことに注意する.) <br>
+p と q の真に間に存在する有理数 r で (分子) + (分母) が最も小さいものは　Stern-Brocot 木上での探索でも求めることができるが, 以上の事実から根からの探索は連分数展開したときの項の和の分だけかかるため効率が良くない.
+ただ連分数展開ベースで考えると, Stern-Brocot 木上の (分子) + (分母) が小さいものから探索するという探索順序から p, q の真に間に存在する有理数 r で (分子) + (分母) が最も小さいものは {p, q の連分数展開形での prefix, min(p におけるその次の項(無い場合は ∞), q におけるその次の項(無い場合は ∞))} の形で書けそうである.
+これは少し嘘で p, q が Stern-Brocot 木上で先祖-祖先の関係になっているとき, r として p や q が出てきてしまうことがある. ただ各 p, q それぞれについて 2 種類の連分数展開, 計 4 種類の連分数展開の組を考えることでそのうちのどれかで, 得られた r は valid になる.
 </p>
 <p>
-(コンストラクタ) <br>
-Rational Number&lt;T&gt;(num): 整数 num の有理数型を構築 <br>
-Rational Number&lt;T&gt;(num, den): 有理数 num / den の有理数型を構築 <br>
+(関数)<br>
+rtocf(val, res): 有理数 val を 連分数展開形 res に変換する(２種類ある). <br>
+cftor(val): 連分数展開形 val を有理数に変換し, それを返す. <br>
+find_rational(val1, val2): 2 つの val1, val2 が与えられたときに val1 と val2 の真に間に存在する有理数で (分子) + (分母) が最も小さいものを返す. val2 <= 1 ならその中で分子が一番小さいものを val1 < 1 < val2 なら 1/1 を val1 <= 1 ならその中で分母が最も小さいものを返す. <br>
+(注: 例えば val2 <= 1 で "(分子)+(分母) 最小 → (分子) 最小" は "(分子) 最小 → (分子)+(分母) 最小" と同じになる. なぜなら 2 つの基準で異なるものが得られた場合 Stern-Brocot 木上で考えたとき, その 2 つの LCA として両方と異なるものが得られ矛盾する.)
+</p>
+<p>
+時間計算量: 各操作 O(log A) (A = max(分子, 分母) とする.)
 </p>
 <h3>コード</h3>
 <div class="codebox">
@@ -118,13 +128,78 @@ public:
     Rational(T num_) : num(num_), den(1){}
     Rational(T num_, T den_) : num(num_), den(den_){ if(den &lt; 0) num = -num, den = -den; }
 };
+
+template&lt;typename T&gt;
+bool is_valid(const Rational&lt;T&gt;&amp; a, const Rational&lt;T&gt;&amp; b, const Rational&lt;T&gt;&amp; c)
+{
+    return (a &lt; b &amp;&amp; b &lt; c);
+}
+
+template&lt;typename T&gt;
+void rtocf(const Rational&lt;T&gt;&amp; val, vector&lt;vector&lt;T&gt; &gt;&amp; res)
+{
+    if(res.empty()) res.push_back(vector&lt;T&gt;());
+    res[0].push_back(val.num / val.den);
+    long long mod = val.num % val.den;
+    if(mod == 0){
+        res.push_back(res[0]);
+        if(res[0].back() == 1 &amp;&amp; (int)res[0].size() &gt; 1){
+            res[1].pop_back(), --res[1].back();
+        }else{
+            --res[0].back(), res[0].push_back(1);
+        }
+        return;
+    }else{
+        rtocf(Rational&lt;T&gt;(val.den, val.num-res[0].back()*val.den) , res);
+    }
+}
+
+template&lt;typename T&gt;
+Rational&lt;T&gt; cftor(vector&lt;T&gt; val)
+{
+    T a = 1, b = 0;
+    while(!val.empty()){
+        swap(a, b);
+        a += val.back()*b;
+        val.pop_back();
+    }
+    return Rational&lt;T&gt;(a, b);
+}
+
+template&lt;typename T&gt;
+Rational&lt;T&gt; find_rational(const Rational&lt;T&gt; val1, const Rational&lt;T&gt; val2)
+{
+    vector&lt;vector&lt;T&gt; &gt; l, r;
+    rtocf(val1, l), rtocf(val2, r);
+    vector&lt;T&gt; res;
+    for(vector&lt;T&gt;&amp; lvec : l){
+        for(vector&lt;T&gt;&amp; rvec : r){
+            vector&lt;T&gt; nw;
+            int i = 0, mn_size = min((int)lvec.size(), (int)rvec.size());
+            for(i = 0; i &lt; mn_size; ++i){
+                if(lvec[i] != rvec[i]){
+                    nw.push_back(min(lvec[i], rvec[i]) + 1);
+                    break;
+                }else{
+                    nw.push_back(lvec[i]);
+                }
+            }
+            if(i == mn_size){
+                if((int)lvec.size() &gt; mn_size){
+                    nw.push_back(lvec[mn_size]+1);
+                }else{
+                    nw.push_back(rvec[mn_size]+1);
+                }
+            }
+            Rational&lt;T&gt; cand = cftor(nw);
+            if(is_valid(val1, cand, val2)) return cand;
+        }
+    }
+    return Rational&lt;T&gt;();
+}
 </pre>
 <h3>verify 用の問題</h3>
-<p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1131">Unit Fraction Partition</a>
-  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3579536#1">提出コード</a><br>
-Codeforces : <a href="https://codeforces.com/contest/1163/problem/C2">Power Transmission (Hard Edition)</a>
-    <a href="https://codeforces.com/contest/1163/submission/54365039">提出コード</a><br>
-(掛け算や割り算は verify していません)</p>
+<p>GCJ : <a href="https://codingcompetitions.withgoogle.com/codejam/round/0000000000051679/0000000000146184">New Elements: Part 2</a></p>
 </section>
 
 </div>

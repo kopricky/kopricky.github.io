@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>Dynamic Connectivity</h2>
+<h3>コードについての説明</h3>
+<p>
+一般のグラフを対象に辺の追加, 削除, 頂点間の連結性判定を効率よく行うことのできるアルゴリズム. 元論文は <a href="https://www.cs.princeton.edu/courses/archive/fall03/cs528/handouts/Poly%20logarithmic.pdf">Holm, Lichtenberg, Thorup 1998</a>. <a href="../DataStructure_OnGraph/link_cut_tree.html">Link Cut Tree</a>, <a href="../DataStructure_OnGraph/euler_tour_tree.html">Euler Tour Tree</a> などは森を対象にしていたためそれの一般化にあたる. <br>
+グラフ G の全域森を管理する. このとき log n 個の Euler Tour Tree を用いて Scaling(Layering とも) (第 i 層では森 F_i を管理し, F_0 ⊇ F_1 ... ⊇ F_{log n} かつ F_i 内の連結成分の最大サイズは 2^i 以下) することで辺を削除した際の restore 操作の高速化を(ならしの意味で)可能にしている. <br>
+詳しくは元論文を参照してもらいたい. Euler Tour Tree 上で情報を正しく伝播させる必要があるため実装は割と気をつける必要がある. 計算量は辺の追加, 削除がならし O(log^2 n), 連結性判定が O(log n) である. Euler Tour Tree を平衡二分木ではなく O(log n)-分木で管理することで計算量上は O(log n) factor の改善が可能になる. <br>
+restore 操作を辺の重みが小さいものから順に走査することで F_0 が常に最小全域森となるように保つことができる. つまりこれは deletion-only の場合削除クエリに対してならし O(log^2 n) の計算量で最小全域森を保持できることを意味している. insertion 込みだとコストの小さい辺が入ってきたときにコストの小さい辺は削除時の探索順の関係で level の高い位置に置く必要があるが, そうするとならしが回らないので単純には無理そう.
+ちなみに online Fully Dynamic だと O(log^4 n), offline だと O(log^2 n) の計算量で MST を管理できるらしい. <br>
+また連結性判定だけでなく連結成分内の頂点全体への演算も F_0 に対する操作で簡単に行えるので計算量は O(log n). 連結成分内の辺全体への演算は F_0 において全ての level の off tree edge を保持しておくようにすればこちらも計算量 O(log n) で行える(はず). <br>
+以下の実装では平衡二分木として splay 木を用いている. 少し高速化を行っているため restore 操作時の処理がわかりにくいと思われる(本当に変更を伝播する必要のあるときのみ伝播するみたいなことをしている). グラフは単純グラフであることを仮定している(多重辺, 自己ループがあっても外部で適切に処理すれば問題ない).
+</p>
+<p>
+(関数)<br>
+link(a, b): 辺(a, b) を追加(連結成分が増えるかどうか(true / false) を返す) <br>
+cut(a, b): 辺(a, b) を削除(連結成分が増えるかどうか(true / false) を返す) <br>
+connected(a, b): 頂点 a, b が同じ連結成分内に属するかどうかを判定する(true / false)
+</p>
+<p>
+時間計算量: link, cut ならし O(log^2 n), connected O(log n)
+</p>
+<h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
+<pre class="prettyprint linenums">
+// 単純グラフと仮定する
+class BSTNode {
+public:
+    int from, to, sz;
+    bool subtree_edge, subofftree_edge;
+    BSTNode *left, *right, *par;
+    unordered_set&lt;int&gt; adjacent;
+    bool exact_level;
+    BSTNode(const int _ver) noexcept :
+        from(_ver), to(_ver), sz(0), subtree_edge(false), subofftree_edge(false),
+            left(nullptr), right(nullptr), par(nullptr), exact_level(false){}
+    BSTNode(const int _from, const int _to, const bool _flag) noexcept :
+        from(_from), to(_to), sz(0), subtree_edge(false), subofftree_edge(false),
+            left(nullptr), right(nullptr), par(nullptr), exact_level((from &lt; to) &amp;&amp; _flag){}
+    inline bool IsRoot() const noexcept { return !par; }
+    inline bool IsVertex() const noexcept { return (from == to); }
+    inline void eval() noexcept {
+        if(IsVertex()) sz = 1, subtree_edge = false, subofftree_edge = !adjacent.empty();
+        else sz = 0, subtree_edge = exact_level, subofftree_edge = false;
+        if(left){
+            sz += left-&gt;sz, subtree_edge |= left-&gt;subtree_edge, subofftree_edge |= left-&gt;subofftree_edge;
+        }
+        if(right){
+            sz += right-&gt;sz, subtree_edge |= right-&gt;subtree_edge, subofftree_edge |= right-&gt;subofftree_edge;
+        }
+    }
+    inline void subtree_edge_eval(){
+        subtree_edge = exact_level;
+        if(left) subtree_edge |= left-&gt;subtree_edge;
+        if(right) subtree_edge |= right-&gt;subtree_edge;
+    }
+    inline void subofftree_edge_eval(){
+        subofftree_edge = !adjacent.empty();
+        if(left) subofftree_edge |= left-&gt;subofftree_edge;
+        if(right) subofftree_edge |= right-&gt;subofftree_edge;
+    }
+    inline bool subofftree_check(){
+        return !adjacent.empty() ||
+                (left ? left-&gt;subofftree_edge : false) || (right ? right-&gt;subofftree_edge : false);
+    }
+    inline bool offtree_check(){
+        return adjacent.empty() ||
+                (left ? left-&gt;subofftree_edge : false) || (right ? right-&gt;subofftree_edge : false);
+    }
+    void rotate(const bool right_) noexcept {
+        BSTNode *p = par, *g = p-&gt;par;
+        if(right_){
+            if((p-&gt;left = right)) right-&gt;par = p;
+            right = p, p-&gt;par = this;
+        }else{
+            if((p-&gt;right = left)) left-&gt;par = p;
+            left = p, p-&gt;par = this;
+        }
+        p-&gt;eval(), eval();
+        if(!(par = g)) return;
+        if(g-&gt;left == p) g-&gt;left = this;
+        if(g-&gt;right == p) g-&gt;right = this;
+        g-&gt;eval();
+    }
+};
+
+BSTNode *splay(BSTNode *u) noexcept {
+    if(!u) return nullptr;
+    while(!(u-&gt;IsRoot())){
+        BSTNode *p = u-&gt;par, *gp = p-&gt;par;
+        if(p-&gt;IsRoot()){ // zig
+            u-&gt;rotate((u == p-&gt;left));
+        }else{
+            bool flag = (u == p-&gt;left);
+            if((u == p-&gt;left) == (p == gp-&gt;left)){ // zig-zig
+                p-&gt;rotate(flag), u-&gt;rotate(flag);
+            }else{ // zig-zag
+                u-&gt;rotate(flag), u-&gt;rotate(!flag);
+            }
+        }
+    }
+    return u;
+}
+
+BSTNode *join(BSTNode *root1, BSTNode *root2) noexcept {
+    if(!root1 || !root2) return root1 ? root1 : root2;
+    BSTNode *cur = nullptr, *nx = root1;
+    do{ cur = nx, nx = cur-&gt;right; }while(nx);
+    BSTNode *ver = splay(cur);
+    ver-&gt;right = root2, ver-&gt;eval(), root2-&gt;par = ver;
+    return ver;
+}
+
+class EulerTourTree {
+public:
+    struct pair_hash {
+        template &lt;class T1, class T2&gt;
+        size_t operator() (const pair&lt;T1, T2&gt;&amp; p) const {
+            size_t lhs = hash&lt;T1&gt;()(p.first), rhs = hash&lt;T2&gt;()(p.second);
+            return lhs^(rhs+0x9e3779b9+(lhs&lt;&lt;6)+(lhs&gt;&gt;2));
+        }
+    };
+    BSTNode** vertex_set;
+    unordered_map&lt;pair&lt;int, int&gt;, pair&lt;BSTNode*, BSTNode*&gt;, pair_hash&gt; edge_set;
+private:
+    BSTNode *reroot(BSTNode *ver) noexcept {
+        BSTNode *res = splay(ver)-&gt;left;
+        if(!res) return ver;
+        ver-&gt;left = nullptr, ver-&gt;eval();
+        while(ver-&gt;right) ver = ver-&gt;right;
+        splay(ver), ver-&gt;right = res, ver-&gt;eval(), res-&gt;par = ver;
+        return ver;
+    }
+    void link(BSTNode *ver1, BSTNode *ver2, const bool flag) noexcept {
+        BSTNode *e1 = new BSTNode(ver1-&gt;from, ver2-&gt;from, flag);
+        BSTNode *e2 = new BSTNode(ver2-&gt;from, ver1-&gt;from, flag);
+        edge_set[{ver1-&gt;from, ver2-&gt;from}] = {e1, e2};
+        join(join(reroot(ver1), e1), join(reroot(ver2), e2));
+    }
+    void cut(BSTNode *edge1, BSTNode *edge2) noexcept {
+        splay(edge1), splay(edge2);
+        BSTNode *p = edge1-&gt;par;
+        bool _right = (edge1 == edge2-&gt;right);
+        if(p != edge2){
+            _right = (p == edge2-&gt;right);
+            p-&gt;par = nullptr, edge1-&gt;rotate((edge1 == p-&gt;left));
+        }
+        if(edge1-&gt;left) edge1-&gt;left-&gt;par = nullptr;
+        if(edge1-&gt;right) edge1-&gt;right-&gt;par = nullptr;
+        if(_right){
+            if(edge2-&gt;left) edge2-&gt;left-&gt;par = nullptr;
+            join(edge2-&gt;left, edge1-&gt;right);
+        }else{
+            if(edge2-&gt;right) edge2-&gt;right-&gt;par = nullptr;
+            join(edge1-&gt;left, edge2-&gt;right);
+        }
+        delete edge1; delete edge2;
+    }
+    bool IsConnected(BSTNode *ver1, BSTNode *ver2) noexcept {
+        splay(ver1), splay(ver2);
+        return ver1-&gt;par;
+    }
+    int component_size(BSTNode *ver) noexcept { return splay(ver)-&gt;sz; }
+public:
+    int V;
+    EulerTourTree(){}
+    void resize(const int node_size) noexcept {
+        V = node_size, vertex_set = new BSTNode*[V];
+        for(int i = 0; i &lt; V; i++) vertex_set[i] = new BSTNode(i);
+    }
+    void reroot(const int node_id) noexcept { reroot(vertex_set[node_id]); }
+    void link(int node1_id, int node2_id, bool flag=true) noexcept {
+        if(node1_id &gt; node2_id) swap(node1_id, node2_id);
+        link(vertex_set[node1_id], vertex_set[node2_id], flag);
+    }
+    void cut(int node1_id, int node2_id){
+        if(node1_id &gt; node2_id) swap(node1_id, node2_id);
+        auto it = edge_set.find({node1_id, node2_id});
+        assert(it != edge_set.end());
+        cut((it-&gt;second).first, (it-&gt;second).second);
+    }
+    bool IsConnected(const int node1_id, const int node2_id) noexcept {
+        if(node1_id == node2_id) return true;
+        return IsConnected(vertex_set[node1_id], vertex_set[node2_id]);
+    }
+    int component_size(int node_id) noexcept { return component_size(vertex_set[node_id]); }
+    void check_dfs(const BSTNode* cur) const noexcept {
+        if(cur-&gt;left) check_dfs(cur-&gt;left);
+        cout &lt;&lt; &quot;{&quot; &lt;&lt; (cur-&gt;from) &lt;&lt; &quot;,&quot; &lt;&lt; (cur-&gt;to) &lt;&lt; &quot;} &quot;;
+        if(cur-&gt;right) check_dfs(cur-&gt;right);
+    }
+};
+
+class DynamicConnectivity {
+private:
+    BSTNode *level_up_dfs(BSTNode *cur, const int layer) noexcept {
+        if(cur-&gt;exact_level){
+            splay(cur)-&gt;exact_level = false, cur-&gt;subtree_edge_eval();
+            detect_layer[{cur-&gt;from, cur-&gt;to}]++, et[layer+1].link(cur-&gt;from, cur-&gt;to);
+            return cur;
+        }
+        if(cur-&gt;left &amp;&amp; cur-&gt;left-&gt;subtree_edge) return level_up_dfs(cur-&gt;left, layer);
+        if(cur-&gt;right &amp;&amp; cur-&gt;right-&gt;subtree_edge) return level_up_dfs(cur-&gt;right, layer);
+        return nullptr;
+    }
+    BSTNode *search_edge_dfs
+        (BSTNode *cur, const int layer, const int another, bool&amp; flag, pair&lt;int, int&gt;&amp; rep_edge) noexcept {
+        if(!cur-&gt;adjacent.empty()){
+            bool state = et[layer+1].vertex_set[cur-&gt;from]-&gt;adjacent.empty();
+            for(auto it = cur-&gt;adjacent.begin(); it != cur-&gt;adjacent.end();){
+                pair&lt;int, int&gt; e = {min(cur-&gt;from, *it), max(cur-&gt;from, *it)};
+                BSTNode *correspond = et[layer].vertex_set[*it];
+                if(et[layer].IsConnected(another, *it)){
+                    flag = true, rep_edge = e;
+                    cur-&gt;adjacent.erase(it), correspond-&gt;adjacent.erase(cur-&gt;from);
+                    if(!correspond-&gt;subofftree_check()){
+                        splay(correspond)-&gt;subofftree_edge_eval();
+                    }
+                    break;
+                }else{
+                    if(!et[layer+1].vertex_set[*it]-&gt;subofftree_check()){
+                        splay(et[layer+1].vertex_set[*it])-&gt;subofftree_edge = true;
+                    }
+                    et[layer+1].vertex_set[cur-&gt;from]-&gt;adjacent.insert(*it);
+                    et[layer+1].vertex_set[*it]-&gt;adjacent.insert(cur-&gt;from);
+                    detect_layer[e]++, it = cur-&gt;adjacent.erase(it);
+                    correspond-&gt;adjacent.erase(cur-&gt;from);
+                    if(!correspond-&gt;subofftree_check()){
+                        splay(correspond)-&gt;subofftree_edge_eval();
+                    }
+                }
+            }
+            if(state &amp;&amp; !et[layer+1].vertex_set[cur-&gt;from]-&gt;offtree_check()){
+                splay(et[layer+1].vertex_set[cur-&gt;from])-&gt;subofftree_edge = true;
+            }
+            splay(cur)-&gt;subofftree_edge_eval();
+            return cur;
+        }
+        if(cur-&gt;left &amp;&amp; cur-&gt;left-&gt;subofftree_edge){
+            return search_edge_dfs(cur-&gt;left, layer, another, flag, rep_edge);
+        }
+        if(cur-&gt;right &amp;&amp; cur-&gt;right-&gt;subofftree_edge){
+            return search_edge_dfs(cur-&gt;right, layer, another, flag, rep_edge);
+        }
+        return nullptr;
+    }
+    bool replace(const int from, const int to, const int layer) noexcept {
+        if(layer &lt; 0) return true;
+        int u, v;
+        if(et[layer].component_size(from) &lt;= et[layer].component_size(to)) u = from, v = to;
+        else u = to, v = from;
+        BSTNode *ver = splay(et[layer].vertex_set[u]);
+        while(ver-&gt;subtree_edge) ver = level_up_dfs(ver, layer);
+        pair&lt;int, int&gt; rep_edge = {-1, -1};
+        bool flag = false;
+        while(ver-&gt;subofftree_edge){
+            ver = search_edge_dfs(ver, layer, v, flag, rep_edge);
+            if(flag) break;
+        }
+        if(flag){
+            et[layer].link(rep_edge.first, rep_edge.second);
+            for(int i = 0; i &lt; layer; i++) et[i].link(rep_edge.first, rep_edge.second, false);
+            return false;
+        }else return replace(from, to, layer-1);
+    }
+public:
+    int V, layer_count;
+    EulerTourTree* et;
+    unordered_map&lt;pair&lt;int, int&gt;, int, EulerTourTree::pair_hash&gt; detect_layer;
+    DynamicConnectivity(int node_size) noexcept : V(node_size), layer_count(ceil(log2(V))+1){
+        et = new EulerTourTree[layer_count];
+        for(int i = 0; i &lt; layer_count; i++) et[i].resize(V);
+    }
+    bool link(int node1_id, int node2_id) noexcept {
+        if(node1_id &gt; node2_id) swap(node1_id, node2_id);
+        detect_layer[{node1_id, node2_id}] = 0;
+        if(et[0].IsConnected(node1_id, node2_id)){
+            BSTNode *ver1 = et[0].vertex_set[node1_id], *ver2 = et[0].vertex_set[node2_id];
+            splay(ver1)-&gt;subofftree_edge = true, ver1-&gt;adjacent.insert(node2_id);
+            splay(ver2)-&gt;subofftree_edge = true, ver2-&gt;adjacent.insert(node1_id);
+            return false;
+        }else{
+            et[0].link(node1_id, node2_id);
+            return true;
+        }
+    }
+    bool cut(int node1_id, int node2_id) noexcept {
+        if(node1_id &gt; node2_id) swap(node1_id, node2_id);
+        int layer = detect_layer[{node1_id, node2_id}];
+        auto&amp; st = et[layer].vertex_set[node1_id]-&gt;adjacent;
+        detect_layer.erase({node1_id, node2_id});
+        if(st.find(node2_id) == st.end()){
+            for(int i = 0; i &lt;= layer; i++) et[i].cut(node1_id, node2_id);
+            return replace(node1_id, node2_id, layer);
+        }else{
+            et[layer].vertex_set[node1_id]-&gt;adjacent.erase(node2_id);
+            if(!et[layer].vertex_set[node1_id]-&gt;subofftree_check()){
+                splay(et[layer].vertex_set[node1_id])-&gt;subofftree_edge_eval();
+            }
+            et[layer].vertex_set[node2_id]-&gt;adjacent.erase(node1_id);
+            if(!et[layer].vertex_set[node2_id]-&gt;subofftree_check()){
+                splay(et[layer].vertex_set[node2_id])-&gt;subofftree_edge_eval();
+            }
+            return false;
+        }
+    }
+    bool IsConnected(const int node1_id, const int node2_id) noexcept {
+        return et[0].IsConnected(node1_id, node2_id);
+    }
+};
+</pre>
+<h3>verify 用の問題</h3>
+<p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2235&lang=jp">Graph Construction</a>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3553850#1">提出コード</a></p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>

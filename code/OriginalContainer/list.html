@@ -230,10 +230,6 @@ public:
     bool operator!=(const ListIterator&amp; itr) const {
         return this-&gt;ls_ptr != itr.ls_ptr || this-&gt;index != itr.index;
     }
-    friend void swap(const ListIterator&lt;T&gt;&amp; itr1, const ListIterator&lt;T&gt;&amp; itr2){
-        ListIterator&lt;T&gt; tmp = itr1;
-        itr1 = itr2, itr2 = itr1;
-    };
 };
 </pre>
 <h3>verify 用の問題</h3>

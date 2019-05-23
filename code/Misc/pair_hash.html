@@ -38,52 +38,25 @@
 <div id="contents">
 
 <section>
-<h2>Rolling Hash</h2>
+<h2>Pair Hash</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
-</p>
-<p>
-(関数)<br>
-add_edge(): 辺を追加する <br>
-</p>
-<p>
-時間計算量: O(mlogn)
+std::pair のハッシュ値はデフォルトで定義されていないため, unordered_set, unordered_map などを使いたいときは以下の実装を用いると良い(boost の実装を基に書いた). <br>
+よくハッシュ値をそのまま xor で結合しているものを見るが, 自明に衝突するケース(同じ要素の組だった場合)が存在するのでやめたほうがいい.
 </p>
 <h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
 <pre class="prettyprint linenums">
-struct RH {
-	static long long mod[2], mul[2];
-    static vector&lt;long long&gt; pm[2];
-	string s; int sz; vector&lt;long long&gt; hs[2];
-	void init(string&amp; s){
-		this-&gt;s = s; sz = (int)s.size();
-        for(int i = 0; i &lt; 2; i++){
-            hs[i].resize(sz+1,0);
-            if(pm[i].empty()) pm[i].push_back(1);
-            for(int j = 0; j &lt; sz; j++){
-                hs[i][j+1] = (hs[i][j]*mul[i]+s[j])%mod[i];
-            }
-        }
-	}
-	pair&lt;long long,long long&gt; hash(int l, int r){	//文字列sのインデックス[l,r)の部分文字列のハッシュ値
-		if(l&gt;=r) return make_pair(0,0);
-        long long res[2];
-        for(int i = 0; i &lt; 2; i++){
-            while((int)pm[i].size() &lt;= r){
-                pm[i].push_back(pm[i].back()*mul[i]%mod[i]);
-            }
-            res[i] = (hs[i][r] + mod[i] - hs[i][l] * pm[i][r-l] % mod[i]) % mod[i];
-        }
-		return make_pair(res[0],res[1]);
-	}
+struct pair_hash {
+    template &lt;class T1, class T2&gt;
+    size_t operator() (const pair&lt;T1, T2&gt;&amp; p) const {
+        size_t lhs = hash&lt;T1&gt;()(p.first), rhs = hash&lt;T2&gt;()(p.second);
+        return lhs^(rhs+0x9e3779b9+(lhs&lt;&lt;6)+(lhs&gt;&gt;2));
+    }
 };
-vector&lt;long long&gt; RH::pm[2];
-long long RH::mod[2]={1000000007, 1000000009}, RH::mul[2]={10009, 10007};
 </pre>
-<h3>verify 用の問題</h3>
-<p>yukicoder : <a href="https://yukicoder.me/problems/no/430">文字列検索</a>
-  <a href="https://yukicoder.me/submissions/270129">提出コード</a></p>
 </section>
 
 </div>
