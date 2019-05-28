@@ -58,14 +58,13 @@ zig, zig-zig, zig-zag の 3 つの回転を用いてあるノードを根にす�
 <input type="checkbox" id="label" class="csscode" />
 <label for="label"></label>
 <pre class="prettyprint linenums">
-// root ポインタは nullptr 初期化することを忘れない
 template&lt;typename _Key, typename _Tp&gt; class node {
 public:
     int sz;
     _Key key;
     _Tp val, al, lazy;
     node *left, *right, *par;
-    node(_Key _key, _Tp _val) noexcept : sz(1), key(_key), val(_val), al(id2), lazy(id1),
+    node(_Key _key, _Tp _val) noexcept : sz(1), key(_key), val(_val), al(val), lazy(id1),
         left(nullptr), right(nullptr), par(nullptr){}
     static const _Tp id1 = (_Tp)0;
     static const _Tp id2 = (_Tp)0;
@@ -252,21 +251,21 @@ pair&lt;node&lt;_Key, _Tp&gt;*, node&lt;_Key, _Tp&gt;*&gt; split_key(const _Key 
     return make_pair(res1, res2);
 }
 
-// root を根とする木のうちキー値が [lval, rval) のものに対して x の更新を行う.
+// root を根とする木のうちキー値が [lkey, rkey) のものに対して x の更新を行う.
 template&lt;typename _Key, typename _Tp&gt;
-node&lt;_Key, _Tp&gt;* range(_Key lval, _Key rval, _Tp x, node&lt;_Key, _Tp&gt;* root) noexcept {
-    auto pnn1 = split(lval, root);
-    auto pnn2 = split(rval, pnn1.second);
-    if(pnn2.first) opr1(pnn2.first-&gt;lazy, x);
+node&lt;_Key, _Tp&gt;* range(_Key lkey, _Key rkey, _Tp x, node&lt;_Key, _Tp&gt;* root) noexcept {
+    auto pnn1 = split_key(lkey, root);
+    auto pnn2 = split_key(rkey, pnn1.second);
+    if(pnn2.first) node&lt;_Key, _Tp&gt;::opr1(pnn2.first-&gt;lazy, x);
     return join(pnn1.first, join(pnn2.first, pnn2.second));
 }
 
-// root を根とする木のうちキー値が [lval, rval) のものに対するクエリに答える.
+// root を根とする木のうちキー値が [lkey, rkey) のものに対するクエリに答える.
 // 返り値は(木の根, 値)
 template&lt;typename _Key, typename _Tp&gt;
-pair&lt;node&lt;_Key, _Tp&gt;*, _Tp&gt; query(_Key lval, _Key rval, node&lt;_Key, _Tp&gt;* root) noexcept {
-    auto pnn1 = split(lval, root);
-    auto pnn2 = split(rval, pnn1.second);
+pair&lt;node&lt;_Key, _Tp&gt;*, _Tp&gt; query(_Key lkey, _Key rkey, node&lt;_Key, _Tp&gt;* root) noexcept {
+    auto pnn1 = split_key(lkey, root);
+    auto pnn2 = split_key(rkey, pnn1.second);
     _Tp res = (pnn2.first ? pnn2.first-&gt;al : node&lt;_Key, _Tp&gt;::id2);
     return make_pair(join(pnn1.first, join(pnn2.first, pnn2.second)), res);
 }

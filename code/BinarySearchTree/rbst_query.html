@@ -45,7 +45,7 @@ RBST とは randomized binary search tree の略で平衡二分木の乱択を�
 こういう単純だけどうまくいく系はしっかりと解析することが大事なので考えてみるとよい気がします(<a href="http://citeseer.ist.psu.edu/viewdoc/download;jsessionid=F4F5586ACF14EFD688A8A58D032E79D0?doi=10.1.1.17.243&rep=rep1&type=pdf">参考</a>). <br>
 以下の実装では平衡二分木に遅延処理をのっけたデータ構造になっています. 具体的には範囲への加算(a_i ← a_i + x (i ∈ [l, r)) + 範囲の swap ([a_p, a_q) と [a_r, a_s) (q-p = s-r)を swap) のようなクエリなどを処理できます. <br>
 また擬似乱数の生成に xor shift と呼ばれる手法を用いています(メルセンヌ・ツイスタとかだと遅くなるので). <br>
-経験上, <a href="./splay_tree.html">Splay Tree</a> の方が速くなることが多い.
+経験上, <a href="./splay_tree.html">Splay Tree</a> の方が速くなることが多い(追記 入力で与えられた数列などを扱う場合は bst_build で最初に完全平衡二分探索木を作るとかなり速くなる).
 </p>
 <p>
 時間計算量: insert, erase, get および 各クエリ O(logn) (期待計算量)
@@ -55,137 +55,126 @@ RBST とは randomized binary search tree の略で平衡二分木の乱択を�
 <input type="checkbox" id="label" class="csscode" />
 <label for="label"></label>
 <pre class="prettyprint linenums">
-template &lt;typename T&gt; class RBST {
-private:
-    struct node{
-        T val, lazy, al;
-        node* left; node* right;
-        int st_size;   // 部分木のサイズ
-        bool lazy_flag;
-        node(){};
-        node(T v, T init) : val(v), lazy(init), al(v), left(nullptr), right(nullptr), st_size(1), lazy_flag(false){}
-        ~node() { delete left; delete right; }
-    };
-    using pnn = pair&lt;node*,node*&gt;;
-    node* root;
-    T id1,id2;  //opr1,opr2の単位元
-    //クエリに答える演算(sumに対応)
-    inline T opr1(T l, T r) {
-    	return l + r;
+template&lt;typename _Tp&gt; class RBSTNode {
+public:
+    unsigned sz;
+    _Tp val, lazy, al;
+    RBSTNode* left, *right;
+    RBSTNode(){};
+    RBSTNode(_Tp v) : sz(1), val(v), lazy(id1), al(val), left(nullptr), right(nullptr){}
+    static const _Tp id1 = (_Tp)0;
+    static const _Tp id2 = (_Tp)0;
+    static void opr1(_Tp&amp; arg1, const _Tp arg2){ arg1 = arg1 + arg2; }
+    static _Tp opr2(const _Tp arg1, const _Tp arg2){ return arg1 + arg2; }
+    void push(){
+        if(lazy == id1) return;
+        opr1(val, lazy), al += lazy * sz;
+        if(left) opr1(left-&gt;lazy, lazy);
+        if(right) opr1(right-&gt;lazy, lazy);
+        lazy = id1;
     }
-    //遅延処理の演算(addに対応)
-    inline T opr2(T& l, T r) {
-    	return l = l + r;
+    void eval(){
+        sz = 1, al = val;
+        if(left) left-&gt;push(), sz += left-&gt;sz, al = opr2(left-&gt;al, al);
+        if(right) right-&gt;push(), sz += right-&gt;sz, al = opr2(al, right-&gt;al);
     }
-    int size(node* t) { return t ? t-&gt;st_size : 0; }
-    T que(node* t) { push(t); return t ? t-&gt;al : id1; }
-    //遅延伝播
-    void push(node* t){
-        if(!t) return t;
-        if(t-&gt;lazy_flag){
-            if(t-&gt;left){
-                t-&gt;left-&gt;lazy_flag = true;
-                opr2(t-&gt;left-&gt;lazy, t-&gt;lazy);
-            }
-            if(t-&gt;right){
-                t-&gt;right-&gt;lazy_flag = true;
-                opr2(t-&gt;right-&gt;lazy,t-&gt;lazy);
-            }
-            opr2(t-&gt;val, t-&gt;lazy);
-            t-&gt;al += t-&gt;lazy;
-            t-&gt;lazy = id2;
-            t-&gt;lazy_flag = false;
-        }
-    }
-    node* update(node *t){
-        push(t);
-        node* l = t-&gt;left; node* r = t-&gt;right;
-        t-&gt;st_size = size(l) + size(r) + 1;
-        t-&gt;al = opr1(opr1(que(l),que(r)),t-&gt;val);
-        return t;
-    }
-    unsigned rnd(){
+    static unsigned rnd(){
         static unsigned x = 123456789, y = 362436069, z = 521288629, w = 86675123;
         unsigned t = (x^(x&lt;&lt;11));
-        x = y,y = z,z = w;
+        x = y, y = z, z = w;
         return (w = (w^(w&gt;&gt;19))^(t^(t&gt;&gt;8)));
     }
-    node* merge(node* l, node* r){
-        if (!l || !r) return (!l) ? r : l;
-        push(l),push(r);
-        if(rnd() % (size(l) + size(r)) &lt; (unsigned)size(l)){
-            l-&gt;right = merge(l-&gt;right, r);
-            return update(l);
-        }else{
-            r-&gt;left = merge(l, r-&gt;left);
-            return update(r);
-        }
-    }
-    pnn split(node* t, int k){   //木のサイズが(k,n-k)となるように分割する
-        if(!t) return pnn(nullptr, nullptr);
-        push(t);
-        if(k &lt;= size(t-&gt;left)){
-            pnn s = split(t-&gt;left, k);
-            t-&gt;left = s.second;
-            return pnn(s.first,update(t));
-        }else{
-            pnn s = split(t-&gt;right, k-size(t-&gt;left)-1);
-            t-&gt;right = s.first;
-            return pnn(update(t), s.second);
-        }
-    }
-    node* insert(node* t, int k, node* u){
-        auto s = split(t, k);
-        return merge(merge(s.first, u), s.second);
-    }
-    node* erase(node* t, int k){
-        auto sl = split(t, k);
-        auto sr = split(sl.second, 1);
-        delete sr.first;
-        return merge(sl.first, sr.second);
-    }
-
-public:
-    RBST() : root(nullptr), id1(0), id2(0){}
-    RBST(vector&lt;T&gt;&amp; vec) : root(nullptr), id1(0), id2(0){
-        for(int i = 0; i &lt; (int)vec.size(); i++){
-    		insert(i, vec[i]);
-    	}
-    }
-    //0_indexedでkにinsert
-    void insert(int k, T val){
-        root = insert(root, k, new node(val, id2));
-    }
-    //0_indexedでkをerase
-    void erase(int k){
-        root = erase(root, k);
-    }
-    // k 番目の要素を参照
-    T get(int k){
-        auto sr = split(root, k+1);
-        auto sl = split(sr.first, k);
-        T res = que(sl.second);
-        root = merge(merge(sl.first, sl.second), sr.second);
-        return res;
-    }
-    // [l, r) に val を加える
-    void range(int l, int r, T val){
-        if(l &gt;= r)  return;
-        auto sr = split(root, r);
-        auto sl = split(sr.first, l);
-        sl.second-&gt;lazy = opr2(sl.second-&gt;lazy, val), sl.second-&gt;lazy_flag = true;
-        root = merge(merge(sl.first,sl.second),sr.second);
-    }
-    // [l, r) の和を返す
-    T query(int l,int r){
-        if(l &gt;= r)  return 0;
-        auto sr = split(root,r);
-        auto sl = split(sr.first,l);
-        T res = que(sl.second);
-        root = merge(merge(sl.first, sl.second), sr.second);
-        return res;
-    }
 };
+
+template&lt;typename _Tp&gt;
+inline unsigned size(RBSTNode&lt;_Tp&gt; *t){ return t ? t-&gt;sz : 0u; }
+
+template&lt;typename _Tp&gt;
+RBSTNode&lt;_Tp&gt; *join(RBSTNode&lt;_Tp&gt; *l, RBSTNode&lt;_Tp&gt; *r){
+    if(!l) return r;
+    if(!r) return l;
+    l-&gt;push(), r-&gt;push();
+    if(RBSTNode&lt;_Tp&gt;::rnd() % (l-&gt;sz + r-&gt;sz) &lt; l-&gt;sz){
+        return l-&gt;right = join(l-&gt;right, r), l-&gt;eval(), l;
+    }else{
+        return r-&gt;left = join(l, r-&gt;left), r-&gt;eval(), r;
+    }
+}
+
+template&lt;typename _Tp&gt;
+pair&lt;RBSTNode&lt;_Tp&gt;*, RBSTNode&lt;_Tp&gt;*&gt; split(RBSTNode&lt;_Tp&gt; *t, unsigned k){
+    if(!t) return make_pair(nullptr, nullptr);
+    t-&gt;push();
+    if(!k) return make_pair(nullptr, t);
+    if(k &lt;= size(t-&gt;left)){
+        pair&lt;RBSTNode&lt;_Tp&gt;*, RBSTNode&lt;_Tp&gt;*&gt; s = split(t-&gt;left, k);
+        return t-&gt;left = s.second, t-&gt;eval(), make_pair(s.first, t);
+    }else{
+        pair&lt;RBSTNode&lt;_Tp&gt;*, RBSTNode&lt;_Tp&gt;*&gt; s = split(t-&gt;right, k-size(t-&gt;left)-1);
+        return t-&gt;right = s.first, t-&gt;eval(), make_pair(t, s.second);
+    }
+}
+
+template&lt;typename _Tp&gt;
+RBSTNode&lt;_Tp&gt;* insert(RBSTNode&lt;_Tp&gt; *root, RBSTNode&lt;_Tp&gt;* u, const unsigned k){
+    auto s = split(root, k);
+    return join(join(s.first, u), s.second);
+}
+
+template&lt;typename _Tp&gt;
+RBSTNode&lt;_Tp&gt;* erase(RBSTNode&lt;_Tp&gt; *root, unsigned k){
+    auto sl = split(root, k);
+    auto sr = split(sl.second, 1);
+    delete sr.first;
+    return join(sl.first, sr.second);
+}
+
+template&lt;typename _Tp&gt;
+pair&lt;RBSTNode&lt;_Tp&gt;*, _Tp&gt; get(RBSTNode&lt;_Tp&gt; *root, unsigned k){
+    auto sr = split(root, k+1);
+    auto sl = split(sr.first, k);
+    auto lr = sl.second;
+    _Tp res = lr-&gt;val;
+    return make_pair(join(join(sl.first, lr), sr.second), res);
+}
+
+template&lt;typename _Tp&gt;
+RBSTNode&lt;_Tp&gt; *range(RBSTNode&lt;_Tp&gt; *root, const unsigned l, const unsigned r, const _Tp x){
+    if(l &gt;= r) return nullptr;
+    auto sl = split(root, l);
+    auto sr = split(sl.second, r-l);
+    RBSTNode&lt;_Tp&gt;::opr1(sr.first-&gt;lazy, x);
+    return join(join(sl.first, sr.first), sr.second);
+}
+
+template&lt;typename _Tp&gt;
+pair&lt;RBSTNode&lt;_Tp&gt;*, _Tp&gt; query(RBSTNode&lt;_Tp&gt; *root, const unsigned l, const unsigned r){
+    if(l &gt;= r) return make_pair(nullptr, (_Tp)RBSTNode&lt;_Tp&gt;::id2);
+    auto sl = split(root, l);
+    auto sr = split(sl.second, r-l);
+    _Tp res = sr.first-&gt;al;
+    return make_pair(join(join(sl.first, sr.first), sr.second), res);
+}
+
+
+// ヘルパー関数
+template&lt;typename _Tp&gt;
+RBSTNode&lt;_Tp&gt; *bst_build(vector&lt;RBSTNode&lt;_Tp&gt;*&gt;&amp; vec){
+    RBSTNode&lt;_Tp&gt; *root = vec[0];
+    int i, n = (int)vec.size(), st = 2, isolate = ((n % 4 == 1) ? (n-1) : -1);
+    while(st &lt;= n){
+        root = vec[st-1];
+        for(i = st-1; i &lt; n; i += 2*st){
+            vec[i]-&gt;left = vec[i-st/2];
+            if(i+st/2 &lt; n) vec[i]-&gt;right = vec[i+st/2];
+            else if(isolate &gt;= 0) vec[i]-&gt;right = vec[isolate];
+            vec[i]-&gt;eval();
+        }
+        isolate = ((n % (4*st) &gt;= st &amp;&amp; (n % (4*st) &lt; 2*st)) ? (i-2*st): isolate);
+        st &lt;&lt;= 1;
+    }
+    return root;
+}
 </pre>
 <h3>verify 用の問題</h3>
 <p>Atcoder : <a href="https://beta.atcoder.jp/contests/soundhound2018-summer-final-open/tasks/soundhound2018_summer_final_e">Hash Swapping</a>
