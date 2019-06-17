@@ -43,10 +43,10 @@
 <p>
 木のオイラーツアー(DFS で探索するときの頂点順)を動的に管理するデータ構造. 辺の追加, 削除, 頂点間の連結性判定, 根の付け替えおよび連結成分内の全ての頂点に対する演算もしくはある部分木内の全ての頂点に対する演算などが O(log n) で行える. 辺の追加はもちろん閉路ができないような追加のみ許される.<br>
 LinkCutTree とは異なり, 部分木もしくは連結成分全体に対する処理が効率よく行え, <a href="../Academic/dynamic_connectivity.html">動的連結性クエリに対するアルゴリズム</a>にも用いられている. <br>
-実装平衡二分木の split, merge を用いてでき, 説明は<a href="http://web.stanford.edu/class/archive/cs/cs166/cs166.1166/lectures/17/Small17.pdf">このスライド</a>がわかりやすいです. <br>
-以下の実装では平衡二分木として splay 木を用いているためならし O(log n) となっています. また頂点数を n, 辺数を m とすると n+2*m 個のノードからなる平衡二分探索木を保持するため定数倍が少々重い. 平衡二分探索木ではなく O(log n)-分木で保持することで計算量上では O(log log n) factor の改善が可能になる<br>
-部分木内の頂点集合に対する演算は op(node v, function f) みたいな形で呼べたらうれしいのですが, EulerTourTree の構造上の問題でそれが難しいです. これは根の付け替えが行われたあとに頂点 v の親 p が何であるかを捕捉することが難しいことに由来しています.<br>
-そのため部分木内の頂点集合に対する演算は op(node v, node p, function f) の形(v が根なら p は -1 とする) で与えることにしています(どうしても op(node v, function f) にしたいなら並行して <a href="./link_cut_tree.html">LinkCutTree</a> を持つとできます). <br>
+実装平衡二分木の split, merge を用いてでき, 説明は<a href="http://web.stanford.edu/class/archive/cs/cs166/cs166.1166/lectures/17/Small17.pdf">このスライド</a>がわかりやすい. <br>
+以下の実装では平衡二分木として splay 木を用いているためならし O(log n) となっている(正直 merge-split ベースの赤黒木で実装するよりこっちの方が速い気がしている). また頂点数を n, 辺数を m とすると n+2*m 個のノードからなる平衡二分探索木を保持するため定数倍が少々重い. 平衡二分探索木ではなく O(log n)-分木で保持することで計算量上では O(log log n) factor の改善が可能になる<br>
+部分木内の頂点集合に対する演算は op(node v, function f) みたいな形で呼べたらうれしいが, EulerTourTree の構造上の問題でそれが難しい. これは根の付け替えが行われたあとに頂点 v の親 p が何であるかを捕捉することが難しいことに由来している.<br>
+そのため部分木内の頂点集合に対する演算は op(node v, node p, function f) の形(v が根なら p は -1 とする) で与えることにしている(どうしても op(node v, function f) にしたいなら並行して <a href="./link_cut_tree.html">LinkCutTree</a> を持つとできる). <br>
 ヘルパー関数は例えば最初辺数 0 からスタートではなくある木や森からスタートというときにそのグラフに対応する完全平衡二分木を効率よく構築し, それを初めの splay 木としてやることでそれ以降の操作の高速化が望めそう(？)なので置いてある. <br>
 元論文は <a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.192.8615&rep=rep1&type=pdf">Henzinger, King 1995</a>.
 </p>
