@@ -194,7 +194,7 @@ private:
     WaveletMatrix wm;
 public:
     OrthogonalRangeCount(vector&lt;ptt&gt; candidate) : sz((int)candidate.size()), X(sz), Y(sz){
-        vector&lt;T&gt; vec(sz);
+        vector&lt;int&gt; vec(sz);
         sort(candidate.begin(), candidate.end());
         for(int i = 0; i &lt; sz; i++){
             X[i] = candidate[i].first, Y[i] = candidate[i].second;
