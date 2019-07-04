@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>高速メビウス変換(FMT)</h2>
+<h3>コードについての説明</h3>
+<p>
+<a href="fast_zeta_transform.html">ゼータ変換</a>(1), (2)の逆変換. 包除と考えた方が良さそう. <br>
+(1) s を含む上位集合 T についての包除 <img src="./texclip20190704193340.png" height="80" width="200"> <br>
+(2) S に含まれる下位集合 t についての包除 <img src="./texclip20190704193404.png" height="80" width="200"> <br>
+そしてこのメビウス変換は計算量 O(n*2^n) で行うことができ, 実装自体は以下のようにシンプルにかける.
+(1) については i 周目の f[j] は j の下位 i 桁以外一致しているような数 k で j を含むもの(j ⊆ k) について包除を取っている.
+j の i 桁目が 0 のものについては i 周目に更新する必要があるがそれは前の周までの f[j | (1 << i)] を引いてやれば包除を取ることができる(賢い). <br>
+(2) については i 周目の f[j] は j の下位 i 桁以外一致しているような数 k で j に含まれるもの(k ⊆ j) について包除を取っている.
+j の i 桁目が 1 のものについては i 周目に更新する必要があるがそれは前の周までの f[j ^ (1 << i)] を引いてやれば包除を取ることができる. <br>
+<!-- (メビウス変換がゼータ変換の逆変換であることの証明) <br>
+f: 2^V → Z, 任意の集合 Y ⊆ V についてゼータ変換 ζ, メビウス変換 μ を以下のように書き直す. <br>
+<img src="./texclip20190704194252.png" height="60" width="170">　
+<img src="./texclip20190704194225.png" height="100" width="240"><br>
+集合を U = {e_i^X | X ⊆ V, 1 ≦ i ≦ f(X)} と定め, 各 v ∈ V について v ∈ V ⇔ e_i^X ∈ A_v を満たすように A_v を定める. このとき
+<img src="./texclip20190704195641.png" height="100" width="240">
+が成り立つことが分かる. <br>
+ここで ζf(Y) は <img src="./texclip20190704195956.png" height="60" width="170"> に注意する. <br>
+包除原理 <img src="./texclip20190704200444.png" height="140" width="350"> を思い出すと、 左辺は f(Y), 右辺は μζf(Y) に対応することが分かり、証明終了. -->
+</p>
+<p>
+時間計算量: O(n*2^n)
+</p>
+<h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
+<pre class="prettyprint linenums">
+// 上位集合(含む集合)を包除(1)
+void fast_mobius_transform(int n, vector&lt;int&gt;&amp; f)
+{
+    for(int i = 0; i &lt; n; ++i){
+        for(int j = 0; j &lt; (1 &lt;&lt; n); ++j){
+            if(!(j &amp; (1 &lt;&lt; i))) f[j] -= f[j | (1 &lt;&lt; i)];
+        }
+    }
+}
+// 下位集合(含まれる集合)を包除(2)
+void fast_mobius_transform(int n, vector&lt;int&gt;&amp; f)
+{
+    for(int i = 0; i &lt; n; ++i){
+        for(int j = 0; j &lt; (1 &lt;&lt; n); ++j){
+            if(j &amp; (1 &lt;&lt; i)) f[j] -= f[j ^ (1 &lt;&lt; i)];
+        }
+    }
+}
+</pre>
+<h3>verify 用の問題</h3>
+<p>Atcoder : <a href="https://atcoder.jp/contests/cf18-relay-open/tasks/relay2018_h">最悪のバス停決定戦</a>
+  <a href="https://atcoder.jp/contests/cf18-relay-open/submissions/6239485">提出コード</a>((2) の場合)</p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>

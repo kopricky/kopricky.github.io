@@ -45,7 +45,8 @@
 シュタイナー木とはターミナル点(要求点)の集合を含むような木(もとのグラフの部分グラフ)のことである. このうちコストが最小のものを最小シュタイナー木という. <br>
 <a href="https://www.slideshare.net/wata_orz/ss-12131479">岩田さんのスライド</a> を参考にさせていただいた. <br>
 元論文は <a href="https://s3.amazonaws.com/academia.edu.documents/34678800/3230010302_ftp1.pdf?AWSAccessKeyId=AKIAIWOWYYGZ2Y53UL3A&Expires=1542239876&Signature=OqolTOWd%2F5JV3MDwY4VNc0pl%2Fi0%3D&response-content-disposition=inline%3B%20filename%3DThe_Steiner_problem_in_graphs.pdf">Dreyfus Wagner 1971</a><br>
-以下の実装では元論文とは異なり, Warshall Floyd を行わず, DP 遷移を Dijkstra 法を用いて更新することでターミナル数 t に関して O(n 3^t + (n+m)logn 2^t) の時間計算量で求めている(FPT). グラフは巨大だがターミナル数が小さいという場合にこの改良が効いてくる.
+以下の実装では元論文とは異なり, Warshall Floyd を行わず, DP 遷移を Dijkstra 法を用いて更新することでターミナル数 t に関して O(n 3^t + (n+m)logn 2^t) の時間計算量で求めている(FPT). グラフは巨大だがターミナル数が小さいという場合にこの改良が効いてくる. <br>
+高速メビウス変換を用いて O*(2^t) に計算量が落ちるみたい(<a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.170.7539&rep=rep1&type=pdf">参考</a>).
 </p>
 <p>
 (関数)<br>
@@ -71,7 +72,7 @@ private:
     vector&lt;vector&lt;T&gt; &gt; dp;
     const T inf = numeric_limits&lt;T&gt;::max() / 10;
     using pti = pair&lt;T, int&gt;;
-    
+
 public:
     SteinerTree(int node_size) : V(node_size), G(V){}
     void add_edge(int u, int v, T cost){
