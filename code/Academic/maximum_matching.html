@@ -53,7 +53,7 @@ Shwartz-Zippel Lemma(帰納法より導出可能) より det T が恒等的に 0
 また det (T_{1},{j}) ≠ 0 ⇒ det (T_{1,j},{1,j}) ≠ 0 より辺 (1, j) を取り除いた後のグラフは完全マッチングを持つ. <br>
 あとは det (T_{1},{j}) ≠ 0 となるような j をどうやって見つけてくるかだが <img src="./texclip20190503141307.png" height="100" width="250"> より, det (T_{1},{j}) ≠ 0 ⇔ T^{-1}_i,j ≠ 0 が得られるので T の逆行列を計算することで j を求めることができる. <br>
 これを再帰的に繰り返すことで O(n^4) で構築することが可能になった(正確には O(n^(ω+1) time). <br>
-ここで逆行列計算を毎回する必要はなく T^{-1} から Shur 補行列 T^{-1}_{i,j},{i,j} を O(n^2) 時間で構築することができるので O(n^3) time で計算可能. ちなみにもっと頑張ると O(n^ω) まで落ちるらしい<br>
+ここで逆行列計算を毎回する必要はなく T^{-1} から Schur 補行列 T^{-1}_{i,j},{i,j} を O(n^2) 時間で構築することができるので O(n^3) time で計算可能. ちなみにもっと頑張ると O(n^ω) まで落ちるらしい<br>
 (注) 完全マッチングを持たないグラフの場合 n - rank(T) 個の頂点を加えて元の頂点に辺を貼ることで完全マッチングを持つグラフに変形可能(構成したマッチングのうち元からあった辺のものが最大マッチングに対応).
 </p>
 <p>
@@ -296,7 +296,7 @@ private:
         invN_3n_3n[1][0] = -invT[id][0] * invdev, invN_3n_3n[1][1] = invT[0][0] * invdev;
         return invN_3n_3n;
     }
-    void shur_complement(const int id, mat&lt;ModInt&lt;mod&gt; &gt;&amp; invT){
+    void schur_complement(const int id, mat&lt;ModInt&lt;mod&gt; &gt;&amp; invT){
         int sz = invT.row(), x = 0;
         mat&lt;ModInt&lt;mod&gt; &gt;N_12_12(sz-2), N_12_3n(sz-2, 2), N_3n_12(2, sz-2);
         for(int i = 1; i &lt; sz; i++){
@@ -321,7 +321,7 @@ private:
                 if(invT[0][j] &amp;&amp; T[vset[0]][vset[j]]){
                     if(vset[j] &lt; V) res.emplace_back(vset[0], vset[j]);
                     vset.erase(vset.begin()), vset.erase(vset.begin() + j - 1);
-                    shur_complement(j, invT);
+                    schur_complement(j, invT);
                     break;
                 }
             }
