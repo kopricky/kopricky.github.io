@@ -211,7 +211,7 @@ public:
         for(auto&amp; val : mp) os &lt;&lt; '{' &lt;&lt; val.first &lt;&lt; ',' &lt;&lt; val.second &lt;&lt; &quot;} &quot;;
         return os;
     }
-    _Tp&amp; operator[](const _Key _key) noexcept { return _find(_key, true)-&gt;data.second; }
+    _Tp&amp; operator[](const _Key&amp; _key) noexcept { return _find(_key, true)-&gt;data.second; }
     const _Tp&amp; at(const _Key&amp; _key){
         node *res = _find(_key);
         if(res == _M_header) __throw_out_of_range(__N(&quot;Map::at&quot;));
