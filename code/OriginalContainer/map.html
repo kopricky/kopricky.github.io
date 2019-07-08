@@ -43,7 +43,8 @@
 <p>
 Splay Tree ベースの map(連想コンテナ) の実装. stl の std::map は Red Black Tree をベースとして書かれており, 検索, 挿入, 削除などにかかる最悪計算量が O(log n) という強みを持っている. <br>
 一方 <a href="../BinarySearchTree/splay_tree.html">Splay Tree</a> はならし計算量で O(log n) であるもののクエリ列の確率分布に対して計算量が最適になるように adjust するため, 分布によっては o(log n) になりうるという強みがある(Red Black Tree の場合の計算量は Ω(log n)). <br>
-以下の実装では std:map ライクな実装をしており, 一部の関数を除き std::map と同様に動作する(同じキーの要素を挿入しても問題ないが std::multimap ほどの仕様にはなっていない).
+以下の実装では std:map ライクな実装をしており, 一部の関数を除き std::map と同様に動作する(同じキーの要素を挿入しても問題ないが std::multimap ほどの仕様にはなっていない). <br>
+(追記) C++17 から std::iterator を継承して自作イテレータを構築するのが非推奨化されているので書き直す必要あり.
 </p>
 <p>
 時間計算量: 各クエリ O(logn) (ならし計算量)
