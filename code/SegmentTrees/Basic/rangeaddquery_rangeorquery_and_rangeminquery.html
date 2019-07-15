@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>アルゴリズム名</h2>
+<h3>コードについての説明</h3>
+<p>
+元論文は <a href=""></a>
+</p>
+<p>
+(関数)<br>
+add_edge(): 辺を追加する <br>
+</p>
+<p>
+時間計算量: ならし O(log(MAX_VAL)log(n))
+</p>
+<h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
+<pre class="prettyprint linenums">
+//更新 a_i → a_i & x (l <= i < r)
+//更新 a_i → a_i | x (l <= i < r)
+//クエリ min (a[l]...a[r-1])
+//計算量はならしO(log(MAX_VAL)log(n))
+template&lt;typename T&gt; class segtree
+{
+private:
+    int n,sz;
+    vector&lt;T&gt; node, _and, _or, lazy;
+    void update(int id){
+        node[id] = min(node[2*id+1],node[2*id+2]);
+        _and[id] = (_and[2*id+1] &amp; _and[2*id+2]);
+        _or[id] = (_or[2*id+1] | _or[2*id+2]);
+    }
+    void eval(int k, int l, int r){
+        if(lazy[k] != 0){
+            node[k] += lazy[k], _and[k] += lazy[k], _or[k] += lazy[k];
+            if(r - l &gt; 1) {
+                lazy[2*k+1] += lazy[k], lazy[2*k+2] += lazy[k];
+            }
+            lazy[k] = 0;
+        }
+    }
+public:
+    segtree(const vector&lt;T&gt;&amp; v) : n(1), sz((int)v.size()){
+        while(n &lt; sz) n *= 2;
+        node.resize(2*n-1, numeric_limits&lt;T&gt;::max()), _and.resize(2*n-1, 0);
+        _or.resize(2*n-1, 0), lazy.resize(2*n-1, 0);
+        for(int i = 0; i &lt; sz; i++){
+            node[i+n-1] = _and[i+n-1] = _or[i+n-1] = v[i];
+        }
+        for(int i=n-2; i&gt;=0; i--){
+            update(i);
+        }
+    }
+    void range_and(int a, int b, T x, int k=0, int l=0, int r=-1){
+        if(r &lt; 0) r = n;
+        eval(k, l, r);
+        if(b &lt;= l || r &lt;= a || !(~x &amp; _or[k])){
+            return;
+        }
+        if(a &lt;= l &amp;&amp; r &lt;= b &amp;&amp; (~x &amp; _and[k]) == (~x &amp; _or[k])){
+            lazy[k] -= (~x &amp; _and[k]);
+            eval(k,l,r);
+        }else{
+            range_and(a, b, x, 2*k+1, l, (l+r)/2), range_and(a, b, x, 2*k+2, (l+r)/2, r);
+            update(k);
+        }
+    }
+    void range_or(int a, int b, T x, int k=0, int l=0, int r=-1){
+        if(r &lt; 0) r = n;
+        eval(k, l, r);
+        if(b &lt;= l || r &lt;= a || !(x &amp; ~_and[k])){
+            return;
+        }
+        if(a &lt;= l &amp;&amp; r &lt;= b &amp;&amp; (x &amp; ~_or[k]) == (x &amp; ~_and[k])){
+            lazy[k] += (x &amp; ~_or[k]);
+            eval(k,l,r);
+        }else{
+            range_or(a, b, x, 2*k+1, l, (l+r)/2), range_or(a, b, x, 2*k+2, (l+r)/2, r);
+            update(k);
+        }
+    }
+    T query(int a, int b, int k=0, int l=0, int r=-1){
+        if(r &lt; 0) r = n;
+        eval(k, l, r);
+        if(b &lt;= l || r &lt;= a){
+            return 0;
+        }
+        if(a &lt;= l &amp;&amp; r &lt;= b){
+            return node[k];
+        }
+        T vl = query(a, b, 2*k+1, l, (l+r)/2), vr = query(a, b, 2*k+2, (l+r)/2, r);
+        return min(vl,vr);
+    }
+    void print(){
+        for(int i = 0; i &lt; sz; i++){
+            cout &lt;&lt; query(i,i+1) &lt;&lt; &quot; &quot;;
+        }
+        cout &lt;&lt; endl;
+    }
+};
+</pre>
+<h3>verify 用の問題</h3>
+<p>
+verify していません(verify 問題を知らない)
+</p>
+<p>Atcoder : <a href=""></a>
+  <a href="">提出コード</a></p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>
