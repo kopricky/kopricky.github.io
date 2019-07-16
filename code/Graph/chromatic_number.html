@@ -67,25 +67,25 @@ public:
     const static int MOD = 1000000007;
     ChromaticrNumber(int node_size) : V(node_size), adj(V, 0){
         for(int i = 0; i &lt; V; i++){
-            adj[i]=(1 &lt;&lt; i);
+            adj[i] = (1 &lt;&lt; i);
         }
     }
     void add_edge(int u, int v){
-        adj[u]|=(1 &lt;&lt; v), adj[v]|=(1 &lt;&lt; u);
+        adj[u] |= (1 &lt;&lt; v), adj[v] |= (1 &lt;&lt; u);
     }
     int solve(){
         vector&lt;int&gt; t(1 &lt;&lt; V, 0), I(1 &lt;&lt; V, 0);
-        t[(1&lt;&lt;V)-1]=I[0]=1;
-        for(int i=1;i&lt;(1&lt;&lt;V);++i){
+        t[(1 &lt;&lt; V) - 1] = I[0] = 1;
+        for(int i = 1; i &lt; (1 &lt;&lt; V); i++){
             int v = __builtin_ctz(i);
-            I[i] = I[i^(1&lt;&lt;v)] + I[i&amp;(~adj[v])];
-            I[i] = (I[i]&gt;=MOD)?(I[i]-MOD):I[i];
-            t[i-1] = ((V-__builtin_popcount(i-1))?-1:1);
+            I[i] = I[i^(1 &lt;&lt; v)] + I[i&amp;(~adj[v])];
+            I[i] = (I[i] &gt;= MOD)?(I[i] - MOD):I[i];
+            t[i-1] = (((V-__builtin_popcount(i-1))%2)?(MOD-1):1);
         }
-        for(int k=1;k&lt;V;k++){
-            long long res=0;
-            for(int i=0;i&lt;(1&lt;&lt;V);i++){
-                res+=(t[i]=(long long)t[i]*I[i]%MOD);
+        for(int k = 1; k &lt; V; k++){
+            long long res = 0;
+            for(int i = 0; i &lt; (1 &lt;&lt; V); i++){
+                res += (t[i] = (long long)t[i] * I[i] % MOD);
             }
             if(res % MOD) return k;
         }
