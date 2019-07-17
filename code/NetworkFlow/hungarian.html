@@ -43,10 +43,11 @@
 <p>
 割当問題を効率よく解くアルゴリズム. 割当問題とは n 人の人と n 個の仕事があり, また各(人 i, 仕事 j) のペアについて人 i が仕事 j を行うのにかかる時間が与えられているとする. このとき n 人の人をちょうど 1 つずつ別々の仕事に割り当てることで仕事にかかるのべ時間を最小にしたいという問題のことを言う. <br>
 二部グラフのマッチングの重みつきの場合のアルゴリズムである. 最小費用流のアルゴリズムでも解くことができるが, こちらだと計算量としては O(n^3 log n) かかるのに対し, ハンガリアン法では O(n^3) の計算量で解くことが可能である. また学問的に割合問題は重み付き(線形)マトロイド交差問題の枠組みで解かれることが多く, 重みが小さい場合には効率よく動作するアルゴリズムも知られている. <br>
-Hungarian 法の説明は有名な Goemans 先生の <a href="http://math.mit.edu/~goemans/18453S17/matching-notes.pdf">Lecture note</a> が分かりやすかった. 先述の通り重み付きマトロイド交叉問題なので Korte, Vygen 本や Schrijver 本の weighted matroid intersection algorithm を参考にしてもよい(実質同じ). <br>
+Hungarian 法の説明は有名な Goemans 先生の <a href="http://math.mit.edu/~goemans/18453S17/matching-notes.pdf">Lecture note</a> が分かりやすかった. ただこちらにのっているのは O(n^4) までの話で O(n^3) への落とし方は自分で考える必要がある. ポテンシャルの更新の際にマッチングが増えない場合は集合 L は新しく w_ij = 0 となった辺による影響のみを追加で考えればよく、結局のところマッチングが 1 増えるまでに見る辺の本数を O(n^2) にできる.<br>
+先述の通り重み付きマトロイド交叉問題なので実質同じだが Korte, Vygen 本や Schrijver 本の weighted matroid intersection algorithm を参考にしてもよい. <br>
 二部グラフのマッチングアルゴリズムと同様に増加道アルゴリズムが正しく動作する. Lecture Note では問題を整数計画問題で書き下しその緩和問題の双対問題を解くことによって最適解を得るという流れで正当性を証明している(無向2部グラフの接続行列は完全単摸なので完全整数双対性が成り立つことに注意). <br>
 初めに双対問題の実行可能解から初めて増加道アルゴリズムを用いて更新を行い, 完全マッチングが得られるまで続けるといった Primal-Dual 法を行う(この手順で完全マッチングが得られたとき相補性条件が成り立つことから最適性が保証される). <br>
-以上の議論を辺コストを要素とする行列上で行っている実装が多い気がするが、 個人的にこれだと正直何をやってるいるかが分かりにくかったので速度は劣ると思うが増加道アルゴリズムによる実装を行った.<br>
+以上の議論を辺コストを要素とする行列上で行っている実装が多い気がするが、 個人的にこれだと正直何をやってるいるかが分かりにくかったので速度は劣ると思うが増加道アルゴリズムによる実装を行った(言ってもそんな遅くない).<br>
 ちなみに Hungarian はこの問題に対する重要な貢献をした 2 人のハンガリー人数学者 Kőnig, Egerváry にちなんで呼ばれている.
 </p>
 <p>
@@ -64,11 +65,12 @@ class Hungarian
 {
 private:
     int V, matching_size;
-    vector&lt;vector&lt;bool&gt; &gt; graph;
-    vector&lt;vector&lt;int&gt; &gt; residue;
-    vector&lt;int&gt; potential, allocate;
-    vector&lt;bool&gt; right_alloc;
+    vector&lt;vector&lt;int&gt; &gt; graph;
+    vector&lt;int&gt; potential, allocate, reverse_alloc;
     T total_cost;
+    inline T diff(const vector&lt;vector&lt;T&gt; &gt;&amp; cost, int _i, int _j){
+        return cost[_i][_j-V] - potential[_i] - potential[_j];
+    }
     void initial_feasible_solution(const vector&lt;vector&lt;T&gt; &gt;&amp; cost){
         for(int i = 0; i &lt; V; i++){
             potential[i] = 0;
@@ -80,35 +82,21 @@ private:
     void inital_graph_construction(const vector&lt;vector&lt;T&gt; &gt;&amp; cost){
         for(int i = 0; i &lt; V; i++){
             for(int j = V; j &lt; 2*V; j++){
-                residue[i][j-V] = cost[i][j-V] - potential[i] - potential[j];
-                graph[i][j-V] = (residue[i][j-V] == 0);
+                graph[i][j-V] = (diff(cost, i, j) == 0);
             }
         }
-    }
-    bool update(){
-        vector&lt;int&gt; visit(2*V, -1);
-        if(increment_matching(visit)) return true;
-        for(int i = 0; i &lt; V; i++){
-            if(allocate[i] &lt; 0 &amp;&amp; visit[i] &lt; 0) dfs(i, i, visit);
-        }
-        T delta = std::numeric_limits&lt;T&gt;::max();
-        for(int i = 0; i &lt; V; i++){
-            if(visit[i] &lt; 0) continue;
-            for(int j = V; j &lt; 2*V; j++){
-                if(visit[j] &lt; 0){
-                    delta = min(delta, residue[i][j-V]);
-                }
-            }
-        }
-        update_potential(visit, delta);
-        update_graph();
-        return false;
     }
     void dfs(const int cur, const int start, vector&lt;int&gt;&amp; visit){
         visit[cur] = start;
-        for(int i = 0; i &lt; V; i++){
-            if(graph[cur][i] &amp;&amp; visit[i + (cur &lt; V)*V] &lt; 0){
-                dfs(i + (cur &lt; V)*V, start, visit);
+        if(cur &gt;= V){
+            if(reverse_alloc[cur-V] &gt;= 0){
+                dfs(reverse_alloc[cur-V], start, visit);
+            }
+        }else{
+            for(int i = 0; i &lt; V; i++){
+                if(graph[cur][i] &amp;&amp; visit[i+V] &lt; 0){
+                    dfs(i+V, start, visit);
+                }
             }
         }
     }
@@ -116,63 +104,72 @@ private:
         for(int i = 0; i &lt; V; i++){
             if(visit[i] &gt;= 0){
                 potential[i] += delta;
-                for(int j = 0; j &lt; V; j++){
-                    residue[i][j] -= delta;
-                }
             }
         }
         for(int j = V; j &lt; 2*V; j++){
             if(visit[j] &gt;= 0){
                 potential[j] -= delta;
-                for(int i = 0; i &lt; V; i++){
-                    residue[i][j-V] += delta;
-                }
             }
         }
     }
-    void update_graph(){
+    void update_graph(const vector&lt;vector&lt;T&gt; &gt;&amp; cost, const vector&lt;pair&lt;int, int&gt; &gt;&amp; vec, const vector&lt;int&gt;&amp; visit){
+        for(auto p : vec){
+            graph[p.first][p.second] = 1;
+        }
         for(int i = 0; i &lt; V; i++){
+            if(visit[i] &gt;= 0) continue;
             for(int j = 0; j &lt; V; j++){
-                graph[i][j] = ((residue[i][j] == 0) &amp;&amp; !graph[j+V][i]);
+                graph[i][j] = ((diff(cost, i, j+V) == 0) &amp;&amp; (reverse_alloc[j] != i));
             }
         }
     }
-    bool increment_matching(vector&lt;int&gt;&amp; visit){
+    void replace_matching(const vector&lt;int&gt;&amp; path){
+        matching_size++;
+        for(int j = 0; j &lt; (int)path.size() - 1; j++){
+            if(j % 2){
+                graph[path[j+1]][path[j]-V] = 1;
+            }else{
+                graph[path[j]][path[j+1]-V] = 0;
+                allocate[path[j]] = path[j+1]-V;
+                reverse_alloc[path[j+1]-V] = path[j];
+            }
+        }
+    }
+    void init_matching(){
         for(int i = 0; i &lt; V; i++){
             if(allocate[i] &lt; 0){
-                vector&lt;int&gt; path;
-                if(find_augmenting_path(i, path, visit)){
-                    matching_size++;
-                    for(int j = 0; j &lt; (int)path.size() - 1; j++){
-                        if(j % 2){
-                            graph[path[j]][path[j+1]] = false;
-                            graph[path[j+1]][path[j]-V] = true;
-                        }else{
-                            graph[path[j]][path[j+1]-V] = false;
-                            graph[path[j+1]][path[j]] = true;
-                            allocate[path[j]] = path[j+1]-V;
-                            right_alloc[path[j+1]-V] = true;
-                        }
-                    }
-                    if(matching_size == V){
-                        return true;
-                    }
+                vector&lt;int&gt; visit(2*V, -1), path;
+                if(find_augmenting_path(i, i, visit, path)){
+                    replace_matching(path);
                 }
-                for(int j = 0; j &lt; 2*V; j++) visit[j] = -1;
+            }
+        }
+    }
+    bool increment_matching(const vector&lt;pair&lt;int, int&gt; &gt;&amp; vec, const vector&lt;int&gt;&amp; visit){
+        for(auto p : vec){
+            if(reverse_alloc[p.second] &lt; 0){
+                vector&lt;int&gt; _visit(2*V, -1), path;
+                find_augmenting_path(visit[p.first], visit[p.first], _visit, path);
+                replace_matching(path);
+                return true;
             }
         }
         return false;
     }
-    bool find_augmenting_path(const int cur, vector&lt;int&gt;&amp; path, vector&lt;int&gt;&amp; visit){
+    bool find_augmenting_path(const int cur, const int start, vector&lt;int&gt;&amp; visit, vector&lt;int&gt;&amp; path){
         path.push_back(cur);
-        visit[cur] = 0;
-        if(cur &gt;= V &amp;&amp; !right_alloc[cur-V]){
-            return true;
-        }
-        for(int i = 0; i &lt; V; i++){
-            if(graph[cur][i] &amp;&amp; visit[i + (cur &lt; V)*V] &lt; 0){
-                if(find_augmenting_path(i + (cur &lt; V)*V, path, visit)){
-                    return true;
+        visit[cur] = start;
+        if(cur &gt;= V){
+            if(reverse_alloc[cur-V] &lt; 0) return true;
+            if(find_augmenting_path(reverse_alloc[cur-V], start, visit, path)){
+                return true;
+            }
+        }else{
+            for(int i = 0; i &lt; V; i++){
+                if(graph[cur][i] &amp;&amp; visit[i+V] &lt; 0){
+                    if(find_augmenting_path(i+V, start, visit, path)){
+                        return true;
+                    }
                 }
             }
         }
@@ -183,15 +180,49 @@ public:
     Hungarian() : matching_size(0), total_cost(0){}
     pair&lt;T, vector&lt;int&gt; &gt; solve(const vector&lt;vector&lt;T&gt; &gt;&amp; cost){
         V = (int)cost.size();
-        graph.resize(2*V, vector&lt;bool&gt;(V, false));
-        residue.resize(V, vector&lt;int&gt;(V));
+        graph.resize(V, vector&lt;int&gt;(V, 0));
         potential.resize(2*V, std::numeric_limits&lt;T&gt;::max());
         allocate.resize(V, -1);
-        right_alloc.resize(V, false);
+        reverse_alloc.resize(V, -1);
         initial_feasible_solution(cost);
         inital_graph_construction(cost);
-        while(true){
-            if(update()) break;
+        vector&lt;pair&lt;int, int&gt; &gt; vec;
+        vector&lt;int&gt; visit(2*V, -1);
+        bool cont = false;
+        while(matching_size &lt; V){
+            if(cont){
+                for(auto p : vec){
+                    vector&lt;int&gt; path;
+                    if(find_augmenting_path(p.second + V, visit[p.first], visit, path)){
+                        cont = false;
+                        break;
+                    }
+                }
+                if(!cont) continue;
+            }else{
+                init_matching();
+                for(int i = 0; i &lt; 2*V; i++) visit[i] = -1;
+                for(int i = 0; i &lt; V; i++){
+                    if(allocate[i] &lt; 0 &amp;&amp; visit[i] &lt; 0) dfs(i, i, visit);
+                }
+            }
+            T delta = std::numeric_limits&lt;T&gt;::max();
+            for(int i = 0; i &lt; V; i++){
+                if(visit[i] &lt; 0) continue;
+                for(int j = V; j &lt; 2*V; j++){
+                    if(visit[j] &lt; 0){
+                        if(delta &gt; diff(cost, i, j)){
+                            delta = diff(cost, i, j);
+                            vec = {{i, j-V}};
+                        }else if(delta == diff(cost, i, j)){
+                            vec.emplace_back(i, j-V);
+                        }
+                    }
+                }
+            }
+            update_potential(visit, delta);
+            update_graph(cost, vec, visit);
+            cont = !increment_matching(vec, visit);
         }
         for(int i = 0; i &lt; V; i++){
             total_cost += cost[i][allocate[i]];
