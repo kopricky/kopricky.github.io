@@ -45,6 +45,8 @@
 残余ネットワーク上での最短経路問題は負辺を含むため直接 <a href="../Graph_SP_MST/dijkstra.html">Dijkstra 法</a>を適用することはできないが, 初めのステップでポテンシャル(頂点 s から各頂点への最短経路とする) を計算すればそれ以降は最短経路を足して更新していくことで常に各辺は非負重みであるかのように扱える. <br>
 初めのポテンシャルの計算だが, 全ての辺が非負重みなら Dijkstra, 負辺を含む(負の有向閉路は含まない)なら <a href="../Graph_SP_MST/bellman_ford.html">Bellman Ford</a>, グラフが DAG なら <a href="./min_cost_flow_DAG.html">トポソDP</a> などが考えられる. 以下の実装は Dijkstra 法で求めている. <br>
 負の有向閉路が合った場合はその cycle を最小平均長閉路アルゴリズムなどを用いて detect して初めにキャンセルする必要がある. <br>
+(補足) <br>
+
 </p>
 <p>
 (関数)<br>
