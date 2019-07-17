@@ -38,21 +38,26 @@
 <div id="contents">
 
 <section>
-<h2>アルゴリズム名</h2>
+<h2>Hungarian</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
-<a href="http://www.cse.ust.hk/~golin/COMP572/Notes/Matching.pdf">参考</a>
+割当問題を効率よく解くアルゴリズム. 割当問題とは n 人の人と n 個の仕事があり, また各(人 i, 仕事 j) のペアについて人 i が仕事 j を行うのにかかる時間が与えられているとする. このとき n 人の人をちょうど 1 つずつ別々の仕事に割り当てることで仕事にかかるのべ時間を最小にしたいという問題のことを言う. <br>
+二部グラフのマッチングの重みつきの場合のアルゴリズムである. 最小費用流のアルゴリズムでも解くことができるが, こちらだと計算量としては O(n^3 log n) かかるのに対し, ハンガリアン法では O(n^3) の計算量で解くことが可能である. また学問的に割合問題は重み付き(線形)マトロイド交差問題の枠組みで解かれることが多く, 重みが小さい場合には効率よく動作するアルゴリズムも知られている. <br>
+Hungarian 法の説明は有名な Goemans 先生の <a href="http://math.mit.edu/~goemans/18453S17/matching-notes.pdf">Lecture note</a> が分かりやすい.
+また重み付きマトロイド交差問題の枠組みで二部マッチングと同様に増加道アルゴリズムが正しく動作するのでそちらからこの問題を考えてもよい(参考 Korte, Vygen 本や Schrijver 本の weighted matroid intersection algorithm). <br>
+以上の議論を辺コストを要素とする行列上でみるとよく見るハンガリアン法の説明の行、 列最小の値引いて割り当てを見つけて更新して...みたいなことをすればできるという話になる(これだけだと本質が見えにくい...). <br>
+ちなみに Hungarian はこの問題に対する重要な貢献をした 2 人のハンガリー人数学者 Kőnig, Egerváry にちなんで呼ばれている.
 </p>
 <p>
 (関数)<br>
 add_edge(): 辺を追加する <br>
 </p>
 <p>
-時間計算量: O(mlogn)
+時間計算量: O(n^3)
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">
+// グラフが完全二部グラフであることを仮定しています.
 template&lt;typename T&gt;
 vector&lt;int&gt; Hungarian(const vector&lt;vector&lt;T&gt; &gt; cost){
     int n = (int)cost.size(), m = (int)cost[0].size();

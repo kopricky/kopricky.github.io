@@ -43,7 +43,8 @@
 <p>
 最小費用流を求めるアルゴリズム. 残余ネットワークに負閉路が存在しなくなるまで最短経路に沿ってフローを流し続けることで解を得る. <br>
 残余ネットワーク上での最短経路問題は負辺を含むため直接 <a href="../Graph_SP_MST/dijkstra.html">Dijkstra 法</a>を適用することはできないが, 初めのステップでポテンシャル(頂点 s から各頂点への最短経路とする) を計算すればそれ以降は最短経路を足して更新していくことで常に各辺は非負重みであるかのように扱える. <br>
-初めのポテンシャルの計算だが, 全ての辺が非負重みなら Dijkstra, 負辺を含む(負の有向閉路は含まない)なら <a href="../Graph_SP_MST/bellman_ford.html">Bellman Ford</a>, グラフが DAG なら <a href="./min_cost_flow_DAG.html">トポソDP</a> などが考えられる. 以下の実装は Dijkstra 法で求めている.
+初めのポテンシャルの計算だが, 全ての辺が非負重みなら Dijkstra, 負辺を含む(負の有向閉路は含まない)なら <a href="../Graph_SP_MST/bellman_ford.html">Bellman Ford</a>, グラフが DAG なら <a href="./min_cost_flow_DAG.html">トポソDP</a> などが考えられる. 以下の実装は Dijkstra 法で求めている. <br>
+負の有向閉路が合った場合はその cycle を最小平均長閉路アルゴリズムなどを用いて detect して初めにキャンセルする必要がある. <br>
 </p>
 <p>
 (関数)<br>
@@ -67,7 +68,7 @@ public:
     vector&lt;vector&lt;edge&gt; &gt; G;
     vector&lt;T&gt; h,dist;
     vector&lt;int&gt; prevv,preve;
-    min_cost_flow(int node_size) : V(node_size), inf(numeric_limits&lt;T&gt;::max()),
+    min_cost_flow(int node_size) : V(node_size), inf(numeric_limits&lt;T&gt;::max() / 4),
         G(V), h(V, 0), dist(V), prevv(V), preve(V){}
     void add_edge(int from, int to, int cap, T cost){
         G[from].push_back((edge){to, cap, cost, (int)G[to].size()});
@@ -119,7 +120,7 @@ public:
 };
 </pre>
 <h3>verify 用の問題</h3>
-<p>AOJ : Minimum Cost Flow<a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_6_B"></a>
+<p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_6_B">Minimum Cost Flow</a>
   <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3211439#1">提出コード</a></p>
 </section>
 
