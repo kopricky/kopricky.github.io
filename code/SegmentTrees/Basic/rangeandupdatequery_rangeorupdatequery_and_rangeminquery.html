@@ -49,7 +49,7 @@ range_and の "(~x & _and[k]) == (~x & _or[k])" の意味は &x を取ること�
 同様に range_or の "(x & ~_or[k]) == (x & ~_and[k])" の意味は &x を取ることによって増えるビットが _and[k] と _or[k] で等しいということを意味していて言い換えると, &x を区間加算と見ることができるという意味になります(区間内のすべての数に一様にビットを立てるので). <br>
 このとき range_and で "(~x & _and[k]) != (~x & _or[k])" となる場合つまり余分に探索する場合は探索後 ~x & _and[k] と ~x & _or[k] が等しくなるので少なくともその区間の D[l..r) は 1 小さくなる. 同様に range_or で "(x & ~_and[k]) != (x & ~_or[k])" となる場合つまり余分に探索する場合は探索後 x & ~_and[k] と x & ~_or[k] が等しくなるので少なくともその区間の D[l..r) は 1 小さくなる. <br>
 よって C = O(n log MAX_VAL) と合わせて各クエリのならし計算量は O(max(log n, log MAX_VAL)) となる. <br>
-RangeUpdateQuery や RangeSumQuery を加えたりは容易にできるが, RangeAddQuery はならしが回らないので相性が悪い. RangeXorQuery 
+RangeUpdateQuery や RangeSumQuery を加えたりは容易にできるが, RangeAddQuery はならしが回らないので相性が悪い.
 </p>
 <p>
 時間計算量: 各クエリならし O(max(log n, log MAX_VAL))
