@@ -42,27 +42,23 @@
 <h3>コードについての説明</h3>
 <p>
 区間and更新 (a_i ← a_i & x (i ∈ [l, r)), 区間or更新 (a_i ← a_i | x (i ∈ [l, r)), 区間最小値 (min_(l <= i < r) a_i) のクエリを効率的に処理できる. <br>
-
-ならしの解析は <a href="./rangemaxupdatequery_and_rangesumquery.html">これ</a> と同じように行う<br>.
-セグ木が保持するノード(2*n 個ぐらいある) に対応する区間 [l, r) について D[l..r) を区間 [l, r) に含まれる数の全要素の and と全要素の or の 2 つの間のハミング距離とする. またすべてのノードの D[l, r) の和を C とする. ここで C = O(n log n log MAX_VAL) であることに注意する. <br>
-区間更新にかかる実際の計算量は O(log n) であるが、 区間更新に伴う C の値の増加分を考えると, 中途半端に区間更新される部分は O(log n) 個なので全体で高々 O(log nlog MAX_VAL) だけ増加する. <br>
+CSAcademy の <a href="https://csacademy.com/contest/round-70/task/and-or-max/">And or Max</a> で出てきたデータ構造. ならしの解析は <a href="./rangemaxupdatequery_and_rangesumquery.html">これ</a> と同じように行う.<br>
+以下では CSAcademy の解説とは異なり, ハミング距離をポテンシャルとしてならし計算量を解析する(このように解析すると計算量が落ちることが分かるので). <br>
+セグ木が保持するノード(2*n 個ぐらいある) に対応する区間 [l, r) について D[l..r) を区間 [l, r) に含まれる数の全要素の and と全要素の or の 2 つの間のハミング距離とする. またすべてのノードの D[l, r) の和を C とする. ここで C = O(n log MAX_VAL) であることに注意する. <br>
+range_and の "(~x & _and[k]) == (~x & _or[k])" の意味は &x を取ることによって消えるビットが _and[k] と _or[k] で等しいということを意味していて言い換えると, &x を区間減算と見ることができるという意味になります(区間内のすべての数から一様に立っていたビットが消えるので). <br>
+同様に range_or の "(x & ~_or[k]) == (x & ~_and[k])" の意味は &x を取ることによって増えるビットが _and[k] と _or[k] で等しいということを意味していて言い換えると, &x を区間加算と見ることができるという意味になります(区間内のすべての数に一様にビットを立てるので). <br>
+このとき range_and で "(~x & _and[k]) != (~x & _or[k])" となる場合つまり余分に探索する場合は探索後 ~x & _and[k] と ~x & _or[k] が等しくなるので少なくともその区間の D[l..r) は 1 小さくなる. 同様に range_or で "(x & ~_and[k]) != (x & ~_or[k])" となる場合つまり余分に探索する場合は探索後 x & ~_and[k] と x & ~_or[k] が等しくなるので少なくともその区間の D[l..r) は 1 小さくなる. <br>
+よって C = O(n log MAX_VAL) と合わせて各クエリのならし計算量は O(max(log n, log MAX_VAL)) となる. <br>
+RangeUpdateQuery や RangeSumQuery を加えたりは容易にできるが, RangeAddQuery はならしが回らないので相性が悪い. RangeXorQuery 
 </p>
 <p>
-(関数)<br>
-add_edge(): 辺を追加する <br>
-</p>
-<p>
-時間計算量: 各クエリならし O(log n log MAX_VAL)
+時間計算量: 各クエリならし O(max(log n, log MAX_VAL))
 </p>
 <h3>コード</h3>
 <div class="codebox">
 <input type="checkbox" id="label" class="csscode" />
 <label for="label"></label>
 <pre class="prettyprint linenums">
-//更新 a_i → a_i & x (l <= i < r)
-//更新 a_i → a_i | x (l <= i < r)
-//クエリ min (a[l]...a[r-1])
-//計算量はならしO(log(MAX_VAL)log(n))
 template&lt;typename T&gt; class segtree
 {
 private:
@@ -144,7 +140,7 @@ public:
 </pre>
 <h3>verify 用の問題</h3>
 <p>CSAcademy : <a href="https://csacademy.com/contest/round-70/task/and-or-max/">And or Max</a>
-  <a href="">提出コード</a></p>
+  <a href="https://csacademy.com/code/gvhxLyTX/">提出コード</a></p>
 </section>
 
 </div>
