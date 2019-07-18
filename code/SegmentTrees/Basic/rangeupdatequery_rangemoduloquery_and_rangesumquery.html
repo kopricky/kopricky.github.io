@@ -41,9 +41,12 @@
 <h2>RangeUpdateQuery RangeModuloQuery and RangeSumQuery</h2>
 <h3>コードについての説明</h3>
 <p>
-区間更新 (a_i ← x (i ∈ [l, r)), 区間剰余更新 (a_i ← a_i % x (i ∈ [l, r)), 区間和 (sum_(l <= i < r) a_i) のクエリを効率的に処理できる. <br>
-詳しくは <a href="https://codeforces.com/blog/entry/57319">ここの</a> part2 に書いている. 計算量は O(log^2n) と書いてあるがたぶんポテンシャルを考えると O(lognlogMAX_VAL) な気がする. <br>
-他の segment tree beats のテクニックと同様にセグ木を下って行くときに追加で条件を課すのだがここでは 「max_val[k] < x で探索終了, max_val[k] == min_val[k] で遅延処理する」 となる. またもやこんなんでいけるのかという気がするが, 意味のある mod 演算だと一回で値が 1/2 未満になるのと区間更新クエリは max_val[k] == min_val[k] に捕捉されることから効率よくクエリを処理できていることがいえる.
+区間更新 (a_i ← x (x >= 0 とする)(i ∈ [l, r)), 区間剰余更新 (a_i ← a_i % x (x >= 1 とする)(i ∈ [l, r)), 区間和 (sum_(l <= i < r) a_i) のクエリを効率的に処理できる. <br>
+詳しくは <a href="https://codeforces.com/blog/entry/57319">ここの</a> part2 に書いている. 計算量は O(log^2n) と書いてあるポテンシャルを考えると O(lognlogMAX_VAL) だと思う. ならしの解析は <a href="./rangemaxupdatequery_and_rangesumquery.html">これ</a> と同じように行う<br>
+セグ木が保持するノード(2*n 個ぐらいある) に対応する区間 [l, r) について D[l..r) を区間 [l, r) に含まれる数のうち異なる数の ceil(log (a[k] + 1)) の和とする. ただしここで区間内に値が 1 種類のみの場合は 0 と定めることにする. またすべてのノードの D[l, r) の和を C とする. ここで C = O(nlognlogMAX_VAL) であることに注意する. <br>
+区間更新にかかる実際の計算量は O(log n) であるが、 区間更新に伴う C の値の増加分を考えると, 中途半端に区間更新される部分は O(log n) 個なので全体で高々 O(log nlog MAX_VAL) だけ増加する. <br>
+次に剰余更新の場合は max_val[k] != min_val[k] の場合に通常の遅延更新より深く探索することになるが、このような探索を 1 度行うとその区間内の D[l, r]) の値が少なくとも 1 減る(これはある数 x をそれ以下の数 y で剰余をとったときに x/2 未満になるという事実から言える). <br>
+以上より各クエリのならし計算量は C の増加分および減少分と C = O(n log n log MAX_VAL) から O(lognlogMAX_VAL) であることが言える.
 </p>
 <p>
 時間計算量: 構築 O(n), 各クエリ ならし O(lognlogMAX_VAL) (MAX_VAL はデータの値の最大値とする)
@@ -58,10 +61,25 @@ private:
     int n,sz;
     vector&lt;T&gt; node, min_val, max_val, lazy;
     vector&lt;bool&gt; lazyFlag;
-    void opr(int id){
+    void update(int id){
         node[id] = node[2*id+1] + node[2*id+2];
         min_val[id] = min(min_val[2*id+1],min_val[2*id+2]);
         max_val[id] = max(max_val[2*id+1],max_val[2*id+2]);
+    }
+public:
+    segtree(const vector&lt;T&gt;&amp; v) : n(1), sz((int)v.size()){
+        while(n &lt; sz) n *= 2;
+        node.resize(2*n-1,0);
+        lazy.resize(2*n-1,0);
+        lazyFlag.resize(2*n-1,false);
+        min_val.resize(2*n-1,numeric_limits&lt;T&gt;::max());
+        max_val.resize(2*n-1,numeric_limits&lt;T&gt;::min());
+        for(int i = 0; i &lt; sz; i++){
+            node[i+n-1] = min_val[i+n-1] = max_val[i+n-1] = v[i];
+        }
+        for(int i=n-2; i&gt;=0; i--){
+            update(i);
+        }
     }
     void eval(int k, int l, int r) {
         if(lazyFlag[k]){
@@ -72,25 +90,6 @@ private:
                 lazyFlag[k*2+1] = lazyFlag[k*2+2] = true;
             }
             lazyFlag[k] = false;
-        }
-    }
-
-public:
-    segtree(const vector&lt;T&gt;&amp; v) : sz((int)v.size()){
-        n = 1;
-        while(n &lt; sz){
-            n *= 2;
-        }
-        node.resize(2*n-1,0);
-        lazy.resize(2*n-1,0);
-        lazyFlag.resize(2*n-1,false);
-        min_val.resize(2*n-1,numeric_limits&lt;T&gt;::max());
-        max_val.resize(2*n-1,numeric_limits&lt;T&gt;::min());
-        for(int i = 0; i &lt; sz; i++){
-            node[i+n-1] = min_val[i+n-1] = max_val[i+n-1] = v[i];
-        }
-        for(int i=n-2; i&gt;=0; i--){
-            opr(i);
         }
     }
     void update(int a, int b, T x, int k=0, int l=0, int r=-1){
@@ -106,7 +105,7 @@ public:
         }else{
             update(a, b, x, 2*k+1, l, (l+r)/2);
             update(a, b, x, 2*k+2, (l+r)/2, r);
-            opr(k);
+            update(k);
         }
     }
     void modulo_update(int a, int b, T x, int k=0, int l=0, int r=-1){
@@ -122,7 +121,7 @@ public:
         }else{
             modulo_update(a, b, x, 2*k+1, l, (l+r)/2);
             modulo_update(a, b, x, 2*k+2, (l+r)/2, r);
-            opr(k);
+            update(k);
         }
     }
     T query(int a, int b, int k=0, int l=0, int r=-1) {
