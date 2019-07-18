@@ -38,31 +38,163 @@
 <div id="contents">
 
 <section>
-<h2>アルゴリズム名</h2>
+<h2>Irving</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
+<a href="./gale_sharpley.html">GaleSharpley</a>アルゴリズムの場合とは異なり, 戦略を取る主体が 1 グループの場合の安定マッチングを求めるアルゴリズムである. <br>
+安定ルームメイト問題とも呼ばれ、 n 人のグループがいたときに各メンバーが他の n-1 人に対する優先順位のリストを持っていて誰と誰が roommate になるかをマッチングするというような状況である. <br>
+この場合の blocking pair も安定結婚問題と同様にあるペアでそれぞれのマッチング相手が今見ているペアの相手よりも優先順位より低い場合のことをいい、 そのような blocking pair の存在しないマッチングを安定マッチングと呼ぶ. <br>
+この問題において, 安定マッチングは常に存在するとは限らず Irving のアルゴリズムは安定マッチングが存在する場合にのみその 1 つを返し, そうでない場合は存在しないと判定する. <br>
+Phase 1 で GaleSharpley のような方法でマッチングを考えていき(ただこれだけだと安定でないのにマッチングが出てきうる), 優先順位のリストを限定し, Phase 2 でその優先順位のリストにおいて各メンバーを安定マッチングとなるように割り当てていく. <br>
+少しややこしいのでより知りたい方は論文をあたってみてください. list などを用いて気をつけて実装すると計算量は O(n^2) となります.
 </p>
 <p>
 (関数)<br>
-add_edge(): 辺を追加する <br>
+solve(_pref): 優先度の高い順に相手の ID を格納した行列(n*(n-1) で n は偶数) を渡す(存在しない場合は要素数 0 の vector を返す). <br>
 </p>
 <p>
-時間計算量: O(mlogn)
+時間計算量: O(n^2)
 </p>
 <h3>コード</h3>
 <div class="codebox">
 <input type="checkbox" id="label" class="csscode" />
 <label for="label"></label>
 <pre class="prettyprint linenums">
-あ
+class Irving
+{
+private:
+    int n;
+    vector&lt;list&lt;int&gt; &gt; pref;
+    vector&lt;vector&lt;list&lt;int&gt;::iterator&gt; &gt; pref_iter;
+    vector&lt;vector&lt;int&gt; &gt; order;
+    list&lt;int&gt; pref_index;
+    vector&lt;list&lt;int&gt;::iterator&gt; pref_index_iter;
+    bool _erase(int num1, int num2)
+    {
+        pref[num1].erase(pref_iter[num1][order[num1][num2]]);
+        pref[num2].erase(pref_iter[num2][order[num2][num1]]);
+        return pref[num1].empty() || pref[num2].empty();
+    }
+    bool __erase(int num1, int num2)
+    {
+        pref[num1].erase(pref_iter[num1][order[num1][num2]]);
+        pref[num2].erase(pref_iter[num2][order[num2][num1]]);
+        if(pref[num1].size() == 1) pref_index.erase(pref_index_iter[num1]);
+        if(pref[num2].size() == 1) pref_index.erase(pref_index_iter[num2]);
+        return pref[num1].empty() || pref[num2].empty();
+    }
+    bool reduction(const vector&lt;int&gt;&amp; cand)
+    {
+        pref_index_iter.resize(n);
+        for(int i = 0; i &lt; n; ++i){
+            if(cand[i] &lt; 0) continue;
+            for(auto it = --pref[i].end(); *it != cand[i]; it = --pref[i].end()){
+                if(_erase(i, *it)) return true;
+            }
+            if(pref[i].size() &gt; 1){
+                pref_index.push_back(i);
+                pref_index_iter[i] = --pref_index.end();
+            }
+        }
+        return false;
+    }
+    bool phase1()
+    {
+        stack&lt;int&gt; single;
+        for(int i = 0; i &lt; n; ++i){
+            single.push(i);
+        }
+        vector&lt;int&gt; cand(n, -1);
+        while(!single.empty()){
+            int u = single.top();
+            single.pop();
+            while(true){
+                int v = *pref[u].begin();
+                if(cand[v] &lt; 0){
+                    cand[v] = u;
+                    break;
+                }else if(order[v][cand[v]] &gt; order[v][u]){
+                    single.push(cand[v]);
+                    if(_erase(v, cand[v])) return true;
+                    cand[v] = u;
+                    break;
+                }else{
+                    if(_erase(v, u)) return true;
+                }
+            }
+        }
+        return reduction(cand);
+    }
+    int eliminate(unique_ptr&lt;bool[]&gt;&amp;&amp; visit, int cur)
+    {
+        list&lt;int&gt; pseq;
+        while(!visit[cur]){
+            pseq.push_back(cur);
+            visit[cur] = true;
+            cur = *(--pref[*(++pref[cur].begin())].end());
+        }
+        list&lt;int&gt;::iterator it = pseq.begin();
+        for(;;++it){
+            visit[*it] = false;
+            if(*it == cur) break;
+        }
+        list&lt;pair&lt;int, int&gt; &gt; elim;
+        for(;it != pseq.end(); ++it){
+            visit[*it] = false;
+            elim.emplace_back(*it, *(++pref[*it].begin()));
+        }
+        for(pair&lt;int, int&gt;&amp; value : elim){
+            int p = value.first, q = value.second;
+            if(*pref[p].begin() != q){
+                if(__erase(p, *pref[p].begin())) return -1;
+            }
+            for(auto it = --pref[q].end(); *it != p; it = --pref[q].end()){
+                if(__erase(q, *it)) return -1;
+            }
+        }
+        return cur;
+    }
+    bool phase2()
+    {
+        if(pref_index.empty()) return false;
+        unique_ptr&lt;bool[]&gt; visit(new bool[n]());
+        int start = *pref_index.begin();
+        do {
+            if(pref[start].size() == 1) start = *pref_index.begin();
+            if((start = eliminate(move(visit), start)) &lt; 0) return true;
+        }while(!pref_index.empty());
+        return false;
+    }
+public:
+    Irving(){}
+    vector&lt;int&gt; solve(const vector&lt;vector&lt;int&gt; &gt;&amp; _pref)
+    {
+        n = (int)_pref.size();
+        assert(n % 2 == 0);
+        pref.resize(n);
+        pref_iter.resize(n, vector&lt;list&lt;int&gt;::iterator&gt;(n-1));
+        order.resize(n, vector&lt;int&gt;(n));
+        for(int i = 0; i &lt; n; ++i){
+            for(int j = 0; j &lt; n-1; ++j){
+                pref[i].push_back(_pref[i][j]);
+                pref_iter[i][j] = --pref[i].end();
+                order[i][_pref[i][j]] = j;
+            }
+        }
+        if(phase1()) return vector&lt;int&gt;();
+        if(phase2()) return vector&lt;int&gt;();
+        vector&lt;int&gt; ans(n);
+        for(int i = 0; i &lt; n; ++i){
+            ans[i] = *pref[i].begin();
+        }
+        return ans;
+    }
+};
 </pre>
 <h3>verify 用の問題</h3>
 <p>
 verify していません(verify 問題を知らない)
 </p>
-<p>Atcoder : <a href=""></a>
-  <a href="">提出コード</a></p>
 </section>
 
 </div>
