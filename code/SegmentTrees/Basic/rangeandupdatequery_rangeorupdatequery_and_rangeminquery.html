@@ -42,13 +42,16 @@
 <h3>コードについての説明</h3>
 <p>
 区間and更新 (a_i ← a_i & x (i ∈ [l, r)), 区間or更新 (a_i ← a_i | x (i ∈ [l, r)), 区間最小値 (min_(l <= i < r) a_i) のクエリを効率的に処理できる. <br>
+ならしの解析は <a href="./rangemaxupdatequery_and_rangesumquery.html">これ</a> と同じように行う<br>.
+セグ木が保持するノード(2*n 個ぐらいある) に対応する区間 [l, r) について D[l..r) を区間 [l, r) に含まれる数のうち異なる数の ceil(log (a[k] + 1)) の和とする. ただしここで区間内に値が 1 種類のみの場合は 0 と定めることにする. またすべてのノードの D[l, r) の和を C とする. ここで C = O(nlognlogMAX_VAL) であることに注意する. <br>
+区間更新にかかる実際の計算量は O(log n) であるが、 区間更新に伴う C の値の増加分を考えると, 中途半端に区間更新される部分は O(log n) 個なので全体で高々 O(log nlog MAX_VAL) だけ増加する. <br>
 </p>
 <p>
 (関数)<br>
 add_edge(): 辺を追加する <br>
 </p>
 <p>
-時間計算量: ならし O(log(MAX_VAL)log(n))
+時間計算量: 各クエリならし O(log n log MAX_VAL)
 </p>
 <h3>コード</h3>
 <div class="codebox">
@@ -139,7 +142,7 @@ public:
 };
 </pre>
 <h3>verify 用の問題</h3>
-<p>CSAcademy : <a href=""></a>
+<p>CSAcademy : <a href="https://csacademy.com/contest/round-70/task/and-or-max/">And or Max</a>
   <a href="">提出コード</a></p>
 </section>
 
