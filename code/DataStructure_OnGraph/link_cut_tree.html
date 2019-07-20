@@ -53,7 +53,7 @@ Link Cut Tree とは木の動的な変化(辺の挿入, 辺の削除)を効率�
 (追記) <br>
 <a href="https://courses.csail.mit.edu/6.851/spring12/lectures/L19.html">この講義</a>を参考にしました. <br>
 スプレー木がならし O(logn) になる理由(Access Lemma) が分かっていればそこまで非自明ではない感じ. access(x) の際各パスに対応する二分木でくるくるするし深さ自体も最悪 Ω(n) だから嘘じゃねとか思ったが結局 Access Lemma と似た考えでポテンシャル部分が O(rank(root) - rank(x)) になるのと
-access(x) で一つ上に登るごとに preferred child が変化する性質に注目し preferred child が変化する回数がならし O(logn) 回であることが便宜的に HL 分解を考えることで言える(heavy かつ preferred な辺が消える回数と light かつ preferred な辺が生まれる回数は考察すると bound できることが分かる). <br>
+access(x) で一つ上に登るごとに preferred child が変化する性質に注目し preferred child が変化する回数がならし O(logn) 回であることが HL 分解した場合のグラフを考えることで言える(heavy かつ preferred な辺が消える回数と light かつ preferred な辺が生まれる回数は考察すると bound できることが分かる). <br>
 </p>
 <p>
 時間計算量: 各クエリ ならし O(logn) <br>
