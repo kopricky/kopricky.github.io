@@ -52,7 +52,7 @@ Edmonds, Karp のアルゴリズムでは毎回辺数最小のパスを幅優先
 s-t最大流とs-t最小カットは等しいのでこのアルゴリズムは最小カットを求めるアルゴリズムとしても用いることができる(最大流を線形計画問題で書き下したときの双対問題が最小カットの線形計画問題にあたり両者は強双対性より等しい), <br>
 アルゴリズムでは残余グラフ上で頂点 s から正の辺をたどって着くことのできる集合 S と V - S の間の辺集合が最小カットに対応している.
 (補足2) <br>
-フロー界隈では容量スケーリングを用いて計算量を log に落とすという手法がよく用いられ、 これは実測でも例えば Dinic の性能が悪く出るようなグラフでは特に有効な高速化となる(Dinic 1975 msec, Dinic(容量スケーリング版) 175 msec という結果になった). <br>
+フロー界隈では容量スケーリングを用いて計算量を log に落とすという手法がよく用いられ、 これは実測でも例えば Dinic の性能が悪く出るようなグラフでは特に有効な高速化となる(実際 Dinic 1975 msec, Dinic(容量スケーリング版) 175 msec という結果になった). <br>
 アルゴリズム自体はとても簡単でフローを 2^k 単位で流すということを k = floor(log_2(U)) ... 0 (U は最大フローの上限とする) のようにスケールダウンするように行うと最終的に最大流が求まる.
 </p>
 <p>
@@ -208,7 +208,9 @@ public:
 </pre>
 <h3>verify 用の問題</h3>
 <p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_6_A">Maximum Flow</a>
-  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3175254#1">提出コード</a></p>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3175254#1">提出コード</a><br>
+Atcoder : <a href="https://atcoder.jp/contests/chokudai_S002/tasks/chokudai_S002_k">種類数 β</a>
+  <a href="https://atcoder.jp/contests/chokudai_S002/submissions/6420722">提出コード</a>(容量スケーリング版)</p>
 </section>
 
 </div>
