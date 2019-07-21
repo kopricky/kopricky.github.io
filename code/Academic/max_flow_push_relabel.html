@@ -38,7 +38,7 @@
 <div id="contents">
 
 <section>
-<h2>Max Flow Push Relabel</h2>
+<h2>Push Relabel</h2>
 <h3>コードについての説明</h3>
 <p>
 フロー f が s, t 間の最大フローであるとは (1) (v から出る量) = (v に入る量) (∀ v ∈ V / {s,t}), (2) 残余ネットワークに augment path(増加道) が存在しない の 2 つが成り立つことが必要十分条件である. <br>
@@ -48,7 +48,7 @@ Edmonds-Karp, Dinic などは (1) の条件を常に満たしながら (2) の�
 ここで s から t にもしたどり着けるならパスに沿って不等式をあてはめると p(s) - p(t) <= n-1 が成り立つはずだが p(s) = n, p(t) = 0 より s から t には常にたどり着けないことが分かる. つまり (2) の条件は常に満たされる. よって (1) が満たされたとき, max flow が得られる.<br>
 残りはこの操作が O(n^2 m^(1/2)) の計算量で終了することであるが <a href="https://www.amazon.co.jp/%E7%B5%84%E5%90%88%E3%81%9B%E6%9C%80%E9%81%A9%E5%8C%96-%E7%AC%AC2%E7%89%88-%E7%90%86%E8%AB%96%E3%81%A8%E3%82%A2%E3%83%AB%E3%82%B4%E3%83%AA%E3%82%BA%E3%83%A0-B-%E3%82%B3%E3%83%AB%E3%83%86/dp/4621062026/ref=sr_1_2?ie=UTF8&qid=1536456416&sr=8-2&keywords=%E7%B5%84%E5%90%88%E3%81%9B%E6%9C%80%E9%81%A9%E5%8C%96%E3%81%A8%E3%82%A2%E3%83%AB%E3%82%B4%E3%83%AA%E3%82%BA%E3%83%A0">組合せ最適化(Korte, Fiegen)</a> などを参考にしてください. 愚直にやると O(n^2 m) かかり, push 操作の順番を常に活性点の中から高さの １ 番高いものから始めるということをすると計算量が O(n^2 m^(1/2)) に落ちる(これがかなり非自明). <br>
 元論文は <a href="http://akira.ruc.dk/~keld/teaching/algoritmedesign_f03/Artikler/08/Goldberg88.pdf">Goldberg and Tarjan 1988</a> で動的木を用いて計算量の改善が可能. <br>
-計算量は O(n^2 m^(1/2)) なので Dinic(計算量 O(n^2m)) よりも優秀だが, 実装が雑なので<b>速くない</b>です(改善する気もあまり起きていない). 活性点をリストで管理してかつ global_relabel(ときどき全部を再ラベリング), gap_relabel(ある高さの活性点がなくなったらそれ以上の高さの活性点を再ラベリング) の 2 つのヒューリスティックを行うととても速くなるらしい(<a href="https://min-25.hatenablog.com/entry/2017/08/22/211034">参考</a>).<br>
+計算量は O(n^2 m^(1/2)) なので Dinic(計算量 O(n^2m)) よりも優秀だが, 実装が雑なので特に 2 部グラフの場合とかは<b>速くない</b>です(改善する気は多少ある). global_relabel(ときどき全部を再ラベリング), gap_relabel(ある高さの活性点がなくなったらそれ以上の高さの活性点を再ラベリング) の 2 つのヒューリスティックを行うととても速くなるらしく gap_relabel をまだ実装していないのでそのうちやる(<a href="http://i.stanford.edu/pub/cstr/reports/cs/tr/94/1523/CS-TR-94-1523.pdf">参考</a>).<br>
 </p>
 <p>
 (関数)<br>
@@ -66,66 +66,149 @@ solve(s, t): s, t 間の最大フローを計算する
 template&lt;typename T&gt; class PushRelabel{
 private:
     struct edge{
-        int to,rev;
-        T f,cap;
+        int to, rev;
+        T cap;
+        typename list&lt;edge*&gt;::iterator it;
+        edge(int _to, int _rev, T _cap) : to(_to), rev(_rev), cap(_cap){}
     };
-    int V;
+    int V, s, t;
     vector&lt;vector&lt;edge&gt; &gt; G;
-public:
-    PushRelabel(int node_size) : V(node_size), G(V){}
-    void add_edge(int from,int to,T capacity){
-        G[from].push_back((edge){to,(int)G[to].size(),(T)0,capacity});
-        G[to].push_back((edge){from,(int)G[from].size()-1,(T)0,(T)0});
-    }
-    T solve(int s,int t){
-        vector&lt;int&gt; d(V,0), mxd(V,0);
-        vector&lt;T&gt; ex(V,0);
-        d[s] = V-1;
+    vector&lt;list&lt;edge*&gt; &gt; adjacent;
+    vector&lt;list&lt;int&gt; &gt; activate;
+    vector&lt;T&gt; excess;
+    vector&lt;int&gt; potential;
+    unique_ptr&lt;bool[]&gt; is_activate;
+    int init(){
+        global_relabel();
+        potential[s] = V;
+        int st_level = -1;
+        is_activate[s] = is_activate[t] = true;
         for(edge&amp; e : G[s]){
-            e.f = e.cap;
-            G[e.to][e.rev].f = -e.cap;
-            ex[e.to] += e.cap;
+            G[e.to][e.rev].cap = e.cap;
+            excess[s] -= e.cap;
+            excess[e.to] += e.cap;
+            if(e.cap &gt; 0 &amp;&amp; !is_activate[e.to]){
+                is_activate[e.to] = true;
+                if(potential[e.to] != 4*V){
+                    activate[potential[e.to]].push_back(e.to);
+                    st_level = (potential[e.to] &gt; st_level) ? potential[e.to] : st_level;
+                }
+            }
+            e.cap = 0;
         }
-        for(int sz = 0;;){
-            if(sz == 0){
-                for(int i = 0; i &lt; V; i++){
-                    if(i != s &amp;&amp; i != t &amp;&amp; ex[i] &gt; 0){
-                        if(sz != 0 &amp;&amp; d[i] &gt; d[mxd[0]]) sz = 0;
-                        mxd[sz++] = i;
+        for(int i = 0; i &lt; V; ++i){
+            if(i != s &amp;&amp; i != t){
+                for(edge&amp; e : G[i]){
+                    if(potential[i] == potential[e.to] + 1 &amp;&amp; e.cap &gt; 0){
+                        adjacent[i].push_back(&amp;e);
+                        e.it = --adjacent[i].end();
                     }
                 }
             }
-            if(sz == 0) break;
-            while(sz){
-                int i = mxd[sz-1];
-                bool push = false;
-                for(int j = 0; j &lt; (int)G[i].size() &amp;&amp; ex[i] != 0; j++){
-                    edge&amp; e = G[i][j];
-                    if(d[i] == d[e.to] + 1 &amp;&amp; e.cap - e.f &gt; 0){
-                        //push操作
-                        push = true;
-                        T df = min(e.cap - e.f, ex[i]);
-                        e.f += df, G[e.to][e.rev].f -= df;
-                        ex[i] -= df, ex[e.to] += df;
-                        if(ex[i] == 0) sz--;
-                    }
+        }
+        return st_level;
+    }
+    void global_relabel(){
+        queue&lt;int&gt; que;
+        que.push(t);
+        potential[t] = 0;
+        while(!que.empty()){
+            int u = que.front();
+            que.pop();
+            for(edge&amp; e : G[u]){
+                if(e.cap == 0 &amp;&amp; potential[e.to] == 4*V){
+                    potential[e.to] = potential[u] + 1;
+                    que.push(e.to);
                 }
-                if(!push){
-                    //relabel操作
-                    d[i] = numeric_limits&lt;int&gt;::max();
-                    for(edge&amp; e : G[i]){
-                        if(d[i] &gt; d[e.to] + 1 &amp;&amp; e.cap - e.f &gt; 0) d[i] = d[e.to] + 1;
-                    }
-                    if(d[i] &gt; d[mxd[0]]){
-                        sz = 0;
-                        break;
-                    }
-                }
+            }
+        }
+    }
+    void push(int&amp; level, int u){
+        edge&amp; e = *adjacent[u].back();
+        if(e.cap &gt; excess[u]){
+            if(potential[u] + 1 == potential[e.to] &amp;&amp; G[e.to][e.rev].cap == 0 &amp;&amp; e.to != s &amp;&amp; e.to != t){
+                adjacent[e.to].push_back(&amp;G[e.to][e.rev]);
+                G[e.to][e.rev].it = --adjacent[e.to].end();
+            }
+            e.cap -= excess[u];
+            G[e.to][e.rev].cap += excess[u];
+            excess[e.to] += excess[u];
+            activate[level].pop_back();
+            is_activate[u] = false;
+            if(!is_activate[e.to]){
+                activate[potential[e.to]].push_back(e.to);
+                is_activate[e.to] = true;
+                level = (potential[e.to] &gt; level) ? potential[e.to] : level;
+            }
+            excess[u] = 0;
+        }else{
+            if(potential[u] + 1 == potential[e.to] &amp;&amp; G[e.to][e.rev].cap == 0 &amp;&amp; e.to != s &amp;&amp; e.to != t){
+                adjacent[e.to].push_back(&amp;G[e.to][e.rev]);
+                G[e.to][e.rev].it = --adjacent[e.to].end();
+            }
+            G[e.to][e.rev].cap += e.cap;
+            excess[u] -= e.cap;
+            excess[e.to] += e.cap;
+            if(excess[u] == 0){
+                activate[level].pop_back();
+                is_activate[u] = false;
+            }
+            if(!is_activate[e.to]){
+                activate[potential[e.to]].push_back(e.to);
+                is_activate[e.to] = true;
+                level = (potential[e.to] &gt; level) ? potential[e.to] : level;
+            }
+            e.cap = 0;
+            adjacent[u].pop_back();
+        }
+    }
+    void relabel(int&amp; level, int u){
+        int prev = potential[u];
+        activate[level].pop_back();
+        potential[u] = numeric_limits&lt;int&gt;::max();
+        for(edge&amp; e : G[u]){
+            if(potential[u] &gt; potential[e.to] + 1 &amp;&amp; e.cap &gt; 0){
+                potential[u] = potential[e.to] + 1;
+            }
+        }
+        level = potential[u];
+        activate[level].push_back(u);
+        for(edge&amp; e : G[u]){
+            if(potential[u] == potential[e.to] + 1 &amp;&amp; e.cap &gt; 0){
+                adjacent[u].push_back(&amp;e);
+                e.it = --adjacent[u].end();
+            }
+            if(prev + 1 == potential[e.to] &amp;&amp; G[e.to][e.rev].cap &gt; 0 &amp;&amp; e.to != s &amp;&amp; e.to != t){
+                adjacent[e.to].erase(G[e.to][e.rev].it);
+            }
+        }
+    }
+public:
+    PushRelabel(int node_size)
+     : V(node_size), G(V), adjacent(V), activate(2*V),
+        excess(V, (T)0), potential(V, 4*V), is_activate(new bool[V]()){}
+    void add_edge(int from, int to, T cap){
+        G[from].emplace_back(to, (int)G[to].size(), cap);
+        G[to].emplace_back(from, (int)G[from].size()-1, (T)0);
+    }
+    T solve(int _s, int _t){
+        s = _s, t = _t;
+        int level = init();
+        while(level &gt;= 0){
+            if(activate[level].empty()){
+                --level;
+                continue;
+            }
+            int u = activate[level].back();
+            if(adjacent[u].empty()){
+                relabel(level, u);
+            }else{
+                push(level, u);
             }
         }
         T flow = 0;
         for(edge&amp; e : G[s]){
-            flow += e.f;
+            if(potential[e.to] != 4*V) flow += G[e.to][e.rev].cap;
         }
         return flow;
     }
@@ -133,7 +216,7 @@ public:
 </pre>
 <h3>verify 用の問題</h3>
 <p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_6_A">Maximum Flow</a>
-  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=2727988#1">提出コード</a></p>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3766344#1">提出コード</a></p>
 </section>
 
 </div>
