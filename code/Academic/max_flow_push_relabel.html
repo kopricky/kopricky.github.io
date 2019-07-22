@@ -67,6 +67,7 @@ solve(s, t): s, t 間の最大フローを計算する
 <input type="checkbox" id="label" class="csscode" />
 <label for="label"></label>
 <pre class="prettyprint linenums">
+// 計算量はちゃんと O(n^2 m^(1/2)) だがもっと簡単かつ高速に書けるので修正したい.
 template&lt;typename T&gt; class PushRelabel{
 private:
     struct edge{
