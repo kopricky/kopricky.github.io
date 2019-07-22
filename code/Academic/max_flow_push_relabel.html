@@ -73,6 +73,7 @@ private:
         edge(int _to, int _rev, T _cap) : to(_to), rev(_rev), cap(_cap){}
     };
     int V, s, t;
+    const int inf;
     vector&lt;vector&lt;edge&gt; &gt; G;
     vector&lt;list&lt;edge*&gt; &gt; adjacent;
     vector&lt;list&lt;int&gt; &gt; activate;
@@ -80,20 +81,22 @@ private:
     vector&lt;int&gt; potential;
     unique_ptr&lt;bool[]&gt; is_activate;
     int init(){
-        global_relabel();
         potential[s] = V;
+        global_relabel();
         int st_level = -1;
         is_activate[s] = is_activate[t] = true;
         for(edge&amp; e : G[s]){
-            G[e.to][e.rev].cap = e.cap;
-            excess[s] -= e.cap;
-            excess[e.to] += e.cap;
-            if(e.cap &gt; 0 &amp;&amp; !is_activate[e.to]){
-                is_activate[e.to] = true;
-                if(potential[e.to] != 4*V){
+            if(potential[e.to] != inf){
+                G[e.to][e.rev].cap = e.cap;
+                excess[s] -= e.cap;
+                excess[e.to] += e.cap;
+                if(e.cap &gt; 0 &amp;&amp; !is_activate[e.to]){
+                    is_activate[e.to] = true;
                     activate[potential[e.to]].push_back(e.to);
                     st_level = (potential[e.to] &gt; st_level) ? potential[e.to] : st_level;
                 }
+            }else{
+                is_activate[e.to] = true;
             }
             e.cap = 0;
         }
@@ -117,7 +120,7 @@ private:
             int u = que.front();
             que.pop();
             for(edge&amp; e : G[u]){
-                if(e.cap == 0 &amp;&amp; potential[e.to] == 4*V){
+                if(e.cap == 0 &amp;&amp; potential[e.to] == inf){
                     potential[e.to] = potential[u] + 1;
                     que.push(e.to);
                 }
@@ -186,8 +189,8 @@ private:
     }
 public:
     PushRelabel(int node_size)
-     : V(node_size), G(V), adjacent(V), activate(2*V),
-        excess(V, (T)0), potential(V, 4*V), is_activate(new bool[V]()){}
+     : V(node_size), inf(4*V), G(V), adjacent(V), activate(2*V),
+        excess(V, (T)0), potential(V, inf), is_activate(new bool[V]()){}
     void add_edge(int from, int to, T cap){
         G[from].emplace_back(to, (int)G[to].size(), cap);
         G[to].emplace_back(from, (int)G[from].size()-1, (T)0);
@@ -209,7 +212,7 @@ public:
         }
         T flow = 0;
         for(edge&amp; e : G[s]){
-            if(potential[e.to] != 4*V) flow += G[e.to][e.rev].cap;
+            if(potential[e.to] != inf) flow += G[e.to][e.rev].cap;
         }
         return flow;
     }
@@ -217,7 +220,7 @@ public:
 </pre>
 <h3>verify 用の問題</h3>
 <p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_6_A">Maximum Flow</a>
-  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3766344#1">提出コード</a></p>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3767761#1">提出コード</a></p>
 </section>
 
 </div>
