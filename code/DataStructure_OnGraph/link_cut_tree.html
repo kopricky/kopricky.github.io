@@ -47,10 +47,11 @@ Link Cut Tree とは木の動的な変化(辺の挿入, 辺の削除)を効率�
 アルゴリズムの理解に時間がかかりますが, 実装自体はそこまで重くない. 以下ではパス上の頂点に対するクエリの処理を実現するデータ構造にしているが, 単に link, cut, connected だけなら各値の伝播や reverse などは必要ないのでもっと実装は簡潔になる.<br>
 <s>実は正直なところなぜならし O(logn) になるかのポテンシャル部分の議論があまりよくわかっていない(ダメじゃん...)</s> 理解した！(⇒追記) <br>
 部分木に対する演算も行いたい場合は各頂点から non-preferred child に辿れる必要がある. この問題は頂点の接続関係(ジョイント)をまた別の splay 木で管理することで解決できる(らしい)が実装がより複雑になる. 実際にパス, 部分木両方のクエリを処理したい場合は <a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.87.9754&rep=rep1&type=pdf">Top Tree (self-adjusting version)</a> を参考にするとよさそう. <br>
-(注) 以下はパス上の加算・総和のクエリだが適宜他の演算に変更可 <br>
+(注1) link の部分どちらの頂点も木の根でない場合に対応するために access ではなく evert にしている. 親子関係を意識しないような動的森の管理に適している. 親子関係を意識せずに cut を行う場合は cut(u, v) を用いる.
+(注2) 以下はパス上の加算・総和のクエリだが適宜他の演算に変更可 <br>
 (雑なメモ) <a href="./splay.pdf">Splay Tree について</a><br>
 (追記) <br>
-<a href="https://courses.csail.mit.edu/6.851/spring12/lectures/L19.html">この講義</a>を参考にしました. <br>
+<a href="https://courses.csail.mit.edu/6.851/spring12/lectures/L19.html">この講義</a> およびその <a href="https://courses.csail.mit.edu/6.851/spring12/scribe/L19.pdf">Lecture note</a> を参考にしました. <br>
 スプレー木がならし O(logn) になる理由(Access Lemma) が分かっていればそこまで非自明ではない感じ. access(x) の際各パスに対応する二分木でくるくるするし深さ自体も最悪 Ω(n) だから嘘じゃねとか思ったが結局 Access Lemma と似た考えでポテンシャル部分が O(rank(root) - rank(x)) になるのと
 access(x) で一つ上に登るごとに preferred child が変化する性質に注目し preferred child が変化する回数がならし O(logn) 回であることが HL 分解した場合のグラフを考えることで言える(heavy かつ preferred な辺が消える回数と light かつ preferred な辺が生まれる回数は考察すると bound できることが分かる). <br>
 </p>
@@ -161,6 +162,17 @@ private:
         access(u);
         u-&gt;left-&gt;par = nullptr, u-&gt;left = nullptr, u-&gt;eval();
     }
+    void cut(node* u, node* v){
+        access(u);
+        node* prev = u;
+        for(u = u-&gt;left; u; u = u-&gt;right) prev = u;
+        if(prev == v){
+            u-&gt;left-&gt;par = nullptr, u-&gt;left = nullptr, u-&gt;eval();
+            splay(prev);
+        }else{
+            splay(prev), cut(v);
+        }
+    }
     node* lca(node* u, node* v){
         access(u);
         return access(v);
@@ -204,6 +216,8 @@ public:
     void link(int id1, int id2){ return link(arr[id1], arr[id2]); }
     // id とその親の間の辺を削除する
     void cut(int id){ return cut(arr[id]); }
+    // id と id2 の間の辺を削除する
+    void cut(int id1, int id2){ return cut(arr[id1], arr[id2]); }
     // id1 と id2 の LCA を求める
     int lca(int id1, int id2){ return lca(arr[id1], arr[id2])-&gt;id; }
     // 元の木の根を id にする
