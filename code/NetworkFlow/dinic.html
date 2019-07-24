@@ -54,7 +54,7 @@ Edmonds, Karp のアルゴリズムでは毎回辺数最小のパスを幅優先
 また上記から s-t 最大流と s-t 最小カットは一致することも分かりこのアルゴリズムは最小カットを求めるアルゴリズムとしても用いることができる <br>
 最大流を線形計画問題で書き下したときの双対問題が最小カットの線形計画問題にあたり両者は強双対性より等しいといった流れでも示すことができる.<br>
 (補足2) <br>
-フロー界隈では容量スケーリングを用いて計算量を log に落とすという手法がよく用いられ、 これは実測でも例えば Dinic の性能が悪く出るようなグラフでは特に有効な高速化となる(実際 Dinic 1975 msec, Dinic(容量スケーリング版) 175 msec という結果になった). <br>
+フロー界隈では容量スケーリングを用いて計算量を log に落とすという手法がよく用いられ、 これは実測でも例えば普通の Dinic だと性能が悪く出るようなグラフでは特に有効な高速化となる(実際 Dinic 1975 msec, Dinic(容量スケーリング版) 175 msec という結果になった). <br>
 アルゴリズム自体はとても簡単でフローを 2^k 単位で流すということを k = floor(log_2(U)) ... 0 (U は最大フローの上限とする) のようにスケールダウンするように行うと最終的に最大流が求まる.
 </p>
 <p>
@@ -69,11 +69,6 @@ solve(s, t): s, t 間の最大フローを計算する
 <pre class="prettyprint linenums">
 template&lt;typename T&gt; class Dinic {
 private:
-    struct edge{
-        int to;
-        T cap;
-        int rev;
-    };
     int V;
     vector&lt;int&gt; level,iter;
     void bfs(int s) {
@@ -111,6 +106,11 @@ private:
     }
 
 public:
+    struct edge{
+        int to;
+        T cap;
+        int rev;
+    };
     vector&lt;vector&lt;edge&gt; &gt; G;
 
     Dinic(int node_size) : V(node_size), level(V), iter(V), G(V){}
@@ -138,36 +138,27 @@ public:
 <pre class="prettyprint linenums">
 template&lt;typename T&gt; class Dinic {
 private:
-    struct edge{
-        int to;
-        T cap;
-        int rev;
-    };
     int V;
-    vector&lt;int&gt; level,iter;
+    vector&lt;int&gt; level, iter, que;
     void bfs(int s, T base) {
         fill(level.begin(),level.end(),-1);
-        queue&lt;int&gt; que;
         level[s] = 0;
-        que.push(s);
-        while(!que.empty()){
-            int v = que.front();
-            que.pop();
+        int qh = 0, qt = 0;
+        for(que[qt++] = s; qh &lt; qt;){
+            int v = que[qh++];
             for(auto&amp; e : G[v]){
-                if(e.cap &gt;= base &amp;&amp; level[e.to] &lt; 0){
+                if(level[e.to] &lt; 0 &amp;&amp; e.cap &gt;= base){
                     level[e.to] = level[v] + 1;
-                    que.push(e.to);
+                    que[qt++] = e.to;
                 }
             }
         }
     }
     T dfs(int v, int t, T f) {
-        if(v == t){
-            return f;
-        }
+        if(v == t) return f;
         for(int&amp; i = iter[v]; i &lt; (int)G[v].size(); i++){
             edge&amp; e = G[v][i];
-            if(e.cap &gt;= f &amp;&amp; level[v] &lt; level[e.to]){
+            if(level[v] &lt; level[e.to] &amp;&amp; e.cap &gt;= f){
                 T d = dfs(e.to, t, f);
                 if(d &gt; 0){
                     e.cap -= d;
@@ -180,9 +171,14 @@ private:
     }
 
 public:
+    struct edge{
+        int to;
+        T cap;
+        int rev;
+    };
     vector&lt;vector&lt;edge&gt; &gt; G;
 
-    Dinic(int node_size) : V(node_size), level(V), iter(V), G(V){}
+    Dinic(int node_size) : V(node_size), level(V), iter(V), que(V), G(V){}
     //辺を張る
     void add_edge(int from,int to,T cap) {
         G[from].push_back((edge){to,cap,(int)G[to].size()});
