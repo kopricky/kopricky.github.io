@@ -41,7 +41,7 @@
 <h2>RangeMaxUpdateQuery and RangeSumQuery</h2>
 <h3>コードについての説明</h3>
 <p>
-区間 max への更新 (a_i ← max(a_i, x) (i ∈ [l, r)), 区間和 (sum_(l <= i < r) a_i) のクエリを効率的に処理できる(RangeMinQuery に変更したり, RangaUpdateQuery, RangaAddQuery を付け加えたりなどは容易にできる). <br>
+区間 max への更新 (a_i ← max(a_i, x) (i ∈ [l, r)), 区間和 (sum_(l <= i < r) a_i) のクエリを効率的に処理できる(RangeMinUpdateQuery, RangaUpdateQuery, RangaAddQuery を付け加えたりなどは以下の計算量解析が回るので容易にできる). <br>
 <a = href="https://codeforces.com/blog/entry/57319">コドフォのブログ</a> に書いてあったテクニックで自分は最初知ったとき結構びっくりした. <br>
 実装もそこまでめんどくさくなく, 通常の遅延セグ木の更新の際の探索において <br>
 「b <= l || r <= a」 なら探索終了の部分を 「b <= l || r <= a || min_val[k] >= x」 なら探索終了に変更し, (min_val[k] とは対応する区間内の最小値を表す) <br>
@@ -71,16 +71,32 @@ private:
         node[id] = node[2*id+1] + node[2*id+2];
         if(min_val[2*id+1] &lt; min_val[2*id+2]){
             min_val[id] = min_val[2*id+1];
-            second_val[id] = min(second_val[2*id+1],min_val[2*id+2]);
+            second_val[id] = min(second_val[2*id+1], min_val[2*id+2]);
             count[id] = count[2*id+1];
         }else if(min_val[2*id+1] &gt; min_val[2*id+2]){
             min_val[id] = min_val[2*id+2];
-            second_val[id] = min(min_val[2*id+1],second_val[2*id+2]);
+            second_val[id] = min(min_val[2*id+1], second_val[2*id+2]);
             count[id] = count[2*id+2];
         }else{
             min_val[id] = min_val[2*id+1];
-            second_val[id] = min(second_val[2*id+1],second_val[2*id+2]);
-            count[id] = count[2*id+1]+count[2*id+2];
+            second_val[id] = min(second_val[2*id+1], second_val[2*id+2]);
+            count[id] = count[2*id+1] + count[2*id+2];
+        }
+    }
+public:
+    segtree(const vector&lt;T&gt;&amp; v) : n(1), sz((int)v.size()){
+        while(n &lt; sz) n *= 2;
+        node.resize(2*n-1, 0);
+        lazy.resize(2*n-1, 0);
+        lazyFlag.resize(2*n-1, false);
+        min_val.resize(2*n-1, numeric_limits&lt;T&gt;::max());
+        second_val.resize(2*n-1, numeric_limits&lt;T&gt;::max());
+        count.resize(2*n-1, 1);
+        for(int i = 0; i &lt; sz; i++){
+            node[i+n-1] = min_val[i+n-1] = v[i];
+        }
+        for(int i=n-2; i&gt;=0; i--){
+            update(i);
         }
     }
     void eval(int k, int l, int r) {
@@ -94,24 +110,6 @@ private:
                 }
             }
             lazyFlag[k] = false;
-        }
-    }
-public:
-    segtree(const vector&lt;T&gt;&amp; v) : sz((int)v.size()){
-        n = 1;
-        while(n &lt; sz){
-            n *= 2;
-        }
-        node.resize(2*n-1, 0), lazy.resize(2*n-1, 0);
-        lazyFlag.resize(2*n-1,false);
-        min_val.resize(2*n-1,numeric_limits&lt;T&gt;::max());
-        second_val.resize(2*n-1,numeric_limits&lt;T&gt;::max());
-        count.resize(2*n-1,1);
-        for(int i = 0; i &lt; sz; i++){
-            node[i+n-1] = min_val[i+n-1] = v[i];
-        }
-        for(int i=n-2; i&gt;=0; i--){
-            update(i);
         }
     }
     void range(int a, int b, T x, int k=0, int l=0, int r=-1){
