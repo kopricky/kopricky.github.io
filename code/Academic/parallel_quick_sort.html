@@ -45,7 +45,7 @@
 ある程度の THRESHOLD でそれ以下になった場合は分割せず通常の std::sort を用いてソートをすることにしている.<br>
 これでもある程度高速になるのだが、 std::partition を愚直に行っている部分が配列が大きくなったときにボトルネックになってしまう. 加えて, (ピボット以上の要素) と (ピボット未満の要素) の要素数に差が生じた場合に一方のスレッドの実行をもう一方が待つ時間が長くなってしまうというようなことも起こりうる. <br>
 partion アルゴリズムを parallel に行うのは考えてみると結構難しいことが分かり、 実際に研究されていることも調べてわかった(<a href="https://www.cs.upc.edu/~lfrias/research/parpar/wea08.pdf">参考スライド</a>, <a href="https://www.cs.upc.edu/~lfrias/research/parpar/parpar.pdf">その論文</a>). <br>
-詳しくは論文を見てもらえるとわかりやすいが, 論文で言うところの F & A algorithm を実装しており, 論文の手法は実装していないことに注意(後に述べる). 配列を多数のブロックに分割し、 各スレッドは分割されたブロックを左端と右端から順に外から内に向かって (左, 右) のペアで取っていく. そして各スレッドで取ったブロック内の要素を外から内に見ていき,
+詳しくは論文を見てもらえるとわかりやすいが, 論文で言うところの F & A algorithm を実装しており, 論文の手法は実装していないことに注意(後に述べる). 配列を多数のブロックに分割し、 各スレッドは分割されたブロックを左端と右端から順に外から内に向かって (左, 右) のペアで取っていく(各スレッドには static ではなく dynamic にプロックを割り当てる). そして各スレッドで取ったブロック内の要素を外から内に見ていき,
 左のブロックで pivot を以上のもの, 右のプロックで pivot 未満のものに到達したらそれらを swap するという操作を繰り返す. そして右もしくは左のブロックの終点に達したら新たに次の右および左のブロックをそのスレッドに割り当てる. 以上を繰り返すと最終的に高々 m(スレッドの数) 個のブロックが正しく配置されていない状況となるので, それを
 std::partition を用いて並び替える(Cleanup 操作). <br>
 論文ではこの Cleanup 操作における比較回数をより小さくするような手法を提案している. ただ比較回数は少なくなるものの少なくとも数列のソートでは単純な F & A アルゴリズムで十分な速度が出ている論文内の実験から分かる(比較の演算の計算コストが重い場合などは論文の手法の方が良いように見える). 実際に論文のアルゴリズムが C++17 の parallel_quick_sort の実装に使われているようだ.
@@ -68,7 +68,7 @@ private:
     const BidirectionalIterator first, last;
     const Compare comp;
     std::mt19937 mt;
-    static const unsigned long THRESHOLD = 15000;
+    static const unsigned long THRESHOLD = (1u << 14);
     void parallel_partial_sort(const BidirectionalIterator _first, const BidirectionalIterator _last);
 
 public:
@@ -128,11 +128,11 @@ private:
     class BlockCounter
     {
     private:
-        static const unsigned leftBlock = 1 &lt;&lt; 16;
-        static const unsigned rightBlock = 1;
-        static const unsigned mask = leftBlock - 1;
-        static const unsigned min_blockSize = 1024;
-        static const unsigned max_blockCount = (1 &lt;&lt; 15) - 1;
+        const unsigned leftBlock = 1 &lt;&lt; 16;
+        const unsigned rightBlock = 1;
+        const unsigned mask = leftBlock - 1;
+        const unsigned min_blockSize = 1024;
+        const unsigned max_blockCount = (1 &lt;&lt; 15) - 1;
 
     public:
         const unsigned block_size, block_count;
@@ -347,7 +347,7 @@ RandomAccessIterator parallel_partition
 }
 
 template&lt;typename T&gt;
-class ThreadSafeQueue
+class ThreadsafeQueue
 {
 private:
     class Node
@@ -361,6 +361,7 @@ private:
     std::mutex tail_mutex;
     Node* tail;
     std::condition_variable data_cond;
+    std::atomic&lt;bool&gt; complete;
 
     Node* get_tail()
     {
@@ -374,7 +375,7 @@ private:
     }
 
 public:
-    ThreadSafeQueue() : head(new Node), tail(head.get()){}
+    ThreadsafeQueue() : head(new Node), tail(head.get()), complete(false){}
     void push(const T new_value)
     {
         std::shared_ptr&lt;T&gt; new_data(std::make_shared&lt;T&gt;(std::move(new_value)));
@@ -388,27 +389,40 @@ public:
         }
         data_cond.notify_one();
     }
-    bool wait_and_pop(T&amp; value, std::atomic&lt;unsigned&gt;&amp; num, std::atomic&lt;bool&gt;&amp; state)
+    bool wait_and_pop(T&amp; value, std::atomic&lt;unsigned&gt;&amp; num)
     {
         std::unique_lock&lt;std::mutex&gt; head_lock(head_mutex);
+        if(locked_empty() &amp;&amp; num.load(std::memory_order_acquire) == 0)
+        {
+            finish();
+            return false;
+        }
         bool check;
         data_cond.wait(head_lock, [&amp;]
         {
-            return (check = (head.get() != get_tail())) || (num.load(std::memory_order_acquire) == 0);
+            return (check = !locked_empty()) || (num.load(std::memory_order_acquire) == 0);
         });
         if(!check)
         {
-            if(!state.load(std::memory_order_acquire))
-            {
-                state.store(true, std::memory_order_release);
-                data_cond.notify_all();
-            }
+            finish();
             return false;
         }
         num.fetch_add(1, std::memory_order_acq_rel);
         value = std::move(*head-&gt;data);
         pop_head();
         return true;
+    }
+    void finish()
+    {
+        if(!complete.load(std::memory_order_acquire))
+        {
+            complete.store(true, std::memory_order_release);
+            data_cond.notify_all();
+        }
+    }
+    bool locked_empty()
+    {
+        return (head.get() == get_tail());
     }
 };
 
@@ -417,10 +431,9 @@ class ParallelQuickSortSolver {
 private:
     const RandomAccessIterator first, last;
     const Compare comp;
-    ThreadSafeQueue&lt;std::pair&lt;RandomAccessIterator, RandomAccessIterator&gt; &gt; task_queue;
+    ThreadsafeQueue&lt;std::pair&lt;RandomAccessIterator, RandomAccessIterator&gt; &gt; task_queue;
     std::mt19937 mt;
     std::atomic&lt;unsigned&gt; actthread_num;
-    std::atomic&lt;bool&gt; finish;
     const unsigned total_length;
     const unsigned THRESHOLD;
 
@@ -430,7 +443,7 @@ private:
 public:
     ParallelQuickSortSolver(const RandomAccessIterator _first, const RandomAccessIterator _last, const Compare _comp)
         : first(_first), last(_last), comp(_comp), task_queue(), mt(std::random_device{}()),
-            actthread_num(0), finish(false), total_length(std::distance(first, last)), THRESHOLD(total_length / 200)
+            actthread_num(0), total_length(std::distance(first, last)), THRESHOLD(std::max(total_length / 200, (1u &lt;&lt; 14)))
     {
         task_queue.push(std::make_pair(first, last));
     }
@@ -441,7 +454,7 @@ template&lt;typename RandomAccessIterator, class Compare&gt;
 void ParallelQuickSortSolver&lt;RandomAccessIterator, Compare&gt;::getTask_and_run()
 {
     std::pair&lt;RandomAccessIterator, RandomAccessIterator&gt; task;
-    while(finish.load(std::memory_order_acquire) || task_queue.wait_and_pop(task, actthread_num, finish))
+    while(task_queue.wait_and_pop(task, actthread_num))
     {
         parallel_partial_sort(task.first, task.second);
     }
@@ -462,7 +475,8 @@ void ParallelQuickSortSolver&lt;RandomAccessIterator, Compare&gt;::parallel_part
     const RandomAccessIterator pivot_itr = std::next(_first, uid(mt));
     const auto pivot = *pivot_itr;
     std::iter_swap(_first, pivot_itr);
-    const RandomAccessIterator middle = parallel_partition(_first + 1, _last, std::bind(comp, std::placeholders::_1, std::cref(pivot)), total_length / 4);
+    const RandomAccessIterator middle
+        = parallel_partition(_first + 1, _last, std::bind(comp, std::placeholders::_1, std::cref(pivot)), std::max(total_length / 4, (1u &lt;&lt; 17)));
     std::iter_swap(_first, middle - 1);
     task_queue.push(std::make_pair(_first, middle - 1));
     parallel_partial_sort(middle, _last);
@@ -472,15 +486,14 @@ template&lt;typename RandomAccessIterator, class Compare&gt;
 void ParallelQuickSortSolver&lt;RandomAccessIterator, Compare&gt;::operator()()
 {
     const unsigned hardware_threads = std::thread::hardware_concurrency();
-    std::vector&lt;std::thread&gt; threads;
-    for(unsigned i = 0; i &lt; hardware_threads-1; ++i)
+    std::vector&lt;std::future&lt;void&gt; &gt; fut;
+    for(unsigned i = 0; i &lt; hardware_threads; ++i)
     {
-        threads.push_back(std::thread(&amp;ParallelQuickSortSolver&lt;RandomAccessIterator, Compare&gt;::getTask_and_run, this));
+        fut.push_back(std::async(&amp;ParallelQuickSortSolver&lt;RandomAccessIterator, Compare&gt;::getTask_and_run, this));
     }
-    getTask_and_run();
-    for(auto&amp; entry : threads)
+    for(auto&amp; entry : fut)
     {
-        entry.join();
+        entry.get();
     }
 }
 
