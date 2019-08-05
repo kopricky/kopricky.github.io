@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>Partial Persistent Linked Data Structure</h2>
+<h3>コードについての説明</h3>
+<p>
+ノードとリンクからなるデータ構造(Linked Data Structure) を部分永続化(partial persistent) する手法. <br>
+Linked Data Structure とはノードと 2 つのノードをつなぐリンク(有向辺) からなり, 各ノードから出るリンクの数(OUTDEGREE) は定数であるものとする. また部分永続データ構造とは過去のすべてのバージョンの read および現在のバージョンの update を行うことできるデータ構造のことを言う(過去のバージョンを参照できるというところが普通のデータ構造と異なる). <br>
+Linked Data Structure のクラスのうち各ノードに入るリンクの数(INDEGREE) が定数となるような構造に限定するとそのような構造の部分永続化を効率良く行うことができ, 以下はその実装である. segree や binary search tree などを個別に永続化することがよくあるがこれはそのような永続化を包括的に扱うことができる. <br>
+ここで update はリンクの insert, erase, ノードの insert, erase, ノードの持つデータの変更を考える. このとき時間計算量および空間計算量は amortized O(1) per update が成り立つ. <br>
+また任意のバージョンで、 ノード v からそのノードの i 番目のリンクに沿った移動は O(1) 時間で行うことができる. 以下の実装では各バージョンにおける access nodes(参照する際の入り口となるノードたち) をクラス内で管理することはしていないので外側で配列として保持しておく. <br>
+実装は元論文である <a href="https://www.cs.cmu.edu/~sleator/papers/another-persistence.pdf">Driscoll, Sarnak, Sleator, Tarjan 1986</a> を参照しました. この論文では完全永続化に対しても同じ計算量での手法を与えているが, list order problem を効率的に解くアルゴリズムが必要だったり, また管理する必要のある pointer も増えるので実装が少々大変.<br>
+</p>
+<p>
+時間計算量: update amortized O(1), access(forward) O(1)
+</p>
+<h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
+<pre class="prettyprint linenums">
+template&lt;unsigned int INDEGREE, unsigned int OUTDEGREE, typename DataType&gt;
+class PartialPersistentLinkedDataStructure
+{
+private:
+    static const unsigned int THRESHOLD = INDEGREE;
+    enum CHANGE { INSERT, ERASE };
+public:
+    struct base_pointer;
+    struct pointer;
+    struct info;
+    struct node
+    {
+        DataType data;
+        const unsigned int version;
+        unsigned int extra_count;
+        base_pointer original[OUTDEGREE];
+        pointer inverse[INDEGREE];
+        struct node *copy_pointer;
+        forward_list&lt;info&gt; extra[OUTDEGREE];
+        node(const DataType&amp; _data, const unsigned int _version)
+            : data(_data), version(_version), extra_count(0)
+        {}
+        inline bool isLive() const
+        {
+            return !copy_pointer;
+        }
+    };
+    struct base_pointer
+    {
+        node *to;
+        unsigned int inverse_index;
+        base_pointer() : to(nullptr){}
+        base_pointer(node* const _to, const unsigned int _inverse_index)
+            : to(_to), inverse_index(_inverse_index)
+        {}
+        inline bool isExist() const
+        {
+            return to;
+        }
+    };
+    static inline void toNULL(base_pointer&amp; u)
+    {
+        u.to = nullptr;
+    }
+    struct pointer : base_pointer
+    {
+        unsigned int version;
+        pointer() : base_pointer()
+        {}
+        pointer(node* const _to, const unsigned int _inverse_index, const unsigned int _version)
+            : base_pointer(_to, _inverse_index), version(_version)
+        {}
+    };
+    struct info
+    {
+        const CHANGE change;
+        const pointer detail;
+        info(const CHANGE _change) : change(_change){}
+        info(const CHANGE _change, const pointer&amp; _detail) : change(_change), detail(_detail)
+        {}
+    };
+private:
+    queue&lt;node*&gt; copied_nodes;
+    unsigned int set_inverse_pointer(node* const u, const unsigned int index,
+        node* const v, const unsigned int version) const
+    {
+        for(unsigned int i = 0; i &lt; INDEGREE; ++i)
+        {
+            if(!v-&gt;inverse[i].isExist())
+            {
+                v-&gt;inverse[i] = (pointer){u, index, version};
+                return i;
+            }
+        }
+        assert(false);
+    }
+    void erase_inverse_pointer(const node* u, const unsigned int index,
+        node* const v) const
+    {
+        for(unsigned int i = 0; i &lt; INDEGREE; ++i)
+        {
+            if(v-&gt;inverse[i].to == u &amp;&amp; v-&gt;inverse[i].inverse_index == index)
+            {
+                toNULL(v-&gt;inverse[i]);
+                return;
+            }
+        }
+        assert(false);
+    }
+    void init_node(node* const u, node* const newu)
+    {
+        u-&gt;copy_pointer = newu;
+        for(unsigned int i = 0; i &lt; OUTDEGREE; ++i)
+        {
+            base_pointer cur = current_base_pointer(u, i);
+            node *v = (newu-&gt;original[i] = cur).to;
+            if(v)
+                v-&gt;inverse[cur.inverse_index].to = newu;
+        }
+        copied_nodes.push(u);
+    }
+    void update_link(node * const u, const unsigned int index,
+        node * const v, const unsigned int version, const CHANGE type)
+    {
+        if(u-&gt;version == version)
+        {
+            if(type == INSERT)
+            {
+                u-&gt;original[index] = (base_pointer){v, set_inverse_pointer(u, index, v, version)};
+            }
+            else
+            {
+                toNULL(u-&gt;original[index]);
+                erase_inverse_pointer(u, index, v);
+            }
+        }
+        else if(u-&gt;extra_count &lt; THRESHOLD)
+        {
+            if(type == INSERT)
+            {
+                u-&gt;extra[index].emplace_front(type,
+                    pointer(v, set_inverse_pointer(u, index, v, version), version));
+            }
+            else
+            {
+                erase_inverse_pointer(u, index, v);
+                u-&gt;extra[index].emplace_front(type);
+            }
+            ++u-&gt;extra_count;
+        }
+        else
+        {
+            node *newu = new node(u-&gt;data, version);
+            init_node(u, newu);
+            update_link(newu, index, v, version, type);
+        }
+    }
+    base_pointer current_base_pointer(const node *u, const unsigned int out_index) const
+    {
+        base_pointer result = u-&gt;original[out_index];
+        if(!u-&gt;extra[out_index].empty())
+        {
+            const info&amp; value = u-&gt;extra[out_index].front();
+            if(value.change == INSERT)
+            {
+                result = (base_pointer){value.detail.to, value.detail.inverse_index};
+            }
+            else
+            {
+                toNULL(result);
+            }
+        }
+        return result;
+    }
+    void _update_data(node* const u, const DataType new_data, const unsigned int version)
+    {
+        if(u-&gt;version == version)
+        {
+            u-&gt;data = new_data;
+        }
+        else
+        {
+            init_node(u, new node(new_data, version));
+        }
+    }
+    void erase_outdegree(node *u, const unsigned int version)
+    {
+        for(unsigned int i = 0; i &lt; OUTDEGREE; ++i)
+        {
+            node *v = current_base_pointer(u, i).to;
+            if(v)
+                erase_link(u = toLive(u), i, v, version);
+        }
+    }
+    void erase_indegree(node *u, const unsigned int version)
+    {
+        for(unsigned int i = 0; i &lt; INDEGREE; ++i){
+            pointer in = u-&gt;inverse[i];
+            if(in.isExist())
+                erase_link(in.to, in.inverse_index, u = toLive(u), version);
+        }
+    }
+    void update_inverse_pointer(node *u, const unsigned int version)
+    {
+        node *newu = toLive(u);
+        for(unsigned int i = 0; i &lt; INDEGREE; ++i)
+        {
+            pointer inverse_pointer = u-&gt;inverse[i];
+            if(inverse_pointer.isExist())
+                update_link(inverse_pointer.to, inverse_pointer.inverse_index, newu, version, INSERT);
+        }
+    }
+    void finish_update(const unsigned int version)
+    {
+        while(!copied_nodes.empty())
+        {
+            node *u = copied_nodes.front();
+            copied_nodes.pop();
+            update_inverse_pointer(u, version);
+        }
+    }
+    node *_forward(const node *u, const unsigned int out_index, const unsigned int version) const
+    {
+        node *res = u-&gt;original[out_index].to;
+        for(const info&amp; value : u-&gt;extra[out_index]){
+            if(value.detail.version &lt;= version)
+            {
+                if(value.change == INSERT)
+                {
+                    res = value.detail.to;
+                }
+                else
+                {
+                    res = nullptr;
+                }
+                break;
+            }
+        }
+        return res;
+    }
+public:
+    PartialPersistentLinkedDataStructure(){}
+    // u の out_index 番目に v を指す link を追加(u, v は最新版(isLive) であることを仮定)
+    void insert_link(node* const u, const unsigned int out_index,
+        node* const v, const unsigned int version)
+    {
+        assert(u-&gt;isLive() &amp;&amp; v-&gt;isLive());
+        update_link(u, out_index, v, version, INSERT);
+        finish_update(version);
+    }
+    // u の out_index 番目の v を指す link を削除(u, v は最新版(isLive) であることを仮定)
+    void erase_link(node* const u, const unsigned int out_index,
+        node* const v, const unsigned int version)
+    {
+        assert(u-&gt;isLive() &amp;&amp; v-&gt;isLive());
+        update_link(u, out_index, v, version, ERASE);
+        finish_update(version);
+    }
+    // u の データを new_data に更新(u は最新版(isLive) であることを仮定)
+    void update_data(node* const u, const DataType new_data, const unsigned int version)
+    {
+        assert(u-&gt;isLive());
+        _update_data(u, new_data, version);
+        finish_update(version);
+    }
+    // データ _data を持つノードを挿入
+    node *insert_node(const DataType _data, const unsigned int version) const
+    {
+        return new node(_data, version);
+    }
+    // 正確には u に入る辺, 出る辺をすべて削除
+    void erase_node(node* const u, const unsigned int version)
+    {
+        erase_outdegree(u, version);
+        erase_indegree(u, version);
+    }
+    // バージョン version の更新後における u の out_index 番目の link 先の node
+    node *forward(const node *u, const unsigned int out_index, const unsigned int version) const
+    {
+        return _forward(u, out_index, version);
+    }
+    // u を最新のバージョンのノードにする.
+    static node *toLive(node *u)
+    {
+        while(u-&gt;copy_pointer)
+        {
+            u = u-&gt;copy_pointer;
+        }
+        return u;
+    }
+};
+</pre>
+<h3>verify 用の問題</h3>
+<p>
+verify していません(verify 問題を知らない)
+</p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>
