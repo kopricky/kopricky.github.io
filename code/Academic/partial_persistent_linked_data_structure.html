@@ -41,7 +41,7 @@
 <h2>Partial Persistent Linked Data Structure</h2>
 <h3>コードについての説明</h3>
 <p>
-ノードとリンクからなるデータ構造(Linked Data Structure) を部分永続化(partial persistent) する手法. <br>
+ノードとリンクからなるデータ構造(Linked Data Structure) を部分永続化(partial persistent) する手法. これを単体で動かすのではなく, 通常の永続でない(ephemeral)データ構造に重ねる形で用いる.<br>
 Linked Data Structure とはノードと 2 つのノードをつなぐリンク(有向辺) からなり, 各ノードから出るリンクの数(OUTDEGREE) は定数であるものとする. また部分永続データ構造とは過去のすべてのバージョンの read および現在のバージョンの update を行うことできるデータ構造のことを言う(過去のバージョンを参照できるというところが普通のデータ構造と異なる). <br>
 Linked Data Structure のクラスのうち各ノードに入るリンクの数(INDEGREE) が定数となるような構造に限定するとそのような構造の部分永続化を効率良く行うことができ, 以下はその実装である. segree や binary search tree などを個別に永続化することがよくあるがこれはそのような永続化を包括的に扱うことができる. <br>
 ここで update はリンクの insert, erase, ノードの insert, erase, ノードの持つデータの変更を考える. このとき時間計算量および空間計算量は amortized O(1) per update が成り立つ. <br>
