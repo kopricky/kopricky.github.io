@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>Runge Kutta</h2>
+<h3>コードについての説明</h3>
+<p>
+微分方程式を数値的に解く手法. 正確には時間発展する未知の関数 y(t) について 1 次の微分方程式 dy / dt = f(t, y) および初期値 y(t_0) = y_0 が与えられているときに y(t) を求める手法である. ここで解の存在および一意性を保証したいので f(t, y) のリプシッツ連続性は仮定しておく. <br>
+ここで最もよく使われる 4 次のルンゲクッタ法について結論から言うと i ステップ目の更新において
+</p>
+<div style="text-align:center;">
+<img src="./texclip20190806035540.png" height="75" width="225">
+</div>
+<p>
+として、 <br>
+</p>
+<div style="text-align:center;">
+<img src="./texclip20190806040046.png" height="100" width="420">
+</div>
+<p>
+のように更新すると良い(h は刻み幅である). <br>
+オイラー法と違い、 接線の傾きである k_1 だけでなく k_2, k_3, k_4 を合わせて計算し, 加重平均を取ることでより正確に更新を行っている.
+このときテイラー展開を行ったとときの 4 次の項までが一致していることが頑張って計算すると分かり(正直に言うと私はしていないです), 1 ステップでの誤差は刻み幅 h について O(h^5) とオイラー法の O(h^2) と比べて誤差に強いと言える. 全体での誤差はステップ数が O(h^(-1)) なので O(h^4) である. <br>
+最後に適当な例として dy / dt = y cos (t), 初期値 t_0 = 0, y_0 = 1, 刻み幅 h = 0.5, ステップ数 n = 20 とした場合のオイラー法, ルンゲクッタ法, exact な値(y = exp(sin(x))) の関係をグラフに表したものを以下に示す.
+</p>
+<div style="text-align:center;">
+<img src="./runge-kutta.png" height="200" width="700">
+</div>
+<p>
+この例からはルンゲクッタ法の近似が良く, オイラー法の近似が悪いことが分かる. <br>
+大学での授業を参考に実装しました.
+</p>
+<p>
+(関数)<br>
+runge-kutta(t0, y0, h, n): 引数は初期値 (t0, y0), 刻み幅 h, ステップ数 n で返り値は長さ n+1 の (t_i, y_i) の vector.<br>
+</p>
+<p>
+時間計算量: O(n * (1 回の f の計算量))
+</p>
+<h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
+<pre class="prettyprint linenums">
+double f(double t, double y)
+{
+    return y * cos(t);
+}
+
+pair&lt;double, double&gt; proceed(double t, double y, double h)
+{
+    double k1 = f(t, y);
+    double k2 = f(t + h / 2, y + h / 2 * k1);
+    double k3 = f(t + h / 2, y + h / 2 * k2);
+    double k4 = f(t + h, y + h * k3);
+    return make_pair(t + h, y + h * (k1 + 2 * (k2 + k3) + k4) / 6);
+}
+
+vector&lt;pair&lt;double, double&gt; &gt; runge_kutta(double t0, double y0, double h, double n)
+{
+    vector&lt;pair&lt;double, double&gt; &gt; result(n + 1);
+    result[0] = {t0, y0};
+    for(int i = 1; i &lt;= n; ++i){
+        result[i] = proceed(result[i-1].first, result[i-1].second, h);
+    }
+    return result;
+}
+</pre>
+<h3>verify 用の問題</h3>
+<p>
+verify していません(verify 問題を知らない)
+</p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>
