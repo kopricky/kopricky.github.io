@@ -90,7 +90,8 @@ public:
         vector&lt;int&gt; ord(sz);
         iota(ord.begin(), ord.end(), 0);
         sort(ord.begin(), ord.end(), [&amp;](int a, int b){
-            return (left[a] / w == left[b] / w) ? (right[a] &lt; right[b]) : (left[a] &lt; left[b]);
+            const int c = left[a] / w, d = left[b] / w;
+            return (c == d) ? ((c &amp; 1) ? (right[a] &lt; right[b]) : (right[b] &lt; right[a])) : (c &lt; d);
         });
         ans.resize(sz);
         for(int i = 0; i &lt; sz; i++){
@@ -123,7 +124,7 @@ void Mo::del(int id)
 </pre>
 <h3>verify 用の問題</h3>
 <p>Atcoder : <a href="https://beta.atcoder.jp/contests/dwacon2017-honsen/tasks/dwango2017final_b">ニワンゴくんの約数</a>
-  <a href="https://beta.atcoder.jp/contests/dwacon2017-honsen/submissions/3305194">提出コード</a> (愚直なので TL が厳しめ)</p>
+  <a href="https://atcoder.jp/contests/dwacon2017-honsen/submissions/6753031">提出コード</a> (愚直なので TL が厳しめ)</p>
 </section>
 
 </div>
