@@ -61,39 +61,37 @@ solve(s,t,f) : s から t へ流量 f 流すのにかかる最小費用<br>
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">
-template&lt;typename T&gt; class min_cost_flow {
+template&lt;typename CapType, typename CostType&gt; class MinCostFlow {
 public:
+    using Cat = CapType;
+    using Cot = CostType;
+    using pti = pair&lt;Cot, int&gt;;
     struct edge {
-        int to,cap;
-        T cost;
-        int rev;
+        int to; Cat cap; Cot cost; int rev;
     };
-    using pti = pair&lt;T,int&gt;;
-    int V;
-    T inf;
+    const int V;
+    const Cot inf;
     vector&lt;vector&lt;edge&gt; &gt; G;
-    vector&lt;T&gt; h,dist;
-    vector&lt;int&gt; prevv,preve;
-    min_cost_flow(int node_size) : V(node_size), inf(numeric_limits&lt;T&gt;::max() / 4),
+    vector&lt;Cot&gt; h, dist;
+    vector&lt;int&gt; prevv, preve;
+    MinCostFlow(int node_size) : V(node_size), inf(numeric_limits&lt;Cot&gt;::max() / 4),
         G(V), h(V, 0), dist(V), prevv(V), preve(V){}
-    void add_edge(int from, int to, int cap, T cost){
+    void add_edge(int from, int to, Cat cap, Cot cost){
         G[from].push_back((edge){to, cap, cost, (int)G[to].size()});
         G[to].push_back((edge){from, 0, -cost, (int)G[from].size() - 1});
     }
-    T solve(int s,int t,int f){
-        T res = 0;
+    Cot solve(int s, int t, Cat f){
+        Cot res = 0;
         while(f &gt; 0){
             priority_queue&lt;pti,vector&lt;pti&gt;,greater&lt;pti&gt; &gt; que;
-            fill(dist.begin(),dist.end(),inf);
+            fill(dist.begin(), dist.end(), inf);
             dist[s] = 0;
-            que.push(pti(0,s));
+            que.push(pti(0, s));
             while(!que.empty()){
                 pti p = que.top();
                 que.pop();
                 int v = p.second;
-                if(dist[v] &lt; p.first){
-                    continue;
-                }
+                if(dist[v] &lt; p.first) continue;
                 for(int i = 0; i &lt; (int)G[v].size(); i++){
                     edge&amp; e = G[v][i];
                     if(e.cap &gt; 0 &amp;&amp; dist[e.to] &gt; dist[v] + e.cost + h[v] - h[e.to]){
@@ -103,9 +101,7 @@ public:
                     }
                 }
             }
-            if(dist[t] == inf){
-                return -1;
-            }
+            if(dist[t] == inf) return -1;
             for(int i = 0; i &lt; V; i++){
                 h[i] += dist[i];
             }
@@ -115,7 +111,7 @@ public:
             }
             f -= d;
             res += d * h[t];
-            for(int v = t; v != s;v = prevv[v]){
+            for(int v = t; v != s; v = prevv[v]){
                 edge&amp; e = G[prevv[v]][preve[v]];
                 e.cap -= d;
                 G[v][e.rev].cap += d;
@@ -127,7 +123,7 @@ public:
 </pre>
 <h3>verify 用の問題</h3>
 <p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_6_B">Minimum Cost Flow</a>
-  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3211439#1">提出コード</a></p>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3797515#1">提出コード</a></p>
 </section>
 
 </div>

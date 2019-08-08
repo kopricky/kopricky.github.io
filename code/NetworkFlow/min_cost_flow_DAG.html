@@ -56,7 +56,7 @@ solve(s,t,f) : s から t へ流量 f 流すのにかかる最小費用<br>
 <input type="checkbox" id="label" class="csscode" />
 <label for="label"></label>
 <pre class="prettyprint linenums">
-template&lt;typename CapType, typename CostType&gt; class min_cost_flow_DAG {
+template&lt;typename CapType, typename CostType&gt; class MinCostFlowDAG {
 public:
     using Cat = CapType;
     using Cot = CostType;
@@ -64,12 +64,12 @@ public:
     struct edge {
         int to; Cat cap; Cot cost; int rev; bool is_for;
     };
-    int V;
-    Cot inf;
+    const int V;
+    const Cot inf;
     vector&lt;vector&lt;edge&gt; &gt; G;
-    vector&lt;CostType&gt; h, dist;
+    vector&lt;Cot&gt; h, dist;
     vector&lt;int&gt; deg, ord, prevv, preve;
-    min_cost_flow_DAG(int node_size) : V(node_size), inf(numeric_limits&lt;Cot&gt;::max() / 4),
+    MinCostFlowDAG(int node_size) : V(node_size), inf(numeric_limits&lt;Cot&gt;::max() / 4),
         G(V), h(V, inf), dist(V), deg(V, 0), prevv(V), preve(V){}
     void add_edge(int from, int to, Cat cap, Cot cost){
         G[from].push_back((edge){to, cap, cost, (int)G[to].size(), true});
@@ -78,22 +78,22 @@ public:
     }
     bool tsort(){
         queue&lt;int&gt; que;
-        for(int i = 0; i &lt; V; i++){
-            if(deg[i] == 0){
-                que.push(i);
-            }
-        }
-        while(!que.empty()){
-            int p = que.front();
-            que.pop();
-            ord.push_back(p);
-            for(auto&amp; e : G[p]){
-                if(e.is_for &amp;&amp; --deg[e.to] == 0){
-                    que.push(e.to);
-                }
-            }
-        }
-        return (*max_element(deg.begin(),deg.end()) == 0);
+		for(int i = 0; i &lt; V; i++){
+			if(deg[i] == 0){
+				que.push(i);
+			}
+		}
+		while(!que.empty()){
+			int p = que.front();
+			que.pop();
+			ord.push_back(p);
+			for(auto&amp; e : G[p]){
+				if(e.is_for &amp;&amp; --deg[e.to] == 0){
+					que.push(e.to);
+				}
+			}
+		}
+		return (*max_element(deg.begin(),deg.end()) == 0);
     }
     void calc_potential(int s){
         h[s] = 0;
@@ -154,6 +154,7 @@ public:
         return res;
     }
 };
+
 </pre>
 <h3>verify 用の問題</h3>
 <p>Atcoder : <a href="https://atcoder.jp/contests/tdpc/tasks/tdpc_graph">グラフ</a>
