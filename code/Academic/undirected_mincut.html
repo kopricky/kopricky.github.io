@@ -49,8 +49,8 @@
 最後に上記の計算量を達成するため最大隣接順序の計算にフィボナッチヒープを用いているが, 実はグラフを隣接行列表現で持つことで, 縮約に伴うグラフの更新の部分をサボっているので結局計算量的には少し悪い O(n^3) になっています...<br>
 (補足) <br>
 無向グラフの大域最小容量カットを求めるアルゴリズムは近年でもよく研究されていて, 重みなしの場合は λ をグラフの連結度としたときに計算量 O(m + λ^2 n) (Gabow) の deterministic algorithm や
-他にも deterministic algorithm として O(m log^12 n) (Kawarabayashi, Thorup) (初の nearly linear time), O(m log^2 n log log^2 n) (Henzinger, Rao, Wang) (⇒ 後に expander decomposition へ応用) などがある. 重みつきの場合は randomized algorithm として
-O(m log^3 n) (Karger) がある.
+他にも deterministic algorithm として O(m log^12 n) (Kawarabayashi, Thorup 2014) (初の nearly linear time), O(m log^2 n log log^2 n) (Henzinger, Rao, Wang 2017) (⇒ 後に expander decomposition へ応用) などがある. 重みつきの場合は randomized algorithm として
+O(m log^3 n) (Karger 2000) がある.
 </p>
 <p>
 時間計算量: O(n^3) (ちゃんとやれば O(mn + n^2log(n)))
