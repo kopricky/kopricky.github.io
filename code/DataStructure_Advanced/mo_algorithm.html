@@ -42,7 +42,7 @@
 <h3>コードについての説明</h3>
 <p>
 Segment Tree ではうまく処理できない(2 つの範囲の結果を結合することが難しい)ような範囲に関するクエリで, オフラインかつ今の範囲を 1 つ伸ばしたり, 1 つ縮めたりという操作は簡単にできるという場合に用いることのできる手法. <br>
-配列の長さ n を sqrt(n) 個のブロックに分け, すべてのクエリをその範囲の左端に注目して対応するブロックに振り分ける(各ブロック内では右端が昇順または降順になるようにクエリを並び替える). <br>
+配列の長さ n を sqrt(n) 個のブロックに分け, すべてのクエリをその範囲の左端に注目して対応するブロックに振り分ける(各ブロック内では右端が昇順(偶数ブロック)または降順(奇数ブロック)になるようにクエリを並び替える). <br>
 そのようにクエリを並び替えてあとは順番にクエリを伸縮させながら処理していくと, 結局範囲の伸縮の回数が O((n+q)sqrt(n)) 回で抑えられるという寸法. <br>
 <a href="https://ei1333.hateblo.jp/entry/2017/09/11/211011">こちら</a> を参考に実装しました.
 </p>
@@ -64,7 +64,6 @@ add(), del(): 一回の範囲の縮小の際に行う計算(クエリの内容�
 // add,del を変更していろいろなクエリに対応する
 // 以下は区間内の数の種類数についてのクエリが飛んでくる場合
 
-
 //現在の状態および値
 const int MAX_VAL = 30000;
 int a[MAX_VAL]; //要素
@@ -74,15 +73,15 @@ int res;        //区間内の種類の数
 class Mo{
 private:
     vector&lt;int&gt; left, right;
-    const int w;
+    const int width;
     void add(const int id);
     void del(const int id);
 
 public:
     vector&lt;int&gt; ans;
 
-    Mo(const int n) : w((int)sqrt(n)){}
-    //クエリ[l, r)
+    Mo(const int n) : width((int)sqrt(n)){}
+    //クエリ[l,r)
     void insert(const int l, const int r){
         left.push_back(l), right.push_back(r);
     }
@@ -92,12 +91,11 @@ public:
         vector&lt;int&gt; ord(sz);
         iota(ord.begin(), ord.end(), 0);
         sort(ord.begin(), ord.end(), [&amp;](const int a, const int b){
-            const int c = left[a] / w, d = left[b] / w;
-            return (c == d) ? ((c &amp; 1) ? (right[a] &lt; right[b]) : (right[b] &lt; right[a])) : (c &lt; d);
+            const int c = left[a] / width, d = left[b] / width;
+            return (c == d) ? ((c &amp; 1) ? (right[b] &lt; right[a]) : (right[a] &lt; right[b])) : (c &lt; d);
         });
         ans.resize(sz);
-        for(int i = 0; i &lt; sz; i++){
-            const int id = ord[i];  //order:クエリのsort後のorder→元のorder
+        for(const int id : ord){
             while(nl &gt; left[id]) add(--nl);
             while(nr &lt; right[id]) add(nr++);  //add
             while(nl &lt; left[id]) del(nl++);
