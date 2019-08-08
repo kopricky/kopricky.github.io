@@ -50,7 +50,7 @@ Minimum Vertex Cover の FPT アルゴリズムの実装などでこの問題が
 そのため Fibonacci Heap の実装の際に起きた異なる list のイテレーター同士を対応付けないといけない問題もこの自作コンテナを用いて(添字ベースで)直観的に行うことができる. また for 文の中で要素の削除などをしても問題なく動作する.<br>
 使い方は基本的には決まった台集合をコンストラクト時に vector の配列として渡してやる方法がやりやすい(添字と各要素の対応は常に不変である). <br>
 自作イテレーター(bidirectional iterator) によって for_each や max_element などの種々のアルゴリズムがそのまま使用可能である(いかんせん自作なので作りが甘く変な使い方をすると stl とは異なるような挙動を示すかもしれない). <br>
-(追記) C++17 から std::iterator を継承して自作イテレータを構築するのが非推奨化されているので書き直す必要あり.
+<strike> (追記) C++17 から std::iterator を継承して自作イテレータを構築するのが非推奨化されているので書き直す必要あり. </strike> (修正済み)
 </p>
 <p>
 
@@ -135,14 +135,15 @@ public:
 };
 
 template&lt;typename T&gt;
-class ListIterator : public std::iterator&lt;bidirectional_iterator_tag, T, ptrdiff_t, T*, T&amp;&gt;{
+class ListIterator {
 private:
     friend List&lt;T&gt;;
     typename List&lt;T&gt;::block *ls_ptr;
-    using base = std::iterator&lt;bidirectional_iterator_tag, T, ptrdiff_t, T*, T&amp;&gt;;
-    using value_type = typename base::value_type;
-    using pointer = typename base::pointer;
-    using reference = typename base::reference;
+    using iterator_category = std::bidirectional_iterator_tag;
+    using value_type = T;
+    using difference_type = T;
+    using pointer = T*;
+    using reference = T&amp;;
 
 private:
     ListIterator(typename List&lt;T&gt;::block *ls) : ls_ptr(ls){}

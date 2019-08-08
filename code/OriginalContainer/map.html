@@ -44,7 +44,7 @@
 Splay Tree ベースの map(連想コンテナ) の実装. stl の std::map は Red Black Tree をベースとして書かれており, 検索, 挿入, 削除などにかかる最悪計算量が O(log n) という強みを持っている. <br>
 一方 <a href="../BinarySearchTree/splay_tree.html">Splay Tree</a> はならし計算量で O(log n) であるもののクエリ列の確率分布に対して計算量が最適になるように adjust するため, 分布によっては o(log n) になりうるという強みがある(Red Black Tree の場合の計算量は Ω(log n)). <br>
 以下の実装では std:map ライクな実装をしており, 一部の関数を除き std::map と同様に動作する(同じキーの要素を挿入しても問題ないが std::multimap ほどの仕様にはなっていない). <br>
-(追記) C++17 から std::iterator を継承して自作イテレータを構築するのが非推奨化されているので書き直す必要あり.
+<strike> (追記) C++17 から std::iterator を継承して自作イテレータを構築するのが非推奨化されているので書き直す必要あり. </strike> (修正済み)
 </p>
 <p>
 時間計算量: 各クエリ O(logn) (ならし計算量)
@@ -233,17 +233,15 @@ public:
 };
 
 template&lt;typename _Key, typename _Tp&gt;
-class MapIterator
-    : public std::iterator&lt;bidirectional_iterator_tag, pair&lt;const _Key, _Tp&gt;,
-        ptrdiff_t, pair&lt;const _Key, _Tp&gt;*, pair&lt;const _Key, _Tp&gt;&amp;&gt; {
+class MapIterator {
 private:
     friend Map&lt;_Key, _Tp&gt;;
     typename Map&lt;_Key, _Tp&gt;::node *map_ptr;
-    using base = std::iterator&lt;bidirectional_iterator_tag, pair&lt;const _Key, _Tp&gt;,
-        ptrdiff_t, pair&lt;const _Key, _Tp&gt;*, pair&lt;const _Key, _Tp&gt;&amp;&gt;;
-    using value_type = typename base::value_type;
-    using pointer = typename base::pointer;
-    using reference = typename base::reference;
+    using iterator_category = std::bidirectional_iterator_tag;
+    using value_type = pair&lt;const _Key, _Tp&gt;;
+    using difference_type = pair&lt;const _Key, _Tp&gt;;
+    using pointer = pair&lt;const _Key, _Tp&gt;*;
+    using reference = pair&lt;const _Key, _Tp&gt;&amp;;
 
 private:
     MapIterator(typename Map&lt;_Key, _Tp&gt;::node *mp) noexcept : map_ptr(mp){}
