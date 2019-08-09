@@ -43,8 +43,9 @@ class _Key, class _Tp<!DOCTYPE html>
 <p>
 Splay Tree ベースの map(連想コンテナ) の実装. stl の std::map は Red Black Tree をベースとして書かれており, 検索, 挿入, 削除などにかかる最悪計算量が O(log n) という強みを持っている. <br>
 一方 <a href="../BinarySearchTree/splay_tree.html">Splay Tree</a> はならし計算量で O(log n) であるもののクエリ列の確率分布に対して計算量が最適になるように adjust するため, 分布によっては o(log n) になりうるという強みがある(Red Black Tree の場合の計算量は Ω(log n)). <br>
-以下の実装では std:map ライクな実装をしており, ある程度 std::map と同様に動作する(同じキーの要素を挿入しても問題ないが std::multimap ほどの仕様にはなっていない). <br>
-<strike> (追記) C++17 から std::iterator を継承して自作イテレータを構築するのが非推奨化されているので書き直す必要あり. </strike> (修正済み)
+以下の実装では std:map ライクな実装をしており, ある程度 std::map と同様に動作する. ムーブセマンティクスなどは実装していない. 同じキーの要素を挿入しても問題ないが erase(key) としてもキーを key とする要素のうち 1 つしか削除しないなど multimap と挙動が異なるのであまりおすすめはしない.<br>
+実装中でデストラクタなどをコメントアウトしてメモリ解放にかかる時間を節約しているが行儀が悪いのでまあ外してください(ただそれなりに速度変わる). <br>
+<strike> (追記) C++17 から std::iterator を継承して自作イテレータを構築するのが非推奨化されているので書き直す必要あり. </strike> (修正済み) <br>
 </p>
 <p>
 時間計算量: 各クエリ O(logn) (ならし計算量)
@@ -62,8 +63,8 @@ private:
     struct node {
         pair&lt;const _Key, _Tp&gt; data;
         node *_M_left, *_M_right, *_M_parent;
-        node(const _Key _key, const _Tp _value) noexcept
-         : data(_key, _value), _M_left(nullptr), _M_right(nullptr), _M_parent(nullptr){}
+        node(const _Key&amp; _key, const _Tp&amp; _value) noexcept
+            : data(_key, _value), _M_left(nullptr), _M_right(nullptr), _M_parent(nullptr){}
         inline bool isRoot() const noexcept { return !_M_parent; }
         void rotate(const bool right) noexcept {
             node *p = _M_parent, *g = p-&gt;_M_parent;
@@ -82,6 +83,9 @@ private:
     friend MapIterator&lt;_Key, _Tp&gt;;
     node *root, *_M_header, *start;
     size_t _M_node_count;
+    inline void confirm_header(){
+        if(!_M_header) root = _M_header = start = new node(_Key(), _Tp());
+    }
     node *splay(node *u) noexcept {
         while(!(u-&gt;isRoot())){
             node *p = u-&gt;_M_parent, *gp = p-&gt;_M_parent;
@@ -126,10 +130,11 @@ private:
         return ver1 ? (ver1-&gt;_M_parent = ver2) : (start = ver2);
     }
     node *_find(const _Key&amp; _key, bool push=false) noexcept {
+        confirm_header();
         node *cur = nullptr, *nx = root;
         do {
             cur = nx;
-            if(cur == _M_header || cur-&gt;data.first &gt; _key) nx = cur-&gt;_M_left;
+            if(cur-&gt;data.first &gt; _key) nx = cur-&gt;_M_left;
             else if(cur-&gt;data.first &lt; _key) nx = cur-&gt;_M_right;
             else return splay(cur);
         }while(nx);
@@ -146,6 +151,7 @@ private:
         }
     }
     node *_insert(node *ver) noexcept {
+        confirm_header();
         node *cur = nullptr, *nx = root;
         do {
             cur = nx;
@@ -162,11 +168,12 @@ private:
         }
     }
     node *_erase(node *root_ver){
+        confirm_header();
         assert(root_ver != _M_header);
         if(root_ver-&gt;_M_left) root_ver-&gt;_M_left-&gt;_M_parent = nullptr;
         if(root_ver-&gt;_M_right) root_ver-&gt;_M_right-&gt;_M_parent = nullptr;
         node *res = join(root_ver-&gt;_M_left, root_ver-&gt;_M_right, root_ver);
-        delete root_ver;
+        // delete root_ver;
         return _M_node_count--, res;
     }
     node *_erase(const _Key&amp; _key){
@@ -174,6 +181,7 @@ private:
         return _erase(ver);
     }
     node *_lower_bound(const _Key&amp; _key) noexcept {
+        confirm_header();
         node *cur = nullptr, *nx = root, *res = nullptr;
         do {
             cur = nx;
@@ -187,6 +195,7 @@ private:
         return res ? res : _M_header;
     }
     node *_upper_bound(const _Key&amp; _key) noexcept {
+        confirm_header();
         node *cur = nullptr, *nx = root, *res = nullptr;
         do {
             cur = nx;
@@ -206,8 +215,8 @@ private:
     }
 
 public:
-    Map() noexcept : _M_node_count(0){ root = _M_header = start = new node(_Key(), _Tp()); }
-    ~Map() noexcept { clear_dfs(root); }
+    Map() noexcept : root(nullptr), _M_header(nullptr), start(nullptr), _M_node_count(0){}
+    // ~Map() noexcept { if(root) clear_dfs(root); }
     friend ostream&amp; operator&lt;&lt; (ostream&amp; os, Map&amp; mp) noexcept {
         for(auto&amp; val : mp) os &lt;&lt; '{' &lt;&lt; val.first &lt;&lt; ',' &lt;&lt; val.second &lt;&lt; &quot;} &quot;;
         return os;
@@ -220,8 +229,8 @@ public:
     }
     size_t size() const noexcept { return _M_node_count; }
     bool empty() const noexcept { return size() == 0; }
-    iterator begin() const noexcept { return iterator(start); }
-    iterator end() const noexcept { return iterator(_M_header); }
+    iterator begin() noexcept { return confirm_header(), iterator(start); }
+    iterator end() noexcept { return confirm_header(), iterator(_M_header); }
     void clear() noexcept { clear_dfs(root), _M_node_count = 0, root = _M_header = start = new node(_Key(), _Tp()); }
     iterator find(const _Key&amp; _key) noexcept { return iterator(_find(_key)); }
     iterator insert(const _Key&amp; _key, const _Tp&amp; _value) noexcept
@@ -231,39 +240,10 @@ public:
     iterator lower_bound(const _Key&amp; _key) noexcept { return iterator(_lower_bound(_key)); }
     iterator upper_bound(const _Key&amp; _key) noexcept { return iterator(_upper_bound(_key)); }
 };
-
-template&lt;class _Key, class _Tp&gt;
-class MapIterator {
-private:
-    friend Map&lt;_Key, _Tp&gt;;
-    typename Map&lt;_Key, _Tp&gt;::node *node_ptr;
-    using iterator_category = std::bidirectional_iterator_tag;
-    using value_type = pair&lt;const _Key, _Tp&gt;;
-    using difference_type = std::ptrdiff_t;
-    using pointer = pair&lt;const _Key, _Tp&gt;*;
-    using reference = pair&lt;const _Key, _Tp&gt;&amp;;
-
-private:
-    MapIterator(typename Map&lt;_Key, _Tp&gt;::node *mp) noexcept : node_ptr(mp){}
-
-public:
-    MapIterator() noexcept : node_ptr(){}
-    MapIterator(const MapIterator&amp; itr) noexcept : node_ptr(itr.node_ptr){}
-    MapIterator&amp; operator=(const MapIterator&amp; itr) &amp; { return node_ptr = itr.node_ptr, *this; }
-    MapIterator&amp; operator=(const MapIterator&amp;&amp; itr) &amp; noexcept { return node_ptr = itr.node_ptr, *this; }
-    reference operator*() const { return node_ptr-&gt;data; }
-    pointer operator-&gt;() const { return &amp;(node_ptr-&gt;data); }
-    MapIterator&amp; operator++() noexcept { return node_ptr = Map&lt;_Key, _Tp&gt;::increment(node_ptr), *this; }
-    MapIterator operator++(int) noexcept { return MapIterator(Map&lt;_Key, _Tp&gt;::increment(this-&gt;node_ptr)); }
-    MapIterator&amp; operator--() noexcept { return node_ptr = Map&lt;_Key, _Tp&gt;::decrement(node_ptr), *this; }
-    MapIterator operator--(int) noexcept { return MapIterator(Map&lt;_Key, _Tp&gt;::decrement(this-&gt;node_ptr)); }
-    bool operator==(const MapIterator&amp; itr) const noexcept { return !(*this != itr); };
-    bool operator!=(const MapIterator&amp; itr) const noexcept { return node_ptr != itr.node_ptr; }
-};
 </pre>
 <h3>verify 用の問題</h3>
 <p>Codeforces : <a href="https://codeforces.com/problemset/problem/505/C">Mr. Kitayuta, the Treasure Hunter</a>
-  <a href="https://codeforces.com/contest/506/submission/58476436">提出コード</a>(非想定解で std::map だと TLE するが splay 木を用いた自作 map だと通る)</p>
+  <a href="https://codeforces.com/contest/506/submission/58501502">提出コード</a>(非想定解で std::map だと TLE するが splay 木を用いた自作 map だと通る)</p>
 </section>
 
 </div>
