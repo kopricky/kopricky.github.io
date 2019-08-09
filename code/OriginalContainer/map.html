@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+class _Key, class _Tp<!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -43,7 +43,7 @@
 <p>
 Splay Tree ベースの map(連想コンテナ) の実装. stl の std::map は Red Black Tree をベースとして書かれており, 検索, 挿入, 削除などにかかる最悪計算量が O(log n) という強みを持っている. <br>
 一方 <a href="../BinarySearchTree/splay_tree.html">Splay Tree</a> はならし計算量で O(log n) であるもののクエリ列の確率分布に対して計算量が最適になるように adjust するため, 分布によっては o(log n) になりうるという強みがある(Red Black Tree の場合の計算量は Ω(log n)). <br>
-以下の実装では std:map ライクな実装をしており, 一部の関数を除き std::map と同様に動作する(同じキーの要素を挿入しても問題ないが std::multimap ほどの仕様にはなっていない). <br>
+以下の実装では std:map ライクな実装をしており, ある程度 std::map と同様に動作する(同じキーの要素を挿入しても問題ないが std::multimap ほどの仕様にはなっていない). <br>
 <strike> (追記) C++17 から std::iterator を継承して自作イテレータを構築するのが非推奨化されているので書き直す必要あり. </strike> (修正済み)
 </p>
 <p>
@@ -54,9 +54,9 @@ Splay Tree ベースの map(連想コンテナ) の実装. stl の std::map は 
 <input type="checkbox" id="label" class="csscode" />
 <label for="label"></label>
 <pre class="prettyprint linenums">
-template&lt;typename _Key, typename _Tp&gt; class MapIterator;
+template&lt;class _Key, class _Tp&gt; class MapIterator;
 
-template&lt;typename _Key, typename _Tp&gt; class Map {
+template&lt;class _Key, class _Tp&gt; class Map {
 private:
     using iterator = MapIterator&lt;_Key, _Tp&gt;;
     struct node {
@@ -227,16 +227,16 @@ public:
     iterator insert(const _Key&amp; _key, const _Tp&amp; _value) noexcept
         { return iterator(_insert(new node(_key, _value))); }
     iterator erase(const _Key&amp; _key){ return iterator(_erase(_key)); }
-    iterator erase(const iterator&amp; itr){ return iterator(_erase(splay(itr.map_ptr))); }
+    iterator erase(const iterator&amp; itr){ return iterator(_erase(splay(itr.node_ptr))); }
     iterator lower_bound(const _Key&amp; _key) noexcept { return iterator(_lower_bound(_key)); }
     iterator upper_bound(const _Key&amp; _key) noexcept { return iterator(_upper_bound(_key)); }
 };
 
-template&lt;typename _Key, typename _Tp&gt;
+template&lt;class _Key, class _Tp&gt;
 class MapIterator {
 private:
     friend Map&lt;_Key, _Tp&gt;;
-    typename Map&lt;_Key, _Tp&gt;::node *map_ptr;
+    typename Map&lt;_Key, _Tp&gt;::node *node_ptr;
     using iterator_category = std::bidirectional_iterator_tag;
     using value_type = pair&lt;const _Key, _Tp&gt;;
     using difference_type = std::ptrdiff_t;
@@ -244,26 +244,26 @@ private:
     using reference = pair&lt;const _Key, _Tp&gt;&amp;;
 
 private:
-    MapIterator(typename Map&lt;_Key, _Tp&gt;::node *mp) noexcept : map_ptr(mp){}
+    MapIterator(typename Map&lt;_Key, _Tp&gt;::node *mp) noexcept : node_ptr(mp){}
 
 public:
-    MapIterator() noexcept : map_ptr(){}
-    MapIterator(const MapIterator&amp; itr) noexcept : map_ptr(itr.map_ptr){}
-    MapIterator&amp; operator=(const MapIterator&amp; itr) &amp; { return map_ptr = itr.map_ptr, *this; }
-    MapIterator&amp; operator=(const MapIterator&amp;&amp; itr) &amp; noexcept { return map_ptr = itr.map_ptr, *this; }
-    reference operator*() const { return map_ptr-&gt;data; }
-    pointer operator-&gt;() const { return &amp;(map_ptr-&gt;data); }
-    MapIterator&amp; operator++() noexcept { return map_ptr = Map&lt;_Key, _Tp&gt;::increment(map_ptr), *this; }
-    MapIterator operator++(int) noexcept { return MapIterator(Map&lt;_Key, _Tp&gt;::increment(this-&gt;map_ptr)); }
-    MapIterator&amp; operator--() noexcept { return map_ptr = Map&lt;_Key, _Tp&gt;::decrement(map_ptr), *this; }
-    MapIterator operator--(int) noexcept { return MapIterator(Map&lt;_Key, _Tp&gt;::decrement(this-&gt;map_ptr)); }
+    MapIterator() noexcept : node_ptr(){}
+    MapIterator(const MapIterator&amp; itr) noexcept : node_ptr(itr.node_ptr){}
+    MapIterator&amp; operator=(const MapIterator&amp; itr) &amp; { return node_ptr = itr.node_ptr, *this; }
+    MapIterator&amp; operator=(const MapIterator&amp;&amp; itr) &amp; noexcept { return node_ptr = itr.node_ptr, *this; }
+    reference operator*() const { return node_ptr-&gt;data; }
+    pointer operator-&gt;() const { return &amp;(node_ptr-&gt;data); }
+    MapIterator&amp; operator++() noexcept { return node_ptr = Map&lt;_Key, _Tp&gt;::increment(node_ptr), *this; }
+    MapIterator operator++(int) noexcept { return MapIterator(Map&lt;_Key, _Tp&gt;::increment(this-&gt;node_ptr)); }
+    MapIterator&amp; operator--() noexcept { return node_ptr = Map&lt;_Key, _Tp&gt;::decrement(node_ptr), *this; }
+    MapIterator operator--(int) noexcept { return MapIterator(Map&lt;_Key, _Tp&gt;::decrement(this-&gt;node_ptr)); }
     bool operator==(const MapIterator&amp; itr) const noexcept { return !(*this != itr); };
-    bool operator!=(const MapIterator&amp; itr) const noexcept { return map_ptr != itr.map_ptr; }
+    bool operator!=(const MapIterator&amp; itr) const noexcept { return node_ptr != itr.node_ptr; }
 };
 </pre>
 <h3>verify 用の問題</h3>
 <p>Codeforces : <a href="https://codeforces.com/problemset/problem/505/C">Mr. Kitayuta, the Treasure Hunter</a>
-  <a href="https://codeforces.com/gym/238854/submission/53787931">提出コード</a>(非想定解で std::map だと TLE するが splay 木を用いた自作 map だと通る)</p>
+  <a href="https://codeforces.com/contest/506/submission/58476436">提出コード</a>(非想定解で std::map だと TLE するが splay 木を用いた自作 map だと通る)</p>
 </section>
 
 </div>

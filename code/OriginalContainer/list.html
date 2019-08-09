@@ -60,25 +60,25 @@ Minimum Vertex Cover の FPT アルゴリズムの実装などでこの問題が
 <input type="checkbox" id="label" class="csscode" />
 <label for="label"></label>
 <pre class="prettyprint linenums">
-template&lt;typename T&gt; class ListIterator;
+template&lt;class C&gt; class ListIterator;
 
-template&lt;typename T&gt;
+template&lt;class C&gt;
 class List {
 public:
-    using iterator = ListIterator&lt;T&gt;;
+    using iterator = ListIterator&lt;C&gt;;
 
 private:
     struct block {
         block *prev, *next;
-        T data;
+        C data;
         block() : prev(this), next(this){}
-        block(T _data) : prev(this), next(this), data(_data){}
+        block(C _data) : prev(this), next(this), data(_data){}
         block(block *_prev, block *_next) : prev(_prev), next(_next){}
     };
     int N;
     size_t sz;
     vector&lt;block&gt; container;
-    friend ListIterator&lt;T&gt;;
+    friend ListIterator&lt;C&gt;;
     // cur を nx の前に挿入
     iterator insert(block* const nx, block* const cur){
         ++sz;
@@ -94,27 +94,27 @@ private:
     }
 
 public:
-    iterator insert(const iterator nx, const iterator cur){ return insert(nx.ls_ptr, cur.ls_ptr); }
-    iterator insert(const iterator nx, int cur_index){ return insert(nx.ls_ptr, &amp;container[cur_index]); }
+    iterator insert(const iterator nx, const iterator cur){ return insert(nx.block_ptr, cur.block_ptr); }
+    iterator insert(const iterator nx, int cur_index){ return insert(nx.block_ptr, &amp;container[cur_index]); }
     iterator insert(int next_index, int cur_index){ return iterator(&amp;container[next_index], &amp;container[cur_index]); }
-    iterator erase(const iterator cur){ return erase(cur.ls_ptr); }
+    iterator erase(const iterator cur){ return erase(cur.block_ptr); }
     iterator erase(int cur_index){ return erase(&amp;container[cur_index]); }
 
 public:
     List() : N(0), sz(0){}
     List(int _N) : N(_N), sz(N), container(_N+1){}
-    List(const vector&lt;T&gt;&amp; _data) : List((int)_data.size()){ build(_data); }
+    List(const vector&lt;C&gt;&amp; _data) : List((int)_data.size()){ build(_data); }
     List(const List&amp; ls) : N(ls.N), sz(ls.sz), container(ls.container){}
-    void build(const vector&lt;T&gt;&amp; _data){
+    void build(const vector&lt;C&gt;&amp; _data){
         for(int i = 0; i &lt;= N; i++){
             container[i].prev = &amp;container[(i+N)%(N+1)];
             container[i].next = &amp;container[(i+1)%(N+1)];
             if(i &lt; N) container[i].data = _data[i];
         }
     }
-    void push_back(const T _data){ ++N, ++sz, container.push_back(_data); }
+    void push_back(const C _data){ ++N, ++sz, container.push_back(_data); }
     void build(){
-        container.push_back(T());
+        container.push_back(C());
         for(int i = 0; i &lt;= N; i++){
             container[i].prev = &amp;container[(i+N)%(N+1)];
             container[i].next = &amp;container[(i+1)%(N+1)];
@@ -124,49 +124,49 @@ public:
         for(auto&amp; val : ls) os &lt;&lt; val &lt;&lt; ' ';
         return os;
     }
-    const T&amp; operator[](size_t index) const { return container[index].data; }
-    T&amp; operator[](size_t index){ return container[index].data; }
+    const C&amp; operator[](size_t index) const { return container[index].data; }
+    C&amp; operator[](size_t index){ return container[index].data; }
     size_t size() const { return sz; }
     bool empty() const { return (size() == 0); }
-    T&amp; front(){ return container[N].next-&gt;data; }
-    T&amp; back(){ return container[N].prev-&gt;data; }
+    C&amp; front(){ return container[N].next-&gt;data; }
+    C&amp; back(){ return container[N].prev-&gt;data; }
     iterator begin(){ return iterator(container[N].next); }
     iterator end(){ return iterator(&amp;container[N]); }
 };
 
-template&lt;typename T&gt;
+template&lt;class C&gt;
 class ListIterator {
 private:
-    friend List&lt;T&gt;;
-    typename List&lt;T&gt;::block *ls_ptr;
+    friend List&lt;C&gt;;
+    typename List&lt;C&gt;::block *block_ptr;
     using iterator_category = std::bidirectional_iterator_tag;
-    using value_type = T;
-    using difference_type = T;
-    using pointer = T*;
-    using reference = T&amp;;
+    using value_type = C;
+    using difference_type = std::ptrdiff_t;
+    using pointer = C*;
+    using reference = C&amp;;
 
 private:
-    ListIterator(typename List&lt;T&gt;::block *ls) : ls_ptr(ls){}
+    ListIterator(typename List&lt;C&gt;::block *ls) : block_ptr(ls){}
 
 public:
     ListIterator(){}
-    ListIterator(const ListIterator&amp; itr) : ls_ptr(itr.ls_ptr){}
-    ListIterator&amp; operator=(const ListIterator&amp; itr) &amp; { return ls_ptr = itr.ls_ptr, *this; }
-    ListIterator&amp; operator=(ListIterator&amp;&amp; itr) &amp; { return ls_ptr = itr.ls_ptr, *this; }
-    reference operator*() const { return ls_ptr-&gt;data; }
-    pointer operator-&gt;() const { return &amp;(ls_ptr-&gt;data); }
-    ListIterator&amp; operator++(){ return ls_ptr = ls_ptr-&gt;next, *this; }
+    ListIterator(const ListIterator&amp; itr) : block_ptr(itr.block_ptr){}
+    ListIterator&amp; operator=(const ListIterator&amp; itr) &amp; { return block_ptr = itr.block_ptr, *this; }
+    ListIterator&amp; operator=(ListIterator&amp;&amp; itr) &amp; { return block_ptr = itr.block_ptr, *this; }
+    reference operator*() const { return block_ptr-&gt;data; }
+    pointer operator-&gt;() const { return &amp;(block_ptr-&gt;data); }
+    ListIterator&amp; operator++(){ return block_ptr = block_ptr-&gt;next, *this; }
     ListIterator operator++(int){
         ListIterator res = *this;
-        return res.ls_ptr = ls_ptr-&gt;next, res;
+        return res.block_ptr = block_ptr-&gt;next, res;
     }
-    ListIterator&amp; operator--(){ return ls_ptr = ls_ptr-&gt;prev, *this; }
+    ListIterator&amp; operator--(){ return block_ptr = block_ptr-&gt;prev, *this; }
     ListIterator operator--(int){
         ListIterator res = *this;
-        return res.ls_ptr = ls_ptr-&gt;prev, res;
+        return res.block_ptr = block_ptr-&gt;prev, res;
     };
     bool operator==(const ListIterator&amp; itr) const { return !(*this != itr); };
-    bool operator!=(const ListIterator&amp; itr) const { return ls_ptr != itr.ls_ptr; }
+    bool operator!=(const ListIterator&amp; itr) const { return block_ptr != itr.block_ptr; }
 };
 </pre>
 <h3>verify 用の問題</h3>

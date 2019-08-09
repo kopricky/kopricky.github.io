@@ -51,8 +51,8 @@ std::pair のハッシュ値はデフォルトで定義されていないため,
 <pre class="prettyprint linenums">
 struct pair_hash {
     template &lt;class T1, class T2&gt;
-    size_t operator() (const pair&lt;T1, T2&gt;&amp; p) const {
-        size_t lhs = hash&lt;T1&gt;()(p.first), rhs = hash&lt;T2&gt;()(p.second);
+    unsigned int operator() (const pair&lt;T1, T2&gt;&amp; p) const {
+        unsigned int lhs = hash&lt;T1&gt;()(p.first), rhs = hash&lt;T2&gt;()(p.second);
         return lhs^(rhs+0x9e3779b9+(lhs&lt;&lt;6)+(lhs&gt;&gt;2));
     }
 };
