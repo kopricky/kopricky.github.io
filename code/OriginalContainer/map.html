@@ -239,7 +239,7 @@ private:
     typename Map&lt;_Key, _Tp&gt;::node *map_ptr;
     using iterator_category = std::bidirectional_iterator_tag;
     using value_type = pair&lt;const _Key, _Tp&gt;;
-    using difference_type = pair&lt;const _Key, _Tp&gt;;
+    using difference_type = std::ptrdiff_t;
     using pointer = pair&lt;const _Key, _Tp&gt;*;
     using reference = pair&lt;const _Key, _Tp&gt;&amp;;
 
