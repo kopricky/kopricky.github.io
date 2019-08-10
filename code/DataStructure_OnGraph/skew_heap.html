@@ -69,7 +69,8 @@ public:
     node&lt;T&gt;* l; node&lt;T&gt;* r; T val;
     node(T t) : l(nullptr), r(nullptr), val(t){}
     friend node* meld(node* a, node* b){
-        if(!a) return b; if(!b) return a;
+        if(!a) return b;
+        if(!b) return a;
         if(a-&gt;val &lt; b-&gt;val) swap(a, b);
         a-&gt;l = meld(a-&gt;l,b);
         swap(a-&gt;l, a-&gt;r);
