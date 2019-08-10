@@ -1,4 +1,4 @@
-class _Key, class _Tp<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -113,17 +113,6 @@ private:
         }
         return ver;
     }
-    static node *decrement(node *ver) noexcept {
-        if(ver-&gt;_M_left){
-            ver = ver-&gt;_M_left;
-            while(ver-&gt;_M_right) ver = ver-&gt;_M_right;
-        }else{
-            node *nx = ver-&gt;_M_parent;
-            while(ver == nx-&gt;_M_left) ver = nx, nx = nx-&gt;_M_parent;
-            ver = nx;
-        }
-        return ver;
-    }
     node *join(node *ver1, node *ver2, const node *ver) noexcept {
         while(ver2-&gt;_M_left) ver2 = ver2-&gt;_M_left;
         splay(ver2)-&gt;_M_left = ver1;
@@ -134,7 +123,7 @@ private:
         node *cur = nullptr, *nx = root;
         do {
             cur = nx;
-            if(cur-&gt;data.first &gt; _key) nx = cur-&gt;_M_left;
+            if(cur == _M_header || cur-&gt;data.first &gt; _key) nx = cur-&gt;_M_left;
             else if(cur-&gt;data.first &lt; _key) nx = cur-&gt;_M_right;
             else return splay(cur);
         }while(nx);
@@ -173,7 +162,7 @@ private:
         if(root_ver-&gt;_M_left) root_ver-&gt;_M_left-&gt;_M_parent = nullptr;
         if(root_ver-&gt;_M_right) root_ver-&gt;_M_right-&gt;_M_parent = nullptr;
         node *res = join(root_ver-&gt;_M_left, root_ver-&gt;_M_right, root_ver);
-        // delete root_ver;
+        delete root_ver;
         return _M_node_count--, res;
     }
     node *_erase(const _Key&amp; _key){
@@ -227,11 +216,11 @@ public:
         if(res == _M_header) __throw_out_of_range(__N(&quot;Map::at&quot;));
         return res-&gt;data.second;
     }
-    void clear() noexcept { clear_dfs(root), _M_node_count = 0, root = _M_header = start = new node(_Key(), _Tp()); }
     size_t size() const noexcept { return _M_node_count; }
     bool empty() const noexcept { return size() == 0; }
     iterator begin() noexcept { return confirm_header(), iterator(start); }
     iterator end() noexcept { return confirm_header(), iterator(_M_header); }
+    void clear() noexcept { clear_dfs(root), _M_node_count = 0, root = _M_header = start = new node(_Key(), _Tp()); }
     iterator find(const _Key&amp; _key) noexcept { return iterator(_find(_key)); }
     iterator insert(const _Key&amp; _key, const _Tp&amp; _value) noexcept
         { return iterator(_insert(new node(_key, _value))); }
@@ -239,6 +228,33 @@ public:
     iterator erase(const iterator&amp; itr){ return iterator(_erase(splay(itr.node_ptr))); }
     iterator lower_bound(const _Key&amp; _key) noexcept { return iterator(_lower_bound(_key)); }
     iterator upper_bound(const _Key&amp; _key) noexcept { return iterator(_upper_bound(_key)); }
+};
+
+template&lt;class _Key, class _Tp&gt;
+class MapIterator {
+private:
+    friend Map&lt;_Key, _Tp&gt;;
+    typename Map&lt;_Key, _Tp&gt;::node *node_ptr;
+    using iterator_category = forward_iterator_tag;
+    using value_type = pair&lt;const _Key, _Tp&gt;;
+    using difference_type = pair&lt;const _Key, _Tp&gt;;
+    using pointer = pair&lt;const _Key, _Tp&gt;*;
+    using reference = pair&lt;const _Key, _Tp&gt;&amp;;
+
+private:
+    MapIterator(typename Map&lt;_Key, _Tp&gt;::node *mp) noexcept : node_ptr(mp){}
+
+public:
+    MapIterator() noexcept : node_ptr(){}
+    MapIterator(const MapIterator&amp; itr) noexcept : node_ptr(itr.node_ptr){}
+    MapIterator&amp; operator=(const MapIterator&amp; itr) &amp; { return node_ptr = itr.node_ptr, *this; }
+    MapIterator&amp; operator=(const MapIterator&amp;&amp; itr) &amp; noexcept { return node_ptr = itr.node_ptr, *this; }
+    reference operator*() const { return node_ptr-&gt;data; }
+    pointer operator-&gt;() const { return &amp;(node_ptr-&gt;data); }
+    MapIterator&amp; operator++() noexcept { return node_ptr = Map&lt;_Key, _Tp&gt;::increment(node_ptr), *this; }
+    MapIterator operator++(int) noexcept { return MapIterator(Map&lt;_Key, _Tp&gt;::increment(this-&gt;node_ptr)); }
+    bool operator==(const MapIterator&amp; itr) const noexcept { return !(*this != itr); };
+    bool operator!=(const MapIterator&amp; itr) const noexcept { return node_ptr != itr.node_ptr; }
 };
 </pre>
 <h3>verify 用の問題</h3>
