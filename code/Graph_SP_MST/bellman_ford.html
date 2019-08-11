@@ -113,13 +113,13 @@ public:
                 if(d[e.from] != inf &amp;&amp; d[e.to] &gt; d[e.from] + e.cost){
                     d[e.to] = d[e.from] + e.cost;
                     if(i &gt;= V-1){
-						d[e.to] = -inf;
-                        if(e.to == t) break;
+                        if(e.to == t) return true;
+                        d[e.to] = -inf;
                     }
                 }
             }
         }
-        return (d[t] == -inf);
+        return false;
     }
 };
 </pre>
@@ -131,6 +131,9 @@ AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_1_B"
 すべての負の閉路の検出を verify <br>
 Atcoder : <a href="https://beta.atcoder.jp/contests/utpc2013/tasks/utpc2013_08">Asteroids2</a>
 <a href="https://beta.atcoder.jp/contests/utpc2013/submissions/2337652">提出コード</a>
+s, t 最短距離が非有界となるかの判定の verify <br>
+Atcoder: <a href="https://atcoder.jp/contests/abc137/tasks/abc137_e">Coins Respawn</a>
+<a href="https://atcoder.jp/contests/abc137/submissions/6848195">提出コード</a>
 </p>
 </section>
 
