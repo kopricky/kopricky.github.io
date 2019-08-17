@@ -48,8 +48,9 @@ restore 操作を辺の重みが小さいものから順に走査することで
 ちなみに online Fully Dynamic だと O(log^4 n), offline だと O(log^2 n) の計算量で MST を管理できるらしい. <br>
 また連結性判定だけでなく連結成分内の頂点全体への演算も F_0 に対する操作で簡単に行えるので計算量は O(log n). 連結成分内の辺全体への演算は F_0 において全ての level の off tree edge を保持しておくようにすればこちらも計算量 O(log n) で行える(はず). <br>
 以下の実装では平衡二分木として splay 木を用いている. 少し高速化を行っているため restore 操作時の処理がわかりにくいと思われる(本当に変更を伝播する必要のあるときのみ伝播するみたいなことをしている). グラフは単純グラフであることを仮定している(多重辺, 自己ループがあっても外部で適切に処理すれば問題ない). <br>
+(注)なおメモリリーク...(そのうちなんとかする) <br>
 (補足) <br>
-<a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.113.7484&rep=rep1&type=pdf">Patrascu, Demaine 2004</a> により動的連結性の operation の lower bound が (amortized) でも Ω(log n) time となることが示された. また更新時間(link, cut) とクエリに応答する時間(connected) の間に存在する trade-off 関係も示している.
+<a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.113.7484&rep=rep1&type=pdf">Patrascu, Demaine 2004</a> により動的連結性の operation の lower bound が (amortized) でも Ω(log n) time となることが示された(これは update もしくは query の少なくとも一方が Ω(log n) time の意味). また更新時間(link, cut) とクエリに応答する時間(connected) の間に存在する trade-off 関係も示している.
 具体的に amortized update time を t_u, amortized query time を t_q とすると <img src="./texclip20190808090008.png" height="100" width="350"> という関係が成り立つ. また trade-off の lower bound を達成するアルゴリズムとして Thrup 2000 や Holm, Lichtenberg, Thorup 2001 がある. <br>
 worst input の構成などのより詳しい内容は論文もしくは <a href="https://courses.csail.mit.edu/6.851/fall17/scribe/L21.pdf">Demaine さんの講義資料</a> が分かりやすかった.
 </p>
@@ -70,17 +71,17 @@ connected(a, b): 頂点 a, b が同じ連結成分内に属するかどうかを
 // 単純グラフと仮定する
 class BSTNode {
 public:
-    int from, to, sz;
-    bool subtree_edge, subofftree_edge;
+    const int from, to;
+    int sz;
+    bool subtree_edge, subofftree_edge, exact_level;
     BSTNode *left, *right, *par;
     unordered_set&lt;int&gt; adjacent;
-    bool exact_level;
     BSTNode(const int _ver) noexcept :
         from(_ver), to(_ver), sz(0), subtree_edge(false), subofftree_edge(false),
-            left(nullptr), right(nullptr), par(nullptr), exact_level(false){}
+            exact_level(false), left(nullptr), right(nullptr), par(nullptr){}
     BSTNode(const int _from, const int _to, const bool _flag) noexcept :
         from(_from), to(_to), sz(0), subtree_edge(false), subofftree_edge(false),
-            left(nullptr), right(nullptr), par(nullptr), exact_level((from &lt; to) &amp;&amp; _flag){}
+            exact_level((from &lt; to) &amp;&amp; _flag), left(nullptr), right(nullptr), par(nullptr){}
     inline bool IsRoot() const noexcept { return !par; }
     inline bool IsVertex() const noexcept { return (from == to); }
     inline void eval() noexcept {
@@ -221,7 +222,9 @@ public:
         if(node1_id &gt; node2_id) swap(node1_id, node2_id);
         auto it = edge_set.find({node1_id, node2_id});
         assert(it != edge_set.end());
-        cut((it-&gt;second).first, (it-&gt;second).second);
+        BSTNode *edge1 = (it-&gt;second).first, *edge2 = (it-&gt;second).second;
+        edge_set.erase(it);
+        cut(edge1, edge2);
     }
     bool IsConnected(const int node1_id, const int node2_id) noexcept {
         if(node1_id == node2_id) return true;
@@ -308,7 +311,7 @@ private:
         }else return replace(from, to, layer-1);
     }
 public:
-    int V, layer_count;
+    const int V, layer_count;
     EulerTourTree* et;
     unordered_map&lt;pair&lt;int, int&gt;, int, EulerTourTree::pair_hash&gt; detect_layer;
     DynamicConnectivity(int node_size) noexcept : V(node_size), layer_count(ceil(log2(V))+1){
@@ -330,9 +333,11 @@ public:
     }
     bool cut(int node1_id, int node2_id) noexcept {
         if(node1_id &gt; node2_id) swap(node1_id, node2_id);
-        int layer = detect_layer[{node1_id, node2_id}];
+        auto it = detect_layer.find({node1_id, node2_id});
+        assert(it != detect_layer.end());
+        int layer = it-&gt;second;
+        detect_layer.erase(it);
         auto&amp; st = et[layer].vertex_set[node1_id]-&gt;adjacent;
-        detect_layer.erase({node1_id, node2_id});
         if(st.find(node2_id) == st.end()){
             for(int i = 0; i &lt;= layer; i++) et[i].cut(node1_id, node2_id);
             return replace(node1_id, node2_id, layer);
@@ -355,7 +360,7 @@ public:
 </pre>
 <h3>verify 用の問題</h3>
 <p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2235&lang=jp">Graph Construction</a>
-  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3553850#1">提出コード</a></p>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3813963#1">提出コード</a></p>
 </section>
 
 </div>

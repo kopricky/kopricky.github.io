@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>Pair Hash</h2>
+<h3>コードについての説明</h3>
+<p>
+std::pair のハッシュ値はデフォルトで定義されていないため, unordered_set, unordered_map などを使いたいときは以下の実装を用いると良い(boost の実装を基に書いた). <br>
+よくハッシュ値をそのまま xor で結合しているものを見るが, 自明に衝突するケース(同じ要素の組だった場合)が存在するのでやめたほうがいい.
+</p>
+<h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
+<pre class="prettyprint linenums">
+struct pair_hash {
+    template &lt;class C1, class C2&gt;
+    unsigned int operator() (const pair&lt;C1, C2&gt;&amp; p) const {
+        unsigned int lhs = hash&lt;C1&gt;()(p.first), rhs = hash&lt;C2&gt;()(p.second);
+        return lhs^(rhs+0x9e3779b9+(lhs&lt;&lt;6)+(lhs&gt;&gt;2));
+    }
+};
+
+struct vector_hash {
+    const unsigned int random = mt19937(random_device{}())();
+    template &lt;class C&gt;
+    unsigned int operator()(const vector&lt;C&gt;&amp; p) const {
+        unsigned int h = (random ^ p.size());
+        for(const C&amp; k : p){
+            h ^= hash&lt;C&gt;()(k)+0x9e3779b9+(h&lt;&lt;6)+(h&gt;&gt;2);
+        }
+        return h;
+    }
+};
+
+struct murmur_hash_int32 {
+    unsigned int operator()(int p) const {
+        const unsigned int m = 0x5bd1e995; p *= m;
+        unsigned int h = (p^(p&gt;&gt;24))*m;
+        return h = (h^(h&gt;&gt;13))*m, (h^(h&gt;&gt;15));
+    }
+};
+
+struct murmur_hash_int64 {
+    unsigned long long operator()(unsigned long long p) const {
+        const unsigned long long m = 0xc6a4a7935bd1e995; p *= m;
+        unsigned long long h = (p^(p&gt;&gt;47))*m;
+        return h = (h^(h&gt;&gt;47))*m, (h^(h&gt;&gt;47));
+    }
+};
+
+struct murmur_hash32 {
+    const unsigned int random = random_device{}();
+    unsigned int operator()(const vector&lt;int&gt;&amp; p) const {
+        const unsigned int m = 0x5bd1e995;
+        unsigned int h = (random ^ (4 * p.size()));
+        for(unsigned int k : p){
+            k *= m, h = (h*m)^((k^(k&gt;&gt;24))*m);
+        }
+        h = (h^(h&gt;&gt;13))*m;
+        return (h^(h&gt;&gt;15));
+    }
+};
+
+struct murmur_hash64 {
+    const unsigned int random = random_device{}();
+    unsigned long long operator()(const vector&lt;long long&gt;&amp; p) const {
+        const unsigned long long m = 0xc6a4a7935bd1e995;
+        unsigned long long h = (random ^ (4 * p.size()));
+        for(unsigned long long k : p){
+            k *= m, h = (h*m)^((k^(k&gt;&gt;47))*m);
+        }
+        h = (h^(h&gt;&gt;47))*m;
+        return (h^(h&gt;&gt;47));
+    }
+};
+</pre>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>
