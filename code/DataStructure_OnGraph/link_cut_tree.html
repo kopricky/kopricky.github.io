@@ -164,15 +164,9 @@ private:
         u-&gt;left-&gt;par = nullptr, u-&gt;left = nullptr, u-&gt;eval();
     }
     void cut(node* u, node* v){
-        access(u);
-        node* prev = u;
-        for(u = u-&gt;left; u; u = u-&gt;right) prev = u;
-        if(prev == v){
-            u-&gt;left-&gt;par = nullptr, u-&gt;left = nullptr, u-&gt;eval();
-            splay(prev);
-        }else{
-            splay(prev), cut(v);
-        }
+        access(u), access(v);
+        if(u-&gt;isRoot()) u-&gt;par = nullptr;
+        else v-&gt;left-&gt;par = nullptr, v-&gt;left = nullptr, v-&gt;eval();
     }
     node* lca(node* u, node* v){
         access(u);
