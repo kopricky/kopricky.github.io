@@ -41,9 +41,19 @@
 <h2>高速メビウス変換(FMT)</h2>
 <h3>コードについての説明</h3>
 <p>
-<a href="fast_zeta_transform.html">ゼータ変換</a>(1), (2)の逆変換. 包除と考えた方が良さそう. <br>
-(1) s を含む上位集合 T についての包除 <img src="./texclip20190704193340.png" height="80" width="200"> <br>
-(2) S に含まれる下位集合 t についての包除 <img src="./texclip20190704193404.png" height="80" width="200"> <br>
+<a href="fast_zeta_transform.html">ゼータ変換</a>(1), (2)の逆変換である. 包除と考えた方が良さそう. <br>
+(1) s を含む上位集合 T についての包除
+</p>
+<div style="text-align:center;">
+<img src="./texclip20190704193340.png" height="80" width="200">
+</div>
+<p>
+(2) S に含まれる下位集合 t についての包除
+</p>
+<div style="text-align:center;">
+<img src="./texclip20190704193404.png" height="80" width="200">
+</div>
+<p>
 そしてこのメビウス変換は計算量 O(n*2^n) で行うことができ, 実装自体は以下のようにシンプルにかける.
 (1) については i 周目の f[j] は j の下位 i 桁以外一致しているような数 k で j を含むもの(j ⊆ k) について包除を取っている.
 j の i 桁目が 0 のものについては i 周目に更新する必要があるがそれは前の周までの f[j | (1 << i)] を引いてやれば包除を取ることができる(賢い). <br>
@@ -67,7 +77,7 @@ f: 2^V → Z, 任意の集合 Y ⊆ V についてゼータ変換 ζ, メビウ�
 <input type="checkbox" id="label" class="csscode" />
 <label for="label"></label>
 <pre class="prettyprint linenums">
-// 上位集合(含む集合)を包除(1)
+// 上位集合(含む集合)の包除(1)
 void fast_mobius_transform(int n, vector&lt;int&gt;&amp; f)
 {
     for(int i = 0; i &lt; n; ++i){
@@ -76,7 +86,7 @@ void fast_mobius_transform(int n, vector&lt;int&gt;&amp; f)
         }
     }
 }
-// 下位集合(含まれる集合)を包除(2)
+// 下位集合(含まれる集合)の包除(2)
 void fast_mobius_transform(int n, vector&lt;int&gt;&amp; f)
 {
     for(int i = 0; i &lt; n; ++i){
