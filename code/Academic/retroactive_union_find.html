@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>Retroactive Union Find</h2>
+<h3>コードについての説明</h3>
+<p>
+
+</p>
+<p>
+(関数)<br>
+unite(id1, id2, _time): 時刻 _time において id1 と id2 を同じ連結成分にする.<br>
+same(id1, id2, _time): 時刻 _time の直後において id1 と id2 が同じ連結成分に入っているかを判定する.
+</p>
+<p>
+時間計算量: ならし O(min(log m, log n)) (m は unite の回数)
+</p>
+<h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
+<pre class="prettyprint linenums">
+template&lt;typename T&gt; class LinkCutTree {
+public:
+    inline static T opr1(const T arg1, const T arg2){
+        return max(arg1, arg2);
+    }
+    struct node {
+        int id, al_id;
+        T val, al;
+        node *left, *right, *par;
+        bool rev;
+        node(){}
+        node(int _id, T _val) : id(_id), al_id(_id), val(_val), al(_val),
+            left(nullptr), right(nullptr), par(nullptr), rev(false){}
+        inline bool isRoot() const {
+            return (!par) || (par-&gt;left != this &amp;&amp; par-&gt;right != this);
+        }
+        void push(){
+            if(!rev) return;
+            swap(left, right);
+            if(left) left-&gt;rev = !(left-&gt;rev);
+            if(right) right-&gt;rev = !(right-&gt;rev);
+            rev = false;
+        }
+        void eval(){
+            al_id = id, al = val;
+            if(left){
+                left-&gt;push();
+                if(al &lt; left-&gt;al){
+                    al = left-&gt;al, al_id = left-&gt;al_id;
+                }
+            }
+            if(right){
+                right-&gt;push();
+                if(al &lt; right-&gt;al){
+                    al = right-&gt;al, al_id = right-&gt;al_id;
+                }
+            }
+        }
+    };
+
+private:
+    void rotate(node* u, bool right){
+        node *p = u-&gt;par, *g = p-&gt;par;
+        if(right){
+            if((p-&gt;left = u-&gt;right)) u-&gt;right-&gt;par = p;
+            u-&gt;right = p, p-&gt;par = u;
+        }else{
+            if((p-&gt;right = u-&gt;left)) u-&gt;left-&gt;par = p;
+            u-&gt;left = p, p-&gt;par = u;
+        }
+        p-&gt;eval(), u-&gt;eval(), u-&gt;par = g;
+        if(!g) return;
+        if(g-&gt;left == p) g-&gt;left = u;
+        if(g-&gt;right == p) g-&gt;right = u;
+        g-&gt;eval();
+    }
+    void splay(node* u){
+        while(!(u-&gt;isRoot())){
+            node *p = u-&gt;par, *gp = p-&gt;par;
+            if(p-&gt;isRoot()){ // zig
+                p-&gt;push(), u-&gt;push();
+                rotate(u, (u == p-&gt;left));
+            }else{
+                gp-&gt;push(), p-&gt;push(), u-&gt;push();
+                bool flag = (u == p-&gt;left);
+                if((u == p-&gt;left) == (p == gp-&gt;left)){
+                    rotate(p, flag), rotate(u, flag);
+                }else{
+                    rotate(u, flag), rotate(u, !flag);
+                }
+            }
+        }
+        u-&gt;push();
+    }
+    node* access(node* u){
+        node* last = nullptr;
+        for(node* v = u; v; v = v-&gt;par){
+            splay(v);
+            v-&gt;right = last;
+            v-&gt;eval();
+            last = v;
+        }
+        splay(u);
+        return last;
+    }
+    void evert(node* u){
+        access(u);
+        u-&gt;rev = !(u-&gt;rev), u-&gt;push();
+    }
+    bool connected(node* u, node* v){
+        access(u), access(v);
+        return u-&gt;par;
+    }
+    void link(node* u, node* v){
+        evert(u), u-&gt;par = v;
+    }
+    void cut(node* u){
+        access(u);
+        u-&gt;left-&gt;par = nullptr, u-&gt;left = nullptr, u-&gt;eval();
+    }
+    void cut(node* u, node* v){
+        access(u), access(v);
+        if(u-&gt;isRoot()) u-&gt;par = nullptr;
+        else v-&gt;left-&gt;par = nullptr, v-&gt;left = nullptr, v-&gt;eval();
+    }
+    pair&lt;T, int&gt; query(node* u, node* v){
+        evert(u), access(v);
+        return make_pair(v-&gt;al, v-&gt;al_id);
+    }
+public:
+    node** arr;
+    LinkCutTree(int node_size){
+        arr = new node*[node_size];
+        for(int i = 0; i &lt; node_size; i++){
+            arr[i] = new node(-1, numeric_limits&lt;T&gt;::min());
+        }
+    }
+    static node *make_node(){ return new node(); }
+    bool connected(int id1, int id2){ return connected(arr[id1], arr[id2]); }
+    void link(int ver_id, node *edge){ return link(arr[ver_id], edge); }
+    void cut(int ver_id, node *edge){ return cut(arr[ver_id], edge); }
+    pair&lt;T, int&gt; query(int id1, int id2){ return query(arr[id1], arr[id2]); }
+};
+
+class RetroactiveUnionFind {
+private:
+    const unsigned int V;
+    LinkCutTree&lt;int&gt; lc;
+    vector&lt;LinkCutTree&lt;int&gt;::node&gt; edge;
+    vector&lt;pair&lt;int, int&gt; &gt; nodes;
+    unsigned int cur_pos;
+
+public:
+    RetroactiveUnionFind(unsigned int node_size)
+     : V(node_size), lc(V), edge(V - 1), nodes(V - 1), cur_pos(0u){}
+    bool unite(const int id1, const int id2, int _time){
+        unsigned int pos = cur_pos;
+        if(cur_pos == V - 1 || lc.connected(id1, id2)){
+            auto res = lc.query(id1, id2);
+            if(res.first &lt;= _time) return false;
+            pair&lt;int, int&gt; p = nodes[pos = res.second];
+            lc.cut(p.first, &amp;edge[pos]), lc.cut(p.second, &amp;edge[pos]);
+        }else{
+            ++cur_pos;
+        }
+        edge[pos] = LinkCutTree&lt;int&gt;::node(pos, _time);
+        lc.link(id1, &amp;edge[pos]), lc.link(id2, &amp;edge[pos]);
+        nodes[pos] = {id1, id2};
+        return true;
+    }
+    bool same(const int id1, const int id2, int _time){
+        if(!lc.connected(id1, id2)) return false;
+        return lc.query(id1, id2).first &lt;= _time;
+    }
+};
+</pre>
+<h3>verify 用の問題</h3>
+<p>
+verify していません(verify 問題を知らない)
+</p>
+<p>Atcoder : <a href=""></a>
+  <a href="">提出コード</a></p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>
