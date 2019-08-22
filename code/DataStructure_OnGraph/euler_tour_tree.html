@@ -111,15 +111,15 @@ BSTNode&lt;_Tp&gt;* splay(BSTNode&lt;_Tp&gt; *u) noexcept {
     if(!u) return nullptr;
     while(!(u-&gt;IsRoot())){
         BSTNode&lt;_Tp&gt; *p = u-&gt;par, *gp = p-&gt;par;
-        if(p-&gt;IsRoot()){
+        if(p-&gt;IsRoot()){ // zig
             p-&gt;push(), u-&gt;push();
             u-&gt;rotate((u == p-&gt;left));
         }else{
             gp-&gt;push(), p-&gt;push(), u-&gt;push();
             bool flag = (u == p-&gt;left);
-            if((u == p-&gt;left) == (p == gp-&gt;left)){
+            if((u == p-&gt;left) == (p == gp-&gt;left)){ // zig-zig
                 p-&gt;rotate(flag), u-&gt;rotate(flag);
-            }else{
+            }else{ // zig-zag
                 u-&gt;rotate(flag), u-&gt;rotate(!flag);
             }
         }
@@ -216,12 +216,20 @@ private:
         return join(join(res1.first,res2.first), res2.second), res;
     }
 public:
-    int V;
+    const int V;
     EulerTourTree(const vector&lt;T&gt;&amp; ver_value, bool helper=false) noexcept : V((int)ver_value.size()){
         vertex_set = new BSTNode&lt;T&gt;*[V];
         for(int i = 0; i &lt; V; i++) vertex_set[i] = new BSTNode&lt;T&gt;(i, i, ver_value[i]);
         if(helper) G.resize(V);
     }
+    // ~EulerTourTree(){
+    //     for(auto it : edge_set){
+    //         delete (it.second).first;
+    //         delete (it.second).second;
+    //     }
+    //     for(int i = 0; i &lt; V; ++i) delete vertex_set[i];
+    //     delete[] vertex_set;
+    // }
     // 根を node_id にする
     void reroot(const int node_id) noexcept { reroot(vertex_set[node_id]); }
     // 辺(node1_id, node2_id) を追加
@@ -234,7 +242,9 @@ public:
         if(node1_id &gt; node2_id) swap(node1_id, node2_id);
         auto it = edge_set.find({node1_id, node2_id});
         assert(it != edge_set.end());
-        cut((it-&gt;second).first, (it-&gt;second).second);
+        BSTNode&lt;T&gt; *edge1 = (it-&gt;second).first, *edge2 = (it-&gt;second).second;
+        edge_set.erase(it);
+        cut(edge1, edge2);
     }
     // node1_id と node2_id が同じ木(連結成分)に属するか
     bool IsConnected(const int node1_id, const int node2_id) noexcept {

@@ -38,17 +38,21 @@
 <div id="contents">
 
 <section>
-<h2>Pair Hash</h2>
+<h2>Hash Function</h2>
 <h3>コードについての説明</h3>
 <p>
-std::pair のハッシュ値はデフォルトで定義されていないため, unordered_set, unordered_map などを使いたいときは以下の実装を用いると良い(boost の実装を基に書いた). <br>
-よくハッシュ値をそのまま xor で結合しているものを見るが, 自明に衝突するケース(同じ要素の組だった場合)が存在するのでやめたほうがいい.
+ハッシュ関数のリスト. <br>
+pair_hash, vector_hash は boost ライブラリを参考にハッシュ値を combine して実装した. <br>
+あとの 4 つは murmur hash と呼ばれるハッシュ関数で <a href="https://sites.google.com/site/murmurhash/">こちら</a> で著者が公開しているコードを基に実装した. <br>
+実際に使用しても murmur hash はかなり優秀なハッシュ関数で他のハッシュ関数(std::hash とか)と違って衝突が起きないなぁという印象. <br>
+なお murmur hash は基本 public domain(ノンライセンス) だが, ビジネス目的で用いる場合は MIT license であるとの文言があるので注意してください.
 </p>
 <h3>コード</h3>
 <div class="codebox">
 <input type="checkbox" id="label" class="csscode" />
 <label for="label"></label>
 <pre class="prettyprint linenums">
+// pair に対する std::hash を用いたハッシュ関数
 struct pair_hash {
     template &lt;class C1, class C2&gt;
     unsigned int operator() (const pair&lt;C1, C2&gt;&amp; p) const {
@@ -57,6 +61,7 @@ struct pair_hash {
     }
 };
 
+// vector に対する std::hash を用いたハッシュ関数
 struct vector_hash {
     const unsigned int random = mt19937(random_device{}())();
     template &lt;class C&gt;
@@ -69,6 +74,7 @@ struct vector_hash {
     }
 };
 
+// int に対する murmur hash
 struct murmur_hash_int32 {
     unsigned int operator()(int p) const {
         const unsigned int m = 0x5bd1e995; p *= m;
@@ -77,14 +83,16 @@ struct murmur_hash_int32 {
     }
 };
 
+// long long に対する murmur hash
 struct murmur_hash_int64 {
-    unsigned long long operator()(unsigned long long p) const {
+    unsigned long long operator()(long long p) const {
         const unsigned long long m = 0xc6a4a7935bd1e995; p *= m;
         unsigned long long h = (p^(p&gt;&gt;47))*m;
         return h = (h^(h&gt;&gt;47))*m, (h^(h&gt;&gt;47));
     }
 };
 
+// vector&lt;int&gt; に対する murmur hash
 struct murmur_hash32 {
     const unsigned int random = random_device{}();
     unsigned int operator()(const vector&lt;int&gt;&amp; p) const {
@@ -98,6 +106,7 @@ struct murmur_hash32 {
     }
 };
 
+// vector&lt;long long&gt; に対する murmur hash
 struct murmur_hash64 {
     const unsigned int random = random_device{}();
     unsigned long long operator()(const vector&lt;long long&gt;&amp; p) const {

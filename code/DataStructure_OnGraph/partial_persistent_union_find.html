@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>Partial Persistent Union Find</h2>
+<h3>コードについての説明</h3>
+<p>
+部分永続 Union Find の実装である. <br>
+部分永続データ構造とは過去のすべてのバージョンの参照および現在のバージョンの更新を行うことできるデータ構造のことを言う(過去のバージョンを参照できるというところが普通のデータ構造と異なる).
+過去のバージョンも更新することができるようなものを完全永続データ構造と呼ぶ. <br>
+経路圧縮を行わない場合は各クエリ最悪 O(log n) 時間で応答するデータ構造を簡単に実装できる. ポイントは Union find 森の親が 1 度できるとその後変化しないので,
+各頂点について親ができた時間とその親の頂点の 2 つを保持しておけば, あとは参照(同じ連結成分に属するかの判定)するときにその情報をもとに木の親をたどっていけば高々 O(log n) 回でその時点での親にたどり着く.
+このとき, 親に向かう辺のできた時間は単調であることと rank の大きいものに小さいものを unite した場合高さは常に O(log n) になるという事実を使っている. <br>
+size も併合の更新があった際に新しい値に (時間, 新しい木のサイズ) の情報を vector として持たせておけば, 参照時に根のもつ vector を 2 分探索することで結果を求められる. <br>
+少し考えてみると Find 操作は頂点と親を結ぶパス上の 2 分探索で求めることもできるのでダブリングの要領でならし計算量 O(log log n) も達成できる. さらに union find 森の構造(高さ h の頂点は高々 n / 2^h 個しかないという性質) に注目して,
+各頂点にダブリングのように O(log log n) 個の頂点ではなくいい感じに間引いて配置することで空間計算量 O(n) でも可能になった(実装が結構めんどくなりそうだったのでもう少しいい方法があるかもしれない).
+この場合 size はまあ y-fast-trie を使えば期待計算量ではあるものの O(log log n) でできる(無理矢理感すごい).<br>
+論文を調べてみると, なんと経路圧縮と永続化は(特殊な)永続配列を用いて両立させることができるらしく, <a href="https://www.lri.fr/~filliatr/ftp/publis/puf-wml07.pdf">こちら</a> にその話がある. <br>
+ちなみに部分永続化より真に難しい <a href="../Academic/retroactive_union_find.html">retroactive union find</a> も効率よく行うことができる.
+</p>
+<p>
+(関数)<br>
+unite(id1, id2, _time): 時刻 _time において id1 と id2 を同じ連結成分にする. (ただし _time は)<br>
+same(id1, id2, _time): 時刻 _time の直後において id1 と id2 が同じ連結成分に入っているかを判定する.
+</p>
+<p>
+時間計算量: O(log n)
+</p>
+<h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
+<pre class="prettyprint linenums">
+class PartialPersistentUnionFind {
+public:
+    const int V;
+    int last;
+    vector&lt;pair&lt;int, int&gt; &gt; par;
+    vector&lt;vector&lt;pair&lt;int, int&gt; &gt; &gt; sz;
+    PartialPersistentUnionFind(int node_size)
+        : V(node_size), last(-1), par(V), sz(V){
+        for(int i = 0; i &lt; V; ++i){
+            par[i] = {1, i};
+            sz[i].emplace_back(-1, 1);
+        }
+    }
+    int find(const int u, const int _time){
+        if(u == par[u].second || par[u].first &gt; _time){
+            return u;
+        }else{
+            return find(par[u].second, _time);
+        }
+    }
+    bool unite(int u, int v, const int _time){
+        assert(last &lt;= _time);
+        if(same(u, v, _time)) return false;
+        last = _time;
+        u = find(u, _time), v = find(v, _time);
+        if(par[u].first &lt; par[v].first){
+            swap(u, v);
+        }
+        par[v] = {_time, u};
+        if(par[u].first == par[v].first){
+            ++par[u].first;
+        }
+    }
+    bool same(const int u, const int v, const int _time){
+        return find(u, _time) == find(v, _time);
+    }
+    int size(int u, const int _time){
+        u = find(u, _time);
+        return sz[u][static_cast&lt;int&gt;(upper_bound(sz[u].begin(), sz[u].end(),
+            make_pair(_time, V+1)) - sz[u].begin()) - 1].second;
+    }
+};
+</pre>
+<h3>verify 用の問題</h3>
+<p>Atcoder : <a href="https://code-thanks-festival-2017.contest.atcoder.jp/tasks/code_thanks_festival_2017_h">Union Sets</a>
+  <a href="https://code-thanks-festival-2017.contest.atcoder.jp/submissions/7068142">提出コード</a>(size 以外の verify)</p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>
