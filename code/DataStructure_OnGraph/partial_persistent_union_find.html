@@ -52,12 +52,14 @@ size も併合の更新があった際に新しい値に (時間, 新しい木�
 各頂点にダブリングのように O(log log n) 個の頂点ではなくいい感じに間引いて配置することで空間計算量 O(n) でも可能になった(実装が結構めんどくなりそうだったのでもう少しいい方法があるかもしれない).
 この場合 size はまあ y-fast-trie を使えば期待計算量ではあるものの O(log log n) でできる(無理矢理感すごい).<br>
 論文を調べてみると, なんと経路圧縮と永続化は(特殊な)永続配列を用いて両立させることができるらしく, <a href="https://www.lri.fr/~filliatr/ftp/publis/puf-wml07.pdf">こちら</a> にその話がある. <br>
-ちなみに部分永続化より真に難しい <a href="../Academic/retroactive_union_find.html">retroactive union find</a> も効率よく行うことができる.
+ちなみに部分永続化より真に難しい <a href="../Academic/fully_retroactive_union_find.html">retroactive union find</a> も効率よく行うことができる.
 </p>
 <p>
 (関数)<br>
-unite(id1, id2, _time): 時刻 _time において id1 と id2 を同じ連結成分にする. (ただし _time は)<br>
-same(id1, id2, _time): 時刻 _time の直後において id1 と id2 が同じ連結成分に入っているかを判定する.
+find(u): 時刻 _time の直後において u を含む木の根を答える.
+unite(u, v, _time): 時刻 _time において u と v を同じ連結成分にする. (ただし _time は最後に unite を呼び出した時間以降とする(部分永続なので).)<br>
+same(u, v, _time): 時刻 _time の直後において u と v が同じ連結成分に入っているかを判定する.
+size(u, _time): 時刻 _time の直後において u を含む木の頂点数を答える.
 </p>
 <p>
 時間計算量: O(log n)
@@ -74,10 +76,10 @@ public:
     vector&lt;pair&lt;int, int&gt; &gt; par;
     vector&lt;vector&lt;pair&lt;int, int&gt; &gt; &gt; sz;
     PartialPersistentUnionFind(int node_size)
-        : V(node_size), last(-1), par(V), sz(V){
+        : V(node_size), last(numeric_limits&lt;int&gt;::min()), par(V), sz(V){
         for(int i = 0; i &lt; V; ++i){
             par[i] = {1, i};
-            sz[i].emplace_back(-1, 1);
+            sz[i].emplace_back(numeric_limits&lt;int&gt;::min(), 1);
         }
     }
     int find(const int u, const int _time){
@@ -96,9 +98,11 @@ public:
             swap(u, v);
         }
         par[v] = {_time, u};
+        sz[u].emplace_back(_time, sz[u].back().second + sz[v].back().second);
         if(par[u].first == par[v].first){
             ++par[u].first;
         }
+        return true;
     }
     bool same(const int u, const int v, const int _time){
         return find(u, _time) == find(v, _time);
