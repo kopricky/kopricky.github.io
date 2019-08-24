@@ -63,20 +63,21 @@ access(x) で一つ上に登るごとに preferred child が変化する性質�
 <input type="checkbox" id="label" class="csscode" />
 <label for="label"></label>
 <pre class="prettyprint linenums">
-// 以下の実装では link, range, query などで reroot が起こるので注意
+// 以下の実装では link, range, query などで reroot が起こる
 template&lt;typename T&gt; class LinkCutTree {
 public:
     struct node {
-        int id, sz;
+        int sz;
         T val, al, lazy;
         node *left, *right, *par;
         bool rev;
-        node(int num) : id(num), sz(1), val(id2), al(id2), lazy(id1),
+        node() : sz(1), val(id2), al(id2), lazy(id1),
+            left(nullptr), right(nullptr), par(nullptr), rev(false){}
+        node(T _val) : sz(1), val(_val), al(_val), lazy(id1),
             left(nullptr), right(nullptr), par(nullptr), rev(false){}
         inline bool isRoot() const {
             return (!par) || (par-&gt;left != this &amp;&amp; par-&gt;right != this);
         }
-        //スプレー木を反転させる
         void push(){
             if(lazy != id1){
                 opr1(val, lazy), al += lazy * sz;
@@ -198,23 +199,31 @@ private:
     }
 
 public:
+    const int V;
     node** arr;
-    LinkCutTree(int node_size){
-        arr = new node*[node_size];
-        for(int i = 0; i &lt; node_size; i++){
-            arr[i] = new node(i);
+    LinkCutTree(const vector&lt;T&gt;&amp; init_node_value)
+     : V((int)init_node_value.size()){
+        arr = new node*[V];
+        for(int i = 0; i &lt; V; ++i){
+            arr[i] = new node(init_node_value[i]);
         }
     }
+    // ~LinkCutTree(){
+    //     for(int i = 0; i &lt; V; ++i){
+    //         delete arr[i];
+    //     }
+    //     delete[] ar
+    // }
     // id1 と id2 が同じ木(連結成分)に属するか
     bool connected(int id1, int id2){ return connected(arr[id1], arr[id2]); }
-    // id1 を id2 の non-preferred edge にする(id1 の子として id2 をつなぐ)
+    // id1 を id2 の non-preferred edge にする
     void link(int id1, int id2){ return link(arr[id1], arr[id2]); }
     // id とその親の間の辺を削除する
     void cut(int id){ return cut(arr[id]); }
     // id と id2 の間の辺を削除する
     void cut(int id1, int id2){ return cut(arr[id1], arr[id2]); }
     // id1 と id2 の LCA を求める
-    int lca(int id1, int id2){ return lca(arr[id1], arr[id2])-&gt;id; }
+    int lca(int id1, int id2){ return static_cast&lt;size_t&gt;(lca(arr[id1], arr[id2]) - arr[0]); }
     // 元の木の根を id にする
     void evert(int id){ return evert(arr[id]); }
     // id の深さを求める

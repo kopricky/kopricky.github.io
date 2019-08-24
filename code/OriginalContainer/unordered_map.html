@@ -53,15 +53,17 @@ robin hood hashing はキャッシュに乗りやすいのが高速になる 1 �
 robin hood hashing の期待計算量はハッシュ関数が真にランダムの場合, O(log log n) でより詳しい計算量解析(concentration など) については <a href="http://luc.devroye.org/robinhood.pdf">この論文</a> が参考になりそう(まだ読んでいない). <br>
 また delete の際に<a href="http://codecapsule.com/2013/11/17/robin-hood-hashing-backward-shift-deletion/">このページ</a>にあるような backward shift を行うと実測が速くなるようなので採用させていただいた.
 具体的には要素を削除した際に, その後に続くバケットを見てバケットが空もしくは本来のバケット位置にいるデータを見つけるまでの要素をすべて後ろに 1 つシフトするということをする. <br>
-以下の実装はある程度 std::unordered_map と同様に動作するが, ムーブセマンティクスなどは実装していない. 自作のハッシュ関数を使う場合は第 3 テンプレート引数として与える. 第 4 引数については最後に書く.
-デフォルトでは std::hash を用いてますが入力に偏りなどあるとすぐ <b>衝突しまくる</b> ので <a href="../Misc/hash_function.html">こちら</a> を参考に murmur hash などましなハッシュ関数を引数として与えることを <b>強くおすすめします</b>. <br>
+以下の実装はある程度 std::unordered_map と同様に動作するが, 実装していない関数もある. 自作のハッシュ関数を使う場合は第 3 テンプレート引数として与える. 第 4 引数については最後に書く.
+デフォルトでは std::hash を用いてますが入力に偏りなどあると結構簡単に <b>衝突しまくる</b> ので <a href="../Misc/hash_function.html">こちら</a> を参考に murmur hash などましなハッシュ関数を引数として与えることを <b>(割と)おすすめします</b>. <br>
 速度を重視したので rahash が起きると <b>イテレーター破壊</b> が起きます!!(逆に言えば find, insert, erase などの操作をしなければイテレーター破壊は起きません.) <br>
 実装は普通のコードと高速版のコードが置いてあり, 高速版の方は int 型や long long 型などに対してのみ用いてください(具体的には一致判定が高速にできるような型に対して用いる). つまりキー値に string などを用いる場合は 1 つ目のコードを使ってください. <br>
 simple_erase は要素を erase したあとに次の要素を返さない erase で後述のようにバケットのサイズの縮小を行わないとバケット数に対して要素数が少ないとき erase された要素の次の要素を見つけるのにとても時間がかかることがあるのでそれを避けるために用いることができる. <br>
+(注) MAX_LOAD_RATE((要素数)/(バケット数) の最大値), MIN_LOAD_FACTOR((要素数)/(バケット数) の最小値(DOWNSIZEの場合にのみ有効)), DOWNSIZE_THRESHOLD(バケットの縮小を行う際の最低のバケット数)
 (細かい実装の話) <br>
 キャッシュミスを防ぐために違和感はあるが dist や hash を data ではなく bucket に紐付けるようにしている. <br>
+コード内の delete(メモリ解放) をコメントアウトすると速くなる場合も多いが, unordered_map の場合終了時だけでなく rehash 時にもデストラクトを呼び出すので, delete しないと 2 倍近く空間計算量が大きくなるのでそのまま残している.
 高速版の方はキャッシュに乗りやすいようなデータの持ち方をした結果イテレーターが普通の std::unordered_map などと異なりイテレーターの参照(*it)の型が pair&lt;const _Key&amp;, _Tp&amp;&gt; になっている. 普通は pair&lt;const _Key, _Tp&gt;&amp;.
-あとイテレーターの pointer は使えないようにしているので高速版の場合は常に *it と参照を用いる.<br>
+あとイテレーターの pointer は使えないようにしているので高速版の場合は常に *it(reference) を用いる.<br>
 alignment 等を気にした結果 dist が short int だったり aligned_storage を用いたりなどしてあがいている. あとバケットのサイズは 2 べきにしています. 2 べきだと % ではなく & でバケットの位置を計算できて高速になりうるみたいな話を聞いたことがあったので.<br>
 関数 maximum_distance() は現在のハッシュテーブルにおいて find の際の linear probing にかかる時間の最大値を求めていて, 速度がなぜか遅くなるみたいな場合はこれを用いることでハッシュの衝突がその原因になっているかどうかを確かめることができる.
 先述のように真にランダムなハッシュ関数を用いた場合期待値 O(log log n) でまた理論的にはばらつきも小さいので maximum_distance() はちゃんとしたハッシュ関数を用いていればとても小さくなる. <br>
@@ -89,7 +91,14 @@ private:
         bool _last, _end;
         aligned_pointer _data_ptr;
         bucket() noexcept : _dist(-1), _last(false), _end(false){}
-        ~bucket(){ if(!empty()) _delete(); }
+        bucket&amp; operator=(const bucket&amp; another) noexcept {
+            _hash = another._hash, _dist = another._dist, _last = another._last, _end = another._end;
+            if(!another.empty()){
+                new(&amp;_data_ptr) data_type(*reinterpret_cast&lt;const data_type*&gt;(&amp;another._data_ptr));
+            }
+            return *this;
+        }
+        ~bucket(){ if(!empty()) data_ptr()-&gt;~data_type(); }
         inline void clear() noexcept { _dist = -1; }
         inline void _delete(){ _dist = -1, data_ptr()-&gt;~data_type(); }
         inline bool empty() const noexcept { return (_dist == -1); }
@@ -100,8 +109,8 @@ private:
             return reinterpret_cast&lt;data_type*&gt;(&amp;_data_ptr);
         }
         inline const _Key&amp; get_key() noexcept { return data_ptr()-&gt;first; }
-        inline void new_data(const data_type&amp; data){
-            new(&amp;_data_ptr) data_type(data);
+        inline void new_data(data_type&amp;&amp; data){
+            new(&amp;_data_ptr) data_type(move(data));;
         }
     };
     inline static unsigned int ceilpow2(unsigned int u) noexcept {
@@ -115,20 +124,20 @@ private:
         return cur;
     }
     inline bucket *next_bucket(bucket *cur) const noexcept {
-        return cur-&gt;_last ? _buckets : cur + 1;
+        return (cur-&gt;_last) ? _buckets : (cur + 1);
     }
     inline unsigned int make_hash(const _Key&amp; key) const noexcept {
         return _Hash()(key);
     }
-    inline float load_factor() const noexcept {
+    inline float load_rate() const noexcept {
         return (float)_data_count / _bucket_count;
     }
-    bucket *insert_impl(bucket *cur, unsigned int hash, short int dist, data_type data){
+    bucket *insert(bucket *cur, unsigned int hash, short int dist, data_type&amp;&amp; data){
         bucket *ret = cur;
         bool flag = false;
         while(true){
             if(cur-&gt;empty()){
-                cur-&gt;_hash = hash, cur-&gt;_dist = dist, cur-&gt;new_data(data);
+                cur-&gt;_hash = hash, cur-&gt;_dist = dist, cur-&gt;new_data(move(data));
                 if(!flag) ret = cur, flag = true;
                 break;
             }else if(dist &gt; cur-&gt;_dist){
@@ -140,106 +149,87 @@ private:
         }
         return ret;
     }
-    bucket *_find(const _Key&amp; key, bool push=false){
+    template&lt;class Key&gt;
+    bucket *_find(Key&amp;&amp; key, bool push = false){
         unsigned int hash = make_hash(key);
         bucket *cur = _buckets + (hash &amp; _mask);
         short int dist = 0;
         while(dist &lt;= cur-&gt;_dist){
-            if(hash == cur-&gt;_hash &amp;&amp; key == cur-&gt;get_key()){
-                return cur;
-            }
-            ++dist;
-            cur = next_bucket(cur);
+            if(hash == cur-&gt;_hash &amp;&amp; key == cur-&gt;get_key()) return cur;
+            ++dist, cur = next_bucket(cur);
         }
         if(!push) return _buckets + _bucket_count;
         ++_data_count;
         if(rehash_check()){
-            hash = make_hash(key), cur = _buckets + (hash &amp; _mask), dist = 0;
+            cur = _buckets + (hash &amp; _mask), dist = 0;
         }
-        return insert_impl(cur, hash, dist, data_type(key, _Tp()));
+        data_type new_data = data_type();
+        new_data.first = forward&lt;Key&gt;(key);
+        return insert(cur, hash, dist, move(new_data));
     }
-    bucket *_insert(const data_type&amp; data){
+    template&lt;class Data&gt;
+    bucket *find_insert(Data&amp;&amp; data){
         const _Key&amp; key = data.first;
         unsigned int hash = make_hash(key);
-        bucket *cur = _buckets + (make_hash(hash) &amp; _mask);
+        bucket *cur = _buckets + (hash &amp; _mask);
         short int dist = 0;
         while(dist &lt;= cur-&gt;_dist){
-            if(hash == cur-&gt;_hash &amp;&amp; key == cur-&gt;get_key()){
-                return cur;
-            }
-            ++dist;
-            cur = next_bucket(cur);
+            if(hash == cur-&gt;_hash &amp;&amp; key == cur-&gt;get_key()) return cur;
+            ++dist, cur = next_bucket(cur);
         }
         ++_data_count;
         if(rehash_check()){
-            hash = make_hash(key), cur = _buckets + (hash &amp; _mask), dist = 0;
+            cur = _buckets + (hash &amp; _mask), dist = 0;
         }
-        return insert_impl(cur, hash, dist, data);
+        data_type new_data = forward&lt;Data&gt;(data);
+        return insert(cur, hash, dist, move(new_data));
     }
     bucket *backward_shift(bucket *cur, bool next_ret){
         bucket *next = next_bucket(cur), *ret = cur;
         if(next-&gt;_dist &lt; 1) return next_ret ? increment(cur) : cur;
         do {
-            cur-&gt;_hash = next-&gt;_hash;
-            cur-&gt;_dist = next-&gt;_dist - 1;
-            cur-&gt;_data_ptr = next-&gt;_data_ptr;
+            cur-&gt;_hash = next-&gt;_hash, cur-&gt;_dist = next-&gt;_dist - 1;
+            cur-&gt;new_data(move(next-&gt;data()));
             cur = next, next = next_bucket(cur);
         }while(next-&gt;_dist &gt;= 1);
         cur-&gt;clear();
         return ret;
     }
     bucket *erase_impl(bucket *cur, bool next_ret){
-        assert(cur != _buckets + _bucket_count);
+        assert(static_cast&lt;size_t&gt;(cur - _buckets) != _bucket_count);
         cur-&gt;_delete();
+        --_data_count;
         return backward_shift(cur, next_ret);
     }
     bucket *erase_itr(bucket *cur, bool next_ret = true){
-        --_data_count;
-        const _Key&amp; key = cur-&gt;get_key();
+        const _Key key = cur-&gt;get_key();
         return erase_impl(rehash_check() ? _find(key) : cur, next_ret);
     }
     bucket *erase_key(const _Key&amp; key, bool next_ret = true){
-        --_data_count;
         rehash_check();
         return erase_impl(_find(key), next_ret);
     }
     bool rehash_check(){
-        if(load_factor() &gt;= MAX_LOAD_FACTOR){
-            rehash(_bucket_count * 2);
+        if(load_rate() &gt;= MAX_LOAD_RATE){
+            rehash(_bucket_count * 2u);
             return true;
         }else if(DOWNSIZE){
-            if(load_factor() &lt;= MIN_LOAD_FACTOR &amp;&amp; _bucket_count &gt;= DOWNSIZE_THRESHOLD){
-                rehash(_bucket_count / 2);
+            if(load_rate() &lt;= MIN_LOAD_RATE &amp;&amp; _bucket_count &gt;= DOWNSIZE_THRESHOLD){
+                rehash(_bucket_count / 2u);
                 return true;
-            }else{
-                return false;
             }
-        }else{
-            return false;
         }
+        return false;
     }
-    void move_data(aligned_pointer data_ptr){
-        unsigned int hash = make_hash(reinterpret_cast&lt;data_type*&gt;(&amp;data_ptr)-&gt;first);
-        bucket *cur = _buckets + (hash &amp; _mask);
-        short int dist = 0;
-        while(true){
-            if(cur-&gt;empty()){
-                cur-&gt;_hash = hash, cur-&gt;_dist = dist, cur-&gt;_data_ptr = data_ptr;
-                break;
-            }else if(dist &gt; cur-&gt;_dist){
-                swap(hash, cur-&gt;_hash), swap(dist, cur-&gt;_dist), swap(data_ptr, cur-&gt;_data_ptr);
-            }
-            ++dist;
-            cur = next_bucket(cur);
-        }
+    void move_data(bucket *cur){
+        insert(_buckets + (cur-&gt;_hash &amp; _mask), cur-&gt;_hash, 0, move(cur-&gt;data()));
     }
     void rehash(unsigned int new_bucket_count){
         UnorderedMap new_unordered_map(new_bucket_count);
         new_unordered_map._data_count = _data_count;
-        for(bucket *cur = _buckets; !cur-&gt;_end; ++cur){
+        for(auto cur = _buckets; !cur-&gt;_end; ++cur){
             if(!cur-&gt;empty()){
-                new_unordered_map.move_data(cur-&gt;_data_ptr);
-                cur-&gt;clear();
+                new_unordered_map.move_data(cur);
             }
         }
         swap(*this, new_unordered_map);
@@ -255,38 +245,74 @@ private:
     unsigned int _bucket_count, _mask, _data_count;
     bucket *_buckets;
 public:
-    const float MAX_LOAD_FACTOR = 0.5f;
-    const float MIN_LOAD_FACTOR = 0.1f;
+    const float MAX_LOAD_RATE = 0.5f;
+    const float MIN_LOAD_RATE = 0.1f;
     const unsigned int DOWNSIZE_THRESHOLD = 16u;
     UnorderedMap(unsigned int bucket_size = 1u)
-     : _bucket_count(ceilpow2(max(bucket_size, 1u))), _mask(_bucket_count - 1),
-        _data_count(0u), _buckets(new bucket[_bucket_count + 1]){
+     : _bucket_count(ceilpow2(max(bucket_size, 1u))), _mask(_bucket_count - 1u),
+        _data_count(0u), _buckets(new bucket[_bucket_count + 1u]){
         _buckets[_bucket_count - 1]._last = true, _buckets[_bucket_count]._end = true;
+    }
+    UnorderedMap(const UnorderedMap&amp; another)
+        : _bucket_count(another._bucket_count), _mask(another._mask), _data_count(another._data_count){
+        _buckets = new bucket[_bucket_count + 1u];
+        for(unsigned int i = 0u; i &lt;= _bucket_count; ++i){
+            _buckets[i] = another._buckets[i];
+        }
+    }
+    UnorderedMap(UnorderedMap&amp;&amp; another)
+        : _bucket_count(move(another._bucket_count)), _mask(move(another._mask)),
+            _data_count(move(another._data_count)), _buckets(another._buckets){
+        another._buckets = nullptr;
+    }
+    UnorderedMap&amp; operator=(const UnorderedMap&amp; another){
+        delete[] _buckets;
+        _bucket_count = another._bucket_count;
+        _mask = another._mask;
+        _data_count = another._data_count;
+        _buckets = new bucket[_bucket_count + 1u];
+        for(unsigned int i = 0u; i &lt;= _bucket_count; ++i){
+            _buckets[i] = another._buckets[i];
+        }
+        return *this;
+    }
+    UnorderedMap&amp; operator=(UnorderedMap&amp;&amp; another){
+        delete[] _buckets;
+        _bucket_count = move(another._bucket_count);
+        _mask = move(another._mask);
+        _data_count = move(another._data_count);
+        _buckets = another._buckets;
+        another._buckets = nullptr;
+        return *this;
     }
     ~UnorderedMap(){ delete[] _buckets; }
     friend ostream&amp; operator&lt;&lt; (ostream&amp; os, UnorderedMap&amp; ump) noexcept {
         for(data_type&amp; val : ump) os &lt;&lt; '{' &lt;&lt; val.first &lt;&lt; ',' &lt;&lt; val.second &lt;&lt; &quot;} &quot;;
         return os;
     }
-    _Tp&amp; operator[](const _Key&amp; key){
-        return _find(key, true)-&gt;data_ptr()-&gt;second;
-    }
+    _Tp&amp; operator[](const _Key&amp; key){ return _find(key, true)-&gt;data_ptr()-&gt;second; }
+    _Tp&amp; operator[](_Key&amp;&amp; key){ return _find(move(key), true)-&gt;data_ptr()-&gt;second; }
     const _Tp&amp; at(const _Key&amp; key){
         bucket *res = _find(key);
-        if(res == _buckets + _bucket_count) __throw_out_of_range(__N(&quot;Unordered_Map::at&quot;));
+        if(static_cast&lt;size_t&gt;(res - _buckets) == _bucket_count){
+            __throw_out_of_range(__N(&quot;Unordered_Map::at&quot;));
+        }
         return res-&gt;data_ptr()-&gt;second;
     }
     void clear(){
-        UnorderedMap new_unordered_set(1u);
-        swap(*this, new_unordered_set);
+        UnorderedMap new_unordered_map(1u);
+        swap(*this, new_unordered_map);
     }
-    size_t size() const noexcept { return _data_count; }
-    size_t bucket_count() const noexcept { return _bucket_count; }
-    bool empty() const noexcept { return (_data_count == 0); }
-    iterator begin() const noexcept { return _buckets-&gt;empty() ? iterator(increment(_buckets)) : iterator(_buckets); }
+    inline size_t size() const noexcept { return _data_count; }
+    inline size_t bucket_count() const noexcept { return _bucket_count; }
+    inline bool empty() const noexcept { return (_data_count == 0u); }
+    iterator begin() const noexcept {
+        return _buckets-&gt;empty() ? iterator(increment(_buckets)) : iterator(_buckets);
+    }
     iterator end() const noexcept { return iterator(_buckets + _bucket_count); }
     iterator find(const _Key&amp; key){ return iterator(_find(key)); }
-    iterator insert(const data_type&amp; data){ return iterator(_insert(data)); }
+    iterator insert(const data_type&amp; data){ return iterator(find_insert(data)); }
+    iterator insert(data_type&amp;&amp; data){ return iterator(find_insert(move(data))); }
     iterator erase(const _Key&amp; key){ return iterator(erase_key(key)); }
     iterator erase(const iterator&amp; itr){ return iterator(erase_itr(itr.bucket_ptr)); }
     void simple_erase(const _Key&amp; key){ erase_key(key, false); }
@@ -335,6 +361,7 @@ public:
     bool operator!=(const UnorderedMapIterator&amp; itr) const noexcept { return bucket_ptr != itr.bucket_ptr; }
 };
 </pre>
+</div>
 <h3>コード(高速版)</h3>
 <div class="codebox">
 <input type="checkbox" id="label" class="csscode" />
@@ -357,6 +384,13 @@ private:
         bool _last, _end;
         aligned_pointer _value_ptr;
         bucket() noexcept : _dist(-1), _last(false), _end(false){}
+        bucket&amp; operator=(const bucket&amp; another) noexcept {
+            _key = another._key, _dist = another._dist, _last = another._last, _end = another._end;
+            if(!another.empty()){
+                new(&amp;_value_ptr) value_type(*reinterpret_cast&lt;const value_type*&gt;(&amp;another._value_ptr));
+            }
+            return *this;
+        }
         ~bucket(){ if(!empty()) _delete(); }
         inline void clear() noexcept { _dist = -1; }
         inline void _delete(){ _dist = -1, value_ptr()-&gt;~value_type(); }
@@ -367,8 +401,8 @@ private:
         inline value_type* value_ptr() noexcept {
             return reinterpret_cast&lt;value_type*&gt;(&amp;_value_ptr);
         }
-        inline void new_value(const value_type&amp; value){
-            new(&amp;_value_ptr) value_type(value);
+        inline void new_value(value_type&amp;&amp; value){
+            new(&amp;_value_ptr) value_type(move(value));
         }
     };
     inline static unsigned int ceilpow2(unsigned int u) noexcept {
@@ -387,15 +421,15 @@ private:
     inline unsigned int make_hash(const _Key&amp; key) const noexcept {
         return _Hash()(key);
     }
-    inline float load_factor() const noexcept {
+    inline float load_rate() const noexcept {
         return (float)_data_count / _bucket_count;
     }
-    bucket *insert_impl(bucket *cur, _Key key, short int dist, value_type value){
+    bucket *insert(bucket *cur, _Key&amp;&amp; key, short int dist, value_type&amp;&amp; value){
         bucket *ret = cur;
         bool flag = false;
         while(true){
             if(cur-&gt;empty()){
-                cur-&gt;_key = key, cur-&gt;_dist = dist, cur-&gt;new_value(value);
+                cur-&gt;_key = move(key), cur-&gt;_dist = dist, cur-&gt;new_value(move(value));
                 if(!flag) ret = cur, flag = true;
                 break;
             }else if(dist &gt; cur-&gt;_dist){
@@ -407,99 +441,87 @@ private:
         }
         return ret;
     }
-    bucket *_find(const _Key&amp; key, bool push=false){
-        bucket *cur = _buckets + (make_hash(key) &amp; _mask);
+    template&lt;class Key&gt;
+    bucket *_find(Key&amp;&amp; key, bool push = false){
+        unsigned int hash = make_hash(key);
+        bucket *cur = _buckets + (hash &amp; _mask);
         short int dist = 0;
         while(dist &lt;= cur-&gt;_dist){
             if(key == cur-&gt;_key) return cur;
-            ++dist;
-            cur = next_bucket(cur);
+            ++dist, cur = next_bucket(cur);
         }
         if(!push) return _buckets + _bucket_count;
         ++_data_count;
         if(rehash_check()){
-            cur = _buckets + (make_hash(key) &amp; _mask), dist = 0;
+            cur = _buckets + (hash &amp; _mask), dist = 0;
         }
-        return insert_impl(cur, key, dist, _Tp());
+        value_type new_value = value_type();
+        _Key new_key = forward&lt;Key&gt;(key);
+        return insert(cur, move(new_key), dist, move(new_value));
     }
-    bucket *_insert(const data_type&amp; data){
+    template&lt;class Data&gt;
+    bucket *find_insert(Data&amp;&amp; data){
         const _Key&amp; key = data.first;
-        bucket *cur = _buckets + (make_hash(key) &amp; _mask);
+        unsigned int hash = make_hash(key);
+        bucket *cur = _buckets + (hash &amp; _mask);
         short int dist = 0;
         while(dist &lt;= cur-&gt;_dist){
             if(key == cur-&gt;_key) return cur;
-            ++dist;
-            cur = next_bucket(cur);
+            ++dist, cur = next_bucket(cur);
         }
         ++_data_count;
         if(rehash_check()){
-            cur = _buckets + (make_hash(key) &amp; _mask), dist = 0;
+            cur = _buckets + (hash &amp; _mask), dist = 0;
         }
-        return insert_impl(cur, key, dist, data.second);
+        data_type new_data = forward&lt;Data&gt;(data);
+        return insert(cur, move(new_data.first), dist, move(new_data.second));
     }
     bucket *backward_shift(bucket *cur, bool next_ret){
         bucket *next = next_bucket(cur), *ret = cur;
         if(next-&gt;_dist &lt; 1) return next_ret ? increment(cur) : cur;
         do {
-            cur-&gt;_key = next-&gt;_key;
-            cur-&gt;_dist = next-&gt;_dist - 1;
-            cur-&gt;_value_ptr = next-&gt;_value_ptr;
+            cur-&gt;_key = next-&gt;_key, cur-&gt;_dist = next-&gt;_dist - 1;
+            cur-&gt;new_value(move(next-&gt;value()));
             cur = next, next = next_bucket(cur);
         }while(next-&gt;_dist &gt;= 1);
         cur-&gt;clear();
         return ret;
     }
     bucket *erase_impl(bucket *cur, bool next_ret){
-        assert(cur != _buckets + _bucket_count);
+        assert(static_cast&lt;size_t&gt;(cur - _buckets) != _bucket_count);
         cur-&gt;_delete();
+        --_data_count;
         return backward_shift(cur, next_ret);
     }
     bucket *erase_itr(bucket *cur, bool next_ret = true){
-        --_data_count;
-        const _Key&amp; key = cur-&gt;_key;
+        const _Key key = cur-&gt;_key;
         return erase_impl(rehash_check() ? _find(key) : cur, next_ret);
     }
     bucket *erase_key(const _Key&amp; key, bool next_ret = true){
-        --_data_count;
         rehash_check();
         return erase_impl(_find(key), next_ret);
     }
     bool rehash_check(){
-        if(load_factor() &gt;= MAX_LOAD_FACTOR){
-            rehash(_bucket_count * 2);
+        if(load_rate() &gt;= MAX_LOAD_RATE){
+            rehash(_bucket_count * 2u);
             return true;
         }else if(DOWNSIZE){
-            if(load_factor() &lt;= MIN_LOAD_FACTOR &amp;&amp; _bucket_count &gt;= DOWNSIZE_THRESHOLD){
-                rehash(_bucket_count / 2);
+            if(load_rate() &lt;= MIN_LOAD_RATE &amp;&amp; _bucket_count &gt;= DOWNSIZE_THRESHOLD){
+                rehash(_bucket_count / 2u);
                 return true;
-            }else{
-                return false;
             }
-        }else{
-            return false;
         }
+        return false;
     }
-    void move_data(_Key key, aligned_pointer value_ptr){
-        bucket *cur = _buckets + (make_hash(key) &amp; _mask);
-        short int dist = 0;
-        while(true){
-            if(cur-&gt;empty()){
-                cur-&gt;_key = key, cur-&gt;_dist = dist, cur-&gt;_value_ptr = value_ptr;
-                break;
-            }else if(dist &gt; cur-&gt;_dist){
-                swap(key, cur-&gt;_key), swap(dist, cur-&gt;_dist), swap(value_ptr, cur-&gt;_value_ptr);
-            }
-            ++dist;
-            cur = next_bucket(cur);
-        }
+    void move_data(bucket *cur){
+        insert(_buckets + (make_hash(cur-&gt;_key) &amp; _mask), move(cur-&gt;_key), 0, move(cur-&gt;value()));
     }
     void rehash(unsigned int new_bucket_count){
         UnorderedMap new_unordered_map(new_bucket_count);
         new_unordered_map._data_count = _data_count;
         for(bucket *cur = _buckets; !cur-&gt;_end; ++cur){
             if(!cur-&gt;empty()){
-                new_unordered_map.move_data(cur-&gt;_key, cur-&gt;_value_ptr);
-                cur-&gt;clear();
+                new_unordered_map.move_data(cur);
             }
         }
         swap(*this, new_unordered_map);
@@ -515,22 +537,53 @@ private:
     unsigned int _bucket_count, _mask, _data_count;
     bucket *_buckets;
 public:
-    const float MAX_LOAD_FACTOR = 0.5f;
-    const float MIN_LOAD_FACTOR = 0.1f;
+    const float MAX_LOAD_RATE = 0.5f;
+    const float MIN_LOAD_RATE = 0.1f;
     const unsigned int DOWNSIZE_THRESHOLD = 16u;
     UnorderedMap(unsigned int bucket_size = 1u)
      : _bucket_count(ceilpow2(max(bucket_size, 1u))), _mask(_bucket_count - 1),
         _data_count(0u), _buckets(new bucket[_bucket_count + 1]){
         _buckets[_bucket_count - 1]._last = true, _buckets[_bucket_count]._end = true;
     }
+    UnorderedMap(const UnorderedMap&amp; another)
+        : _bucket_count(another._bucket_count), _mask(another._mask), _data_count(another._data_count){
+        _buckets = new bucket[_bucket_count + 1u];
+        for(unsigned int i = 0u; i &lt;= _bucket_count; ++i){
+            _buckets[i] = another._buckets[i];
+        }
+    }
+    UnorderedMap(UnorderedMap&amp;&amp; another)
+        : _bucket_count(move(another._bucket_count)), _mask(move(another._mask)),
+            _data_count(move(another._data_count)), _buckets(another._buckets){
+        another._buckets = nullptr;
+    }
+    UnorderedMap&amp; operator=(const UnorderedMap&amp; another){
+        delete[] _buckets;
+        _bucket_count = another._bucket_count;
+        _mask = another._mask;
+        _data_count = another._data_count;
+        _buckets = new bucket[_bucket_count + 1u];
+        for(unsigned int i = 0u; i &lt;= _bucket_count; ++i){
+            _buckets[i] = another._buckets[i];
+        }
+        return *this;
+    }
+    UnorderedMap&amp; operator=(UnorderedMap&amp;&amp; another){
+        delete[] _buckets;
+        _bucket_count = move(another._bucket_count);
+        _mask = move(another._mask);
+        _data_count = move(another._data_count);
+        _buckets = another._buckets;
+        another._buckets = nullptr;
+        return *this;
+    }
     ~UnorderedMap(){ delete[] _buckets; }
     friend ostream&amp; operator&lt;&lt; (ostream&amp; os, UnorderedMap&amp; ump) noexcept {
         for(auto val : ump) os &lt;&lt; '{' &lt;&lt; val.first &lt;&lt; ',' &lt;&lt; val.second &lt;&lt; &quot;} &quot;;
         return os;
     }
-    _Tp&amp; operator[](const _Key&amp; key){
-        return _find(key, true)-&gt;value();
-    }
+    _Tp&amp; operator[](const _Key&amp; key){ return _find(key, true)-&gt;value(); }
+    _Tp&amp; operator[](_Key&amp;&amp; key){ return _find(move(key), true)-&gt;value(); }
     const _Tp&amp; at(const _Key&amp; key){
         bucket *res = _find(key);
         if(res == _buckets + _bucket_count) __throw_out_of_range(__N(&quot;Unordered_Map::at&quot;));
@@ -546,7 +599,8 @@ public:
     iterator begin() const noexcept { return _buckets-&gt;empty() ? iterator(increment(_buckets)) : iterator(_buckets); }
     iterator end() const noexcept { return iterator(_buckets + _bucket_count); }
     iterator find(const _Key&amp; key){ return iterator(_find(key)); }
-    iterator insert(const data_type&amp; data){ return iterator(_insert(data)); }
+    iterator insert(const data_type&amp; data){ return iterator(find_insert(data)); }
+    iterator insert(data_type&amp;&amp; data){ return iterator(find_insert(move(data))); }
     iterator erase(const _Key&amp; key){ return iterator(erase_key(key)); }
     iterator erase(const iterator&amp; itr){ return iterator(erase_itr(itr.bucket_ptr)); }
     void simple_erase(const _Key&amp; key){ erase_key(key, false); }
@@ -593,11 +647,11 @@ public:
     bool operator!=(const UnorderedMapIterator&amp; itr) const noexcept { return bucket_ptr != itr.bucket_ptr; }
 };
 </pre>
+</div>
 <h3>verify 用の問題</h3>
-<p>Atcoder : <a href=""></a>
-  <a href="">提出コード</a></p>
-<p>Codeforces : <a href=""></a>
-  <a href="">提出コード</a></p>
+<p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=ITP2_8_B">Dictionary - Map: Delete</a>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3826559#1">提出コード</a>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3826552#1">提出コード(高速版)</a></p>
 </section>
 
 </div>
