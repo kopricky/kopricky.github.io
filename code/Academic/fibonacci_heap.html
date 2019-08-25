@@ -152,11 +152,11 @@ public:
         if(rank.size() &lt;= max_rank) rank.resize(max_rank + 1);
         for(node*&amp; cur : rank) cur = nullptr;
         for(node *cur = next_minimum; cur != _minimum;){
-            if(cur-&gt;get_key() &lt; next_minimum-&gt;get_key()) next_minimum = cur;
+            if(cur-&gt;_key &lt; next_minimum-&gt;_key) next_minimum = cur;
             node *next = cur-&gt;_next;
             unsigned int deg = cur-&gt;_child;
             while(rank[deg]){
-                if(cur-&gt;get_key() &lt; rank[deg]-&gt;get_key() || cur == next_minimum){
+                if(cur-&gt;_key &lt; rank[deg]-&gt;_key || cur == next_minimum){
                     root_erase(rank[deg]), cur-&gt;insert(rank[deg]);
                 }else{
                     root_erase(cur), rank[deg]-&gt;insert(cur);
