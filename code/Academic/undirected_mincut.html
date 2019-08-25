@@ -41,195 +41,338 @@
 <h2>Undirected Mincut</h2>
 <h3>コードについての説明</h3>
 <p>
-無向グラフの大域最小容量カットを求めるアルゴリズム. 愚直に n-1 回 s,t 最大フローを求めるよりも高速に解くことができ計算量は O(mn + n^2log(n)) である. <br>
-ある頂点 v から始めて今の頂点集合 S と一番連結度の高い頂点を S に加えていくというように貪欲に取っていく順序を最大隣接順序 (MA ordering) と呼ぶ. <br>
-このように頂点を並び替えることで効率よく大域最小容量カットを求めることができる(最大隣接順序での後ろ 2 つの頂点 x_n, x_{n-1} の間の連結度が x_n の次数に一致するため縮約が可能). このアルゴリズムはより一般的な(対称)劣モジュラ関数の最小化アルゴリズムに拡張される(Queyranne 1998).<br>
-元論文は <a href="https://epubs.siam.org/doi/abs/10.1137/0405004">Nagamochi and Ibaraki 1992</a> <br>
-大域最小容量カットは他にも, 何も考えずグラフの辺をランダムに縮約していき残り 2 点になったときの連結度を最小容量カットとするというような操作を O(n^2) くらい繰り返せば高確率で最適値を得られるというようなモンテカルロアルゴリズムも存在する. <br>
-最後に上記の計算量を達成するため最大隣接順序の計算にフィボナッチヒープを用いているが, 実はグラフを隣接行列表現で持つことで, 縮約に伴うグラフの更新の部分をサボっているので結局計算量的には少し悪い O(n^3) になっています...<br>
+無向グラフの重みつき大域最小容量カットを求めるアルゴリズム. 愚直に n-1 回 s,t 最大フローを求めるよりも高速に解くことができ計算量は O(mn + n^2log(n)) である. <br>
+グラフ G = (V, E) についてある頂点 v(∈ V) から始めて今の頂点集合 S と一番連結度の高い頂点を S に加えていくというように貪欲に取っていく順序を最大隣接順序 (MA ordering) と呼ぶ. <br>
+このとき, 最大隣接順序での後ろ 2 つの頂点 x_n, x_{n-1} の間の連結度(x_n, x_{n-1} 間最小カット)が x_n の次数(δ(x_n))に一致する.
+これによってある 2 点間の連結度が分かったので x_n と x_{n-1} の 2 点を縮約することができる. 具体的には縮約後のグラフを G' とすると大域最小容量カットは min(δ(x_n), λ(G')) となる(答えとなる最小カットで x, y が分かれるか分かれないか). <br>
+このアルゴリズムはより一般的な(対称)劣モジュラ関数の最小化アルゴリズムに拡張される(Queyranne 1998).<br>
+元論文は <a href="https://epubs.siam.org/doi/abs/10.1137/0405004">Nagamochi and Ibaraki 1992</a> や <a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.450.4415&rep=rep1&type=pdf">Stoer, Wagner 1997</a> など<br>
+重みなし大域最小容量カットの場合は, 何も考えずグラフの辺をランダムに縮約していき残り 2 点になったときの連結度を最小容量カットとするというような操作を O(n^2) くらい繰り返せば高確率で最適値を得られるというようなモンテカルロアルゴリズムも存在する.
+<br>
 (補足) <br>
 無向グラフの大域最小容量カットを求めるアルゴリズムは近年でもよく研究されていて, 重みなしの場合は λ をグラフの連結度としたときに計算量 O(m + λ^2 n) (Gabow) の deterministic algorithm や
 他にも deterministic algorithm として O(m log^12 n) (Kawarabayashi, Thorup 2014) (初の nearly linear time), O(m log^2 n log log^2 n) (Henzinger, Rao, Wang 2017) (⇒ 後に expander decomposition へ応用) などがある. 重みつきの場合は randomized algorithm として
 O(m log^3 n) (Karger 2000) がある.
 </p>
 <p>
-時間計算量: O(n^3) (ちゃんとやれば O(mn + n^2log(n)))
+時間計算量: O(mn + n^2 log n)
 </p>
 <h3>コード</h3>
 <div class="codebox">
 <input type="checkbox" id="label" class="csscode" />
 <label for="label"></label>
 <pre class="prettyprint linenums">
-template&lt;typename KeyType&gt; class Fibonacci_Heap
+template&lt;typename _Key, typename _Tp&gt; class Fibonacci_Heap
 {
 public:
     class node
     {
     public:
-        KeyType key;
-        int child, id;
-        node *par, *prv, *nx, *ch_sentinel;
-        bool mark;
-        node(KeyType val, int _id) : key(val), child(0), id(_id),
-                par(nullptr), prv(nullptr), nx(nullptr), mark(false){}
-        node() : key(numeric_limits&lt;KeyType&gt;::max()), prv(this), nx(this){}
+        pair&lt;_Key, _Tp&gt; _data;
+        unsigned short int _child;
+        bool _mark;
+        node *_par, *_prev, *_next, *_ch_last;
+        node(const _Key&amp; key, const _Tp&amp; data) : _data(key, data),
+            _child(0), _par(nullptr), _prev(nullptr), _next(nullptr), _ch_last(nullptr){}
+        node(const _Key&amp; key, _Tp&amp;&amp; data) : _data(key, move(data)),
+            _child(0), _par(nullptr), _prev(nullptr), _next(nullptr), _ch_last(nullptr){}
+        inline const _Key&amp; get_key() const noexcept { return _data.first; }
+        void insert(node *cur){
+            if(_ch_last) insert_impl(cur, _ch_last);
+            else _ch_last = cur, _ch_last-&gt;_prev = _ch_last-&gt;_next = _ch_last;
+            ++_child, cur-&gt;_par = this;
+        }
+        void erase(node *cur){
+            if(cur == cur-&gt;_prev){
+                _ch_last = nullptr;
+            }else{
+                erase_impl(cur);
+                if(cur == _ch_last) _ch_last = cur-&gt;_prev;
+            }
+            --_child, cur-&gt;_par = nullptr;
+        }
     };
 
 private:
-    int _size;
-    node *minimum, *sentinel;
+    static constexpr float FACTOR = 1.0f / log2((1.0f + sqrt(5.0f)) / 2.0f);
+    size_t _size;
+    node *_minimum;
+    vector&lt;node*&gt; rank;
 
-    inline void _insert(node *_node1, node *_node2){
-        _node1-&gt;prv = _node2-&gt;prv, _node1-&gt;nx = _node2;
-        _node1-&gt;prv-&gt;nx = _node1, _node2-&gt;prv = _node1;
+    static void insert_impl(node *cur, node *next){
+        cur-&gt;_prev = next-&gt;_prev, cur-&gt;_next = next;
+        cur-&gt;_prev-&gt;_next = cur, next-&gt;_prev = cur;
     }
-    inline void _erase(node *_node){
-        _node-&gt;prv-&gt;nx = _node-&gt;nx, _node-&gt;nx-&gt;prv = _node-&gt;prv;
+    static void erase_impl(node *cur){
+        cur-&gt;_prev-&gt;_next = cur-&gt;_next, cur-&gt;_next-&gt;_prev = cur-&gt;_prev;
     }
-
-public:
-    Fibonacci_Heap() : _size(0){
-        minimum = sentinel = new node();
+    static int ceil2(int u){
+        return 32 - __builtin_clz(u);
     }
-    inline bool empty(){
-        return (_size == 0);
+    void root_insert(node *cur){
+        if(_minimum){
+            insert_impl(cur, _minimum);
+            if(cur-&gt;get_key() &lt; _minimum-&gt;get_key()) _minimum = cur;
+        }else{
+            _minimum = cur, _minimum-&gt;_prev = _minimum-&gt;_next = _minimum;
+        }
     }
-    inline int size(){
-        return _size;
+    void root_erase(node *cur){
+        if(cur == cur-&gt;_prev) _minimum = nullptr;
+        else erase_impl(cur);
     }
-    inline node* top(){
-        return minimum;
+    void _delete(node *cur){
+        root_erase(cur);
+        delete cur;
     }
-    node* push(KeyType val, int _id){
-        _size++;
-        node* new_node = new node(val, _id);
-        new_node-&gt;ch_sentinel = new node();
-        _insert(new_node, sentinel);
-        if(minimum-&gt;key &gt; val) minimum = new_node;
+    template&lt;typename Data&gt;
+    node *_push(const _Key&amp; key, Data&amp;&amp; data){
+        ++_size;
+        node* new_node = new node(key, forward&lt;Data&gt;(data));
+        root_insert(new_node);
         return new_node;
     }
-    void pop(){
+    void _pop(){
         assert(_size &gt; 0);
-        _size--;
-        for(auto _node = minimum-&gt;ch_sentinel-&gt;nx; _node != minimum-&gt;ch_sentinel;){
-            node* nx_node = _node-&gt;nx;
-            _node-&gt;par = nullptr, _insert(_node, sentinel), _node = nx_node;
-        }
-        _erase(minimum);
-        delete minimum;
+        --_size;
         if(_size == 0){
-            minimum = sentinel;
+            _delete(_minimum);
             return;
         }
-        int sz = (int)log2(_size)+2;
-        node** array = new node*[sz];
-        for(int i = 0; i &lt; sz; i++) array[i] = nullptr;
-        for(auto _node = sentinel-&gt;nx; _node != sentinel;){
-            node* nx_node = _node-&gt;nx;
-            int deg = _node-&gt;child;
-            while(array[deg]){
-                if(_node-&gt;key &lt; array[deg]-&gt;key){
-                    array[deg]-&gt;par = _node, _node-&gt;child++;
-                    _erase(array[deg]), _insert(array[deg], _node-&gt;ch_sentinel);
-                }else{
-                    _node-&gt;par = array[deg], array[deg]-&gt;child++;
-                    _erase(_node), _insert(_node, array[deg]-&gt;ch_sentinel);
-                    _node = array[deg];
-                }
-                array[deg] = nullptr;
-                deg++;
-                assert(sz &gt; deg);
+        if(_minimum-&gt;_ch_last){
+            for(node *cur = _minimum-&gt;_ch_last-&gt;_next;;){
+                node *next = cur-&gt;_next;
+                _minimum-&gt;erase(cur), root_insert(cur);
+                if(!_minimum-&gt;_ch_last) break;
+                cur = next;
             }
-            array[deg] = _node;
-            _node = nx_node;
         }
-        delete array;
-        KeyType val = sentinel-&gt;key;
-        for(auto _node = sentinel-&gt;nx; _node != sentinel; _node = _node-&gt;nx){
-            if(val &gt; _node-&gt;key) val = _node-&gt;key, minimum = _node;
+        unsigned int max_rank = ceil(ceil2(_size) * FACTOR);
+        node *next_minimum = _minimum-&gt;_next;
+        if(rank.size() &lt;= max_rank) rank.resize(max_rank + 1);
+        for(node*&amp; cur : rank) cur = nullptr;
+        for(node *cur = next_minimum; cur != _minimum;){
+            if(cur-&gt;get_key() &lt; next_minimum-&gt;get_key()) next_minimum = cur;
+            node *next = cur-&gt;_next;
+            unsigned int deg = cur-&gt;_child;
+            while(rank[deg]){
+                if(cur-&gt;get_key() &lt; rank[deg]-&gt;get_key() || cur == next_minimum){
+                    root_erase(rank[deg]), cur-&gt;insert(rank[deg]);
+                }else{
+                    root_erase(cur), rank[deg]-&gt;insert(cur);
+                    cur = rank[deg];
+                }
+                rank[deg++] = nullptr;
+            }
+            rank[deg] = cur;
+            cur = next;
         }
+        _delete(_minimum);
+        _minimum = next_minimum;
     }
-    void update(node* _node, KeyType val){
-        assert(val &gt;= 0);
-        _node-&gt;key -= val;
-        if(_node-&gt;key &lt; minimum-&gt;key) minimum = _node;
-        if(_node-&gt;par &amp;&amp; _node-&gt;par-&gt;key &lt;= val) return;
-        while(_node-&gt;par){
-            node* nx_node = _node-&gt;par;
-            _erase(_node), _node-&gt;par-&gt;child--, _insert(_node, sentinel);
-            _node-&gt;mark = false, _node-&gt;par = nullptr, _node = nx_node;
-            if(!_node) break;
-            if(!_node-&gt;mark){
-                _node-&gt;mark = true;
+    void _update(node *cur, const _Key&amp; key){
+        assert(key &gt;= (_Key)0);
+        node *change = ((cur-&gt;_data.first -= key) &lt; _minimum-&gt;get_key()) ? cur : nullptr;
+        if(!cur-&gt;_par || cur-&gt;_par-&gt;get_key() &lt;= cur-&gt;get_key()){
+            if(change) _minimum = change;
+            return;
+        }
+        while(true){
+            node *next = cur-&gt;_par;
+            next-&gt;erase(cur), root_insert(cur);
+            cur-&gt;_mark = false, cur = next;
+            if(!cur-&gt;_par) break;
+            if(!cur-&gt;_mark){
+                cur-&gt;_mark = true;
                 break;
             }
         }
+        if(change) _minimum = change;
     }
-    friend void unite(Fibonacci_Heap* fh1, Fibonacci_Heap* fh2){
+    void clear_dfs(node *cur){
+        if(cur-&gt;_ch_last){
+            for(node *_cur = cur-&gt;_ch_last-&gt;_next;;){
+                node *next = _cur-&gt;_next;
+                if(_cur == cur-&gt;_ch_last){
+                    clear_dfs(_cur);
+                    break;
+                }else{
+                    clear_dfs(_cur);
+                }
+                _cur = next;
+            }
+        }
+        delete cur;
+        return;
+    }
+    void _clear(){
+        if(!_minimum) return;
+        for(node *cur = _minimum-&gt;_next;;){
+            node *next = cur-&gt;_next;
+            if(cur == _minimum){
+                clear_dfs(cur);
+                break;
+            }else{
+                clear_dfs(cur);
+            }
+            cur = next;
+        }
+    }
+
+public:
+    Fibonacci_Heap() noexcept : _size(0u), _minimum(nullptr){}
+    Fibonacci_Heap(const Fibonacci_Heap&amp;) = delete;
+    Fibonacci_Heap(Fibonacci_Heap&amp;&amp; another)
+        : _size(move(another._size)), rank(move(another.rank)){
+        _clear(), _minimum = another._minimum;
+    }
+    Fibonacci_Heap&amp; operator=(const Fibonacci_Heap&amp;) = delete;
+    Fibonacci_Heap&amp; operator=(Fibonacci_Heap&amp;&amp; another){
+        _size = move(another._size), rank = move(another.rank);
+        _clear(), _minimum = another._minimum;
+    }
+    // ~Fibonacci_Heap(){ _clear(); }
+    inline bool empty() const noexcept { return (_size == 0); }
+    inline size_t size() const noexcept { return _size; }
+    inline const pair&lt;_Key, _Tp&gt;&amp; top() const noexcept { return _minimum-&gt;_data; }
+    node *push(const _Key&amp; key, const _Tp&amp; data){ return _push(key, data); }
+    node *push(const _Key&amp; key, _Tp&amp;&amp; data){ return _push(key, move(data)); }
+    void pop(){ _pop(); }
+    void update(node *cur, const _Key&amp; key){ _update(cur, key); }
+    void clear(){ _clear(); _size = 0; rank.~vector&lt;node*&gt;(); }
+    friend Fibonacci_Heap *unite(Fibonacci_Heap *fh1, Fibonacci_Heap *fh2){
         if(fh2-&gt;_size == 0){
-            delete fh2;
+            fh2-&gt;~Fibonacci_Heap();
+            return fh1;
+        }
+        if(fh1-&gt;size == 0){
+            fh1-&gt;~Fibonacci_Heap();
+            return fh2;
+        }
+        fh1-&gt;__minimum-&gt;_prev-&gt;_next = fh2-&gt;__minimum-&gt;_next;
+        fh2-&gt;__minimum-&gt;_next-&gt;_prev = fh1-&gt;__minimum-&gt;_prev;
+        fh2-&gt;__minimum-&gt;_next = fh1-&gt;__minimum;
+        fh1-&gt;__minimum-&gt;_prev = fh2-&gt;__minimum;
+        fh1-&gt;_size += fh2-&gt;_size;
+        if(fh1-&gt;__minimum-&gt;get_key() &gt; fh2-&gt;__minimum-&gt;get_key()) fh1-&gt;__minimum = fh2-&gt;__minimum;
+        fh2-&gt;~Fibonacci_Heap();
+        return fh1;
+    }
+
+    // DEBUG 用
+    int dfs(node *cur, bool print, int depth) const {
+        if(!cur-&gt;_ch_last){
+            assert(cur-&gt;_child == 0);
+            return 1;
+        }
+        int sz = 1;
+        for(node *next = cur-&gt;_ch_last-&gt;_next; ; next = next-&gt;_next){
+            if(print) cout &lt;&lt; depth &lt;&lt; &quot;: &quot; &lt;&lt; next-&gt;_data.first &lt;&lt; &quot; &quot; &lt;&lt;
+                        next-&gt;_data.second &lt;&lt; &quot; &quot; &lt;&lt; next-&gt;_mark &lt;&lt; endl;
+            sz += dfs(next, print, depth + 1);
+            if(next == cur-&gt;_ch_last) break;
+        }
+        return sz;
+    }
+    void check(bool print = false) const {
+        if(!_minimum){
+            assert(_size == 0);
             return;
         }
-        if(fh1-&gt;minimum-&gt;key &gt; fh2-&gt;minimum-&gt;key) fh1-&gt;minimum = fh2-&gt;minimum;
-        fh1-&gt;_size += fh2-&gt;_size;
-        fh1-&gt;sentinel-&gt;prv-&gt;nx = fh2-&gt;sentinel-&gt;nx;
-        fh2-&gt;sentinel-&gt;nx-&gt;prv = fh1-&gt;sentinel-&gt;prv;
-        fh2-&gt;sentinel-&gt;prv-&gt;nx = fh1-&gt;sentinel;
-        fh1-&gt;sentinel-&gt;prv = fh2-&gt;sentinel-&gt;prv;
-        delete fh2-&gt;sentinel;
+        size_t sz = 0;
+        for(node *cur = _minimum-&gt;_next; ; cur = cur-&gt;_next){
+            if(print) cout &lt;&lt; &quot;0: &quot; &lt;&lt; cur-&gt;_data.first &lt;&lt; &quot; &quot; &lt;&lt;
+                        cur-&gt;_data.second &lt;&lt; endl;
+            sz += dfs(cur, print, 1);
+            if(cur == _minimum) break;
+        }
+        cout &lt;&lt; endl;
+        assert(sz == _size);
+    }
+};
+
+class SimpleMergeSet
+{
+public:
+    vector&lt;int&gt; next;
+    SimpleMergeSet(const int node_size)
+        : next((int)node_size){
+        iota(next.begin(), next.end(), 0);
+    }
+    void unite(const int u, const int v){
+        swap(next[u], next[v]);
     }
 };
 
 template&lt;typename T&gt; class UndirectedMinCut
 {
-public:
+private:
     struct edge{
-        int to, rev;
-        T cost;
+        int to; T cost; int rev;
+        edge(int _to, T _cost, int _rev)
+        : to(_to), cost(_cost), rev(_rev){}
     };
+    const int V;
+    SimpleMergeSet ms;
+    vector&lt;vector&lt;edge&gt; &gt; G;
 
-    int V;
-    vector&lt;vector&lt;int&gt; &gt; G;
-    vector&lt;int&gt; order;
-    UndirectedMinCut(int node_size) : V(node_size), G(V, vector&lt;int&gt;(V, 0)), order(V){
-        iota(order.begin(),order.end(),0);
-    }
-    void add_edge(int u, int v, T cap){
-        G[u][v] += cap, G[v][u] += cap;
+public:
+    vector&lt;int&gt; ans_set;
+    UndirectedMinCut(const int node_size) : V(node_size), ms(V), G(V){}
+    void add_edge(int u, int v, T cost){
+		G[u].emplace_back(v, cost, (int)G[v].size());
+        G[v].emplace_back(u, cost, (int)G[u].size() - 1);
     }
     T solve(){
         T ans = numeric_limits&lt;T&gt;::max();
-        for(int i = V; i &gt; 1; i--){
-            vector&lt;typename Fibonacci_Heap&lt;T&gt;::node*&gt; kp(i, nullptr);
-            vector&lt;int&gt; new_order(i-1), rev_order(V, -1);
-            for(int j = 0; j &lt; i; j++) rev_order[order[j]] = j;
-            Fibonacci_Heap&lt;T&gt; fh;
-            for(int j = 0; j &lt; i; j++) kp[j] = fh.push(0, j);
-            for(int j = 0; j &lt; i-1; j++){
-                int mx_id = fh.top()-&gt;id;
+		vector&lt;typename Fibonacci_Heap&lt;T, int&gt;::node*&gt; kp(V, nullptr);
+		vector&lt;int&gt; ord(V);
+		bool *visited = new bool[V]();
+		iota(ord.begin(), ord.end(), 0);
+        for(int i = V; i &gt; 1; --i){
+            Fibonacci_Heap&lt;T, int&gt; fh;
+			vector&lt;int&gt; new_ord(i-1);
+            for(int id : ord){
+				kp[id] = fh.push(0, id);
+			}
+            for(int j = 0; j &lt; i-1; ++j){
+                int cur = fh.top().second;
                 fh.pop();
-                new_order[j] = order[mx_id], rev_order[order[mx_id]] = -1;
-                for(int k = 0; k &lt; i; k++){
-                    if(rev_order[order[mx_id]] &gt;= 0){
-                        fh.update(kp[rev_order[order[mx_id]]], G[order[mx_id]][order[k]]);
-                    }
+                visited[cur] = true, new_ord[j] = cur;
+				for(edge&amp; e : G[cur]){
+					if(!visited[e.to]) fh.update(kp[e.to], e.cost);
+				}
+            }
+            int last_ver = fh.top().second, nx_last = new_ord[i-2];
+			for(edge&amp; e : G[last_ver]){
+                if(e.to == nx_last) continue;
+				G[nx_last].emplace_back(e.to, e.cost, e.rev);
+                edge&amp; reve = G[e.to][e.rev];
+				reve.to = nx_last, reve.rev = (int)G[nx_last].size() - 1;
+			}
+			for(int ver : new_ord){
+                visited[ver] = false;
+            }
+            visited[last_ver] = true;
+            if(ans &gt; -fh.top().first){
+                ans = -fh.top().first;
+                ans_set.clear();
+                for(int cur = last_ver;;){
+                    ans_set.push_back(cur);
+                    if((cur = ms.next[cur]) == last_ver) break;
                 }
             }
-            int last_ver = order[fh.top()-&gt;id], nx_last = new_order.back();
-            for(int j = 0; j &lt; (int)new_order.size()-1; j++){
-                G[nx_last][new_order[j]] += G[last_ver][new_order[j]];
-                G[new_order[j]][nx_last] += G[new_order[j]][last_ver];
-            }
-            order = new_order;
-            ans = min(ans, -fh.top()-&gt;key);
+            ms.unite(nx_last, last_ver);
+            swap(ord, new_ord);
         }
+        delete[] visited;
         return ans;
     }
 };
 </pre>
 <h3>verify 用の問題</h3>
-<p>
-verify していません(verify 問題を知らない)
+<p>UVa : <a href="https://onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_problem&problem=1930">Bomb, Divide and Conquer</a>
+    <a href="https://ideone.com/mCEPVd">提出コード</a>
 </p>
 </section>
 
