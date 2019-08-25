@@ -74,8 +74,6 @@ public:
         unsigned short int _child;
         bool _mark;
         node *_par, *_prev, *_next, *_ch_last;
-        node(const _Key&amp; _key) : _key(_key), _child(0),
-                _par(nullptr), _prev(nullptr), _next(nullptr), _ch_last(nullptr){}
         node(_Key&amp;&amp; _key) : _key(move(_key)), _child(0),
                 _par(nullptr), _prev(nullptr), _next(nullptr), _ch_last(nullptr){}
         void insert(node *cur){
@@ -126,9 +124,11 @@ public:
         root_erase(cur);
         delete cur;
     }
-    node *_push(const _Key&amp; key){
+    template&lt;typename Key&gt;
+    node *_push(Key&amp;&amp; key){
         ++_size;
-        node* new_node = new node(key);
+        _Key new_key = forward&lt;Key&gt;(key);
+        node* new_node = new node(move(new_key));
         root_insert(new_node);
         return new_node;
     }
@@ -171,9 +171,9 @@ public:
         _minimum = next_minimum;
     }
     void _update(node *cur, const _Key&amp; key){
-        assert(key &gt;= (_Key)0);
+        assert(!(key &lt; (_Key)0));
         node *change = ((cur-&gt;_key -= key) &lt; _minimum-&gt;_key) ? cur : nullptr;
-        if(!cur-&gt;_par || cur-&gt;_par-&gt;_key &lt;= cur-&gt;_key){
+        if(!cur-&gt;_par || !(cur-&gt;_key &lt; cur-&gt;_par-&gt;_key)){
             if(change) _minimum = change;
             return;
         }
@@ -236,6 +236,7 @@ public:
     inline size_t size() const noexcept { return _size; }
     inline const _Key&amp; top() const noexcept { return _minimum-&gt;_key; }
     node *push(const _Key&amp; key){ return _push(key); }
+    node *push(_Key&amp;&amp; key){ return _push(move(key)); }
     void pop(){ _pop(); }
     void update(node *cur, const _Key&amp; key){ _update(cur, key); }
     void clear(){ _clear(); _size = 0; rank.~vector&lt;node*&gt;(); }
@@ -253,7 +254,7 @@ public:
         fh2-&gt;_minimum-&gt;_next = fh1-&gt;_minimum;
         fh1-&gt;_minimum-&gt;_prev = fh2-&gt;_minimum;
         fh1-&gt;_size += fh2-&gt;_size;
-        if(fh1-&gt;_minimum-&gt;_key &gt; fh2-&gt;_minimum-&gt;_key) fh1-&gt;_minimum = fh2-&gt;_minimum;
+        if(fh2-&gt;_minimum-&gt;_key &lt; fh1-&gt;_minimum-&gt;_key) fh1-&gt;_minimum = fh2-&gt;_minimum;
         fh2-&gt;~Fibonacci_Heap();
         return fh1;
     }
@@ -296,16 +297,15 @@ public:
 template&lt;typename _Key, typename _Tp&gt; class Fibonacci_Heap
 {
 public:
+    using data_type = pair&lt;_Key, _Tp&gt;;
     class node
     {
     public:
-        pair&lt;_Key, _Tp&gt; _data;
+        data_type _data;
         unsigned short int _child;
         bool _mark;
         node *_par, *_prev, *_next, *_ch_last;
-        node(const _Key&amp; key, const _Tp&amp; data) : _data(key, data),
-            _child(0), _par(nullptr), _prev(nullptr), _next(nullptr), _ch_last(nullptr){}
-        node(const _Key&amp; key, _Tp&amp;&amp; data) : _data(key, move(data)),
+        node(data_type&amp;&amp; data) : _data(move(data)),
             _child(0), _par(nullptr), _prev(nullptr), _next(nullptr), _ch_last(nullptr){}
         inline const _Key&amp; get_key() const noexcept { return _data.first; }
         void insert(node *cur){
@@ -356,10 +356,11 @@ private:
         root_erase(cur);
         delete cur;
     }
-    template&lt;typename Data&gt;
-    node *_push(const _Key&amp; key, Data&amp;&amp; data){
+    template&lt;typename Key, typename Data&gt;
+    node *_push(Key&amp;&amp; key, Data&amp;&amp; data){
         ++_size;
-        node* new_node = new node(key, forward&lt;Data&gt;(data));
+        data_type new_data(forward&lt;Key&gt;(key), forward&lt;Data&gt;(data));
+        node* new_node = new node(move(new_data));
         root_insert(new_node);
         return new_node;
     }
@@ -402,9 +403,9 @@ private:
         _minimum = next_minimum;
     }
     void _update(node *cur, const _Key&amp; key){
-        assert(key &gt;= (_Key)0);
+        assert(!(key &lt; (_Key)0));
         node *change = ((cur-&gt;_data.first -= key) &lt; _minimum-&gt;get_key()) ? cur : nullptr;
-        if(!cur-&gt;_par || cur-&gt;_par-&gt;get_key() &lt;= cur-&gt;get_key()){
+        if(!cur-&gt;_par || !(cur-&gt;get_key() &lt; cur-&gt;_par-&gt;get_key())){
             if(change) _minimum = change;
             return;
         }
@@ -455,19 +456,19 @@ public:
     Fibonacci_Heap(const Fibonacci_Heap&amp;) = delete;
     Fibonacci_Heap(Fibonacci_Heap&amp;&amp; another)
         : _size(move(another._size)), rank(move(another.rank)){
-        _clear(), _minimum = another._minimum;
+        _minimum = another._minimum, another._minimum = nullptr;
     }
     Fibonacci_Heap&amp; operator=(const Fibonacci_Heap&amp;) = delete;
     Fibonacci_Heap&amp; operator=(Fibonacci_Heap&amp;&amp; another){
         _size = move(another._size), rank = move(another.rank);
-        _clear(), _minimum = another._minimum;
+        _clear(), _minimum = another._minimum, another._minimum = nullptr;
     }
     // ~Fibonacci_Heap(){ _clear(); }
     inline bool empty() const noexcept { return (_size == 0); }
     inline size_t size() const noexcept { return _size; }
-    inline const pair&lt;_Key, _Tp&gt;&amp; top() const noexcept { return _minimum-&gt;_data; }
-    node *push(const _Key&amp; key, const _Tp&amp; data){ return _push(key, data); }
-    node *push(const _Key&amp; key, _Tp&amp;&amp; data){ return _push(key, move(data)); }
+    inline const data_type&amp; top() const noexcept { return _minimum-&gt;_data; }
+    template&lt;typename Key, typename Data&gt;
+    node *push(Key&amp;&amp; key, Data&amp;&amp; data){ return _push(forward&lt;Key&gt;(key), forward&lt;Data&gt;(data)); }
     void pop(){ _pop(); }
     void update(node *cur, const _Key&amp; key){ _update(cur, key); }
     void clear(){ _clear(); _size = 0; rank.~vector&lt;node*&gt;(); }
@@ -476,16 +477,16 @@ public:
             fh2-&gt;~Fibonacci_Heap();
             return fh1;
         }
-        if(fh1-&gt;size == 0){
+        if(fh1-&gt;_size == 0){
             fh1-&gt;~Fibonacci_Heap();
             return fh2;
         }
-        fh1-&gt;__minimum-&gt;_prev-&gt;_next = fh2-&gt;__minimum-&gt;_next;
-        fh2-&gt;__minimum-&gt;_next-&gt;_prev = fh1-&gt;__minimum-&gt;_prev;
-        fh2-&gt;__minimum-&gt;_next = fh1-&gt;__minimum;
-        fh1-&gt;__minimum-&gt;_prev = fh2-&gt;__minimum;
+        fh1-&gt;_minimum-&gt;_prev-&gt;_next = fh2-&gt;_minimum-&gt;_next;
+        fh2-&gt;_minimum-&gt;_next-&gt;_prev = fh1-&gt;_minimum-&gt;_prev;
+        fh2-&gt;_minimum-&gt;_next = fh1-&gt;_minimum;
+        fh1-&gt;_minimum-&gt;_prev = fh2-&gt;_minimum;
         fh1-&gt;_size += fh2-&gt;_size;
-        if(fh1-&gt;__minimum-&gt;get_key() &gt; fh2-&gt;__minimum-&gt;get_key()) fh1-&gt;__minimum = fh2-&gt;__minimum;
+        if(fh2-&gt;_minimum-&gt;get_key() &lt; fh1-&gt;_minimum-&gt;get_key()) fh1-&gt;_minimum = fh2-&gt;_minimum;
         fh2-&gt;~Fibonacci_Heap();
         return fh1;
     }
@@ -524,7 +525,7 @@ public:
 </pre>
 <h3>verify 用の問題</h3>
 <p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2559">Minimum Spanning Tree</a>
-  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3829485#1">提出コード</a></p>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3829493#1">提出コード</a></p>
 </section>
 
 </div>

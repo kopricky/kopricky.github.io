@@ -41,7 +41,7 @@
 <h2>Dijkstra with Fibonacci Heap</h2>
 <h3>コードについての説明</h3>
 <p>
-Dijkstra 法を <a href="./fibonacci_heap.html">Fibonacci Heap</a> を用いて高速化したアルゴリズム. 時間計算量が O((n+m)logn) から O(nlogn+m) に落ちる. <br>
+Dijkstra 法を <a href="./fibonacci_heap.html">Fibonacci Heap</a> を用いて高速化したアルゴリズム. 時間計算量が O((n + m) logn) から O(n log n + m) に落ちる. <br>
 最短距離の更新をフィボナッチヒープのキー値減算を用いることで 1 回あたりならし O(1) で行えるところがポイント. <br>
 元論文は <a href="http://www.bioinfo.org.cn/~dbu/AlgorithmCourses/Lectures/Fibonacci-Heap-Tarjan.pdf">Fredman, Tarjan 1984</a>
 </p>
@@ -56,16 +56,15 @@ Dijkstra 法を <a href="./fibonacci_heap.html">Fibonacci Heap</a> を用いて�
 template&lt;typename _Key, typename _Tp&gt; class Fibonacci_Heap
 {
 public:
+    using data_type = pair&lt;_Key, _Tp&gt;;
     class node
     {
     public:
-        pair&lt;_Key, _Tp&gt; _data;
+        data_type _data;
         unsigned short int _child;
         bool _mark;
         node *_par, *_prev, *_next, *_ch_last;
-        node(const _Key&amp; key, const _Tp&amp; data) : _data(key, data),
-            _child(0), _par(nullptr), _prev(nullptr), _next(nullptr), _ch_last(nullptr){}
-        node(const _Key&amp; key, _Tp&amp;&amp; data) : _data(key, move(data)),
+        node(data_type&amp;&amp; data) : _data(move(data)),
             _child(0), _par(nullptr), _prev(nullptr), _next(nullptr), _ch_last(nullptr){}
         inline const _Key&amp; get_key() const noexcept { return _data.first; }
         void insert(node *cur){
@@ -116,10 +115,11 @@ private:
         root_erase(cur);
         delete cur;
     }
-    template&lt;typename Data&gt;
-    node *_push(const _Key&amp; key, Data&amp;&amp; data){
+    template&lt;typename Key, typename Data&gt;
+    node *_push(Key&amp;&amp; key, Data&amp;&amp; data){
         ++_size;
-        node* new_node = new node(key, forward&lt;Data&gt;(data));
+        data_type new_data(forward&lt;Key&gt;(key), forward&lt;Data&gt;(data));
+        node* new_node = new node(move(new_data));
         root_insert(new_node);
         return new_node;
     }
@@ -162,9 +162,9 @@ private:
         _minimum = next_minimum;
     }
     void _update(node *cur, const _Key&amp; key){
-        assert(key &gt;= (_Key)0);
+        assert(!(key &lt; (_Key)0));
         node *change = ((cur-&gt;_data.first -= key) &lt; _minimum-&gt;get_key()) ? cur : nullptr;
-        if(!cur-&gt;_par || cur-&gt;_par-&gt;get_key() &lt;= cur-&gt;get_key()){
+        if(!cur-&gt;_par || !(cur-&gt;get_key() &lt; cur-&gt;_par-&gt;get_key())){
             if(change) _minimum = change;
             return;
         }
@@ -225,9 +225,9 @@ public:
     // ~Fibonacci_Heap(){ _clear(); }
     inline bool empty() const noexcept { return (_size == 0); }
     inline size_t size() const noexcept { return _size; }
-    inline const pair&lt;_Key, _Tp&gt;&amp; top() const noexcept { return _minimum-&gt;_data; }
-    node *push(const _Key&amp; key, const _Tp&amp; data){ return _push(key, data); }
-    node *push(const _Key&amp; key, _Tp&amp;&amp; data){ return _push(key, move(data)); }
+    inline const data_type&amp; top() const noexcept { return _minimum-&gt;_data; }
+    template&lt;typename Key, typename Data&gt;
+    node *push(Key&amp;&amp; key, Data&amp;&amp; data){ return _push(forward&lt;Key&gt;(key), forward&lt;Data&gt;(data)); }
     void pop(){ _pop(); }
     void update(node *cur, const _Key&amp; key){ _update(cur, key); }
     void clear(){ _clear(); _size = 0; rank.~vector&lt;node*&gt;(); }
@@ -245,7 +245,7 @@ public:
         fh2-&gt;_minimum-&gt;_next = fh1-&gt;_minimum;
         fh1-&gt;_minimum-&gt;_prev = fh2-&gt;_minimum;
         fh1-&gt;_size += fh2-&gt;_size;
-        if(fh1-&gt;_minimum-&gt;get_key() &gt; fh2-&gt;_minimum-&gt;get_key()) fh1-&gt;_minimum = fh2-&gt;_minimum;
+        if(fh2-&gt;_minimum-&gt;get_key() &lt; fh1-&gt;_minimum-&gt;get_key()) fh1-&gt;_minimum = fh2-&gt;_minimum;
         fh2-&gt;~Fibonacci_Heap();
         return fh1;
     }
@@ -325,7 +325,7 @@ public:
 </pre>
 <h3>verify 用の問題</h3>
 <p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_1_A">Single Source Shortest Path</a>
-  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3828390#1">提出コード</a></p>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3829495#1">提出コード</a></p>
 </section>
 
 </div>

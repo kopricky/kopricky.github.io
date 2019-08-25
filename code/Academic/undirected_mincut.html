@@ -43,12 +43,12 @@
 <p>
 無向グラフの重みつき大域最小容量カットを求めるアルゴリズム. 愚直に n-1 回 s,t 最大フローを求めるよりも高速に解くことができ計算量は O(mn + n^2log(n)) である. <br>
 グラフ G = (V, E) についてある頂点 v(∈ V) から始めて今の頂点集合 S と一番連結度の高い頂点を S に加えていくというように貪欲に取っていく順序を最大隣接順序 (MA ordering) と呼ぶ. <br>
-このとき, 最大隣接順序での後ろ 2 つの頂点 x_n, x_{n-1} の間の連結度(x_n, x_{n-1} 間最小カット)が x_n の次数(δ(x_n))に一致する.
+このとき, 最大隣接順序での後ろ 2 つの頂点 x_n, x_{n-1} の間の連結度(x_n, x_{n-1} 間最小カット)が x_n の次数(δ(x_n))に一致する(帰納法から簡単に言える).
 これによってある 2 点間の連結度が分かったので x_n と x_{n-1} の 2 点を縮約することができる. 具体的には縮約後のグラフを G' とすると大域最小容量カットは min(δ(x_n), λ(G')) となる(答えとなる最小カットで x, y が分かれるか分かれないか). <br>
 このアルゴリズムはより一般的な(対称)劣モジュラ関数の最小化アルゴリズムに拡張される(Queyranne 1998).<br>
 元論文は <a href="https://epubs.siam.org/doi/abs/10.1137/0405004">Nagamochi and Ibaraki 1992</a> や <a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.450.4415&rep=rep1&type=pdf">Stoer, Wagner 1997</a> など<br>
 重みなし大域最小容量カットの場合は, 何も考えずグラフの辺をランダムに縮約していき残り 2 点になったときの連結度を最小容量カットとするというような操作を O(n^2) くらい繰り返せば高確率で最適値を得られるというようなモンテカルロアルゴリズムも存在する.
-<br>
+これは最適なカットに属する辺が最後まで縮約されずに残る確率が O(n^(-2)) であることから従う. <br>
 (補足) <br>
 無向グラフの大域最小容量カットを求めるアルゴリズムは近年でもよく研究されていて, 重みなしの場合は λ をグラフの連結度としたときに計算量 O(m + λ^2 n) (Gabow) の deterministic algorithm や
 他にも deterministic algorithm として O(m log^12 n) (Kawarabayashi, Thorup 2014) (初の nearly linear time), O(m log^2 n log log^2 n) (Henzinger, Rao, Wang 2017) (⇒ 後に expander decomposition へ応用) などがある. 重みつきの場合は randomized algorithm として
@@ -65,16 +65,15 @@ O(m log^3 n) (Karger 2000) がある.
 template&lt;typename _Key, typename _Tp&gt; class Fibonacci_Heap
 {
 public:
+    using data_type = pair&lt;_Key, _Tp&gt;;
     class node
     {
     public:
-        pair&lt;_Key, _Tp&gt; _data;
+        data_type _data;
         unsigned short int _child;
         bool _mark;
         node *_par, *_prev, *_next, *_ch_last;
-        node(const _Key&amp; key, const _Tp&amp; data) : _data(key, data),
-            _child(0), _par(nullptr), _prev(nullptr), _next(nullptr), _ch_last(nullptr){}
-        node(const _Key&amp; key, _Tp&amp;&amp; data) : _data(key, move(data)),
+        node(data_type&amp;&amp; data) : _data(move(data)),
             _child(0), _par(nullptr), _prev(nullptr), _next(nullptr), _ch_last(nullptr){}
         inline const _Key&amp; get_key() const noexcept { return _data.first; }
         void insert(node *cur){
@@ -125,10 +124,11 @@ private:
         root_erase(cur);
         delete cur;
     }
-    template&lt;typename Data&gt;
-    node *_push(const _Key&amp; key, Data&amp;&amp; data){
+    template&lt;typename Key, typename Data&gt;
+    node *_push(Key&amp;&amp; key, Data&amp;&amp; data){
         ++_size;
-        node* new_node = new node(key, forward&lt;Data&gt;(data));
+        data_type new_data(forward&lt;Key&gt;(key), forward&lt;Data&gt;(data));
+        node* new_node = new node(move(new_data));
         root_insert(new_node);
         return new_node;
     }
@@ -171,9 +171,9 @@ private:
         _minimum = next_minimum;
     }
     void _update(node *cur, const _Key&amp; key){
-        assert(key &gt;= (_Key)0);
+        assert(!(key &lt; (_Key)0));
         node *change = ((cur-&gt;_data.first -= key) &lt; _minimum-&gt;get_key()) ? cur : nullptr;
-        if(!cur-&gt;_par || cur-&gt;_par-&gt;get_key() &lt;= cur-&gt;get_key()){
+        if(!cur-&gt;_par || !(cur-&gt;get_key() &lt; cur-&gt;_par-&gt;get_key())){
             if(change) _minimum = change;
             return;
         }
@@ -234,9 +234,9 @@ public:
     // ~Fibonacci_Heap(){ _clear(); }
     inline bool empty() const noexcept { return (_size == 0); }
     inline size_t size() const noexcept { return _size; }
-    inline const pair&lt;_Key, _Tp&gt;&amp; top() const noexcept { return _minimum-&gt;_data; }
-    node *push(const _Key&amp; key, const _Tp&amp; data){ return _push(key, data); }
-    node *push(const _Key&amp; key, _Tp&amp;&amp; data){ return _push(key, move(data)); }
+    inline const data_type&amp; top() const noexcept { return _minimum-&gt;_data; }
+    template&lt;typename Key, typename Data&gt;
+    node *push(Key&amp;&amp; key, Data&amp;&amp; data){ return _push(forward&lt;Key&gt;(key), forward&lt;Data&gt;(data)); }
     void pop(){ _pop(); }
     void update(node *cur, const _Key&amp; key){ _update(cur, key); }
     void clear(){ _clear(); _size = 0; rank.~vector&lt;node*&gt;(); }
@@ -254,7 +254,7 @@ public:
         fh2-&gt;_minimum-&gt;_next = fh1-&gt;_minimum;
         fh1-&gt;_minimum-&gt;_prev = fh2-&gt;_minimum;
         fh1-&gt;_size += fh2-&gt;_size;
-        if(fh1-&gt;_minimum-&gt;get_key() &gt; fh2-&gt;_minimum-&gt;get_key()) fh1-&gt;_minimum = fh2-&gt;_minimum;
+        if(fh2-&gt;_minimum-&gt;get_key() &lt; fh1-&gt;_minimum-&gt;get_key()) fh1-&gt;_minimum = fh2-&gt;_minimum;
         fh2-&gt;~Fibonacci_Heap();
         return fh1;
     }
@@ -336,7 +336,7 @@ public:
 				kp[id] = fh.push(0, id);
 			}
             for(int j = 0; j &lt; i-1; ++j){
-                int cur = fh.top().second;
+                int cur = fh.top().get_data();
                 fh.pop();
                 visited[cur] = true, new_ord[j] = cur;
 				for(edge&amp; e : G[cur]){
@@ -354,8 +354,8 @@ public:
                 visited[ver] = false;
             }
             visited[last_ver] = true;
-            if(ans &gt; -fh.top().first){
-                ans = -fh.top().first;
+            if(ans &gt; -fh.top().get_key()){
+                ans = -fh.top().get_key();
                 ans_set.clear();
                 for(int cur = last_ver;;){
                     ans_set.push_back(cur);
