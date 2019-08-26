@@ -43,7 +43,7 @@
 <p>
 Splay Tree ベースの map(連想コンテナ) の実装. stl の std::map は Red Black Tree をベースとして書かれており, 検索, 挿入, 削除などにかかる最悪計算量が O(log n) という強みを持っている. <br>
 一方 <a href="../BinarySearchTree/splay_tree.html">Splay Tree</a> はならし計算量で O(log n) であるもののクエリ列の確率分布に対して計算量が最適になるように adjust するため, 分布によっては o(log n) になりうるという強みがある(Red Black Tree の場合の計算量は Ω(log n)). <br>
-以下の実装では std:map ライクな実装をしており, ある程度 std::map と同様に動作する. ムーブセマンティクスなどは実装していない. 同じキーの要素を挿入しても問題ないが erase(key) としてもキーを key とする要素のうち 1 つしか削除しないなど multimap ではないのでそのような使用はおすすめしない.<br>
+以下の実装では std:map ライクな実装をしており, ある程度 std::map と同様に動作する.<br>
 実装中でデストラクタなどをコメントアウトしてメモリ解放にかかる時間を節約しているが行儀が悪いのでまあ外してください(ただそれなりに速度変わる). <br>
 <strike> (追記) C++17 から std::iterator を継承して自作イテレータを構築するのが非推奨化されているので書き直す必要あり. </strike> (修正済み) <br>
 </p>
@@ -293,7 +293,10 @@ public:
 </pre>
 <h3>verify 用の問題</h3>
 <p>Codeforces : <a href="https://codeforces.com/problemset/problem/505/C">Mr. Kitayuta, the Treasure Hunter</a>
-  <a href="https://codeforces.com/contest/506/submission/58501502">提出コード</a>(非想定解で std::map だと TLE するが splay 木を用いた自作 map だと通る)</p>
+  <a href="https://codeforces.com/contest/506/submission/58501502">提出コード</a>(非想定解で std::map だと TLE するが splay 木を用いた自作 map だと通る)<br>
+  AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=ITP2_8_B">Dictionary - Map: Delete</a>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3829525#1">提出コード</a>
+</p>
 </section>
 
 </div>
