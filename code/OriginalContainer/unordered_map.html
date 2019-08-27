@@ -184,6 +184,10 @@ private:
         data_type new_data = forward&lt;Data&gt;(data);
         return insert(cur, hash, dist, move(new_data));
     }
+    template&lt;typename... Args&gt;
+    bucket *emplace(Args&amp;&amp;... args){
+        return find_insert(data_type(forward&lt;Args&gt;(args)...));
+    }
     bucket *backward_shift(bucket *cur, bool next_ret){
         bucket *next = next_bucket(cur), *ret = cur;
         if(next-&gt;_dist &lt; 1) return next_ret ? increment(cur) : cur;
@@ -313,6 +317,8 @@ public:
     iterator find(const _Key&amp; key){ return iterator(_find(key)); }
     iterator insert(const data_type&amp; data){ return iterator(find_insert(data)); }
     iterator insert(data_type&amp;&amp; data){ return iterator(find_insert(move(data))); }
+    template&lt;typename... Args&gt;
+    iterator emplace(Args&amp;&amp;... args){ return iterator(_emplace(forward&lt;Args&gt;(args)...)); }
     iterator erase(const _Key&amp; key){ return iterator(erase_key(key)); }
     iterator erase(const iterator&amp; itr){ return iterator(erase_itr(itr.bucket_ptr)); }
     void simple_erase(const _Key&amp; key){ erase_key(key, false); }
@@ -476,6 +482,10 @@ private:
         data_type new_data = forward&lt;Data&gt;(data);
         return insert(cur, move(new_data.first), dist, move(new_data.second));
     }
+    template&lt;typename... Args&gt;
+    bucket *emplace(Args&amp;&amp;... args){
+        return find_insert(data_type(forward&lt;Args&gt;(args)...));
+    }
     bucket *backward_shift(bucket *cur, bool next_ret){
         bucket *next = next_bucket(cur), *ret = cur;
         if(next-&gt;_dist &lt; 1) return next_ret ? increment(cur) : cur;
@@ -601,6 +611,8 @@ public:
     iterator find(const _Key&amp; key){ return iterator(_find(key)); }
     iterator insert(const data_type&amp; data){ return iterator(find_insert(data)); }
     iterator insert(data_type&amp;&amp; data){ return iterator(find_insert(move(data))); }
+    template&lt;typename... Args&gt;
+    iterator emplace(Args&amp;&amp;... args){ return iterator(_emplace(forward&lt;Args&gt;(args)...)); }
     iterator erase(const _Key&amp; key){ return iterator(erase_key(key)); }
     iterator erase(const iterator&amp; itr){ return iterator(erase_itr(itr.bucket_ptr)); }
     void simple_erase(const _Key&amp; key){ erase_key(key, false); }

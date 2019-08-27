@@ -147,6 +147,10 @@ private:
         _Key new_key = forward&lt;Key&gt;(key);
         return insert(cur, hash, dist, move(new_key));
     }
+    template&lt;typename... Args&gt;
+    bucket *emplace(Args&amp;&amp;... args){
+        return find_insert(_Key(forward&lt;Args&gt;(args)...));
+    }
     bucket *backward_shift(bucket *cur, bool next_ret){
         bucket *next = next_bucket(cur), *ret = cur;
         if(next-&gt;_dist &lt; 1) return next_ret ? increment(cur) : cur;
@@ -268,6 +272,8 @@ public:
     size_t count(const _Key&amp; key) const { return (_find(key) != _buckets + _bucket_count); }
     iterator insert(const _Key&amp; key){ return iterator(find_insert(key)); }
     iterator insert(_Key&amp;&amp; key){ return iterator(find_insert(move(key))); }
+    template&lt;typename... Args&gt;
+    iterator emplace(Args&amp;&amp;... args){ return iterator(_emplace(forward&lt;Args&gt;(args)...)); }
     iterator erase(const _Key&amp; key){ return iterator(erase_key(key)); }
     iterator erase(const iterator&amp; itr){ return iterator(erase_itr(itr.bucket_ptr)); }
     void simple_erase(const _Key&amp; key){ erase_key(key, false); }
@@ -401,6 +407,10 @@ private:
         _Key new_key = forward&lt;Key&gt;(key);
         return insert(cur, dist, move(new_key));
     }
+    template&lt;typename... Args&gt;
+    bucket *emplace(Args&amp;&amp;... args){
+        return find_insert(_Key(forward&lt;Args&gt;(args)...));
+    }
     bucket *backward_shift(bucket *cur, bool next_ret){
         bucket *next = next_bucket(cur), *ret = cur;
         if(next-&gt;_dist &lt; 1) return next_ret ? increment(cur) : cur;
@@ -521,6 +531,8 @@ public:
     size_t count(const _Key&amp; key) const { return (_find(key) != _buckets + _bucket_count); }
     iterator insert(const _Key&amp; key){ return iterator(find_insert(key)); }
     iterator insert(_Key&amp;&amp; key){ return iterator(find_insert(move(key))); }
+    template&lt;typename... Args&gt;
+    iterator emplace(Args&amp;&amp;... args){ return iterator(_emplace(forward&lt;Args&gt;(args)...)); }
     iterator erase(const _Key&amp; key){ return iterator(erase_key(key)); }
     iterator erase(const iterator&amp; itr){ return iterator(erase_itr(itr.bucket_ptr)); }
     void simple_erase(const _Key&amp; key){ erase_key(key, false); }

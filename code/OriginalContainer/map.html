@@ -175,8 +175,7 @@ private:
     }
     template&lt;typename... Args&gt;
     node *_emplace(Args&amp;&amp;... args){
-        data_type new_data(forward&lt;Args&gt;(args)...);
-        return _insert(move(new_data));
+        return _insert(data_type(forward&lt;Args&gt;(args)...));
     }
     node *_erase(node *root_ver){
         confirm_header();
