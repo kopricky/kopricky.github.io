@@ -73,7 +73,20 @@ private:
         C data;
         block() : prev(this), next(this){}
         block(const C&amp; _data) : prev(this), next(this), data(_data){}
+        block(C&amp;&amp; _data) : prev(this), next(this), data(move(_data)){}
         block(block *_prev, block *_next) : prev(_prev), next(_next){}
+        block(const block&amp;) = delete;
+        block(block&amp;&amp; another) : data(move(another.data)){
+            prev = another.prev, next = another.next;
+            another.prev = another.next = nullptr;
+        }
+        block&amp; operator=(const block&amp;) = delete;
+        block&amp; operator=(block&amp;&amp; another){
+            this-&gt;~block();
+            data = move(another.data);
+            prev = another.prev, next = another.next;
+            another.prev = another.next = nullptr;
+        }
     };
     int N;
     size_t sz;
@@ -104,28 +117,38 @@ public:
     List() : N(0), sz(0){}
     List(int _N) : N(_N), sz(N), container(_N+1){}
     List(const vector&lt;C&gt;&amp; _data) : List((int)_data.size()){ build(_data); }
-    List(const List&amp; ls) : N(ls.N), sz(ls.sz), container(ls.container){}
-    void build(const vector&lt;C&gt;&amp; _data){
-        for(int i = 0; i &lt;= N; i++){
-            container[i].prev = &amp;container[(i+N)%(N+1)];
-            container[i].next = &amp;container[(i+1)%(N+1)];
-            if(i &lt; N) container[i].data = _data[i];
-        }
-    }
-    void push_back(const C&amp; _data){ ++N, ++sz, container.push_back(_data); }
-    void build(){
-        container.push_back(C());
-        for(int i = 0; i &lt;= N; i++){
-            container[i].prev = &amp;container[(i+N)%(N+1)];
-            container[i].next = &amp;container[(i+1)%(N+1)];
-        }
-    }
+    List(vector&lt;C&gt;&amp;&amp; _data) : List((int)_data.size()){ build(move(_data)); }
+    List(const List&amp;) = delete;
+    List(List&amp;&amp; another) = default;
+    List&amp; operator=(const List&amp;) = delete;
+    List&amp; operator=(List&amp;&amp;) = default;
     friend ostream&amp; operator&lt;&lt; (ostream&amp; os, List&amp; ls){
         for(auto&amp; val : ls) os &lt;&lt; val &lt;&lt; ' ';
         return os;
     }
-    const C&amp; operator[](size_t index) const { return container[index].data; }
+    template&lt;typename Data&gt;
+    void build(Data&amp;&amp; _data){
+        vector&lt;C&gt; new_data = forward&lt;Data&gt;(_data);
+        for(int i = 0; i &lt;= N; i++){
+            container[i].prev = &amp;container[(i+N)%(N+1)];
+            container[i].next = &amp;container[(i+1)%(N+1)];
+            if(i &lt; N) container[i].data = move(new_data[i]);
+        }
+    }
+    void build(){
+        container.emplace_back();
+        for(int i = 0; i &lt;= N; i++){
+            container[i].prev = &amp;container[(i+N)%(N+1)];
+            container[i].next = &amp;container[(i+1)%(N+1)];
+        }
+    }
+    void push_back(const C&amp; _data){ ++N, ++sz, container.push_back(_data); }
+    template&lt;typename... Args&gt;
+    void emplace_back(Args&amp;&amp;... _data){
+        ++N, ++sz, container.emplace_back(forward&lt;Args&gt;(_data)...);
+    }
     C&amp; operator[](size_t index){ return container[index].data; }
+    const C&amp; operator[](size_t index) const { return container[index].data; }
     size_t size() const { return sz; }
     bool empty() const { return (size() == 0); }
     C&amp; front(){ return container[N].next-&gt;data; }
@@ -139,9 +162,9 @@ class ListIterator {
 private:
     friend List&lt;C&gt;;
     typename List&lt;C&gt;::block *block_ptr;
-    using iterator_category = std::bidirectional_iterator_tag;
+    using iterator_category = bidirectional_iterator_tag;
     using value_type = C;
-    using difference_type = std::ptrdiff_t;
+    using difference_type = ptrdiff_t;
     using pointer = C*;
     using reference = C&amp;;
 
