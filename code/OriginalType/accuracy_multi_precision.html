@@ -11,6 +11,7 @@
 <script type="text/javascript" src="../../js/openclose.js"></script>
 <link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
 <link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<link rel="shortcut icon" type="image/x-icon" href="../../favicon.ico">
 <!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
@@ -297,7 +298,7 @@ private:
     }
 
 public:
-    
+
     friend ostream&amp; operator&lt;&lt;(ostream&amp; os, const AMP&amp; num) {
         if(num.zero){ os &lt;&lt; &quot;0.&quot;; for(int i = 0; i &lt; acc-1; i++) os &lt;&lt; '0';
                     os &lt;&lt; &quot;+e0&quot;; return os; }

@@ -11,6 +11,7 @@
 <script type="text/javascript" src="../../js/openclose.js"></script>
 <link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
 <link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<link rel="shortcut icon" type="image/x-icon" href="../../favicon.ico">
 <!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
@@ -41,7 +42,7 @@
 <h2>BIT 2D RangeAdd RangeSum</h2>
 <h3>コードについての説明</h3>
 <p>多次元領域の範囲加算および範囲総和のクエリに O(polylogn) で答える(実装は2次元).<br>
-イメージは <a href="../DataStructure_Basic/bit_1d_rangeadd_rangesum.html">1 次元の範囲加算と範囲総和を BIT で行うやつ</a> と <a href="../DataStructure_Advanced/bit_2d/html">2 次元 BIT</a> を組み合わせた感じ. xy の項, x の項, y の項, 定数項 に分けてそれぞれを 2 次元 BIT で処理する. <br> 
+イメージは <a href="../DataStructure_Basic/bit_1d_rangeadd_rangesum.html">1 次元の範囲加算と範囲総和を BIT で行うやつ</a> と <a href="../DataStructure_Advanced/bit_2d/html">2 次元 BIT</a> を組み合わせた感じ. xy の項, x の項, y の項, 定数項 に分けてそれぞれを 2 次元 BIT で処理する. <br>
 計算量は最悪計算量が線形である quadtree と比べて高速. <br>
 多次元領域の min や update などのクエリを polylog で処理するアルゴリズムはわかっていないそう. <br>
 元論文は <a href="https://arxiv.org/pdf/1311.6093.pdf">Mishra 2013</a>
