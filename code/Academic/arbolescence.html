@@ -41,16 +41,19 @@
 <section>
 <h2>Arbolescence</h2>
 <h3>コードについての説明</h3>
-<p>有向グラフと点 r が与えられたときに r を根とする最小全域有向木(根からすべての点に有向辺の向きに沿って到達できるような木)を求めるアルゴリズム.<br>
-<!-- 根からコストの一番小さい辺を DFS でたどっていき、 たどった頂点のなすパスがサイクルになる場合は適宜サイクルを開く. 開いたサイクルは一点に圧縮し, その後再びコストの小さい辺から順にたどっていく. <br> -->
-<!-- 操作自体は簡単だが, 頂点の圧縮やヒープの併合などの実装コストが割とある. また併合可能なヒープとして <a href="../DataStructure_OnGraph/skew_heap.html">skew heap</a> を用いた.</p> -->
-<p>
+<p>有向グラフと点 r が与えられたときに r を根とする最小全域有向木(根からすべての点に有向辺の向きに沿って到達できるような木)を求めるアルゴリズム. <br>
+今まで使っていない頂点から始めてその頂点に入ってくる辺のうち １ 番コストの小さいものにたどるという操作を繰り返す.
+各頂点ごとに入ってくる辺をヒープで管理しているので １ 番コストの小さいものは O(log n) で求めることが可能. たどった辺はそのヒープから削除します.
+その最中にサイクルが生じる場合があるが, その場合はそのサイクルを 1 つの頂点に圧縮する. サイクル内の各頂点 v について, 現在 v に入ってきている辺のコストを c(v) とすると v のヒープから一様に c[v] を減らします.
+これはサイクルを開くために辺を取り替えるのですが, そのときに重みの差分をキー値として使いたいからです. そしてサイクル内の各頂点 v の管理するヒープ heap[v] をマージする. <br>
+操作としては以上で終わりで, 必要なデータ構造は遅延伝播を備えたマージ可能なヒープとサイクルを圧縮して 1 つの頂点にするという操作を繰り返すなかで, 元のグラフの頂点が今どの頂点に属しているかを効率よく知るために必要な Union Find です.
+下の実装では併合可能なヒープとして <a href="../DataStructure_OnGraph/skew_heap.html">skew heap</a> を用いているので O(m log n) ですが, 遅延伝播を備えた fibonacci heap を用いることで O(m + n log n) で行うことが可能です. <br>
 このアルゴリズムについては<a href="http://joisino.hatenablog.com/entry/2017/01/11/230141">このブログの記事</a>がわかりやすいです. 大いに参考にさせていただきました. <br>
 また元論文は <a href="https://cw.fel.cvut.cz/old/_media/courses/a4m33pal/cviceni/tarjan-finding-optimum-branchings.pdf">
 Tarjan 1977</a> です.
 </p>
 <p>
-時間計算量: O(mlogn)
+時間計算量: O(m log n)
 </p>
 <h3>コード</h3>
 <div class="codebox">
@@ -95,7 +98,8 @@ public:
         a-&gt;lazy = 0;
     }
     node* meld(node* a, node* b){
-        if(!a) return b; if(!b) return a;
+        if(!a) return b;
+        if(!b) return a;
         if(a-&gt;val+a-&gt;lazy &gt; b-&gt;val+b-&gt;lazy) swap(a, b);
         push(a);
         a-&gt;r = meld(a-&gt;r,b);
@@ -114,7 +118,7 @@ public:
 
 template&lt;typename T&gt; class Arborescence {
 public:
-    // ここでの edge の cost は枝の重みというよりは枝を取り替えたときの差分を持っている
+    // ここでの edge の cost は枝の重みだけでなくサイクルを開くために枝を取り替えるときの差分も意味している.
     struct edge{
         int from, to;
         T cost;
