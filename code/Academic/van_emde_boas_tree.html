@@ -38,33 +38,580 @@
 <div id="contents">
 
 <section>
-<h2>van emde boas tree</h2>
+<h2>van Emde Boas Tree</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
+そのうち書く.
 </p>
 <p>
-(関数)<br>
-add_edge(): 辺を追加する <br>
+(愚直版のコンストラクタ)<br>
+vanEmdeBoasTree(const size_t length): [0, length) の数を管理する順序付き集合を構築
 </p>
 <p>
-時間計算量: O(mlogn)
+時間計算量: insert, erase, predecessor, successor O(log log U) (U は値の上限)
 </p>
-<h3>コード</h3>
+<h3>コード(愚直版)</h3>
 <div class="codebox">
 <input type="checkbox" id="label" class="csscode" />
 <label for="label"></label>
 <pre class="prettyprint linenums">
-あ
+class vanEmdeBoasTree
+{
+private:
+    const size_t LENGTH;
+    size_t _size;
+    struct layer {
+        static const unsigned int THRESHOULD = 64;
+        unsigned int length, num_blocks, quo, rem;
+        int _max, _min;
+        unsigned long long data;
+        layer *summary, **sublayers;
+        layer(const unsigned int length)
+            : length(length), num_blocks((int)sqrt(length)),
+                quo(length / num_blocks), rem(length % num_blocks),
+                    _max(-1), _min(length), data(0ULL){
+            if(length &lt;= THRESHOULD) return;
+            summary = new layer(num_blocks);
+            sublayers = new layer*[num_blocks];
+            for(unsigned int i = 0; i &lt; num_blocks; ++i){
+                sublayers[i] = new layer(quo + (i &lt; rem));
+            }
+        }
+        layer(const layer&amp; another)
+            : length(another.length), num_blocks(another.num_blocks), quo(another.quo), rem(another.rem),
+                _max(another._max), _min(another._min), data(another.data){
+            if(length &lt;= THRESHOULD) return;
+            summary = new layer(*another.summary);
+            sublayers = new layer*[num_blocks];
+            for(unsigned int i = 0; i &lt; num_blocks; ++i){
+                sublayers[i] = new layer(*another.sublayers[i]);
+            }
+        }
+        layer(layer&amp;&amp; another)
+            : length(move(another.length)), num_blocks(move(another.num_blocks)),
+                quo(move(another.quo)), rem(move(another.rem)),
+                    _max(move(another._max)), _min(move(another._min)), data(move(another.data)){
+            if(length &lt;= THRESHOULD) return;
+            summary = another.summary, sublayers = another.sublayers;
+            another.summary = nullptr, another.sublayers = nullptr;
+        }
+        layer&amp; operator=(const layer&amp; another){
+            length = another.length, num_blocks = another.num_blocks, quo = another.quo, rem = another.rem;
+            _max = another._max, _min = another._min, data = another.data;
+            this-&gt;~layer();
+            if(length &lt;= THRESHOULD) return *this;
+            summary = new layer(*another.summary);
+            sublayers = new layer*[num_blocks];
+            for(unsigned int i = 0; i &lt; num_blocks; ++i){
+                sublayers[i] = new layer(*another.sublayers[i]);
+            }
+            return *this;
+        }
+        layer&amp; operator=(layer&amp;&amp; another){
+            this-&gt;~layer();
+            length = move(another.length), num_blocks = move(another.num_blocks);
+            quo = move(another.quo), rem = move(another.rem);
+            _max = move(another._max), _min = move(another._min), data = move(another.data);
+            if(length &lt;= THRESHOULD) return *this;
+            summary = another.summary, sublayers = another.sublayers;
+            another.summary = nullptr, another.sublayers = nullptr;
+            return *this;
+        }
+        // ~layer(){
+        //     if(length &lt;= THRESHOULD) return;
+        //     delete summary;
+        //     for(unsigned int i = 0; i &lt; num_blocks; ++i){
+        //         delete sublayers[i];
+        //     }
+        //     delete[] sublayers;
+        // }
+        inline static int msb(unsigned long long u){
+            return 63 - __builtin_clzll(u);
+        }
+        inline static int lsb(unsigned long long u){
+            return __builtin_ctzll(u);
+        }
+        inline bool empty() const noexcept { return (_max == -1); }
+        inline bool isOne() const noexcept { return (_max == _min); }
+        inline int max() const noexcept { return _max; }
+        inline int min() const noexcept { return _min; }
+        inline int index(const unsigned int value) const noexcept {
+            return (value &gt;= rem * (quo + 1))
+                ? (rem + (value - rem * (quo + 1)) / quo) : (value / (quo + 1));
+        }
+        inline int sum(unsigned int index) const noexcept {
+            return (index &gt; rem)
+                ? (rem * (quo + 1) + (index - rem) * quo) : (index * (quo + 1));
+        }
+        bool small_find(const int value) const noexcept {
+            return (data &gt;&gt; value) &amp; 1ULL;
+        }
+        bool find(const int value) const noexcept {
+            if(value == _min) return true;
+            if(length &lt;= THRESHOULD) return small_find(value);
+            const int id = index(value);
+            return sublayers[id]-&gt;find(value - sum(id));
+        }
+        bool small_insert(const int value) noexcept {
+            if(small_find(value)) return false;
+            data ^= (1ULL &lt;&lt; value);
+            return true;
+        }
+        bool insert(int value) noexcept {
+            if(empty()){
+                _max = _min = value;
+                return true;
+            }else if(value == _min){
+                return false;
+            }else if(value &lt; _min){
+                swap(value, _min);
+            }else if(value &gt; _max){
+                _max = value;
+            }
+            if(length &lt;= THRESHOULD) return small_insert(value);
+            const int id = index(value);
+            if(sublayers[id]-&gt;insert(value - sum(id))){
+                if(sublayers[id]-&gt;isOne()) summary-&gt;insert(id);
+                return true;
+            }else{
+                return false;
+            }
+        }
+        void small_erase(const int value){
+            if(value == _min){
+                _min = lsb(data);
+                data ^= (1ULL &lt;&lt; _min);
+            }else{
+                data ^= (1ULL &lt;&lt; value);
+                if(data == 0) _max = _min;
+                else if(value == _max){
+                    _max = msb(data);
+                }
+            }
+        }
+        void erase(int value){
+            if(isOne()){
+                _max = -1, _min = length;
+                return;
+            }
+            if(length &lt;= THRESHOULD) return small_erase(value);
+            if(value == _min){
+                const int id = summary-&gt;min();
+                 _min = value = sum(id) + sublayers[id]-&gt;min();
+            }
+            const int id = index(value);
+            sublayers[id]-&gt;erase(value - sum(id));
+            if(sublayers[id]-&gt;empty()){
+                summary-&gt;erase(id);
+            }
+            if(value == _max){
+                if(summary-&gt;empty()){
+                    _max = _min;
+                }else{
+                    const int id = summary-&gt;max();
+                    _max = sum(id) + sublayers[id]-&gt;max();
+                }
+            }
+        }
+        int small_predecessor(const int value) const noexcept {
+            const unsigned long long tmp = (data &amp; ((1ULL &lt;&lt; value) - 1ULL));
+            return tmp ? msb(tmp) : _min;
+        }
+        int predecessor(const int value) const noexcept {
+            if(_min &gt;= value){
+                return -1;
+            }else if(value &gt; _max){
+                return _max;
+            }
+            if(length &lt;= THRESHOULD) return small_predecessor(value);
+            const int id = index(value), sm = sum(id);
+            if(value &gt; sm + sublayers[id]-&gt;min()){
+                return sm + sublayers[id]-&gt;predecessor(value - sm);
+            }else{
+                const int id2 = summary-&gt;predecessor(id);
+                return (id2 &gt;= 0) ? (sum(id2) + sublayers[id2]-&gt;max()) : _min;
+            }
+        }
+        int small_successor(const int value) const noexcept {
+            return lsb(data &amp; ~((1ULL &lt;&lt; (value + 1)) - 1ULL));
+        }
+        int successor(const int value) const noexcept {
+            if(value &lt; _min){
+                return _min;
+            }else if(value &gt;= _max){
+                return length;
+            }
+            if(length &lt;= THRESHOULD) return small_successor(value);
+            const int id = index(value), sm = sum(id);
+            if(value &lt; sm + sublayers[id]-&gt;max()){
+                return sm + sublayers[id]-&gt;successor(value - sm);
+            }else{
+                const int id2 = summary-&gt;successor(id);
+                return sum(id2) + sublayers[id2]-&gt;min();
+            }
+        }
+    };
+    layer base_layer;
+public:
+    vanEmdeBoasTree(const size_t length) : LENGTH(length), _size(0), base_layer(length){}
+    vanEmdeBoasTree(const vanEmdeBoasTree&amp;) = default;
+    vanEmdeBoasTree(vanEmdeBoasTree&amp;&amp;) = default;
+    vanEmdeBoasTree&amp; operator=(const vanEmdeBoasTree&amp;) = default;
+    vanEmdeBoasTree&amp; operator=(vanEmdeBoasTree&amp;&amp;) = default;
+    friend ostream&amp; operator&lt;&lt; (ostream&amp; os, vanEmdeBoasTree&amp; veb) noexcept {
+        for(unsigned int st = veb.successor(-1); st != veb.LENGTH; st = veb.successor(st))
+            os &lt;&lt; st &lt;&lt; &quot; &quot;;
+        return os;
+    }
+    bool empty() const noexcept { return (_size == 0); }
+    size_t size() const noexcept { return _size; }
+    size_t max_size() const noexcept { return LENGTH; }
+    bool find(const unsigned int value) const noexcept {
+        if(value &gt;= LENGTH) return false;
+        return base_layer.find(value);
+    }
+    size_t count(const unsigned int value) const noexcept {
+        return find(value);
+    }
+    int max() const noexcept { return base_layer.max(); }
+    int min() const noexcept { return base_layer.min(); }
+    void insert(const unsigned int value){
+        assert(value &lt; LENGTH);
+        _size += base_layer.insert(value);
+    }
+    void erase(const unsigned int value){
+        assert(value &lt; LENGTH);
+        base_layer.erase(value), --_size;
+    }
+    int predecessor(const int value) const noexcept {
+        return base_layer.predecessor(value);
+    }
+    int successor(const int value) const noexcept {
+        return base_layer.successor(value);
+    }
+};
+</pre>
+<h3>コード(2^30 未満の整数に特化した高速版)</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
+<pre class="prettyprint linenums">
+class vanEmdeBoasTree
+{
+private:
+    static const size_t LENGTH = 1073741824;
+    size_t _size;
+    #define msb(u) (63 - __builtin_clzll(u))
+    #define lsb(u) (__builtin_ctzll(u))
+    struct first_layer;
+    struct middle_layer;
+    struct last_layer;
+    struct first_layer {
+        unsigned long long *data;
+        middle_layer *summary;
+        int _max, _min;
+        first_layer() : _max(-1), _min(1073741824){
+            data = new unsigned long long[16777216](), summary = new middle_layer();
+        }
+        first_layer(const first_layer&amp; another) : _max(another._max), _min(another._min){
+            data = new unsigned long long[16777216];
+            for(unsigned int i = 0; i &lt; 16777216; ++i) data[i] = another.data[i];
+            summary = new middle_layer(*another.summary);
+        }
+        first_layer(first_layer&amp;&amp; another)
+            : _max(move(another._max)), _min(move(another._min)){
+            data = another.data, summary = another.summary;
+            data = nullptr, summary = nullptr;
+        }
+        first_layer&amp; operator=(const first_layer&amp; another){
+            this-&gt;~first_layer();
+            _max = another._max, _min = another._min;
+            data = new unsigned long long[16777216];
+            for(unsigned int i = 0; i &lt; 16777216; ++i) data[i] = another.data[i];
+            summary = new middle_layer(*another.summary);
+            return *this;
+        }
+        first_layer&amp; operator=(first_layer&amp;&amp; another){
+            this-&gt;~first_layer();
+            _max = move(another._max), _min = move(another._min);
+            data = another.data, summary = another.summary;
+            data = nullptr, summary = nullptr;
+            return *this;
+        }
+        // ~first_layer(){
+        //     delete summary;
+        //     delete[] data;
+        // }
+        inline bool empty() const noexcept { return (_max == -1); }
+        inline bool isOne() const noexcept { return (_max == _min); }
+        inline int max() const noexcept { return _max; }
+        inline int min() const noexcept { return _min; }
+        bool find(const int value) const noexcept {
+            return (value == _min) || ((data[value &gt;&gt; 6] &gt;&gt; (value &amp; 63)) &amp; 1ULL);
+        }
+        bool insert(int value) noexcept {
+            if(value == _min) return false;
+            else if(_max == -1) return _max = _min = value, true;
+            else if(value &lt; _min) swap(value, _min);
+            else if(value &gt; _max) _max = value;
+            const int id = (value &gt;&gt; 6);
+            if((data[id] &gt;&gt; (value &amp; 63)) &amp; 1ULL) return false;
+            else{
+                if(data[id] == 0) summary-&gt;insert(id);
+                data[id] ^= (1ULL &lt;&lt; (value &amp; 63));
+                return true;
+            }
+        }
+        void erase(int value) noexcept {
+            if(_max == _min){
+                _max = -1, _min = 1073741824;
+                return;
+            }else if(value == _min){
+                const int id = summary-&gt;min();
+                 _min = value = (id &lt;&lt; 6) + lsb(data[id]);
+            }
+            const int id = (value &gt;&gt; 6);
+            data[id] ^= (1ULL &lt;&lt; (value &amp; 63));
+            if(data[id] == 0) summary-&gt;erase(id);
+            if(value == _max){
+                if(summary-&gt;empty()) _max = _min;
+                else{
+                    const int id = summary-&gt;max();
+                    _max = (id &lt;&lt; 6) + msb(data[id]);
+                }
+            }
+        }
+        int predecessor(const int value) const noexcept {
+            if(_min &gt;= value) return -1;
+            else if(value &gt; _max) return _max;
+            const int id = (value &gt;&gt; 6), sm = (id &lt;&lt; 6);
+            if(data[id] &amp;&amp; value &gt; sm + lsb(data[id]))
+                return sm + msb(data[id] &amp; ((1ULL &lt;&lt; (value &amp; 63)) - 1ULL));
+            else{
+                const int id2 = summary-&gt;predecessor(id);
+                return (id2 &gt;= 0) ? ((id2 &lt;&lt; 6) + msb(data[id2])) : _min;
+            }
+        }
+        int successor(const int value) const noexcept {
+            if(value &lt; _min) return _min;
+            else if(value &gt;= _max) return 1073741824;
+            const int id = (value &gt;&gt; 6), sm = (id &lt;&lt; 6);
+            if(data[id] &amp;&amp; value &lt; sm + msb(data[id]))
+                return sm + lsb(data[id] &amp; ~((1ULL &lt;&lt; ((value &amp; 63) + 1)) - 1ULL));
+            else{
+                const int id2 = summary-&gt;successor(id);
+                return (id2 &lt;&lt; 6) + lsb(data[id2]);
+            }
+        }
+    };
+    struct middle_layer{
+        last_layer *sublayers, *summary;
+        int _max, _min;
+        middle_layer() : _max(-1), _min(16777216){
+            sublayers = new last_layer[4096](), summary = new last_layer();
+        }
+        middle_layer(const middle_layer&amp; another) : _max(another._max), _min(another._min){
+            sublayers = new last_layer[4096];
+            for(unsigned int i = 0; i &lt; 4096; ++i)
+                sublayers[i] = last_layer(another.sublayers[i]);
+            summary = new last_layer(*another.summary);
+        }
+        middle_layer(middle_layer&amp;&amp; another)
+            : _max(move(another._max)), _min(move(another._min)){
+            sublayers = another.sublayers, summary = another.summary;
+            another.sublayers = another.summary = nullptr;
+        }
+        middle_layer&amp; operator=(const middle_layer&amp; another){
+            this-&gt;~middle_layer();
+            _max = another._max, _min = another._min;
+            sublayers = new last_layer[4096];
+            for(unsigned int i = 0; i &lt; 4096; ++i)
+                sublayers[i] = last_layer(another.sublayers[i]);
+            summary = new last_layer(*another.summary);
+            return *this;
+        }
+        middle_layer&amp; operator=(middle_layer&amp;&amp; another){
+            this-&gt;~middle_layer();
+            _max = move(another._max), _min = move(another._min);
+            sublayers = another.sublayers, summary = another.summary;
+            another.sublayers = another.summary = nullptr;
+            return *this;
+        }
+        // ~middle_layer(){
+        //     delete summary;
+        //     delete[] sublayers;
+        // }
+        inline bool empty() const noexcept { return (_max == -1); }
+        inline bool isOne() const noexcept { return (_max == _min); }
+        inline int max() const noexcept { return _max; }
+        inline int min() const noexcept { return _min; }
+        bool insert(int value) noexcept {
+            if(value == _min) return false;
+            else if(_max == -1) return _max = _min = value, true;
+            else if(value &lt; _min) swap(value, _min);
+            else if(value &gt; _max) _max = value;
+            const int id = (value &gt;&gt; 12);
+            if(sublayers[id].insert(value &amp; 4095)){
+                if(sublayers[id].isOne()) summary-&gt;insert(id);
+                return true;
+            }else return false;
+        }
+        void erase(int value) noexcept {
+            if(_max == _min){
+                _max = -1, _min = 16777216;
+                return;
+            }else if(value == _min){
+                const int id = summary-&gt;min();
+                 _min = value = (id &lt;&lt; 12) + sublayers[id].min();
+            }
+            const int id = (value &gt;&gt; 12);
+            sublayers[id].erase(value &amp; 4095);
+            if(sublayers[id].empty()) summary-&gt;erase(id);
+            if(value == _max){
+                if(summary-&gt;empty()) _max = _min;
+                else{
+                    const int id = summary-&gt;max();
+                    _max = (id &lt;&lt; 12) + sublayers[id].max();
+                }
+            }
+        }
+        int predecessor(const int value) const noexcept {
+            if(_min &gt;= value) return -1;
+            else if(value &gt; _max) return _max;
+            const int id = (value &gt;&gt; 12), sm = (id &lt;&lt; 12);
+            if(value &gt; sm + sublayers[id].min()){
+                return sm + sublayers[id].predecessor(value &amp; 4095);
+            }else{
+                const int id2 = summary-&gt;predecessor(id);
+                return (id2 &gt;= 0) ? ((id2 &lt;&lt; 12) + sublayers[id2].max()) : _min;
+            }
+        }
+        int successor(const int value) const noexcept {
+            if(value &lt; _min) return _min;
+            else if(value &gt;= _max) return 16777216;
+            const int id = (value &gt;&gt; 12), sm = (id &lt;&lt; 12);
+            if(value &lt; sm + sublayers[id].max()){
+                return sm + sublayers[id].successor(value &amp; 4095);
+            }else{
+                const int id2 = summary-&gt;successor(id);
+                return (id2 &lt;&lt; 12) + sublayers[id2].min();
+            }
+        }
+    };
+    struct last_layer{
+        unsigned long long data[64], summary;
+        int _max, _min;
+        last_layer() noexcept : summary(0ULL), _max(-1), _min(4096){
+            memset(data, 0, sizeof(data));
+        }
+        inline bool empty() const noexcept { return (_max == -1); }
+        inline bool isOne() const noexcept { return (_max == _min); }
+        inline int max() const noexcept { return _max; }
+        inline int min() const noexcept { return _min; }
+        bool insert(int value) noexcept {
+            if(value == _min) return false;
+            else if(_max == -1) return _max = _min = value, true;
+            else if(value &lt; _min) swap(value, _min);
+            else if(value &gt; _max) _max = value;
+            const int id = (value &gt;&gt; 6);
+            if((data[id] &gt;&gt; (value &amp; 63)) &amp; 1ULL) return false;
+            else{
+                data[id] ^= (1ULL &lt;&lt; (value &amp; 63)), summary |= (1ULL &lt;&lt; id);
+                return true;
+            }
+        }
+        void erase(int value) noexcept {
+            if(_max == _min){
+                _max = -1, _min = 4096;
+                return;
+            }else if(value == _min){
+                const int id = lsb(summary);
+                _min = value = (id &lt;&lt; 6) + lsb(data[id]);
+            }
+            const int id = (value &gt;&gt; 6);
+            data[id] ^= (1ULL &lt;&lt; (value &amp; 63));
+            if(data[id] == 0) summary ^= (1ULL &lt;&lt; id);
+            if(value == _max){
+                if(summary == 0) _max = _min;
+                else{
+                    const int id = msb(summary);
+                    _max = (id &lt;&lt; 6) + msb(data[id]);
+                }
+            }
+        }
+        int predecessor(const int value) const noexcept {
+            if(_min &gt;= value) return -1;
+            else if(value &gt; _max) return _max;
+            const int id = (value &gt;&gt; 6), sm = (id &lt;&lt; 6);
+            if(data[id] &amp;&amp; value &gt; sm + lsb(data[id]))
+                return sm + msb(data[id] &amp; ((1ULL &lt;&lt; (value &amp; 63)) - 1ULL));
+            else{
+                const unsigned long long tmp = (summary &amp; ((1ULL &lt;&lt; id) - 1ULL));
+                if(tmp == 0ULL) return _min;
+                else{
+                    const int id2 = msb(tmp);
+                    return (id2 &lt;&lt; 6) + msb(data[id2]);
+                }
+            }
+        }
+        int successor(const int value) const noexcept {
+            if(value &lt; _min) return _min;
+            else if(value &gt;= _max) return 4096;
+            const int id = (value &gt;&gt; 6), sm = (id &lt;&lt; 6);
+            if(data[id] &amp;&amp; value &lt; sm + msb(data[id]))
+                return sm + lsb(data[id] &amp; ~((1ULL &lt;&lt; ((value &amp; 63) + 1)) - 1ULL));
+            else{
+                const int id2 = lsb(summary &amp; ~((1ULL &lt;&lt; (id + 1)) - 1ULL));
+                return (id2 &lt;&lt; 6) + lsb(data[id2]);
+            }
+        }
+    };
+    first_layer base_layer;
+public:
+    vanEmdeBoasTree() : _size(0), base_layer(){}
+    vanEmdeBoasTree(const vanEmdeBoasTree&amp;) = default;
+    vanEmdeBoasTree(vanEmdeBoasTree&amp;&amp;) = default;
+    vanEmdeBoasTree&amp; operator=(const vanEmdeBoasTree&amp;) = default;
+    vanEmdeBoasTree&amp; operator=(vanEmdeBoasTree&amp;&amp;) = default;
+    friend ostream&amp; operator&lt;&lt; (ostream&amp; os, vanEmdeBoasTree&amp; veb) noexcept {
+        for(unsigned int st = veb.successor(-1); st != veb.LENGTH; st = veb.successor(st))
+            os &lt;&lt; st &lt;&lt; &quot; &quot;;
+        return os;
+    }
+    bool empty() const noexcept { return (_size == 0); }
+    size_t size() const noexcept { return _size; }
+    size_t max_size() const noexcept { return LENGTH; }
+    bool find(const unsigned int value) const noexcept {
+        if(value &gt;= LENGTH) return false;
+        return base_layer.find(value);
+    }
+    size_t count(const unsigned int value) const noexcept {
+        return find(value);
+    }
+    int max() const noexcept { return base_layer.max(); }
+    int min() const noexcept { return base_layer.min(); }
+    void insert(const unsigned int value){
+        assert(value &lt; LENGTH);
+        _size += base_layer.insert(value);
+    }
+    void erase(const unsigned int value){
+        assert(value &lt; LENGTH);
+        base_layer.erase(value), --_size;
+    }
+    int predecessor(const int value) const noexcept {
+        return base_layer.predecessor(value);
+    }
+    int successor(const int value) const noexcept {
+        return base_layer.successor(value);
+    }
+};
 </pre>
 <h3>verify 用の問題</h3>
-<p>
-verify していません(verify 問題を知らない)
-</p>
 <p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=ITP2_7_C">Set - Set: Range Search</a>
-  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3831625#1">提出コード</a></p>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3831964#1">提出コード(愚直版)</a>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3831956#1">提出コード(高速版)</a>
+</p>
 </section>
-
 </div>
 <!--/contents-->
 
