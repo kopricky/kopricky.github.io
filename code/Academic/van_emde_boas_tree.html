@@ -42,7 +42,19 @@
 <h2>van Emde Boas Tree</h2>
 <h3>コードについての説明</h3>
 <p>
-.
+van Emde Boas Tree の実装. van Emde Boas Tree は [0, U) 内の要素について
+ insert, delete, prdecessor, successor クエリに最悪計算量 O(log log U) で答えるデータ構造で, その空間計算量 O(U) である. <br>
+y fast trie と比べて実装が楽かつ最悪計算量を保証している点が優れている. おそらく実測もこちらのほうが速いが, 空間計算量が要素数ではなく, 値域分だけ必要である点が劣っている. <br>
+実装は <a href="http://web.stanford.edu/class/archive/cs/cs166/cs166.1166/lectures/14/Slides14.pdf">こちらの資料</a> を参考にた. <br>
+実装は再帰的に書けるので比較的容易だが, 愚直に実装すると時間的にもメモリ的にも効率が悪くなってしまう.
+2 つコードを用意して 1 つ目は愚直の実装で特に速度やメモリを木にしていないので余り使い物にならないが, 実装の参考にはなると思う(最終層は unsigned long long を用いています.). <br>
+2 つ目のコードは競プロなどでよくある 10^9 以下の非負整数(正確には 2^30 未満の非負整数) について管理する割と高速な van Emde Boas Tree を実装してみた. <br>
+1 層目は 2^24 個のブロックに分割し, 各ブロックは uint64_t で管理して長さ 2^24 の summary を次の層でまたブロック分割する. メモリ削減のため 1 層目の各ブロックは
+min, max の変数を持たないようにしている. <br>
+2 層目は 2^12 個のブロックに分割し, 各ブロック, summary ともに長さ 2^12 となりそれをまた次の層でブロック分割する. <br>
+3 層目は 2^6 個のブロックに分割し, 各ブロック, summary ともに長さ 2^6 となりこれらを uint64_t で管理している. <br>
+2 べきにすることで各層で除算, 乗算を行わずにビット演算で済ませることができ, またある程度要素が増えてくるとクエリの処理が 1 層目で終了することも多くなり, そういった場合はとても高速に動作する. <br>
+ただ注意として, 2 つ目のコードについて 134 MB ほどメモリを食うので高速であるもののメモリ効率は良くない.
 </p>
 <p>
 (愚直版のコンストラクタ)<br>
@@ -300,8 +312,8 @@ public:
 class vanEmdeBoasTree
 {
 private:
-    static const uint32_t  LENGTH = 1073741824;
-    uint32_t  _size;
+    static const uint32_t LENGTH = 1073741824;
+    uint32_t _size;
     #define msb(u) (63 - __builtin_clzll(u))
     #define lsb(u) (__builtin_ctzll(u))
     struct first_layer;
@@ -580,13 +592,13 @@ public:
         return os;
     }
     bool empty() const noexcept { return (_size == 0); }
-    uint32_t  size() const noexcept { return _size; }
-    uint32_t  max_size() const noexcept { return LENGTH; }
+    uint32_t size() const noexcept { return _size; }
+    uint32_t max_size() const noexcept { return LENGTH; }
     bool find(const uint32_t value) const noexcept {
         if(value &gt;= LENGTH) return false;
         return base_layer.find(value);
     }
-    uint32_t  count(const uint32_t value) const noexcept {
+    uint32_t count(const uint32_t value) const noexcept {
         return find(value);
     }
     int32_t max() const noexcept { return base_layer.max(); }

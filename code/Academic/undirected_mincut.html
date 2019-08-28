@@ -149,9 +149,9 @@ private:
                 cur = next;
             }
         }
-        unsigned int max_rank = ceil(ceil2(_size) * FACTOR);
         node *next_minimum = _minimum-&gt;_next;
-        if(rank.size() &lt;= max_rank) rank.resize(max_rank + 1);
+        const unsigned int max_rank = ceil(ceil2(_size) * FACTOR);
+        rank.resize(max_rank + 1);
         for(node*&amp; cur : rank) cur = nullptr;
         for(node *cur = next_minimum; cur != _minimum;){
             if(cur-&gt;get_key() &lt; next_minimum-&gt;get_key()) next_minimum = cur;

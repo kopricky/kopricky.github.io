@@ -42,20 +42,34 @@
 <h2>Fibonacci Heap</h2>
 <h3>コードについての説明</h3>
 <p>
-単一始点最短経路の高速化のために考えられた手法で Dijkstra 法の計算量オーダーを改善できたり, 他にもプリム法や無向グラフの大域最小カットの計算量オーダーを改善できたりもする. (<a href="./dijkstra_fheap.html">参考1</a>, <a href="./undirected_mincut.html">参考2</a>) <br>
-一般的な二分ヒープとは異なり, push に O(1), pop(最小値削除) に ならし O(logn) の時間計算量がかかる. <br>
-二分ヒープと比べて優位な点としてキーの値を減らす方向への更新がならし O(1) の時間計算量で行えることが挙げられ, 上記のアルゴリズムについてもこの影響でオーダーが落ちる. 加えてヒープの併合も簡単に行うことができる.<br>
+単一始点最短経路の高速化のために考えられた手法で Dijkstra 法の計算量オーダーを改善できたり, 他にもプリム法や無向グラフの大域最小カットの計算量オーダーを改善できたりもします.
+(<a href="./dijkstra_fheap.html">参考 1</a>, <a href="./prim_heap.html">参考 2</a>, <a href="./undirected_mincut.html">参考 3</a>) <br>
+一般的な二分ヒープとは異なり, push に O(1), pop(最小値削除) に ならし O(logn) の時間計算量で行うことができます. <br>
+二分ヒープと比べて優位な点としてキーの値を減らす方向への更新(decrease key) がならし O(1) の時間計算量で行えることが挙げられ, 上記のアルゴリズムについてもこの影響でオーダーが落ちます. またヒープの併合も簡単に行うことができます.<br>
+具体的には binomial heap(二項ヒープ) の改良版で binomial heap では push, union 時に厳格に二項ヒープの条件 "次数 k の二項木は次数 0 〜 k-1 の二項木を子として持つ", "同じ次数の二項木は高々 1 つ" という条件を常に満たしていたため,
+各クエリの最悪計算量が O(log n) であったが, fibonacci heap では decrease key を含めたそれらのクエリを delete_min クエリに遅延処理をすることで delete_min のみならし O(log n) 時間で push, union, decrease key などをならし O(1) 時間で行うことができます. <br>
+fibonacci という名前の由来はおそらくその木の構造から来ています. push, delete_min クエリのみの場合は単に push クエリ時の処理が delete_min 時に遅延処理されるだけなので delete_min 操作の終了時には二項ヒープになります.
+しかし, decrease key クエリによってヒープ木内の任意の頂点についてその頂点を根とする部分木が脱離する可能性がでてくるため二項ヒープの条件は崩れます.
+ここでむやみやたらに部分木の脱離を許すのではなく, 根を除く頂点について子が脱離する回数を高々 1 回と制限すると木の根の次数が頂点数の log で抑えることができます., このときに根の次数が k となるような木でありうる最小の頂点数が k についてフィボナッチ数列(二項ヒープの場合は 2 べき)を成し,
+これが名前の由来だと思います. <br>
 <a href="https://www.cs.princeton.edu/~wayne/teaching/fibonacci-heap.pdf">このスライド</a>の説明をもとに実装しました. <br>
+キー値減算を行いたい場合は push 時に push されたノードへのポインタを返すのでそれを配列などで保持しておき, update(ノードへのポインタ, 減らす値) を呼ぶことで実現できる. <br>
 元論文は <a href="http://www.bioinfo.org.cn/~dbu/AlgorithmCourses/Lectures/Fibonacci-Heap-Tarjan.pdf">Fredman, Tarjan 1984</a><br>
+(上記の参考スライドの補足) <br>
+ポテンシャルを tree(H) + 2 * marks(H) と取っているイメージは木の根の頂点については後にマージされる際にかかる計算量の分の 1,
+マークされている頂点については後に部分木として離脱し, 新たに木の根になるのにかかる計算量の分に 1, そして木の根になった後に同じくマージされる際にかかる計算量の分に 1 の合計 2 がかかっていると見ることができる. <br>
+一般的なならし計算量の解析と同様にならしコストは (実際にかかるコスト) + (ポテンシャルの差分) で計算され, ポテンシャルが増えることは後の計算のために貯金すること, 減ることは貯金していた分を使うことに対応している. <br>
+(fibonacci heap 以降のヒープの(雑な)話) <br>
+fibonacci heap における delete_min, delete_key にかかるならし計算量を最悪計算量で実現するヒープとして relaxed heap がある(Driscoll, Gabow, Sharairman, Tarjan 1988).
+このヒープはその名の通り厳密にはヒープではなくヒープの条件を満たさないノードを log n 個くらい許すという条件を常に保つように更新をする. ただその影響で find_min には O(log n) 時間がかかる. <br>
+他にもヒープ操作にかかる計算量の情報理論的下界を下回る計算量を実現したものとして soft heap がある(chazelle 2000).
+こちらはヒープ内の key の値を途中で変化させることで保持する要素の情報量を落とし, さらなる高速化を測るものである.
+insert された要素の個数を n としたときパラメーター ε について, insert にかかる計算量が O(log 1/ε), ヒープ内の変更された key の値は高々 εn 個のようにパラメタライズされる.
+この soft heap は種々のアルゴリズムに応用されていて例えば最小全域木を最悪計算量 O(E α(E, V)) で求めるアルゴリズムなどに使われている(fibonacci heap では prim 法を O(n log n + m) が限界だった.).
+論文を読んでいないのでどういう風に用いるかは知らない...(<a href="https://en.wikipedia.org/wiki/Soft_heap">wikipedia の記事</a> の Application には soft heap を selection algorithm に応用する例が載っている.)
 </p>
 <p>
-(関数)<br>
-update(v, val): ノード v のキー値を val(≧ 0) 減算する.<br>
-top(): ヒープ内の"最小"キー値を返す <br>
-unite(fh1, fh2): fh1 に fh2 をマージする
-</p>
-<p>
-時間計算量: push O(1), pop ならしO(logn), update(キー値減算) ならしO(1), unite O(1)
+時間計算量: push O(1), pop ならし O(log n), update(キー値減算) ならし O(1), unite O(1)
 </p>
 <h3>コード(キー値のみを保持)</h3>
 <div class="codebox">
@@ -145,9 +159,9 @@ public:
                 cur = next;
             }
         }
-        unsigned int max_rank = ceil(ceil2(_size) * FACTOR);
         node *next_minimum = _minimum-&gt;_next;
-        if(rank.size() &lt;= max_rank) rank.resize(max_rank + 1);
+        const unsigned int max_rank = ceil(ceil2(_size) * FACTOR);
+        rank.resize(max_rank + 1);
         for(node*&amp; cur : rank) cur = nullptr;
         for(node *cur = next_minimum; cur != _minimum;){
             if(cur-&gt;_key &lt; next_minimum-&gt;_key) next_minimum = cur;
@@ -377,9 +391,9 @@ private:
                 cur = next;
             }
         }
-        unsigned int max_rank = ceil(ceil2(_size) * FACTOR);
         node *next_minimum = _minimum-&gt;_next;
-        if(rank.size() &lt;= max_rank) rank.resize(max_rank + 1);
+        const unsigned int max_rank = ceil(ceil2(_size) * FACTOR);
+        rank.resize(max_rank + 1);
         for(node*&amp; cur : rank) cur = nullptr;
         for(node *cur = next_minimum; cur != _minimum;){
             if(cur-&gt;get_key() &lt; next_minimum-&gt;get_key()) next_minimum = cur;
@@ -523,7 +537,9 @@ public:
 </pre>
 <h3>verify 用の問題</h3>
 <p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2559">Minimum Spanning Tree</a>
-  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3829493#1">提出コード</a></p>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3829493#1">提出コード</a><br>
+  (参考) <a href="./dijkstra_fheap.html">verify 1</a>, <a href="./undirected_mincut.html">verify 2</a>, <a href="./prim_fheap.html">verify 3</a>
+</p>
 </section>
 
 </div>

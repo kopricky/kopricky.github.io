@@ -39,13 +39,10 @@
 <div id="contents">
 
 <section>
-<h2>Dijkstra with Fibonacci Heap</h2>
+<h2>Prim with Fibonacci Heap</h2>
 <h3>コードについての説明</h3>
 <p>
-Dijkstra 法を <a href="./fibonacci_heap.html">Fibonacci Heap</a> を用いて高速化したアルゴリズム. 時間計算量が O((n + m) logn) から O(n log n + m) に落ちる. <br>
-すでにフィボナッチヒープ内にある頂点についての最短距離の更新はキー値減算を用いることで 1 回あたりならし O(1) で行えるため, 新たに要素を insert する必要はない.
-結果 insert および delete は n 回となるので計算量は O(n log n + m) となる.
-元論文は <a href="http://www.bioinfo.org.cn/~dbu/AlgorithmCourses/Lectures/Fibonacci-Heap-Tarjan.pdf">Fredman, Tarjan 1984</a>
+<a href="./dijkstra_fheap.html">Dijkstra 法の Fibonacci Heap を用いた高速化</a> と同様の手法で prim 法の計算量も O(n log n + m) に落ちる.
 </p>
 <p>
 時間計算量: O(n log n + m)
@@ -284,48 +281,50 @@ public:
     }
 };
 
-template&lt;typename T&gt; class Dijkstra {
+template&lt;typename T&gt; class Prim {
 public:
 	struct edge{
-		int to; T cost;
+		int to;
+		T cost;
 	};
-    const int V;
+	const int V;
+    const T inf = numeric_limits&lt;T&gt;::max();
 	vector&lt;vector&lt;edge&gt; &gt; G;
 	vector&lt;T&gt; d;
     Fibonacci_Heap&lt;T, int&gt; fheap;
-    typename Fibonacci_Heap&lt;T, int&gt;::node** keep;
-	Dijkstra(int node_size) : V(node_size), G(V), d(V, numeric_limits&lt;T&gt;::max()),
-        keep(new typename Fibonacci_Heap&lt;T, int&gt;::node*[V]){}
-    // ~Dijkstra(){
-        // delete[] keep;
-    // }
-	// 無向グラフの場合
-	void add_edge(int u, int v, T cost){
-		G[u].pb((edge){v, cost}), G[v].pb((edge){u, cost});
+    vector&lt;typename Fibonacci_Heap&lt;T, int&gt;::node*&gt; nodes;
+	Prim(int node_size)
+        : V(node_size), G(V), d(V, inf), fheap(), nodes(V, nullptr){}
+	void add_edge(int u, int v, T val){
+		G[u].push_back((edge){v, val}), G[v].push_back((edge){u, val});
 	}
-	void solve(int s){
-		d[s] = 0;
-		keep[s] = fheap.push(0, s);
+	T solve(){
+		T res = 0;
+		d[0] = 0;
+        nodes[0] = fheap.push(0, 0);
 		while(!fheap.empty()){
-            int v = fheap.top().second;
-            fheap.pop();
-			for(auto&amp; w : G[v]){
-				if(d[w.to] &gt; d[v] + w.cost){
-                    if(d[w.to] == numeric_limits&lt;T&gt;::max()){
-                        keep[w.to] = fheap.push(d[v] + w.cost, w.to);
+			const int v = fheap.top().second;
+            res += fheap.top().first;
+			fheap.pop();
+            d[v] = -1;
+			for(auto&amp; e : G[v]){
+				if(d[e.to] &gt;= 0 &amp;&amp; d[e.to] &gt; e.cost){
+                    if(d[e.to] == inf){
+                        nodes[e.to] = fheap.push(e.cost, e.to);
                     }else{
-                        fheap.update(keep[w.to], d[w.to] - (d[v] + w.cost));
+                        fheap.update(nodes[e.to], d[e.to] - e.cost);
                     }
-                    d[w.to] = d[v] + w.cost;
+                    d[e.to] = e.cost;
 				}
 			}
 		}
+		return res;
 	}
 };
 </pre>
 <h3>verify 用の問題</h3>
-<p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_1_A">Single Source Shortest Path</a>
-  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3829495#1">提出コード</a></p>
+<p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_2_A">Spanning Tree - Minimum Spanning Tree</a>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3833823#1">提出コード</a></p>
 </section>
 
 </div>

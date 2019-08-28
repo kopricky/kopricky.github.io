@@ -43,19 +43,31 @@
 <h3>コードについての説明</h3>
 <p>
 Dijkstra 法を Radix Heap を用いて高速化したアルゴリズム. 辺のコストが非負"整数"の場合に用いることができる高速化である. <br>
-辺コストが int である場合について<a href="https://www.slideshare.net/yosupo/ss-46612984">このスライドの話</a> をもとに実装したので, 計算量や操作についてはこのスライドの説明を参考にしてもらいたい.<br>
-push を O(1), pop を ならしlog(MAX_VAL) で実現するが, push の際に最後に pop した値より小さな値を入れることができないという制限がある. この制限は Dijkstra 法のアルゴリズムとコンフリクトしないので Dijkstra 法の高速化に用いることができる.<br>
-実測では priority_queue を用いた Dijkstra 法より少し速くなった.
+辺コストが int である場合について<a href="https://www.slideshare.net/yosupo/ss-46612984">このスライドの話</a>をもとに実装した.<br>
+push を O(1), pop を ならし log(MAX_VAL) (MAX_VAL は格納する要素の最大値) で実現し定数倍も軽いが, push の際に最後に pop した値より小さな値を入れることができないという制限がある. この制限は Dijkstra 法のアルゴリズムとコンフリクトしないので Dijkstra 法の高速化に用いることができる.<br>
+以下の実装は距離が int 型で表せる場合の実装である. 実測では priority_queue を用いた Dijkstra 法より少し速くなった. <br>
+(Radix Heap の補足) <br>
+radix heap から最後に pop した値を last とする. このときヒープ内の各要素 x は vec[(x^last の最上位ビット) + 1] に格納されている(ただし 0 の最上位ビットは -1 とする).
+push(x) は要素 x を vec[(x^last の最上位ビット) + 1] に入れるだけなので最上位ビットにかかる計算を O(1) と考えると O(1) でできます. 以下 pop の説明をします.<br>
+ここで最後に pop した値より大きな値を push できないという制約からヒープ内のすべての数は last 以上です.
+これより (x^last の最上位ビット) はビットを大きい方から見ていき last が 0 で, x が 1 であるような最も左のビットと言えます.
+つまり vec[i] 内のすべての要素は vec[i+1] 内のどの要素よりも小さいということが言えます.
+よって pop する際は v[0], v[1],... と順番に見ていき非空の vector vec[i] が見つかったらその中の最小値を pop するとします. <br>
+このとき vec[i] 内の最小値を見つけるために要素をすべて見る必要があることや pop 後に last が変わるので構造を変化させなければいけないことが問題に見えますが, この操作にかかる計算量は以下で説明するようにならし O(MAX_VAL) になります. <br>
+実は pop 後に last が変わった後に "ヒープ内の各要素 x は vec[(x^last の最上位ビット) + 1] に格納されている" という条件を保つためにするべきことは vec[i] 内の各要素を新しい last について考えた vec[(x^last の最上位ビット) + 1] に再格納するだけで十分です.
+なぜなら vec[0],...vec[i-1] には要素がないですし, vec[i+1] 以降の要素については last が変わっても (x^last の最上位ビット) の最上位ビットが変化しないからです. <br>
+さらに再格納先は vec[i] 内の各要素 x について 「(x^(元のlast) の最上位ビット) > (x^(新しいlast) の最上位ビット)」 が成り立つことから i より小さくなります.
+ゆえに各要素について再格納される回数および最小値を見つける際に参照される回数は全体で高々 O(log (MAX_VAL)) 回であることが言えます.
 </p>
 <p>
-時間計算量: O((n+m)log(MAX_VAL)) (最短距離の最大値を MAX_VAL とする)
+時間計算量: O((n + m) log(MAX_VAL)) (最短距離の最大値を MAX_VAL とする)
 </p>
 <h3>コード</h3>
 <div class="codebox">
 <input type="checkbox" id="label" class="csscode" />
 <label for="label"></label>
 <pre class="prettyprint linenums">
-#define impl(x, last) x == last ? 0 : 31 - __builtin_clz(x ^ last)
+#define impl(x, last) (x == last) ? 0 : 31 - __builtin_clz(x ^ last)
 
 class RadixHeap{
 public:
@@ -89,33 +101,33 @@ public:
     }
 };
 
-template&lt;typename T&gt; class Dijkstra {
+class Dijkstra {
 public:
     struct edge{
-        int to; T cost;
+        int to, cost;
     };
     int V;
     vector&lt;vector&lt;edge&gt; &gt; G;
-    vector&lt;T&gt; d;
-    using pti = pair&lt;T,int&gt;;
-    Dijkstra(int node_size) : V(node_size), G(V), d(V, numeric_limits&lt;T&gt;::max()){}
+    vector&lt;int&gt; d;
+    using pii = pair&lt;int, int&gt;;
+    Dijkstra(int node_size) : V(node_size), G(V), d(V, numeric_limits&lt;int&gt;::max()){}
     //無向グラフの場合
-    void add_edge(int u,int v,T cost){
-        G[u].push_back((edge){v,cost}), G[v].push_back((edge){u,cost});
+    void add_edge(int u, int v, int cost){
+        G[u].push_back((edge){v, cost}), G[v].push_back((edge){u, cost});
     }
     void solve(int s){
         RadixHeap que;
         d[s] = 0;
-        que.push(0,s);
+        que.push(0, s);
         while(!que.empty()){
-            pti p = que.top();
+            pii p = que.top();
             que.pop();
             int v = p.second;
             if(d[v] &lt; p.first) continue;
             for(auto&amp; w : G[v]){
                 if(d[w.to] &gt; d[v] + w.cost){
                     d[w.to] = d[v] + w.cost;
-                    que.push(d[w.to],w.to);
+                    que.push(d[w.to], w.to);
                 }
             }
         }

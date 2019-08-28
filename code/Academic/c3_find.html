@@ -44,12 +44,12 @@
 <p>
 無向グラフ G に長さ 3 の単純閉路が含まれるかどうかを返すアルゴリズム. <br>
 threshold α を決めて, 次数が α 以下の各頂点についてはそこから出る異なる 2 辺についてもう一方の端点同士の間に辺があるかどうかを調べる(あれば true). <br>
-次数が α より大きい頂点(個数は 2m/α 以下)については隣接行列の 3 乗(64 bit高速化が使える)を計算して対角成分を見る(非ゼロの成分があれば true). <br>
-(この実装では端点同士の辺のあるなしを logm かけて調べているので) α はだいたい O(sqrt(m)) とか O(sqrt(m/logm)) とかにするのがよい.<br>
+次数が α より大きい頂点(個数は 2m / α 以下)については隣接行列の 3 乗(64 bit高速化が使える)を計算して対角成分を見る(非ゼロの成分があれば true). <br>
+(この実装では端点同士の辺のあるなしを log m かけて調べているので) α はだいたい O(sqrt(m)) とか O(sqrt(m / log m)) とかにするのがよい.<br>
 元論文は <a href="https://www.tau.ac.il/~nogaa/PDFS/ayz97.pdf">Alon, Yuster, Zwick 1997</a>
 </p>
 <p>
-MAX_E は最大の辺の数に対応する
+引数の MAX_E は辺の数を表す.
 </p>
 <p>
 時間計算量: だいたい O(m^1.5)
@@ -63,8 +63,8 @@ template &lt;int MAX_E&gt; class C3_Find {
 private:
 
     // static const int alpha = floor(sqrt(MAX_E/log2((double)MAX_E+1)))+1;
-    static const int alpha = floor(sqrt(MAX_E/2.0))+1;
-    static const int MAX_N = ceil(2.0*MAX_E / alpha);
+    static const int alpha = floor(sqrt(MAX_E / 2.0)) + 1;
+    static const int MAX_N = ceil(2.0 * MAX_E / alpha);
 
     class mat {
     public:
