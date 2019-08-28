@@ -43,13 +43,15 @@
 <h3>コードについての説明</h3>
 <p>
 <a href="merge_segtree.html">Merge Segtree</a> を用いた長方形領域内に含まれる点を効率よく報告するデータ構造である. <br>
-計算量は報告する点の数に依存し, output sensitive である. <br>
-フラクショナルカスケーディング版はクエリが O(log(n)+k) であるものの構築にかかる計算量や空間計算量が定数倍重いため実測は速くない. <br>
+計算量は O(log^2 n + k) と報告する点の数に依存し, output sensitive である. <br>
+フラクショナルカスケーディング版はクエリが O(log n + k) と log 落ちるものの構築にかかる計算量や空間計算量が定数倍重いため実測は速くない. <br>
 実装は <a href="https://www.amazon.co.jp/%E3%82%B3%E3%83%B3%E3%83%94%E3%83%A5%E3%83%BC%E3%82%BF%E3%83%BB%E3
 %82%B8%E3%82%AA%E3%83%A1%E3%83%88%E3%83%AA%E2%80%95%E8%A8%88%E7%AE%97%E5%B9%BE%E4%BD%95%E5%AD%A6-%E3
 %82%A2%E3%83%AB%E3%82%B4%E3%83%AA%E3%82%BA%E3%83%A0%E3%81%A8%E5%BF%9C%E7%94%A8-M-%E3%83%89%E3%83%90%
 E3%83%BC%E3%82%B0/dp/4764903881/ref=pd_lpo_sbs_14_img_2?_encoding=UTF8&psc=1&refRID=7BYX1J7GC6X3X6Q0
-WM8T">コンピュータ・ジオメトリ</a> を参考にしました.
+WM8T">コンピュータ・ジオメトリ</a> を参考にしました. <br>
+フラクショナルカスケーディングは一般の d 次元にも応用でき, 時間計算量 O(log^{d-1} n + k) 空間計算量 O(n log^(d-1) n) となる. <br>
+ちなみに (d >= 3) 次元について時間計算量 O(log^{d-2} n + k) 空間計算量 O(n log^d n) を達成するデータ構造もあってこれは確かフラクショナルカスケーディングより前に発表された研究だった(気がする).
 </p>
 <p>
 (関数)<br>
@@ -57,7 +59,7 @@ OrthogonalRangeReport(cand): 点の座標を渡す <br>
 query(lx, ly, rx, ry, report): [lx, rx)×[ly, ry) の長方形領域内に含まれる点のインデックスが report に入る
 </p>
 <p>
-時間計算量: 構築 O(nlogn), 各クエリ O(log^2n + k) (k は報告する点の数) (フラクショナルカスケーディングを用いると O(log n + k))
+時間計算量: 構築 O(n log n), 各クエリ O(log^2n + k) (k は報告する点の数) (フラクショナルカスケーディングを用いると O(log n + k)) 空間計算量 O(n log n)
 </p>
 <h3>コード</h3>
 <div class="codebox">
