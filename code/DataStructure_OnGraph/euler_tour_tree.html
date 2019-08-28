@@ -49,7 +49,7 @@ LinkCutTree とは異なり, 部分木もしくは連結成分全体に対する
 部分木内の頂点集合に対する演算は op(node v, function f) みたいな形で呼べたらうれしいが, reroot の影響でそれが難しい.<br>
 そのため部分木内の頂点集合に対する演算は op(node v, node p, function f) の形(v が根なら p は -1 とする) で与えることにしている(どうしても op(node v, function f) にしたいなら並行して <a href="./link_cut_tree.html">LinkCutTree</a> を持つとできる). <br>
 ヘルパー関数は例えば最初辺数 0 からスタートではなくある木や森からスタートというときにそのグラフに対応する完全平衡二分木を効率よく構築し, それを初めの splay 木としてやることでそれ以降の操作の高速化が望めそう(？)なので置いてある. <br>
-元論文は <a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.192.8615&rep=rep1&type=pdf">Henzinger, King 1995</a>. <br>
+元論文は "Randomized Dynamic Graph Algorithms with Polylogarithmic Time per Operation" [Henzinger, King 1995] <br>
 (追記) <br>
 高速な自作 <a href="../OriginalContainer/unordered_map.html">Unordered Map</a> を用いた高速版も一応用意した. <br>
 </p>

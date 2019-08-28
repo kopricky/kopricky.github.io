@@ -54,7 +54,8 @@ fibonacci という名前の由来はおそらくその木の構造から来て�
 これが名前の由来だと思います. <br>
 <a href="https://www.cs.princeton.edu/~wayne/teaching/fibonacci-heap.pdf">このスライド</a>の説明をもとに実装しました. <br>
 キー値減算を行いたい場合は push 時に push されたノードへのポインタを返すのでそれを配列などで保持しておき, update(ノードへのポインタ, 減らす値) を呼ぶことで実現できる. <br>
-元論文は <a href="http://www.bioinfo.org.cn/~dbu/AlgorithmCourses/Lectures/Fibonacci-Heap-Tarjan.pdf">Fredman, Tarjan 1984</a><br>
+元論文は "Fibonacci Heaps and Their Uses in Improved Network
+Optimization Algorithms" [Fredman, Tarjan 1984] <br>
 (上記の参考スライドの補足) <br>
 ポテンシャルを tree(H) + 2 * marks(H) と取っているイメージは木の根の頂点については後にマージされる際にかかる計算量の分の 1,
 マークされている頂点については後に部分木として離脱し, 新たに木の根になるのにかかる計算量の分に 1, そして木の根になった後に同じくマージされる際にかかる計算量の分に 1 の合計 2 がかかっていると見ることができる. <br>

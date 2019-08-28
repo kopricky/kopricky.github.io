@@ -48,7 +48,7 @@
 これによって 2 点間の連結度が陽に分かったので x_n と x_{n-1} の 2 点を縮約することができる. 具体的には縮約後のグラフを G' とすると大域最小容量カットは解となる最小カット S* で x_n, x_{n-1} が分かれるか分かれないかを考えて min(δ(x_n), λ(G')) となる. この操作を
 1 点になるまで繰り返すことで大域最小容量カットが得られる.<br>
 このアルゴリズムはより一般的な(対称)劣モジュラ関数の最小化アルゴリズムに拡張される(Queyranne 1998).<br>
-元論文は <a href="https://epubs.siam.org/doi/abs/10.1137/0405004">Nagamochi and Ibaraki 1992</a> や <a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.450.4415&rep=rep1&type=pdf">Stoer, Wagner 1997</a> など<br>
+元論文は "Computing Edge-Connectivity in Multigraphs and Capacitated Graphs" [Nagamochi and Ibaraki 1992] や "A Simple Min-Cut Algorithm" [Stoer, Wagner 1997] など<br>
 重みなし大域最小容量カットの場合は, 何も考えずグラフの辺をランダムに縮約していき残り 2 点になったときの連結度を最小容量カットの候補とするというような操作を O(n^2) くらい繰り返せばある程度の確率で最適解が得られるというようなモンテカルロアルゴリズムも存在する.
 これは最適なカットに属する辺が最後まで縮約されずに残る確率が O(n^(-2)) となることから従う. <br>
 (補足) <br>

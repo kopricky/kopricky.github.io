@@ -47,7 +47,7 @@ Linked Data Structure とはノードと 2 つのノードをつなぐリンク(
 Linked Data Structure のクラスのうち各ノードに入るリンクの数(INDEGREE) が定数となるような構造に限定するとそのような構造の部分永続化は効率良く行うことができ, 以下はその実装である. segment tree や binary search tree などを個別に永続化することがよくあるがこれはそのような永続化を包括的にかつ効率的に扱うことができる. <br>
 ここで update はリンクの insert, erase, ノードの insert, erase, ノードの持つデータの変更を考える. このとき時間計算量および空間計算量は amortized O(1) per update が成り立つ. <br>
 また任意のバージョンで、 ノード v からそのノードの i 番目のリンクに沿った移動は O(1) 時間で行うことができる. 以下の実装では各バージョンにおける access nodes(参照する際の入り口となるノードたち) をクラス内で管理することはしていないので外側で配列として保持しておく. <br>
-実装は元論文である <a href="https://www.cs.cmu.edu/~sleator/papers/another-persistence.pdf">Driscoll, Sarnak, Sleator, Tarjan 1986</a> を参照しました. この論文では完全永続化に対しても同じ計算量での手法を与えていて, やることは大きく変わらないものの list order problem を効率的に解くアルゴリズムが必要だったり, また管理する必要のある pointer も増えるので実装が少々大変.<br>
+実装は元論文である "Making Data Structures Persistent" [Driscoll, Sarnak, Sleator, Tarjan 1986] を参照しました. この論文では完全永続化に対しても同じ計算量での手法を与えていて, やることは大きく変わらないものの list order problem を効率的に解くアルゴリズムが必要だったり, また管理する必要のある pointer も増えるので実装が少々大変.<br>
 また同論文にはこれらの手法を平衡二分探索木の部分永続化および完全永続化に応用していて insertion / deletion が worst case O(log n) でできることも示している.
 </p>
 <p>

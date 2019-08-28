@@ -42,7 +42,7 @@
 <h2>Random Graph Generator</h2>
 <h3>コードについての説明</h3>
 <p>
-ランダムグラフを生成するアルゴリズム. 1 つ目は簡単なものの寄せ集め(Erdős–Rényi (ER)モデルとか)で 2 つ目は次数列が与えられたときにそれを満たすようなグラフを一様ランダムで生成するアルゴリズムになっている. 元論文は <a href="https://kops.uni-konstanz.de/bitstream/handle/123456789/5799/random.pdf?sequence=1">Batagelj Brandes 2005</a> および <a href="http://complexnetworks.fr/wp-content/uploads/2011/01/random.pdf">Viger, Latapy 2011</a>.
+ランダムグラフを生成するアルゴリズム. 1 つ目は簡単なものの寄せ集め(Erdős–Rényi (ER)モデルとか)で 2 つ目は次数列が与えられたときにそれを満たすようなグラフを一様ランダムで生成するアルゴリズムになっている. 元論文は "Efficient Generation of Large Random Networks" [Batagelj Brandes 2005] および "Efficient and simple generation of random simple connected graphswith prescribed degree sequence" [Viger, Latapy 2011] <br>
 前半は G(n, p) が愚直にやると O(n^2) かかるが次にどの辺を取るかを幾何分布に従う乱数によって決める(次に取るのが i 個先となる確率は p(1-p)^(i-1) なので)ことで平均計算量 O(np) で求めることができることぐらいでほかは普通. <br>
 後半のアルゴリズムは出力されるグラフが非連結を許さない場合(こちらのほうが難しい)について説明する(以下の 3 つのステップからなる). <br>
 (I) 与えられた次数列を満たすグラフを構築する(<a href="../Graph/havel_hakimi.html">Havel-Hakimi</a> アルゴリズム). (II) 得られたグラフを swap 操作(グラフ G_1 内の辺(a, b), G_2 内の辺(c, d)を ⇒ 辺(a, c), 辺(b, d) に付け替える操作)を繰り返すことで連結にする. swap 操作は各頂点の次数を変化させないことに注意する.<br>

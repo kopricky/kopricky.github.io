@@ -46,7 +46,7 @@
 threshold α を決めて, 次数が α 以下の各頂点についてはそこから出る異なる 2 辺についてもう一方の端点同士の間に辺があるかどうかを調べる(あれば true). <br>
 次数が α より大きい頂点(個数は 2m / α 以下)については隣接行列の 3 乗(64 bit高速化が使える)を計算して対角成分を見る(非ゼロの成分があれば true). <br>
 (この実装では端点同士の辺のあるなしを log m かけて調べているので) α はだいたい O(sqrt(m)) とか O(sqrt(m / log m)) とかにするのがよい.<br>
-元論文は <a href="https://www.tau.ac.il/~nogaa/PDFS/ayz97.pdf">Alon, Yuster, Zwick 1997</a>
+元論文は "Finding and Counting Given Length Cycles" [Alon, Yuster, Zwick 1997]
 </p>
 <p>
 引数の MAX_E は辺の数を表す.
