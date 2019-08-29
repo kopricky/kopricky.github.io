@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<link rel="shortcut icon" type="image/x-icon" href="../../favicon.ico">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>Directed Minimum Mean Weight Cycle</h2>
+<h3>コードについての説明</h3>
+<p>
+有向グラフに含まれる最小平均長の閉路を求めるアルゴリズムである.<br>
+有向グラフの最小平均長閉路アルゴリズムは [Karp 1978] の結果から O(nm) 時間で解けることが知られている. 以下雑な備忘録. <br>
+便宜上証明では元のグラフに超頂点 S と S から各頂点に重み 0 の辺を張ったグラフを新たに G とおいてグラフ G
+に含まれる最小平均長閉路を求めることにする. 新たに頂点, 辺を加えたことで閉路が増えることはないのでこの変換によって解は変化しない. <br>
+F_k(x) を始点を s, 終点を x とする長さ k の walk の最小の重みとする. walk は頂点及び辺の重複を許すパスとする.
+また長さ k の walk とは k 本の辺からなる walk の意味で使っています. もしそのような walk が存在しなければ ∞ と考える.
+このとき μ(G, c) をグラフ G, 重み関数 c に対する最小平均長閉路の値とすると以下の重要な等式が成り立つ. <br>
+</p>
+<div style="text-align:center;">
+    <img src="./texclip20190828213518.png" height="150" width="350"> <br>
+</div>
+<p>
+ここで G, V(G), n (= |V(G)|) はすべて超頂点 S およびそれに付随する辺を含んでいると考えます. <br>
+まず
+</p>
+<div style="text-align:center;">
+    <img src="./texclip20190829061605.png" height="150" width="205">
+</div>
+<p>
+が μ(G, c) 以上であることを示す. <br>
+F_n(x) は長さ n の walk であることからその道中で少なくとも 1 つの頂点を 2 度以上通る. <br>
+最後に 2 度以上通った頂点を t としてそれが長さ n の walk の j 番目とする. また j 番目より前かつ一番最後に t を通ったときを i 番目とする.
+このとき F_n(x) に対応する長さ n の walk P のうち x 番目から y 番目までの部分ウォークを P_xy と表すことにする.
+また P_0i, Pjn のようにたどった長さ n + i - j の walk の重みを W とする. ここで Pij のループの平均重みは μ(G, c) 以上, W は F_{n+i-j}(x) 以下であるという事実から
+</p>
+<div style="text-align:center;">
+    <img src="./texclip20190829064436.png" height="150" width="640">
+</div>
+<p>
+が成り立つので示せた. <br>
+次に上式がすべて等号で成り立たつような頂点 x が存在することを示す. <br>
+最小平均長となるような閉路を C とし, 含まれる辺の本数を L とする. C 内の頂点で S からの辺の本数の意味での距離が最も近い頂点を p とし, またその距離を R とする.
+このとき, 頂点 p の定義から L + R ≦ n が成り立ち, p から n - R - L step だけ有向閉路 C の向きに沿って移動した頂点を q とする.
+今考えた walk は s を始点, q を終点とする長さ n - L の walk となっていることから F_{n-L}(q) は有限である. 
+
+参考書の解法を確認すると, 全辺の重みを - μ(G, c) して μ(G, c) = 0 の場合のみ考えれば十分であることを使っていて, たしかにその方がスマートな気がする... <br>
+実装はこの F_k(x) を Bellman ford 法(DP) で求めて min max を計算したらおしまい.
+<br>
+(無向グラフの最小平均長閉路アルゴリズムについて) <br>
+補足ではあるが, 無向グラフの場合に上記の最小平均長閉路アルゴリズムを応用するため両方向に辺を張ると, 結局重み最小の辺に対応するループ(invalid なループ)が検出されるだけでうまく動かない. <br>
+調べると最小の ∅-join (Euler 部分グラフ) を求める問題を O(n) 回解くことで求められるらしく, 計算量は O(n^4) みたい.
+</p>
+<p>
+(関数)<br>
+solve(): (閉路の総重み, 閉路の長さ) の std::pair を返し, また ans に実際の閉路の頂点番号が辺に沿った順番で格納される.<br>
+</p>
+<p>
+時間計算量: O(mn)
+</p>
+<h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
+<pre class="prettyprint linenums">
+template&lt;typename T&gt;
+class DirectedMinimumMeanWeightCycle
+{
+private:
+    struct edge {
+        int to;
+        T cost;
+    };
+    const int V;
+    const T inf = numeric_limits&lt;T&gt;::max();
+    vector&lt;vector&lt;edge&gt; &gt; G;
+    vector&lt;vector&lt;T&gt; &gt; dp;
+    vector&lt;vector&lt;int&gt; &gt; prev;
+public:
+    vector&lt;int&gt; ans;
+    DirectedMinimumMeanWeightCycle(const int node_size)
+        : V(node_size), G(V), dp(V + 1, vector&lt;T&gt;(V, 0)), prev(V + 1, vector&lt;int&gt;(V)){}
+    void add_edge(const int from, const int to, const T cost){
+        G[from].push_back((edge){to, cost});
+    }
+    pair&lt;T, int&gt; solve(){
+        for(int k = 0; k &lt; V; ++k){
+            for(int i = 0; i &lt; V; ++i){
+                dp[k+1][i] = inf;
+            }
+            for(int i = 0; i &lt; V; ++i){
+                for(edge&amp; e : G[i]){
+                    if(dp[k+1][e.to] &gt; dp[k][i] + e.cost){
+                        dp[k+1][e.to] = dp[k][i] + e.cost;
+                        prev[k+1][e.to] = i;
+                    }
+                }
+            }
+        }
+        if(*min_element(dp[V].begin(), dp[V].end()) == inf) return make_pair(inf, -1);
+        int start = -1;
+        T tnum = inf / V;
+        int tden = 1;
+        for(int i = 0; i &lt; V; ++i){
+            if(dp[V][i] == inf) continue;
+            T num = -inf / V;
+            int den = 1;
+            for(int k = 0; k &lt; V; ++k){
+                if(dp[k][i] == inf) continue;
+                if(num * (V-k) &lt;= den * (dp[V][i] - dp[k][i])){
+                    num = dp[V][i] - dp[k][i], den = V - k;
+                }
+            }
+            if(num &gt; -inf / V){
+                if((num * tden &lt; den * tnum) || (num * tden == den * tnum &amp;&amp; den &lt; tden)){
+                    tnum = num, tden = den;
+                    start = i;
+                }
+            }
+        }
+        int level = V;
+        ans.resize(tden);
+        for(int i = 0; i &lt; tden; ++i){
+            start = prev[level--][ans[tden - i - 1] = start];
+        }
+        return {tnum, tden};
+    }
+};
+</pre>
+<h3>verify 用の問題</h3>
+<p>
+verify していません(verify 問題を知らない)
+</p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>
