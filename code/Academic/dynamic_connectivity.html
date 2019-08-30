@@ -45,7 +45,9 @@
 一般のグラフを対象に辺の追加, 削除, 頂点間の連結性判定を効率よく行うことのできるアルゴリズム. <a href="../DataStructure_OnGraph/link_cut_tree.html">Link Cut Tree</a>, <a href="../DataStructure_OnGraph/euler_tour_tree.html">Euler Tour Tree</a> などは森を対象にしていたためそれの一般化にあたる.<br>
 元論文は "Poly-logarithmic deterministic fully-dynamic algorithms for connectivity, minimum spannning tree, 2-edge, and biconnectivity" [Holm, Lichtenberg, Thorup 1998]<br>
 グラフ G の全域森を管理する. このとき log n 個の Euler Tour Tree を用いて Scaling(Layering) することで辺を削除した際の restore 操作の高速化を(ならしの意味で)可能にしている. 具体的に (i) 第 i 層では森 F_i を管理し, F_i 内の連結成分の最大サイズは 2^i 以下 (ii) F_0 ⊇ F_1 ... ⊇ F_{log n} (iii) F_0 は G の全域森 の 3 つの条件を常に満たすように更新をします. <br>
-F_i に含まれない辺 e (off tree edge) については端点に対応する EulerTourTree のノードに格納して, 例えば F_i 内の辺が cut され新たに連結成分が増えてしまうという場合に off tree edge の中から非連結となった頂点集合どうしを再び連結させるような辺がないかを探索するときに参照される. このときに効率よく探索する必要があり, そのために Euler Tour Tree の各ノードに "そのノードを根とする部分木内に off tree edge があるか" などの情報を適切に遅延伝播させたりなどする. 何を言っているかわからないと思うので詳しく知りたい方は元論文を参照してもらいたい.<br>
+F_i に含まれない辺 e (off tree edge) については端点に対応する EulerTourTree のノードに格納して, 例えば F_i 内の辺が cut され新たに連結成分が増えてしまうという場合に off tree edge の中から非連結となった頂点集合どうしを再び連結させるような辺がないかを探索するときに参照される.
+このときに効率よく探索する必要があり, そのために Euler Tour Tree の各ノードに "そのノードを根とする部分木内に off tree edge があるか" などの情報を平衡二分探索木上で適切に遅延伝播させたりなどする.
+何を言っているかわからないと思うので詳しく知りたい方は元論文を参照してもらいたい.<br>
 Euler Tour Tree 上で情報を正しく伝播させる必要があるため実装は割と気をつける必要がある. 計算量は辺の追加, 削除がならし O(log^2 n), 連結性判定が O(log n) である. Euler Tour Tree を平衡二分木ではなく O(log n)-分木で管理することで計算量上は O(log log n) factor の改善が可能になる. <br>
 restore 操作を辺の重みが小さいものから順に走査することで F_0 が常に最小全域森となるように保つことができる. つまりこれは deletion-only の場合削除クエリに対してならし O(log^2 n) の計算量で最小全域森を保持できることを意味している. insertion 込みだとコストの小さい辺が入ってきたときにコストの小さい辺は削除時の探索順の関係で level の高い位置に置く必要があるが, そうするとならしが回らないので単純には無理そう.
 ちなみに online Fully Dynamic だと O(log^4 n), offline だと O(log^2 n) の計算量で MST を管理できるらしい. <br>

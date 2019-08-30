@@ -270,6 +270,33 @@ public:
     iterator lower_bound(const _Key&amp; key){ return iterator(_lower_bound(key)); }
     iterator upper_bound(const _Key&amp; key){ return iterator(_upper_bound(key)); }
 };
+
+template&lt;class _Key, class _Tp&gt;
+class MapIterator {
+private:
+    friend Map&lt;_Key, _Tp&gt;;
+    typename Map&lt;_Key, _Tp&gt;::node *node_ptr;
+    using iterator_category = forward_iterator_tag;
+    using value_type = pair&lt;const _Key, _Tp&gt;;
+    using difference_type = pair&lt;const _Key, _Tp&gt;;
+    using pointer = pair&lt;const _Key, _Tp&gt;*;
+    using reference = pair&lt;const _Key, _Tp&gt;&amp;;
+
+private:
+    MapIterator(typename Map&lt;_Key, _Tp&gt;::node *mp) noexcept : node_ptr(mp){}
+
+public:
+    MapIterator() noexcept : node_ptr(){}
+    MapIterator(const MapIterator&amp; itr) noexcept : node_ptr(itr.node_ptr){}
+    MapIterator&amp; operator=(const MapIterator&amp; itr) &amp; noexcept { return node_ptr = itr.node_ptr, *this; }
+    MapIterator&amp; operator=(const MapIterator&amp;&amp; itr) &amp; noexcept { return node_ptr = itr.node_ptr, *this; }
+    reference operator*() const { return node_ptr-&gt;_M_data; }
+    pointer operator-&gt;() const { return &amp;(node_ptr-&gt;_M_data); }
+    MapIterator&amp; operator++() noexcept { return node_ptr = Map&lt;_Key, _Tp&gt;::increment(node_ptr), *this; }
+    MapIterator operator++(int) const noexcept { return MapIterator(Map&lt;_Key, _Tp&gt;::increment(this-&gt;node_ptr)); }
+    bool operator==(const MapIterator&amp; itr) const noexcept { return !(*this != itr); };
+    bool operator!=(const MapIterator&amp; itr) const noexcept { return node_ptr != itr.node_ptr; }
+};
 </pre>
 <h3>verify 用の問題</h3>
 <p>Codeforces : <a href="https://codeforces.com/problemset/problem/505/C">Mr. Kitayuta, the Treasure Hunter</a>
