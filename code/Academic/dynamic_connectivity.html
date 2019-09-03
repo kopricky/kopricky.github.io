@@ -56,7 +56,7 @@ restore 操作を辺の重みが小さいものから順に走査することで
 <br>
 (補足) <br>
 <a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.113.7484&rep=rep1&type=pdf">Patrascu, Demaine 2004</a> により動的連結性の operation の lower bound が (amortized) でも Ω(log n) time となることが示された(これは update もしくは query の少なくとも一方が Ω(log n) time の意味). また更新時間(link, cut) とクエリに応答する時間(connected) の間に存在する trade-off 関係も示している.
-具体的に amortized update time を t_u, amortized query time を t_q とすると <img src="./texclip20190808090008.png" height="100" width="350"> という関係が成り立つ. また trade-off の lower bound を達成するアルゴリズムとして Thrup 2000 や Holm, Lichtenberg, Thorup 2001 がある. <br>
+具体的に amortized update time を t_u, amortized query time を t_q とすると <img src="./texclip20190808090008.png" height="100" width="350"> という関係が成り立つ. また trade-off の lower bound を達成するアルゴリズムとして Thorup 2000 や Holm, Lichtenberg, Thorup 2001 がある. <br>
 worst input の構成などのより詳しい内容は論文もしくは <a href="https://courses.csail.mit.edu/6.851/fall17/scribe/L21.pdf">Demaine 先生の講義資料</a> が分かりやすかった. <br>
 <br>
 (追記) <br>
