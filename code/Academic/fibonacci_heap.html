@@ -54,6 +54,8 @@ fibonacci という名前の由来はおそらくその木の構造から来て�
 これが名前の由来だと思います. <br>
 <a href="https://www.cs.princeton.edu/~wayne/teaching/fibonacci-heap.pdf">このスライド</a>の説明をもとに実装しました. <br>
 キー値減算を行いたい場合は push 時に push されたノードへのポインタを返すのでそれを配列などで保持しておき, update(ノードへのポインタ, 減らす値) を呼ぶことで実現できる. <br>
+Dijkstra 法での応用のようにヒープにキー値(最短距離)だけでなくデータ(頂点)も持たせたくなる場合が多い. ただキー値減算をサポートしている影響でキー値の型に対して減算が定義されている必要があり,
+そのまま普通の Dijkstra 法のようにキー値を std::pair にすることはできなくて煩わしいのでキー値だけ保持するヒープだけでなくキー値とデータを保持するヒープも 2 つ目の実装として置いた. <br>
 元論文は "Fibonacci Heaps and Their Uses in Improved Network
 Optimization Algorithms" [Fredman, Tarjan 1984] <br>
 <br>
