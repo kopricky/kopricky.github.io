@@ -66,7 +66,8 @@ class Hungarian
 private:
     int V, matching_size;
     vector&lt;vector&lt;int&gt; &gt; graph;
-    vector&lt;int&gt; potential, allocate, reverse_alloc;
+    vector&lt;T&gt; potential;
+    vector&lt;int&gt; allocate, reverse_alloc;
     T total_cost;
     inline T diff(const vector&lt;vector&lt;T&gt; &gt;&amp; cost, int _i, int _j){
         return cost[_i][_j-V] - potential[_i] - potential[_j];
@@ -236,7 +237,9 @@ public:
 AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_7_A">Bipartite Matching(重みなし 2 部マッチング)</a>
   <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3758013#1">提出コード</a><br>
 AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2429">marukaite</a>
-  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3757707#1">提出コード</a>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3757707#1">提出コード</a><br>
+yosupo さんのジャッジ <a href="https://judge.yosupo.jp/problem/assignment">Assignment Problem</a>
+  <a href="https://judge.yosupo.jp/submission/161">提出コード</a>
 </p>
 </section>
 
