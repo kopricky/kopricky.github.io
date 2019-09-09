@@ -51,7 +51,7 @@ make() で階乗,階乗逆元を前計算する. <br>
 comb(a, b) で aCb を返す
 </p>
 <p>
-時間計算量: make() O(n), comb(a, b) O(1)
+時間計算量: 前計算 make() O(n), comb(a, b) O(1)
 </p>
 <h3>コード</h3>
 <div class="codebox">
@@ -61,7 +61,7 @@ comb(a, b) で aCb を返す
 #define MAX_N 100005
 #define MOD 1000000007
 
-int inv[MAX_N],fac[MAX_N],finv[MAX_N];
+int inv[MAX_N], fac[MAX_N], finv[MAX_N];
 
 void make()
 {

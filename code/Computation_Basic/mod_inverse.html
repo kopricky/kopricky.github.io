@@ -47,10 +47,10 @@ Z/pZ (p は素数) の逆元を拡張ユークリッドの互除法を用いて�
 </p>
 <p>
 (関数)<br>
-mod_inverse(a, m): a の Z/mZ 上の逆元を求める <br>
+mod_inverse(a, m): a の Z/mZ 上の逆元を求める(m は素数とする) <br>
 </p>
 <p>
-時間計算量: O(log(a))
+時間計算量: O(log a)
 </p>
 <h3>コード</h3>
 <div class="codebox">
@@ -60,8 +60,8 @@ mod_inverse(a, m): a の Z/mZ 上の逆元を求める <br>
 void extgcd(int a,int b, int&amp; x,int&amp; y)
 {
 	if(b != 0){
-		extgcd(b,a%b,y,x);
-		y -= (a/b)*x;
+		extgcd(b, a % b, y, x);
+		y -= (a / b) * x;
 	}else{
 		x = 1;
 		y = 0;
@@ -70,8 +70,8 @@ void extgcd(int a,int b, int&amp; x,int&amp; y)
 
 int mod_inverse(int a, int m)
 {
-	int x,y;
-	extgcd(a,m,x,y);
+	int x, y;
+	extgcd(a, m, x, y);
 	return (m + x % m) % m;
 }
 </pre>

@@ -53,7 +53,7 @@ fibonacci という名前の由来はおそらくその木の構造から来て�
 ここでむやみやたらに部分木の脱離を許すのではなく, 根を除く頂点について子が脱離する回数を高々 1 回と制限すると木の根の次数が頂点数の log で抑えることができます., このときに根の次数が k となるような木でありうる最小の頂点数が k についてフィボナッチ数列(二項ヒープの場合は 2 べき)を成し,
 これが名前の由来だと思います. <br>
 <a href="https://www.cs.princeton.edu/~wayne/teaching/fibonacci-heap.pdf">このスライド</a>の説明をもとに実装しました. <br>
-キー値減算を行いたい場合は push 時に push されたノードへのポインタを返すのでそれを配列などで保持しておき, update(ノードへのポインタ, 減らす値) を呼ぶことで実現できる. <br>
+キー値減算を行いたい場合は push 時に push されたノードへのポインタを返すのでそれを配列などで保持しておき, decrease_key(ノードへのポインタ, 減らす値) を呼ぶことで実現できる. <br>
 Dijkstra 法での応用のようにヒープにキー値(最短距離)だけでなくデータ(頂点)も持たせたくなる場合が多い. ただキー値減算をサポートしている影響でキー値の型に対して減算が定義されている必要があり,
 そのまま普通の Dijkstra 法のようにキー値を std::pair にすることはできなくて煩わしいのでキー値だけ保持するヒープだけでなくキー値とデータを保持するヒープも 2 つ目の実装として置いた. <br>
 元論文は "Fibonacci Heaps and Their Uses in Improved Network
@@ -68,21 +68,22 @@ Optimization Algorithms" [Fredman, Tarjan 1984] <br>
 fibonacci heap における delete_min, delete_key にかかるならし計算量を最悪計算量で実現するヒープとして relaxed heap がある(Driscoll, Gabow, Sharairman, Tarjan 1988).
 このヒープはその名の通り厳密にはヒープではなくヒープの条件を満たさないノードを log n 個くらい許すという条件を常に保つように更新をする. ただその影響で find_min には O(log n) 時間がかかる. <br>
 他にもヒープ操作にかかる計算量の情報理論的下界を下回る計算量を実現したものとして soft heap がある(chazelle 2000).
-こちらはヒープ内の key の値を途中で変化させることで保持する要素の情報量を落とし, さらなる高速化を測るものである.
+こちらはヒープ内の key の値を途中で変化させることで保持する要素の情報量を落としさらなる高速化を測るもので, 厳密にはヒープではない.
 delete, findmin などのクエリを O(1) で処理でき, さらに insert された要素の個数を n としたときパラメーター ε について, insert にかかる計算量が O(log 1/ε), かつヒープ内の変更された key の値は高々 εn 個のようにパラメタライズされる. <br>
-ここで comparison based model において sort にかかる時間計算量は決定木を用いた証明から Ω(n log n) であることを思い出すと, soft heap はヒープの操作にかかる計算量の情報理論的下界を下回る計算量を達成することが分かる. <br>
-この soft heap は種々のアルゴリズムに応用されていて例えば最小全域木を最悪計算量 O(E α(E, V)) で求めるアルゴリズムなどに使われている(fibonacci heap では prim 法を用いて O(n log n + m) time が限界だった).
+ここで comparison based model において sort にかかる時間計算量は決定木を用いた証明から Ω(n log n) であることを思い出すと, n 回のヒープ操作にかかる計算量は Ω(n log n) である.
+つまり soft heap はヒープの操作にかかる計算量の情報理論的下界を下回る計算量を達成していることが分かる(繰り返しになるが soft heap はキー値を恣意的に変化させているので厳密にはヒープではない). <br>
+この soft heap は種々のアルゴリズムに応用されていて例えば最小全域木を最悪計算量 O(m α(m, n)) で求めるアルゴリズムなどに使われている(fibonacci heap では prim 法を用いて O(n log n + m) time が限界だった).
 論文を読んでいないのでどういう風に用いるかは知らない...(一応 <a href="https://en.wikipedia.org/wiki/Soft_heap">wikipedia の記事</a> の Application には soft heap を selection algorithm に応用する例が載っている.)
 </p>
 <p>
-時間計算量: push O(1), pop ならし O(log n), update(キー値減算) ならし O(1), unite O(1)
+時間計算量: push O(1), pop ならし O(log n), decrease_key(キー値減算) ならし O(1), meld O(1)
 </p>
 <h3>コード(キー値のみを保持)</h3>
 <div class="codebox">
 <input type="checkbox" id="label" class="csscode" />
 <label for="label"></label>
 <pre class="prettyprint linenums">
-template&lt;typename _Key&gt; class Fibonacci_Heap
+template&lt;typename _Key&gt; class FibonacciHeap
 {
 public:
     class node
@@ -188,7 +189,7 @@ public:
         _delete(_minimum);
         _minimum = next_minimum;
     }
-    void _update(node *cur, const _Key&amp; key){
+    void _decrease_key(node *cur, const _Key&amp; key){
         assert(!(key &lt; (_Key)0));
         node *change = ((cur-&gt;_key -= key) &lt; _minimum-&gt;_key) ? cur : nullptr;
         if(!cur-&gt;_par || !(cur-&gt;_key &lt; cur-&gt;_par-&gt;_key)){
@@ -238,33 +239,33 @@ public:
     }
 
 public:
-    Fibonacci_Heap() noexcept : _size(0u), _minimum(nullptr){}
-    Fibonacci_Heap(const Fibonacci_Heap&amp;) = delete;
-    Fibonacci_Heap(Fibonacci_Heap&amp;&amp; another)
+    FibonacciHeap() noexcept : _size(0u), _minimum(nullptr){}
+    FibonacciHeap(const FibonacciHeap&amp;) = delete;
+    FibonacciHeap(FibonacciHeap&amp;&amp; another)
         : _size(move(another._size)), rank(move(another.rank)){
         _minimum = another._minimum, another._minimum = nullptr;
     }
-    Fibonacci_Heap&amp; operator=(const Fibonacci_Heap&amp;) = delete;
-    Fibonacci_Heap&amp; operator=(Fibonacci_Heap&amp;&amp; another){
+    FibonacciHeap&amp; operator=(const FibonacciHeap&amp;) = delete;
+    FibonacciHeap&amp; operator=(FibonacciHeap&amp;&amp; another){
         _size = move(another._size), rank = move(another.rank);
         _clear(), _minimum = another._minimum, another._minimum = nullptr;
     }
-    // ~Fibonacci_Heap(){ _clear(); }
+    // ~FibonacciHeap(){ _clear(); }
     inline bool empty() const noexcept { return (_size == 0); }
     inline size_t size() const noexcept { return _size; }
     inline const _Key&amp; top() const noexcept { return _minimum-&gt;_key; }
     node *push(const _Key&amp; key){ return _push(key); }
     node *push(_Key&amp;&amp; key){ return _push(move(key)); }
     void pop(){ _pop(); }
-    void update(node *cur, const _Key&amp; key){ _update(cur, key); }
+    void decrease_key(node *cur, const _Key&amp; key){ _decrease_key(cur, key); }
     void clear(){ _clear(); _size = 0; rank.~vector&lt;node*&gt;(); }
-    friend Fibonacci_Heap *unite(Fibonacci_Heap *fh1, Fibonacci_Heap *fh2){
+    friend FibonacciHeap *meld(FibonacciHeap *fh1, FibonacciHeap *fh2){
         if(fh2-&gt;_size == 0){
-            fh2-&gt;~Fibonacci_Heap();
+            fh2-&gt;~FibonacciHeap();
             return fh1;
         }
         if(fh1-&gt;_size == 0){
-            fh1-&gt;~Fibonacci_Heap();
+            fh1-&gt;~FibonacciHeap();
             return fh2;
         }
         fh1-&gt;_minimum-&gt;_prev-&gt;_next = fh2-&gt;_minimum-&gt;_next;
@@ -273,7 +274,7 @@ public:
         fh1-&gt;_minimum-&gt;_prev = fh2-&gt;_minimum;
         fh1-&gt;_size += fh2-&gt;_size;
         if(fh2-&gt;_minimum-&gt;_key &lt; fh1-&gt;_minimum-&gt;_key) fh1-&gt;_minimum = fh2-&gt;_minimum;
-        fh2-&gt;~Fibonacci_Heap();
+        fh2-&gt;~FibonacciHeap();
         return fh1;
     }
 
@@ -312,7 +313,7 @@ public:
 <input type="checkbox" id="label" class="csscode" />
 <label for="label"></label>
 <pre class="prettyprint linenums">
-template&lt;typename _Key, typename _Tp&gt; class Fibonacci_Heap
+template&lt;typename _Key, typename _Tp&gt; class FibonacciHeap
 {
 public:
     using data_type = pair&lt;_Key, _Tp&gt;;
@@ -420,7 +421,7 @@ private:
         _delete(_minimum);
         _minimum = next_minimum;
     }
-    void _update(node *cur, const _Key&amp; key){
+    void _decrease_key(node *cur, const _Key&amp; key){
         assert(!(key &lt; (_Key)0));
         node *change = ((cur-&gt;_data.first -= key) &lt; _minimum-&gt;get_key()) ? cur : nullptr;
         if(!cur-&gt;_par || !(cur-&gt;get_key() &lt; cur-&gt;_par-&gt;get_key())){
@@ -470,33 +471,33 @@ private:
     }
 
 public:
-    Fibonacci_Heap() noexcept : _size(0u), _minimum(nullptr){}
-    Fibonacci_Heap(const Fibonacci_Heap&amp;) = delete;
-    Fibonacci_Heap(Fibonacci_Heap&amp;&amp; another)
+    FibonacciHeap() noexcept : _size(0u), _minimum(nullptr){}
+    FibonacciHeap(const FibonacciHeap&amp;) = delete;
+    FibonacciHeap(FibonacciHeap&amp;&amp; another)
         : _size(move(another._size)), rank(move(another.rank)){
         _minimum = another._minimum, another._minimum = nullptr;
     }
-    Fibonacci_Heap&amp; operator=(const Fibonacci_Heap&amp;) = delete;
-    Fibonacci_Heap&amp; operator=(Fibonacci_Heap&amp;&amp; another){
+    FibonacciHeap&amp; operator=(const FibonacciHeap&amp;) = delete;
+    FibonacciHeap&amp; operator=(FibonacciHeap&amp;&amp; another){
         _size = move(another._size), rank = move(another.rank);
         _clear(), _minimum = another._minimum, another._minimum = nullptr;
     }
-    // ~Fibonacci_Heap(){ _clear(); }
+    // ~FibonacciHeap(){ _clear(); }
     inline bool empty() const noexcept { return (_size == 0); }
     inline size_t size() const noexcept { return _size; }
     inline const data_type&amp; top() const noexcept { return _minimum-&gt;_data; }
     template&lt;typename Key, typename Data&gt;
     node *push(Key&amp;&amp; key, Data&amp;&amp; data){ return _push(forward&lt;Key&gt;(key), forward&lt;Data&gt;(data)); }
     void pop(){ _pop(); }
-    void update(node *cur, const _Key&amp; key){ _update(cur, key); }
+    void decrease_key(node *cur, const _Key&amp; key){ _decrease_key(cur, key); }
     void clear(){ _clear(); _size = 0; rank.~vector&lt;node*&gt;(); }
-    friend Fibonacci_Heap *unite(Fibonacci_Heap *fh1, Fibonacci_Heap *fh2){
+    friend FibonacciHeap *meld(FibonacciHeap *fh1, FibonacciHeap *fh2){
         if(fh2-&gt;_size == 0){
-            fh2-&gt;~Fibonacci_Heap();
+            fh2-&gt;~FibonacciHeap();
             return fh1;
         }
         if(fh1-&gt;_size == 0){
-            fh1-&gt;~Fibonacci_Heap();
+            fh1-&gt;~FibonacciHeap();
             return fh2;
         }
         fh1-&gt;_minimum-&gt;_prev-&gt;_next = fh2-&gt;_minimum-&gt;_next;
@@ -505,7 +506,7 @@ public:
         fh1-&gt;_minimum-&gt;_prev = fh2-&gt;_minimum;
         fh1-&gt;_size += fh2-&gt;_size;
         if(fh2-&gt;_minimum-&gt;get_key() &lt; fh1-&gt;_minimum-&gt;get_key()) fh1-&gt;_minimum = fh2-&gt;_minimum;
-        fh2-&gt;~Fibonacci_Heap();
+        fh2-&gt;~FibonacciHeap();
         return fh1;
     }
 

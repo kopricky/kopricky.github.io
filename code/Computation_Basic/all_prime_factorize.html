@@ -42,11 +42,11 @@
 <h2>All Prime Factorize</h2>
 <h3>コードについての説明</h3>
 <p>
-1~n のすべての数の素因数分解を高速に行うアルゴリズム. <br>
+2 〜 n のすべての数の素因数分解を高速に行うアルゴリズム. <br>
 エラトステネスのふるいの要領で、素数を見つけたらその倍数を見ていき、その素数をいくつ因数として含むかを計算してやると良い.
 </p>
 <p>
-時間計算量: O(nlogn)
+時間計算量: O(n log n)
 </p>
 <h3>コード</h3>
 <div class="codebox">
@@ -55,7 +55,7 @@
 <pre class="prettyprint linenums">
 #define MAX_N 100000
 
-// 2〜MAX_N-1のすべての数の素因数分解を計算(O(MAX_Nlog(MAX_N)))
+// 2 〜 MAX_N-1のすべての数の素因数分解を計算(O(MAX_Nlog(MAX_N)))
 // pr[i]: i の素因数の配列
 // id[i]: i の素因数 pr[i][j] の指数部分
 vector&lt;int&gt; pr[MAX_N],id[MAX_N];
