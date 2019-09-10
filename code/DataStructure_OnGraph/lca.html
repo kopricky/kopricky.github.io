@@ -105,7 +105,7 @@ public:
         while(a != b){
             if(a % 2) cmn(res1, node[a++]);
             if(b % 2) cmn(res2, node[--b]);
-            a &gt;&gt;= 1, b&gt;&gt;= 1;
+            a &gt;&gt;= 1, b &gt;&gt;= 1;
         }
         return min(res1, res2);
     }
