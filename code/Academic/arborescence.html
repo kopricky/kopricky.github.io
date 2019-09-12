@@ -62,6 +62,8 @@
 前提として O(m log n) の Chu-Liu / Edmond のアルゴリズムと FibonacciHeap を完全に理解していることが必要になる.
 特に Dijkstra や Prim の高速化と異なり, FibonacciHeap をただ blackbox 的に適用するだけではうまくいかない.<br>
 < 以下に雑な備忘録を書く > <br>
+(やるべきこと) 実装した後に考えたらパス圧縮のみの Union Find で Find 操作 m(= Ω(n log n)) 回, Union 操作を n 回したときの計算量は O(m) 回であることが言える気がしてきたので
+1 頂点に圧縮した後の頂点を Union Find の木の根に取って問題なさそう. これをすると実装が少し楽になるので変更したい(実装してるときにたぶん問題なさそうとは思ってたけど普通に成り立つな. ⇒ 変更した). <br>
 <!-- サイクルに入ってくる辺は高々 1 本しか管理しなくていいとか -->
 元論文は "Efficient algorithm for finding minimum spanning trees in undirected and directed graphs" [Gabow, Galil, Spencer, Tarjan 1985]. <br>
 多重辺や自己ループがあっても問題なく動作するようにしているが verify 問題でそのようなケースがないのでちゃんと動くかは不明(さすがに大丈夫だと思うけど).
@@ -83,7 +85,7 @@ class LazyUnionFind {
 private:
     const int sz;
     vector&lt;_Tp&gt; diff, lazy;
-    vector&lt;int&gt; par, nrank;
+    vector&lt;int&gt; par;
     pair&lt;int, _Tp&gt; _find(int x){
         if(par[x] == x) return {x, (_Tp)0};
         auto res = _find(par[x]);
@@ -92,7 +94,7 @@ private:
     }
 public:
     LazyUnionFind(const int node_size)
-        : sz(node_size), diff(sz, (_Tp)0), lazy(sz, (_Tp)0), par(sz), nrank(sz, 0){
+        : sz(node_size), diff(sz, (_Tp)0), lazy(sz, (_Tp)0), par(sz){
         iota(par.begin(), par.end(), 0);
     }
     int find(int x){ return _find(x).first; }
@@ -103,13 +105,8 @@ public:
     void change_value(_Tp value, int x){
         diff[x] += value, lazy[x] += value;
     }
-    int unite(int x, int y){
-        x = find(x), y = find(y);
-        if(x == y) return -1;
-    	if(nrank[x] &lt; nrank[y]) swap(x,y);
+    void unite(int x, int y){
         par[y] = x, diff[y] -= lazy[x], lazy[y] -= lazy[x];
-        if(nrank[x] == nrank[y]) nrank[x]++;
-        return x;
     }
 };
 
@@ -313,10 +310,10 @@ private:
         info(const edge *_e, typename list&lt;info&gt;::iterator _itr) : e(_e), itr(_itr){}
     };
     struct cycle_edge {
-        int from, super_from, super_to;
+        int from;
         const edge *e;
-        cycle_edge(int _from, int _super_from, int _super_to, const edge *_e)
-            : from(_from), super_from(_super_from), super_to(_super_to), e(_e){}
+        cycle_edge(int _from, const edge *_e)
+            : from(_from), e(_e){}
     };
     const int V;
     int super_id;
@@ -331,15 +328,15 @@ private:
 public:
     _Tp ans;
     vector&lt;int&gt; parent;
-    Arborescence(int node_size)
-        : V(node_size), super_id(V), revG(V), cycle(2*V), _exit(V), passive(V),
-            used(V, -1), heap(V, -1), par(2*V), uf(V), fh(V, nullptr), nodes(V, nullptr),
+    Arborescence(const int node_size)
+        : V(node_size), super_id(V), revG(V), cycle(2*V-2), _exit(2*V-2), passive(2*V-2),
+            used(2*V-1, -1), heap(2*V-2, -1), par(2*V-2), uf(2*V-2), fh(2*V-2, nullptr), nodes(2*V-2, nullptr),
                 ans((_Tp)0), parent(V, -1){
         iota(par.begin(), par.end(), 0);
     }
     // ~Arborescence(){
-    //     for(int i = 0; i &lt; V; ++i) if(nodes[i]) delete nodes[i];
-    //     for(int i = 0; i &lt; V; ++i) if(fh[i]) delete fh[i];
+    //     for(int i = 0; i &lt; 2*V-2; ++i) if(nodes[i]) delete nodes[i];
+    //     for(int i = 0; i &lt; 2*V-2; ++i) if(fh[i]) delete fh[i];
     // }
     void add_edge(int from, int to, _Tp cost){
         revG[to].emplace_back(from, to, cost);
@@ -348,8 +345,7 @@ public:
         move_node(fh[prev], nodes[vertex], fh[next]);
         heap[vertex] = next, nodes[vertex]-&gt;_data = e;
     }
-    void grow_path(int cur, forward_list&lt;int&gt;&amp; visit){
-        visit.push_front(cur);
+    void grow_path(int cur){
         while(!_exit[cur].empty()){
             const info&amp; res = _exit[cur].front();
             passive[uf.find(res.e-&gt;to)].erase(res.itr);
@@ -375,8 +371,7 @@ public:
             }
         }
     }
-    int contract_cycle(int cur, forward_list&lt;cycle_edge&gt;&amp;&amp; cur_path){
-        int modify = -1;
+    void contract_cycle(int cur, forward_list&lt;cycle_edge&gt;&amp;&amp; cur_path){
         for(auto it = next(cur_path.begin(), 1);; ++it){
             const int v = (it == cur_path.end()) ? cur : it-&gt;from;
             while(!passive[v].empty()){
@@ -389,19 +384,15 @@ public:
                 }
                 _exit[from].erase(res1.itr), passive[v].pop_front();
             }
+            par[v] = super_id;
             if(v == cur) break;
-            par[it-&gt;super_from] = super_id;
-            modify = it-&gt;super_to;
         }
-        par[cur_path.begin()-&gt;super_from = modify] = super_id;
-        int ver = -1;
         for(auto it = next(cur_path.begin(), 1);; ++it){
             const int v = (it == cur_path.end()) ? cur : it-&gt;from;
             if(heap[v] &gt;= 0) fh[v]-&gt;delete_node(nodes[v]), heap[v] = -1, nodes[v] = nullptr;
-            if(ver &gt;= 0){
-                if(uf.unite(ver, v) == ver) fh[ver] = meld(fh[ver], fh[v]), fh[v] = nullptr;
-                else fh[v] = meld(fh[ver], fh[v]), fh[ver] = nullptr, ver = v;
-            }else ver = v;
+            if(fh[super_id]) fh[super_id] = meld(fh[super_id], fh[v]);
+            else fh[super_id] = fh[v];
+            uf.unite(super_id, v), fh[v] = nullptr;
             if(v == cur){
                 cycle[super_id].push_front(cur_path.front()), cur_path.pop_front();
                 cycle[super_id].splice_after(cycle[super_id].begin(), move(cur_path),
@@ -409,20 +400,21 @@ public:
                 break;
             }
         }
-        if(!cur_path.empty()) cur_path.begin()-&gt;from = ver, cur_path.begin()-&gt;super_from = super_id;
-        return ver;
+        if(!cur_path.empty()) cur_path.begin()-&gt;from = super_id;
     }
     void cycle_dfs(int u, int par_cycle){
         while(u != par[u] &amp;&amp; par[u] != par_cycle){
             const int p = par[u];
             for(auto it = cycle[p].begin(); it != cycle[p].end(); ++it){
-                int v = it-&gt;super_from;
+                int v = it-&gt;from;
                 if(v == u){
-                    while(u != it-&gt;super_to){
-                        const int w = it-&gt;e-&gt;to;
-                        parent[w] = it-&gt;e-&gt;from;
-                        if(p != par[w]) cycle_dfs(w, p);
+                    auto memo = it;
+                    while(true){
+                        const int x = it-&gt;e-&gt;from, y = it-&gt;e-&gt;to;
                         if(++it == cycle[p].end()) it = cycle[p].begin();
+                        if(memo == it) break;
+                        parent[y] = x;
+                        if(p != par[y]) cycle_dfs(y, p);
                     }
                     break;
                 }
@@ -433,7 +425,7 @@ public:
     void identify_tree(){
         for(forward_list&lt;cycle_edge&gt;&amp; cur_path : path){
             while(!cur_path.empty()){
-                int v = cur_path.begin()-&gt;e-&gt;to;
+                const int v = cur_path.begin()-&gt;e-&gt;to;
                 parent[v] = cur_path.begin()-&gt;e-&gt;from;
                 cur_path.pop_front();
                 cycle_dfs(v, -1);
@@ -444,24 +436,24 @@ public:
         used[root] = 1;
         for(int i = 0; i &lt; V; ++i){
             if(used[i] != -1) continue;
-            int cur = i, super_cur;
+            int cur = i;
             forward_list&lt;cycle_edge&gt; cur_path;
             forward_list&lt;int&gt; visit;
             while(used[cur] != 1){
                 if(used[cur] == -1){
-                    grow_path(cur, visit);
-                    used[super_cur = cur] = 0;
+                    grow_path(cur);
                 }else{
-                    cur = contract_cycle(cur, move(cur_path));
-                    super_cur = super_id++;
+                    contract_cycle(cur, move(cur_path));
+                    cur = super_id++;
                 }
+                used[cur] = 0, visit.push_front(cur);
                 const edge *e = fh[cur]-&gt;pop();
                 if(!e) return numeric_limits&lt;_Tp&gt;::max();
                 ans += e-&gt;cost + uf.find_value(e-&gt;to);
                 uf.change_value(-e-&gt;cost - uf.find_value(e-&gt;to), cur);
                 cur = uf.find(e-&gt;from);
                 heap[cur] = -1, nodes[cur] = nullptr;
-                cur_path.emplace_front(cur, e-&gt;from, super_cur, e);
+                cur_path.emplace_front(cur, e);
             }
             path.push_front(move(cur_path));
             for(const int ver : visit) used[ver] = 1;
@@ -473,9 +465,9 @@ public:
 </pre>
 <h3>verify 用の問題</h3>
 <p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_2_B">Minimum-Cost Arborescence</a>
-  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3861323#1">提出コード</a><br>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3863164#1">提出コード</a><br>
 yosupo さんの library checker : <a href="https://judge.yosupo.jp/problem/directedmst">Directed MST</a>
-  <a href="https://judge.yosupo.jp/submission/189">提出コード</a></p>
+  <a href="https://judge.yosupo.jp/submission/194">提出コード</a></p>
 </section>
 
 </div>
