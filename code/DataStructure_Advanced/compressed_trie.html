@@ -59,7 +59,7 @@
 add_edge(): 辺を追加する <br>
 </p> -->
 <p>
-時間計算量: 構築 O(|S|) (σ は文字の種類数, |S| は文字列の合計の長さ)
+時間計算量: 構築にかかる時間計算量, 空間計算量は最悪 O(σS) (S は文字列の合計の長さとする)
 </p>
 <h3>コード</h3>
 <div class="codebox">
@@ -95,32 +95,46 @@ private:
             s[index] = move(_s), to[index] = new node(), ++sub, adj |= (1u &lt;&lt; index);
         }
     };
-    void make_node(string&amp; orgs, const string&amp; news, unsigned int start, unsigned int newend, node*&amp; to){
+    void make_node(string&amp; orgs, unsigned int start, node*&amp; to){
         string tmp = orgs.substr(0, start);
         orgs.erase(orgs.begin(), orgs.begin() + start);
         to = new node(move(orgs), to, orgs[0] - START_CHARACTER, to-&gt;sub);
         orgs = move(tmp);
-        if(start == newend) return;
-        to-&gt;direct_push(news.substr(start, newend - start), news[start] - START_CHARACTER);
+    }
+    void new_push(const string&amp; s, unsigned int index, node *to){
+        string _s(s.substr(index, s.size() - index));
+        to-&gt;direct_push(move(_s), s[index] - START_CHARACTER);
+    }
+    void new_push(string&amp;&amp; s, unsigned int index, node *to){
+        s.erase(s.begin(), s.begin() + index);
+        to-&gt;direct_push(move(s), s[0] - START_CHARACTER);
     }
     template&lt;typename String&gt;
-    void push(node *cur, String&amp;&amp; _s){
-        string news = forward&lt;String&gt;(_s);
+    void push(node *cur, String&amp;&amp; news){
+        const unsigned int _ls = news.size();
+        unsigned int index = 0u, prefix;
         while(true){
-            const unsigned int num = news[0] - START_CHARACTER;
+            const unsigned int num = news[index] - START_CHARACTER;
             if(cur-&gt;exist(num)){
                 ++cur-&gt;sub;
                 string&amp; orgs = cur-&gt;s[num];
-                const unsigned int ls = orgs.size(), _ls = news.size();
-                for(unsigned int i = 0u; i &lt; min(ls, _ls); ++i){
-                    if(orgs[i] == news[i]) continue;
-                    return make_node(orgs, news, i, _ls, cur-&gt;to[num]);
+                const unsigned int ls = orgs.size();
+                for(prefix = 0u; prefix &lt; ls &amp;&amp; index &lt; _ls; ++prefix, ++index){
+                    if(orgs[prefix] == news[index]) continue;
+                    make_node(orgs, prefix, cur-&gt;to[num]);
+                    new_push(forward&lt;String&gt;(news), index, cur-&gt;to[num]);
+                    return;
                 }
-                if(ls &gt; _ls) return make_node(orgs, news, _ls, _ls, cur-&gt;to[num]);
-                else if(ls &lt; _ls) cur = cur-&gt;to[num], news.erase(news.begin(), news.begin() + ls);
-                else return;
+                if(index == _ls){
+                    if(prefix == ls) return;
+                    make_node(orgs, prefix, cur-&gt;to[num]);
+                    return;
+                }else{
+                    cur = cur-&gt;to[num];
+                }
             }else{
-                return cur-&gt;direct_push(move(news), num);
+                new_push(forward&lt;String&gt;(news), index, cur);
+                return;
             }
         }
     }
@@ -159,7 +173,7 @@ public:
 </pre>
 <h3>verify 用の問題</h3>
 <p>Atcoder : <a href="https://atcoder.jp/contests/code-festival-2016-qualb/tasks/codefestival_2016_qualB_e">Lexicographical disorder</a>
-  <a href="https://atcoder.jp/contests/code-festival-2016-qualb/submissions/7481926">提出コード</a></p>
+  <a href="https://atcoder.jp/contests/code-festival-2016-qualb/submissions/7489565">提出コード</a></p>
 </section>
 
 </div>
