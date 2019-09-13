@@ -54,11 +54,24 @@
 <p>
 Union Find は推移的な関係をうまく保持するデータ構造である. <br>
 競技プログラミングでは基本的なアルゴリズムなので, 説明は蟻本または<a href="https://www.slideshare.net/chokudai/union-find-49066733">このスライド</a>にゆずる. <br>
-計算量が O(α(n)) (α(n)はアッカーマンの逆関数) になる話については過去に記事を書きました. <br>
-U-TOKYO AP Advent Calendar 2017 8 日目: <a href="https://qiita.com/kopricky/items/f0964aece8156872dd66">Union Find の計算量の話</a>
+各クエリの計算量は数学的には解析が難しいが, 実用上は定数と考えて問題ない <br>
+<br>
+(計算量の細かい話) <br>
+計算量は m(≧ n) 回の Find 操作, n 回の Union 操作のクエリ列を処理するのに O(n + m α(m, n)) 時間であることが証明されている(後の解析で O(n + m α(m + n, n)) 時間に落ちることがわかっている).
+ここで α(m, n) はアッカーマン関数 A(i, j) を用いて以下のように定義される. <br>
+まず増加の非常に急激な関数であるアッカーマン関数は A(i, j) は以下のように再帰的に定義される.
+A(1, j) = 2^j (j ≧ 1), A(i, 1) = A(i - 1, 2) (i ≧ 2), A(i, j) = A(i - 1, A(i, j - 1)) (i, j ≧ 2) <br>
+このとき α(m, n) = min{i ≧ 1 | A(i, floor(m / n)) > log n} と定義される. これを見ると m = Ω(n log log n) で α(m, n) = 1, m = Ω(n slog n) で α(m, n) ≦ 2 みたいなことが分かり,
+要をするにアッカーマン関数の逆関数 α(m, n) は非常に増加が緩やかであるということが分かっていればよい. <br>
+ちなみに α(α(m, n), n) ≦ 4 ceil(m / n) ≦ 8 m / n を用いて, 定数 k について m (≧ n α(k, n)) 回の Find 操作, n 回の Union 操作のクエリ列を処理するのにかかる時間は O(m) time であることも言える.
+これは個人的に意外で昔は O(m α(m, n)) かかるものだと思ってた. <br>
+Union Find の計算量の解析の論文としては "Efficiency of a Good But Not Linear Set Union Algorithm" [Tarjan 1975] や "Worst-Case Analysis of Set Union Algorithms" [Tarjan, LEEUWEN 1984] が詳しい. <br>
+<br>
+過去に上記論文の簡易版として Union Find の計算量についての記事を書きました. 簡単ではないので興味のある方は読んでみてください.
+U-TOKYO AP Advent Calendar 2017 8 日目: <a href="https://qiita.com/kopricky/items/3e5847ab1451fe990367">Union Find の計算量の話</a>
 </p>
 <p>
-時間計算量: クエリ ならし O(α(n)) (α(n)はアッカーマンの逆関数)
+時間計算量: Find クエリ, Union クエリ ならし O(α(m, n)) (α(m, n) は上記で定義された増加の非常にゆるやかな関数. 実用上は定数と考えて良い.)
 </p>
 <h3>コード</h3>
 <div class="codebox">
