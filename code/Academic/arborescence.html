@@ -62,8 +62,8 @@
 前提として O(m log n) の Chu-Liu / Edmond のアルゴリズムと FibonacciHeap を完全に理解していることが必要になる.
 特に Dijkstra や Prim の高速化と異なり, FibonacciHeap をただ blackbox 的に適用するだけではうまくいかない.<br>
 < 以下に雑な備忘録を書く > <br>
-(やるべきこと) 実装した後に考えたらパス圧縮のみの Union Find で Find 操作 m(= Ω(n log n)) 回, Union 操作を n 回したときの計算量は O(m) 回であることが言える気がしてきたので
-1 頂点に圧縮した後の頂点を Union Find の木の根に取って問題なさそう. これをすると実装が少し楽になるので変更したい(実装してるときにたぶん問題なさそうとは思ってたけど普通に成り立つ. ⇒ 変更した). <br>
+<!-- 実装した後に考えたらパス圧縮のみの Union Find で Find 操作 m(= Ω(n log n)) 回, Union 操作を n 回したときの計算量は O(m) 回であることが言える気がしてきたので -->
+<!-- 1 頂点に圧縮した後の頂点を Union Find の木の根に取って問題なさそう. これをすると実装が少し楽になるので変更したい(実装してるときにたぶん問題なさそうとは思ってたけど普通に成り立つ. ⇒ 変更した). <br> -->
 <!-- サイクルに入ってくる辺は高々 1 本しか管理しなくていいとか -->
 元論文は "Efficient algorithm for finding minimum spanning trees in undirected and directed graphs" [Gabow, Galil, Spencer, Tarjan 1985]. <br>
 多重辺や自己ループがあっても問題なく動作するようにしているが verify 問題でそのようなケースがないのでちゃんと動くかは不明(さすがに大丈夫だと思うけど).
