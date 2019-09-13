@@ -89,7 +89,8 @@ private:
             return cur ? lsb(cur) : CHARACTER_SIZE;
         }
         inline static unsigned int end(){ return CHARACTER_SIZE; }
-        inline bool exist(const unsigned int v) const { return adj &gt;&gt; v &amp; 1u; }
+        inline bool isExist(const unsigned int v) const { return adj &gt;&gt; v &amp; 1u; }
+        inline bool isFinal() const { return !s; }
         void direct_push(string&amp;&amp; _s, unsigned int index){
             if(!s) s = new string[CHARACTER_SIZE](), to = new node*[CHARACTER_SIZE]();
             s[index] = move(_s), to[index] = new node(), ++sub, adj |= (1u &lt;&lt; index);
@@ -115,7 +116,7 @@ private:
         unsigned int index = 0u, prefix;
         while(true){
             const unsigned int num = news[index] - START_CHARACTER;
-            if(cur-&gt;exist(num)){
+            if(cur-&gt;isExist(num)){
                 ++cur-&gt;sub;
                 string&amp; orgs = cur-&gt;s[num];
                 const unsigned int ls = orgs.size();
@@ -151,29 +152,27 @@ public:
     void add(const string&amp; s){ push(root, s); }
     void add(string&amp;&amp; s){ push(root, move(s)); }
     //何らかのクエリ
-    int recur_query(node *cur, unsigned int d, const string&amp; s){
+    int recur_query(node *cur, unsigned int d, int *index, const string&amp; s){
         int res = 0;
         while(true){
-            // !cur-&gt;s が true ならそのノードは終点ノード
-            if(d &gt;= s.size() || !cur-&gt;s) break;
+            if(cur-&gt;isFinal()) break;
             const unsigned int next = s[d] - START_CHARACTER;
-            // cur から出る存在する辺のみを以下の for 文でなめることができる.
             for(unsigned int i = cur-&gt;begin(); i != cur-&gt;end(); i = cur-&gt;next(i)){
-                // 例えば cur-&gt;s[i] は cur から出る i 番目の文字から始まる文字列
+                if(index[i] &lt; index[next]) res += cur-&gt;to[i]-&gt;sub;
             }
             d += cur-&gt;s[next].size();
             cur = cur-&gt;to[next];
         }
         return res;
     }
-    int query(const string&amp; s){
-        return recur_query(root, 0u, s);
+    int query(int *index, const string&amp; s){
+        return recur_query(root, 0u, index, s);
     }
 };
 </pre>
 <h3>verify 用の問題</h3>
 <p>Atcoder : <a href="https://atcoder.jp/contests/code-festival-2016-qualb/tasks/codefestival_2016_qualB_e">Lexicographical disorder</a>
-  <a href="https://atcoder.jp/contests/code-festival-2016-qualb/submissions/7489565">提出コード</a></p>
+  <a href="https://atcoder.jp/contests/code-festival-2016-qualb/submissions/7489999">提出コード</a></p>
 </section>
 
 </div>
