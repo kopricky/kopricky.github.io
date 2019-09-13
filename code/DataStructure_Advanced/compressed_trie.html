@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-131511873-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-131511873-1');
+</script>
+
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<link rel="shortcut icon" type="image/x-icon" href="../../favicon.ico">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>Compressed Trie</h2>
+<h3>コードについての説明</h3>
+<p>
+<そのうち説明書く>
+</p>
+<!-- <p>
+(関数)<br>
+add_edge(): 辺を追加する <br>
+</p> -->
+<p>
+時間計算量: 構築 O(σ|S|) (σ は文字の種類数, |S| は文字列の合計の長さ)
+</p>
+<h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
+<pre class="prettyprint linenums">
+// 使う文字は 31 文字以下の文字コード上で連続する文字の列とする.
+template&lt;unsigned int CHARACTER_SIZE, char START_CHARACTER&gt;
+class CompressedTrie {
+private:
+    struct node {
+        string s[CHARACTER_SIZE];
+        node *to[CHARACTER_SIZE] = {};
+        // sub: 部分木に含まれる要素の数, adj: 子の bit 表現
+        uint32_t sub, adj;
+        node() : sub(1u), adj(0u){}
+        node(string&amp;&amp; _s, node *v, unsigned int index, uint32_t _sub)
+         : sub(_sub), adj(1u &lt;&lt; index){
+            s[index] = move(_s), to[index] = v;
+        }
+        #define lsb(v) (__builtin_ctz(v))
+        inline unsigned int begin() const { return adj ? lsb(adj) : CHARACTER_SIZE; }
+        inline unsigned int next(unsigned int cur) const {
+            cur = adj &amp; ~((1u &lt;&lt; (cur + 1u)) - 1u);
+            return cur ? lsb(cur) : CHARACTER_SIZE;
+        }
+        inline static unsigned int end(){ return CHARACTER_SIZE; }
+        inline bool exist(const unsigned int v) const { return adj &gt;&gt; v &amp; 1u; }
+        void direct_push(string&amp;&amp; _s, unsigned int index){
+            s[index] = move(_s), to[index] = new node(), ++sub, adj |= (1u &lt;&lt; index);
+        }
+    };
+    void make_node(string&amp; orgs, const string&amp; news, unsigned int start, unsigned int newend, node*&amp; to){
+        string tmp = orgs.substr(0, start);
+        orgs.erase(orgs.begin(), orgs.begin() + start);
+        to = new node(move(orgs), to, orgs[0] - START_CHARACTER, to-&gt;sub);
+        orgs = move(tmp);
+        if(start == newend) return;
+        to-&gt;direct_push(news.substr(start, newend - start), news[start] - START_CHARACTER);
+    }
+    template&lt;typename String&gt;
+    void push(node *cur, String&amp;&amp; _s){
+        string news = forward&lt;String&gt;(_s);
+        while(true){
+            const unsigned int num = news[0] - START_CHARACTER;
+            if(cur-&gt;exist(num)){
+                ++cur-&gt;sub;
+                string&amp; orgs = cur-&gt;s[num];
+                const unsigned int ls = orgs.size(), _ls = news.size();
+                for(unsigned int i = 0u; i &lt; min(ls, _ls); ++i){
+                    if(orgs[i] == news[i]) continue;
+                    return make_node(orgs, news, i, _ls, cur-&gt;to[num]);
+                }
+                if(ls &gt; _ls) return make_node(orgs, news, _ls, _ls, cur-&gt;to[num]);
+                else if(ls &lt; _ls) cur = cur-&gt;to[num], news.erase(news.begin(), news.begin() + ls);
+                else return;
+            }else{
+                return cur-&gt;direct_push(move(news), num);
+            }
+        }
+    }
+    // void clear_dfs(node *cur){
+    //     if(!cur) return;
+    //     for(unsigned int i = 0u; i &lt; 27u; ++i) clear_dfs(cur-&gt;to[i]);
+    //     delete cur;
+    // }
+public:
+    node* root;
+    CompressedTrie() : root(new node()){}
+    // ~CompressedTrie(){ clear_dfs(root); }
+    // CompressedTrie 木に s を加える
+    void add(const string&amp; s){ push(root, s); }
+    void add(string&amp;&amp; s){ push(root, move(s)); }
+    //何らかのクエリ
+    int recur_query(node *cur, unsigned int d, int *index, const string&amp; s){
+        int res = 0;
+        while(true){
+            if(!cur || d &gt;= s.size()) break;
+            const unsigned int next = s[d] - START_CHARACTER;
+            for(unsigned int i = cur-&gt;begin(); i != cur-&gt;end(); i = cur-&gt;next(i)){
+                if(index[i] &lt; index[next]) res += cur-&gt;to[i]-&gt;sub;
+            }
+            d += cur-&gt;s[next].size();
+            cur = cur-&gt;to[next];
+        }
+        return res;
+    }
+    int query(int *index, const string&amp; s){
+        return recur_query(root, 0u, index, s);
+    }
+};
+</pre>
+<h3>verify 用の問題</h3>
+<p>Atcoder : <a href="https://atcoder.jp/contests/code-festival-2016-qualb/tasks/codefestival_2016_qualB_e">Lexicographical disorder</a>
+  <a href="https://atcoder.jp/contests/code-festival-2016-qualb/submissions/7481926">提出コード</a></p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>
