@@ -58,7 +58,11 @@ RBST とは randomized binary search tree の略で平衡二分木の乱択を�
 加えて研究されているかどうかは知らないが, それなりに sharp な concentration が成り立つ気がしているので木が大きく平衡から外れるケースはめったになさそう？(怪)<br>
 以下の実装では平衡二分木に遅延処理をのっけたデータ構造になっています. 具体的には範囲への加算(a_i ← a_i + x (i ∈ [l, r)) + 範囲の swap ([a_p, a_q) と [a_r, a_s) (q-p = s-r)を swap) のようなクエリなどを処理できます. <br>
 また擬似乱数の生成に xor shift と呼ばれる手法を用いています(メルセンヌ・ツイスタとかだと遅くなるので). <br>
-経験上, <a href="./splay_tree.html">Splay Tree</a> の方が速くなることが多い(追記 入力で与えられた数列などを扱う場合は bst_build で最初に完全平衡二分探索木を作ってから始めるとかなり速くなる).
+経験上, <a href="./splay_tree.html">Splay Tree</a> の方が速くなることが多い(入力で与えられた数列などから始める場合は bst_build で最初に完全平衡二分探索木を作ってから始めるとかなり速くなる). <br>
+(追記) <br>
+<a href="http://yosupo.hatenablog.com/entry/2015/10/30/115910">この記事</a> にあるように RBST の永続化は木が偏ってしまう可能性が高くなり適していない.
+例えば偏った木と偏った木を merge させてできた木はさらに偏りが大きくなる可能性が高そうで,
+記事のように自分と自分を merge させるというような操作を繰り返したときに自分がもし偏った木になった場合には自浄作用が働かず, 平衡状態に戻る確率は低くなると予想される.
 </p>
 <p>
 時間計算量: insert, erase, get および 各クエリ O(logn) (期待計算量)
@@ -68,6 +72,7 @@ RBST とは randomized binary search tree の略で平衡二分木の乱択を�
 <input type="checkbox" id="label" class="csscode" />
 <label for="label"></label>
 <pre class="prettyprint linenums">
+// 返り値のノードはその木の新たな root として更新することを忘れない.
 template&lt;typename _Tp&gt; class RBSTNode {
 public:
     unsigned sz;
@@ -102,6 +107,7 @@ public:
 template&lt;typename _Tp&gt;
 inline unsigned size(RBSTNode&lt;_Tp&gt; *t){ return t ? t-&gt;sz : 0u; }
 
+// r を根とする木内のすべてのキー値が l を根とする木内どのキー値よりも大きいというような場合に, その 2 つの木 merge させる.
 template&lt;typename _Tp&gt;
 RBSTNode&lt;_Tp&gt; *join(RBSTNode&lt;_Tp&gt; *l, RBSTNode&lt;_Tp&gt; *r){
     if(!l) return r;
@@ -114,6 +120,7 @@ RBSTNode&lt;_Tp&gt; *join(RBSTNode&lt;_Tp&gt; *l, RBSTNode&lt;_Tp&gt; *r){
     }
 }
 
+// n 点の木を頂点数 k の木, 頂点数 n-k の木に split する.
 template&lt;typename _Tp&gt;
 pair&lt;RBSTNode&lt;_Tp&gt;*, RBSTNode&lt;_Tp&gt;*&gt; split(RBSTNode&lt;_Tp&gt; *t, unsigned k){
     if(!t) return make_pair(nullptr, nullptr);
@@ -128,12 +135,14 @@ pair&lt;RBSTNode&lt;_Tp&gt;*, RBSTNode&lt;_Tp&gt;*&gt; split(RBSTNode&lt;_Tp&gt;
     }
 }
 
+// k 番目に頂点 u(を根とする木) を insert する.
 template&lt;typename _Tp&gt;
 RBSTNode&lt;_Tp&gt;* insert(RBSTNode&lt;_Tp&gt; *root, RBSTNode&lt;_Tp&gt;* u, const unsigned k){
     auto s = split(root, k);
     return join(join(s.first, u), s.second);
 }
 
+// k 番目の要素を erase する.
 template&lt;typename _Tp&gt;
 RBSTNode&lt;_Tp&gt;* erase(RBSTNode&lt;_Tp&gt; *root, unsigned k){
     auto sl = split(root, k);
@@ -142,6 +151,7 @@ RBSTNode&lt;_Tp&gt;* erase(RBSTNode&lt;_Tp&gt; *root, unsigned k){
     return join(sl.first, sr.second);
 }
 
+// k 番目の頂点を取得する
 template&lt;typename _Tp&gt;
 pair&lt;RBSTNode&lt;_Tp&gt;*, _Tp&gt; get(RBSTNode&lt;_Tp&gt; *root, unsigned k){
     auto sr = split(root, k+1);
