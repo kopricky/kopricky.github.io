@@ -66,7 +66,7 @@ Edmonds-Karp, Dinic などは (1) の条件を常に満たしながら (2) の�
 <strike>以下の実装は組み合わせ最適化本に沿って実装したけど、こうした方が絶対実装楽だし, 計算量もちゃんと O(n^2 m^(1/2)) なので時間があれば変更したい</strike>(⇒ 追記) <br>
 <br>
 (追記) <br>
-<a href="http://i.stanford.edu/pub/cstr/reports/cs/tr/94/1523/CS-TR-94-1523.pdf">(参考)</a> をもとに実装を変更した. 上記の gap_relabel(ある高さの活性点がなくなったらそれ以上の高さの活性点を再ラベリング) および global_relabel(ときどき全部を再ラベリング) を行った実装にしたことで高速になり, 多くのケースでは <a href="../NetworkFlow/dinic.html">Dinic</a> より速くなった. <a href="https://min-25.hatenablog.com/entry/2017/08/22/211034">この記事</a> が頂点の管理を自作リストで行っていて, 確かに高速化できそうだったので採用させていただいた. <br>
+"On Implementing Push-Relabel Method For The Maximum FLOW Problem" [Cherkassky, Goldberg 1994] をもとに実装を変更した. 上記の gap_relabel(ある高さの活性点がなくなったらそれ以上の高さの活性点を再ラベリング) および global_relabel(ときどき全部を再ラベリング) を行った実装にしたことで高速になり, 多くのケースでは <a href="../NetworkFlow/dinic.html">Dinic</a> より速くなった. <a href="https://min-25.hatenablog.com/entry/2017/08/22/211034">この記事</a> が頂点の管理を自作リストで行っていて, 確かに高速化できそうだったので採用させていただいた. <br>
 </p>
 <p>
 (関数)<br>
