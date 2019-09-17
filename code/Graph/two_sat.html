@@ -54,7 +54,17 @@
 <p>
 SAT(充足可能性問題) を CNF 形式で書いたときに各クロージャーに高々 2 個しかリテラルが含まれないような命題論理式(2 SAT) の充足可能性を判定し、可能なら実際にその割当を計算するアルゴリズムである. <br>
 3 SAT については決定性チューリングマシンを用いて多項式時間で解くことが難しいと考えられているが 2 SAT については驚くことに線形時間で解けることが知られている. <br>
-詳しくは蟻本などを参照して欲しいが, この問題は強連結成分分解を用いて解ける.
+n 個のリテラル x_i が存在するとき x_i, <span style="text-decoration:overline;">x</span>_i に対応する 2*n 頂点のグラフを考える.
+各クロージャー a V b は ¬a ⇒ b, ¬ b ⇒ a と同値であり, グラフに (¬a, b), (¬ b ⇒ a) の有向辺を加える. そしてできあがったグラフで強連結成分分解を行い,
+すべてのリテラルについて x_i と <span style="text-decoration:overline;">x</span>_i が異なる強連結成分に属することと論理式を満たす解が存在することとが同値になる. <br>
+2 部グラフの判定法で頂点を倍加して Union Find を行う話を知っている方は原理がまったく同じなので分かりやすいだろう.
+詳しくは蟻本などに載っている.
+</p>
+<p>
+(関数) <br>
+TwoSAT(リテラルの個数): コンストラクタ <br>
+void add_closure: リテラルの個数を n とすると (x_i V <span style="text-decoration:overline;">x</span>_j) なら add_closure(i, j + n) とする(否定は +n) <br>
+bool satisfy(): 充足可能性判定を行い, 可能なら ans に結果 1/0(真/偽) が格納される <br>
 </p>
 <p>
 時間計算量: O(n+m) (n はリテラルの数, m はクロージャーの数)
@@ -64,81 +74,61 @@ SAT(充足可能性問題) を CNF 形式で書いたときに各クロージャ
 <input type="checkbox" id="label" class="csscode" />
 <label for="label"></label>
 <pre class="prettyprint linenums">
-class SAT {
+class TwoSAT {
 private:
-	int V;	//頂点数
-	vector&lt;vector&lt;int&gt; &gt; G,rG;
-	vector&lt;int&gt; post_order; //帰りがけ順の並び
-	vector&lt;bool&gt; used; //すでに調べたかどうか
-	vector&lt;int&gt; cmp;	//属する強連結成分のトポロジカル順序
-	void _add_edge(int from,int to){
-		G[from].push_back(to);
-		rG[to].push_back(from);
+	const int V;
+	vector&lt;vector&lt;int&gt; &gt; G, rG;
+	vector&lt;int&gt; ps, cmp;
+	void add_edge(int from, int to){
+		G[from].push_back(to), rG[to].push_back(from);
 	}
-	void _dfs(int u){
-		used[u] = true;
-		for(int v : G[u]){
-			if(!used[v]){
-				_dfs(v);
-			}
+	void dfs(int u){
+        cmp[u] = 0;
+        for(int v : G[u]){
+			if(cmp[v] == -1) dfs(v);
 		}
-		post_order.push_back(u);
+		ps.push_back(u);
 	}
-	void _rdfs(int u,int k){
-		used[u] = true;
+	void rdfs(int u, int k){
 		cmp[u] = k;
 		for(int v : rG[u]){
-			if(!used[v]){
-				_rdfs(v,k);
-			}
+			if(cmp[v] == -1) rdfs(v, k);
 		}
 	}
-	int _scc(){
-		fill(used.begin(),used.end(),false);
-		post_order.clear();
-		for(int v=0;v&lt;2*V;v++){
-			if(!used[v]){
-				_dfs(v);
-			}
+	int scc(){
+		for(int i = 0; i &lt; 2 * V; ++i){
+			if(cmp[i] == -1) dfs(i);
 		}
-		fill(used.begin(),used.end(),false);
-		int k=0;
-		for(int i=2*V-1;i&gt;=0;i--){
-			if(!used[post_order[i]]){
-				_rdfs(post_order[i],k++);
-			}
+		fill(cmp.begin(), cmp.end(), -1);
+		int k = 0;
+		for(int i = 2 * V - 1; i &gt;= 0; --i){
+			if(cmp[ps[i]] == -1) rdfs(ps[i], k++);
 		}
 		return k;
 	}
 
 public:
-	SAT(int node_size) : V(node_size), G(2*V), rG(2*V), used(2*V), cmp(2*V){}
-	//充足可能性判定
-	bool ok(vector&lt;pair&lt;int, int&gt; &gt;&amp; vec){
-		for(pair&lt;int, int&gt; p : vec){
-			_add_edge((p.first+V)%(2*V),p.second);
-			_add_edge((p.second+V)%(2*V),p.first);
-		}
-		_scc();
+	vector&lt;int&gt; ans;
+	TwoSAT(const int literal_count)
+	 	: V(literal_count), G(2 * V), rG(2 * V), cmp(2 * V, -1), ans(V){}
+	void add_closure(int x, int y){
+		add_edge((x + V) % (2 * V), y), add_edge((y + V) % (2 * V), x);
+	}
+	// 充足可能性判定
+	// 真のものは 1,偽のものは 0 が ans に格納される(解の構成)
+	bool satisfy(){
+		scc();
 		for(int i = 0; i &lt; V; i++){
-			if(cmp[i] == cmp[V+i]){
-				return false;
-			}
+			if(cmp[i] == cmp[V + i]) return false;
+			ans[i] = (cmp[i] &gt; cmp[V + i]);
 		}
 		return true;
-	}
-	//真のものは1,偽のものは0を返す(解の構成)
-	void restore(vector&lt;int&gt;&amp; ans){
-		ans.resize(V);
-		for(int i = 0; i &lt; V; i++){
-			ans[i] = (cmp[i] &gt; cmp[V+i]);
-		}
 	}
 };
 </pre>
 <h3>verify 用の問題</h3>
-<p>Atcoder : <a href="https://beta.atcoder.jp/contests/arc069/tasks/arc069_d">Flags</a>
-  <a href="https://beta.atcoder.jp/contests/arc069/submissions/3144949">提出コード</a></p>
+<p>Atcoder : <a href="https://atcoder.jp/contests/arc069/tasks/arc069_d">Flags</a>
+  <a href="https://atcoder.jp/contests/arc069/submissions/7575184">提出コード</a></p>
 </section>
 
 </div>
