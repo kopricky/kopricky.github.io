@@ -48,13 +48,15 @@
 <div id="contents">
 
 <section>
-<h2>Number Theoretic Transform</h2>
+<h2>Fast Number Theoretic Transform</h2>
 <h3>コードについての説明</h3>
 <p>
-Number Theoretic Transform の略. 特殊な素数 p について有限体 Z/pZ 上で高速フーリエ変換を行うアルゴリズム. <br>
-特殊な剰余の場合 FFT での 1 の原始 n 乗根が Z/pZ の原始根 g に対応する. つまり g が 1 の原始 n 乗根の性質をちゃんと満たすそうな... <br>
+高速数論変換のアルゴリズム. 特殊な素数 p について有限体 Z/pZ 上で高速フーリエ変換を行うアルゴリズム. <br>
+k 2-n +1 の形の素数が剰余の場合 Cooley-Tukey の FFT アルゴリズムを用いてサイズ 2^n 以下の数列について高速に NTT を求めることが可能になる. <Br>
+1 の原始 n 乗根が Z/pZ の原始根 g に対応し, 一般の離散フーリエ変換と異なり, 計算機上で扱っても誤差が生じないためうれしい.<br>
 <a href="../MultiPrecisionIntegar/multi_precision_integar.html">多倍長整数の実装</a>では乗算にこの NTT を用いた. <br>
-任意の素数 p についての有限体 Z/pZ 上で高速フーリエ変換を行うアルゴリズムも存在し, <a href="http://math314.hateblo.jp/entry/2015/05/07/014908">このページ</a> が参考になるだろう.
+任意の素数 p についての有限体 Z/pZ 上で高速フーリエ変換を行うこともでき, 複数の mod について下記のアルゴリズムで数論変換を行い garner のアルゴリズムを用いて復元する手法が
+ <a href="http://math314.hateblo.jp/entry/2015/05/07/014908">このページ</a> に紹介されている.
 </p>
 <p>
 <p>
@@ -63,7 +65,7 @@ mul(a, b): 配列 a, b の畳み込みを行う
 <p>
 </p>
 <p>
-時間計算量: O(nlogn)
+時間計算量: O(n log n)
 </p>
 <h3>コード</h3>
 <div class="codebox">
