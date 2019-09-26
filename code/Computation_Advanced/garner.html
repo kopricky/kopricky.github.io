@@ -49,31 +49,65 @@
 <div id="contents">
 
 <section>
-<h2>アルゴリズム名</h2>
+<h2>Garner's Algorithm</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
+Garner のアルゴリズムは <a href="./crt.html">中国剰余定理</a> の拡張で, ある数 x(0 ≦ x < Π p_i) について p_i で割った余りが a_i (i = 1,..,n) という情報 n 個与えられたときに
+その x を mod で割った余りを効率よく求めるアルゴリズムである. ただし p_i は互いに素であるとする. <br>
+任意の mod について x % mod を overflow することなく求めることができるのがうれしい. <br>
+<a href="https://cp-algorithms.com/algebra/chinese-remainder-theorem.html">このページ</a> を参考に理解した.
+garner のアルゴリズムについては分かりやすい解説を書いている人が多いので他の人のものを参考にしてもらいたい.
 </p>
 <p>
-(関数)<br>
-add_edge(): 辺を追加する <br>
-</p>
-<p>
-時間計算量: O(mlogn)
+時間計算量: O(n^2 + n log (max_i p_i))
 </p>
 <h3>コード</h3>
 <div class="codebox">
 <input type="checkbox" id="label" class="csscode" />
 <label for="label"></label>
 <pre class="prettyprint linenums">
-あ
+template&lt;typename T&gt;
+T mod_add(const T a, const T b, const T mod){
+    return (a + b) % mod;
+}
+
+template&lt;typename T&gt;
+T mod_mul(const T a, const T b, const T mod){
+    return a * b % mod;
+}
+
+template&lt;typename T&gt;
+T mod_inv(T a, T mod){
+    T u[] = {a, 1, 0}, v[] = {mod, 0, 1}, t;
+    while(*v){
+        t = *u / *v;
+        swap(u[0] -= t * v[0], v[0]);
+        swap(u[1] -= t * v[1], v[1]);
+        swap(u[2] -= t * v[2], v[2]);
+    }
+    u[1] %= mod;
+    return (u[1] &lt; 0) ? (u[1] + mod) : u[1];
+}
+
+template&lt;typename T&gt;
+T garner(const vector&lt;T&gt;&amp; a, vector&lt;T&gt; p, const T mod){
+    const unsigned int sz = a.size();
+    vector&lt;T&gt; kp(sz + 1, 0), rmult(sz + 1, 1);
+    p.push_back(mod);
+    for(unsigned int i = 0; i &lt; sz; ++i){
+        T x = mod_mul(a[i] - kp[i], mod_inv(rmult[i], p[i]), p[i]);
+        x = (x &lt; 0) ? (x + p[i]) : x;
+        for(unsigned int j = i + 1; j &lt; sz + 1; ++j){
+            kp[j] = mod_add(kp[j], rmult[j] * x, p[j]);
+            rmult[j] = mod_mul(rmult[j], p[i], p[j]);
+        }
+    }
+    return kp[sz];
+}
 </pre>
 <h3>verify 用の問題</h3>
-<p>
-verify していません(verify 問題を知らない)
-</p>
-<p>Atcoder : <a href=""></a>
-  <a href="">提出コード</a></p>
+<p>yukicoder : <a href="https://yukicoder.me/problems/no/187">中華風 (Hard)</a>
+  <a href="https://yukicoder.me/submissions/383220">提出コード</a></p>
 </section>
 
 </div>

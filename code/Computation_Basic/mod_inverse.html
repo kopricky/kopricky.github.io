@@ -52,12 +52,12 @@
 <h2>Mod Inverse</h2>
 <h3>コードについての説明</h3>
 <p>
-Z/pZ (p は素数) の逆元を拡張ユークリッドの互除法を用いて計算するアルゴリズム. <br>
-フェルマーの小定理を用いて p-2 乗を計算して求めても良い.
+Z/pZ 上で p と互いに素である a の逆元を拡張ユークリッドの互除法を用いて計算するアルゴリズム. <br>
+"a と p が互いに素 ⇔ Z/pZ 上で a の逆元が存在する" が成り立つことに注意する.
 </p>
 <p>
 (関数)<br>
-mod_inverse(a, m): a の Z/mZ 上の逆元を求める(m は素数とする) <br>
+mod_inverse(a, p): Z/pZ 上で a の逆元を求める(ただし a と p は互いに素とする). <br>
 </p>
 <p>
 時間計算量: O(log a)
@@ -69,20 +69,20 @@ mod_inverse(a, m): a の Z/mZ 上の逆元を求める(m は素数とする) <br
 <pre class="prettyprint linenums">
 void extgcd(int a,int b, int&amp; x,int&amp; y)
 {
-	if(b != 0){
-		extgcd(b, a % b, y, x);
-		y -= (a / b) * x;
-	}else{
-		x = 1;
-		y = 0;
-	}
+    if(b != 0){
+        extgcd(b, a % b, y, x);
+        y -= (a / b) * x;
+    }else{
+        x = 1;
+        y = 0;
+    }
 }
 
-int mod_inverse(int a, int m)
+int mod_inverse(int a, int p)
 {
-	int x, y;
-	extgcd(a, m, x, y);
-	return (m + x % m) % m;
+    int x, y;
+    extgcd(a, p, x, y);
+    return (p + x % p) % p;
 }
 </pre>
 <h3>verify 用の問題</h3>
