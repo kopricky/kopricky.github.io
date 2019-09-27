@@ -52,7 +52,7 @@
 <h2>Splay Tree</h2>
 <h3>コードについての説明</h3>
 <p>
-lookup, insert, erase などの操作をならし計算量 O(log n) で実現する平衡二分探索木([Sleator, Tarjan '83]). 動的連結性を高速に解く手法(<a href="../DataStructure_OnGraph/link_cut_tree.html">Link Cut Tree<a>)を考案する過程で得られたデータ構造.<br>
+lookup, insert, erase などの操作をならし計算量 O(log n) で実現する平衡二分探索木([Sleator, Tarjan '83]). 動的連結性クエリに高速に答える手法(<a href="../DataStructure_OnGraph/link_cut_tree.html">Link Cut Tree<a>)を考案する過程で得られたデータ構造.<br>
 self-adjusting な構造である. つまり事前に lookup クエリの確率分布を知らなくても動的によく参照されるノードは根に近く, そうでないものは根から遠い位置になるように変形される(union-find と同じ).<br>
 zig, zig-zig, zig-zag の 3 つの回転を用いてあるノードを根にする splay と呼ばれる操作が基本になっていて, これが実装できればあとは lookup, insert, erase などは容易に実装できる.<br>
 また以下では遅延処理(区間加算, 区間総和)を施した実装にしている.<br>
