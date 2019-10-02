@@ -49,12 +49,12 @@
 <div id="contents">
 
 <section>
-<h2>Link Cut Tree</h2>
+<h2>link cut tree</h2>
 <h3>コードについての説明</h3>
 <p>
-Link Cut Tree とは木の動的な変化(辺の挿入, 辺の削除)を効率的に処理するデータ構造.<br>
-木を根から葉に向かうパスに分解し, 各パスを深さをキーとする平衡二分探索木(以下の実装は splay 木)で保持するもの. あくまで木に対するデータ構造なので同じ連結成分内の頂点間に辺を貼ったりはできない. そういうことがしたい(一般のグラフの動的連結性を行いたい)なら, O(logn) 個の Link Cut Tree を持つ必要がある. <br>
-実際のところ Link Cut Tree はパスを扱うのには適しているが, 部分木を扱うのにはあまり適していないので実際に上記のデータ構造の実装をする際は同じく木の動的連結性を保持するデータ構造である <a href="./euler_tour_tree.html">Euler Tour Tree</a> を使ったほうがよいかもしれない. <br>
+link cut tree とは木の動的な変化(辺の挿入, 辺の削除)を効率的に処理するデータ構造.<br>
+木を根から葉に向かうパスに分解し, 各パスを深さをキーとする平衡二分探索木(以下の実装は splay 木)で保持するもの. あくまで木に対するデータ構造なので同じ連結成分内の頂点間に辺を貼ったりはできない. そういうことがしたい(一般のグラフの動的連結性を行いたい)なら, O(logn) 個の link cut tree を持つ必要がある. <br>
+実際のところ link cut tree はパスを扱うのには適しているが, 部分木を扱うのにはあまり適していないので実際に上記のデータ構造の実装をする際は同じく木の動的連結性を保持するデータ構造である <a href="./euler_tour_tree.html">Euler Tour Tree</a> を使ったほうがよいかもしれない. <br>
 アルゴリズムの理解に時間がかかりますが, 実装自体はそこまで重くない. 以下ではパス上の頂点に対するクエリ(可換半群を仮定)の処理を実現するデータ構造にしているが, 単に link, cut, connected だけなら各値の伝播や reverse などは必要ないのでもっと実装は簡潔になる.<br>
 <s>実は正直なところなぜならし O(logn) になるかのポテンシャル部分の議論があまりよくわかっていない(ダメじゃん...)</s> 理解した！(⇒追記) <br>
 パス, 部分木両方のクエリを処理したい場合は "Self-Adjusting Top Trees" [Tarjan, Werneck 2005] を参考にするとよさそう. <br>
@@ -63,8 +63,24 @@ Link Cut Tree とは木の動的な変化(辺の挿入, 辺の削除)を効率�
 (雑なメモ) <a href="./splay.pdf">Splay Tree について</a><br>
 (追記) <br>
 <a href="https://courses.csail.mit.edu/6.851/spring12/lectures/L19.html">この講義</a> およびその <a href="https://courses.csail.mit.edu/6.851/spring12/scribe/L19.pdf">Lecture note</a> を参考にしました. <br>
-スプレー木がならし O(logn) になる理由(Access Lemma) が分かっていればそこまで非自明ではない感じ. access(x) の際各パスに対応する二分木でくるくるするし深さ自体も最悪 Ω(n) だから嘘じゃねとか思ったが結局 Access Lemma と似た考えでポテンシャル部分が O(rank(root) - rank(x)) になるのと
-access(x) で一つ上に登るごとに preferred child が変化する性質に注目し preferred child が変化する回数がならし O(logn) 回であることが HL 分解した場合のグラフを考えることで言える(heavy かつ preferred な辺が消える回数と light かつ preferred な辺が生まれる回数は考察すると bound できることが分かる). <br>
+結局 access(v) がならし O(log n) であることを示せば十分である. つまり splay 木を回転する回数が各 access(v) でならし O(log n) となることを示す. <br>
+まず splay 木がならし O(logn) になる理由(Access Lemma) を用います. 具体的には "頂点 u を根とする splay 木に含まれる頂点 v に対して splay(v) を行なったときのならしコストが 3(rank(u) - rank(v)) + 1 で抑えられる" である. <br>
+link cut tree においてはこの rank(x) を次のように定める. x の属する splay 木を T(x), その splay 木内の x を根とする部分木を T'(x) とする.
+このとき rank(x) = log ( |T'(x)| + (y ∈ T'(x), y の non-preferred child z について rank(z) の和) ) とする. つまり x を含む splay 木に限らず, x 以下にあるすべての頂点の数の合計の log とする.
+そしてポテンシャルはもちろん ∑_x r(x) である.<br>
+すると access(v) で splay 操作にかかる総ならしコストは 3(rank(root) - rank(v)) + (preferred child の変化する回数) で抑えられることがわかる. splay 操作をする回数は preferred child の変化する回数で抑えられることに注意する.
+また preferred child の変化に伴って, 頂点の rank が変化することもないことも確認する.<br>
+全 m(≧ n) 回の access(v) の操作について 3(rank(root) - rank(v)) の和は 0 ≦ rank(v) ≦ log n より O(m log n) となり, この部分はならし O(log n) である. よって後は (preferred child の変化する回数) がならし O(log n) であることを示せばよい. <br>
+ここで元の木について edge を heavy edge, light edge の 2 種類に分類する.
+e = (u, v) が heavy とは (u が v の親であるとした場合) (u を根とする部分木のサイズ) ≦ 2 * (v を根とする部分木のサイズ) となるもののことをいうとする.
+結果的に今 edge は heavy / light, preferred / non-preferred の 4 種類あることになり, また heavy, light については常に変化しないことに注意する. <br>
+1 回の access(v) で light かつ non-preferred な辺が preferred になる回数は根からのパス上に light edge は高々 log n 個以下しかないことから log n 個で抑えられるので,
+heavy かつ non-preferred な辺が preferred になる回数を考える.
+そこで 1 回の access(v) で heavy かつ preferred な辺が preferred から non-preferred になる回数を考えると, これは同じタイミングで light edge が non-preferred から preferred になるので log n 回で抑えられる.
+ゆえに (heavy かつ non-preferred な辺が preferred になる回数) ≦ (初めの段階で heavy かつ non-preferred な辺の個数) + (heavy かつ preferred な辺が preferred から non-preferred になる回数) であることを考えると
+全 m(≧ n) 回の access(v) の操作で (heavy かつ non-preferred な辺が preferred になる回数) は O(m log n) 回となり, 1 回の access(v) ではならし O(log n) 回であることが分かる. ゆえにすべて示せた. <br>
+<br>
+結論: link cut tree はマジで天才.
 </p>
 <p>
 時間計算量: 各クエリ ならし O(logn) <br>
@@ -74,7 +90,7 @@ access(x) で一つ上に登るごとに preferred child が変化する性質�
 <input type="checkbox" id="label" class="csscode" />
 <label for="label"></label>
 <pre class="prettyprint linenums">
-// 以下の実装では link, range, query などで reroot が起こる
+// 注: 以下の実装では link, range, query などで reroot が起こる
 template&lt;typename T&gt; class LinkCutTree {
 public:
     struct node {
