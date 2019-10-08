@@ -69,11 +69,12 @@ link cut tree においてはこの rank(x) を次のように定める. x の�
 このとき rank(x) = log ( |T'(x)| + (y ∈ T'(x), y の non-preferred child z について rank(z) の和) ) とする. つまり x を含む splay 木に限らず, x 以下にあるすべての頂点の数の合計の log とする.
 そしてポテンシャルはもちろん ∑_x r(x) である.<br>
 すると access(v) で splay 操作にかかる総ならしコストは 3(rank(root) - rank(v)) + (preferred child の変化する回数) で抑えられることがわかる. splay 操作をする回数は preferred child の変化する回数で抑えられることに注意する.
-また preferred child の変化に伴って, 頂点の rank が変化することもないことも確認する.<br>
-全 m(≧ n) 回の access(v) の操作について 3(rank(root) - rank(v)) の和は 0 ≦ rank(v) ≦ log n より O(m log n) となり, この部分はならし O(log n) である. よって後は (preferred child の変化する回数) がならし O(log n) であることを示せばよい. <br>
+また preferred child の変化に伴って, 頂点の rank が変化することがないことも確認する.<br>
+全 m(≧ n) 回の access(v) の操作について 3(rank(root) - rank(v)) の和は 0 ≦ rank(v) ≦ log n より O(m log n) となり, この部分はならし O(log n) である.
+よって後は (preferred child の変化する回数), つまり (non-preferred である辺が preferred になる回数) がならし O(log n) であることを示せばよい. <br>
 ここで元の木について edge を heavy edge, light edge の 2 種類に分類する.
-e = (u, v) が heavy とは (u が v の親であるとした場合) (u を根とする部分木のサイズ) ≦ 2 * (v を根とする部分木のサイズ) となるもののことをいうとする.
-結果的に今 edge は heavy / light, preferred / non-preferred の 4 種類あることになり, また heavy, light については常に変化しないことに注意する. <br>
+e = (u, v) が heavy とは u が v の親であるとした場合 (u を根とする部分木のサイズ) ≦ 2 * (v を根とする部分木のサイズ) となるもののことをいうとする.
+結果的に今 edge は heavy / light, preferred / non-preferred の 2 x 2 = 4 種類あることになり, また heavy, light については常に変化しないことに注意する. <br>
 1 回の access(v) で light かつ non-preferred な辺が preferred になる回数は根からのパス上に light edge は高々 log n 個以下しかないことから log n 個で抑えられるので,
 heavy かつ non-preferred な辺が preferred になる回数を考える.
 そこで 1 回の access(v) で heavy かつ preferred な辺が preferred から non-preferred になる回数を考えると, これは同じタイミングで light edge が non-preferred から preferred になるので log n 回で抑えられる.
