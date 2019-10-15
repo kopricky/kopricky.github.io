@@ -65,7 +65,6 @@ A(1, j) = 2^j (j ≧ 1), A(i, 1) = A(i - 1, 2) (i ≧ 2), A(i, j) = A(i - 1, A(i
 要をするにアッカーマン関数の逆関数 α(m, n) は実用上定数と考えてよい.. <br>
 次に a(i, n) = min{j ≧ 1 | A(i, j) > log n} を定義する.
 このとき任意の正整数 k(定数) について m (≧ n a(k, n)) 回の Find 操作, n 回の Union 操作のクエリ列を処理するのにかかる時間は O(m) time であることも言える(α(n a(k, n), n) ≦ k より).
-つまり Find 操作を n log n 回, Union 操作を n 回行うのにかかる時間は O(n log n) time となる.<br>
 Union Find の計算量の解析の論文としては "Efficiency of a Good But Not Linear Set Union Algorithm" [Tarjan 1975] や "Worst-Case Analysis of Set Union Algorithms" [Tarjan, LEEUWEN 1984] が詳しい. <br>
 <br>
 過去に上記論文の簡易版として Union Find の計算量についての記事を書きました. 簡単ではないので興味のある方は読んでみてください. <br>
