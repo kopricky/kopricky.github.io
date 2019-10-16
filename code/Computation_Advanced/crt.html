@@ -89,13 +89,6 @@ void extgcd(T a, T b, T&amp; x, T&amp; y)
     }
 }
 
-// mod が long long のときに以下のようなものが使えるらしい (a * b % mod)
-long long mod_prod(long long a, long long b, long long mod) {
-    long long res = (a * b - (long long)((long double)a / mod * b) * mod) % mod;
-    return res &lt; 0 ? res + mod : res;
-}
-
-//modが10^6より大きい値を扱うときは m1 * x を__int128にキャストする(か上の mod_prod を用いる)(10^12とかまで可能)
 //(value, mod)
 template &lt;typename T&gt;
 pair&lt;T, T&gt; CRT(const pair&lt;T, T&gt;&amp; a1, const pair&lt;T, T&gt;&amp; a2)
@@ -107,11 +100,11 @@ pair&lt;T, T&gt; CRT(const pair&lt;T, T&gt;&amp; a1, const pair&lt;T, T&gt;&amp;
     extgcd(m1, m2, x, y);
     x *= (v2 - v1), y *= (v2 - v1);
     const T m = m1 * m2;
-    return make_pair((((m1 * x + v1) % m) + m) % m, m);
+    const T res = ((m1 * (x % m2)) + v1) % m;
+    return make_pair((res >= 0 ? res : res + m), m);
 }
 
 //modどうしが互いに素でないとき
-//modが10^6より大きい値を扱うときは m1 * x を__int128にキャストする(10^12とかまで可能)
 //(value, mod)
 // template &lt;typename T&gt;
 // pair&lt;T, T&gt; CRT(const pair&lt;T, T&gt;&amp; a1, const pair&lt;T, T&gt;&amp; a2)
@@ -126,7 +119,8 @@ pair&lt;T, T&gt; CRT(const pair&lt;T, T&gt;&amp; a1, const pair&lt;T, T&gt;&amp;
 //     extgcd(m1 / g, m2 / g, x, y);
 //     x *= dev, y *= dev;
 //     const T m = m1 / g * m2;
-//     return make_pair((((m1 * x + v1) % m) + m) % m, m);
+//     const T res = ((m1 * (x % (m2 / g))) + v1) % m;
+//     return make_pair((res >= 0 ? res : res + m), m);
 // }
 </pre>
 <h3>verify 用の問題</h3>
