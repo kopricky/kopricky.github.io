@@ -10,6 +10,14 @@
 
   gtag('config', 'UA-131511873-1');
 </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
 
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -53,10 +61,12 @@
 <h3>コードについての説明</h3>
 <p>
 グラフの最小全域木の重みを求めるアルゴリズム. <br>
-最小全域木とはもとのグラフの部分グラフでありかつすべての頂点を含む木のなかで辺の重みの総和が最小のもののことである. 同じく最小全域木を求めるアルゴリズムとして <a href="./kruskal.html">Kruskal 法</a> がある.<br>
-頂点集合 V={0} から始めて, V 内の頂点と隣接する頂点のうちその間の辺の重みが最小であるようなものを新たに V の要素として加えることを繰り返す. <br>
-密なグラフ(m = Θ(n^2))については最小重みの辺を優先度付きキューを使わず愚直に計算することで O(n^2) で解くことができ, この場合は Kruskal 法(n^2 log n) よりも高速に動作する. <br>
-また計算量の意味では <a href="../Academic/prim_fheap.html">fibonacci heap を用いた高速化</a> で O(n log n + m) 時間に改善することが可能.
+最小全域木とはもとのグラフの部分グラフでありかつすべての頂点を含む木のなかで辺の重みの総和が最小のもののことである.
+同じく最小全域木を求めるアルゴリズムとして <a href="./kruskal.html">Kruskal 法</a> がある.<br>
+頂点集合 $V= \{ 0 \}$ から始めて, $V$ 内の頂点と隣接する頂点のうちその間の辺の重みが最小であるようなものを新たに $V$ の要素として加えることを繰り返す. <br>
+密なグラフ($m = \Theta (n^2)$)については最小重みの辺を優先度付きキューを使わず愚直に計算することで $\O (n^2)$ で解くことができ,
+この場合は Kruskal 法 $\O ( n^2 \log n)$ よりも高速に動作する. <br>
+また計算量の意味では <a href="../Academic/prim_fheap.html">fibonacci heap を用いた高速化</a> で $\O (n \log n + m)$ 時間に改善することが可能.
 </p>
 <p>
 (関数)<br>
@@ -64,7 +74,7 @@ add_edge(u, v, cost): u, v の間に重み cost の無向辺を追加する <br>
 solve(): 最小全域木の重みを計算する
 </p>
 <p>
-時間計算量: O(m log n)
+時間計算量: $\O (m \log n)$
 </p>
 <h3>コード</h3>
 <div class="codebox">

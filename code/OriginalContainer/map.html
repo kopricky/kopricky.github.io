@@ -10,6 +10,14 @@
 
   gtag('config', 'UA-131511873-1');
 </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
 
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -53,13 +61,13 @@
 <h3>コードについての説明</h3>
 <p>
 Splay Tree ベースの map(連想コンテナ) の実装. stl の std::map は Red Black Tree をベースとして書かれており, 検索, 挿入, 削除などにかかる最悪計算量が O(log n) という強みを持っている. <br>
-一方 <a href="../BinarySearchTree/splay_tree.html">Splay Tree</a> はならし計算量で O(log n) であるもののクエリ列の確率分布に対して計算量が最適になるように adjust するため, 分布によっては o(log n) になりうるという強みがある(Red Black Tree の場合の計算量は Ω(log n)). <br>
+一方 <a href="../BinarySearchTree/splay_tree.html">Splay Tree</a> はならし計算量で O(log n) であるもののクエリ列の確率分布に対して計算量が最適になるように adjust するため, 分布によっては $o(\log n)$ になりうるという強みがある(Red Black Tree の場合の計算量は $\Omega (\log n)$). <br>
 以下の実装では std:map ライクな実装をしており, ある程度 std::map と同様に動作する.<br>
 実装中でデストラクタなどをコメントアウトしてメモリ解放にかかる時間を節約しているが行儀が悪いのでまあ外してください(ただそれなりに速度変わる). <br>
 <strike> (追記) C++17 から std::iterator を継承して自作イテレータを構築するのが非推奨化されているので書き直す必要あり. </strike> (修正済み) <br>
 </p>
 <p>
-時間計算量: 各クエリならし O(logn)
+時間計算量: 各クエリならし $\O (\log n)$
 </p>
 <h3>コード</h3>
 <div class="codebox">

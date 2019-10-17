@@ -10,6 +10,14 @@
 
   gtag('config', 'UA-131511873-1');
 </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
 
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -52,10 +60,10 @@
 <h2>Longest Common Sequence</h2>
 <h3>コードについての説明</h3>
 <p>
-O(n^2) の実装が有名だが, a[i] = b[j] を満たすようなペア (i, j) の最長増加列問題と考えれば O(nlogn) で解くことができる.
+$\O (n^2)$ の実装が有名だが, $a[i] = b[j]$ を満たすようなペア $(i, j)$ の最長増加列問題と考えれば $\O (n \log n)$ で解くことができる.
 </p>
 <p>
-時間計算量: O(nlogn)
+時間計算量: $\O (n \log n)$
 </p>
 <h3>コード</h3>
 <div class="codebox">

@@ -10,6 +10,14 @@
 
   gtag('config', 'UA-131511873-1');
 </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
 
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -56,7 +64,7 @@
 以下の実装では括弧を含む四則演算の式について構文木を構築するようにしている.
 </p>
 <p>
-時間計算量: O(|S|) (|S| は計算式の文字数とする)
+時間計算量: $\O (|S|)$ ($|S|$ は計算式の文字数とする)
 </p>
 <h3>コード</h3>
 <div class="codebox">

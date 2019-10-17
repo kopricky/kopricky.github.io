@@ -10,6 +10,14 @@
 
   gtag('config', 'UA-131511873-1');
 </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
 
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -53,9 +61,9 @@
 <h3>コードについての説明</h3>
 <p>
 非負重みの辺のみからなるグラフに対する単一始点最短経路問題(SSSP) を効率よく解くアルゴリズム. <br>
-始点からの距離が近いものから順に探索を繰り返す("始点から最も近い頂点"は優先度付きキューを用いて効率よく管理する). ここでヒープとして二分ヒープではなくフィボナッチヒープを用いると, O((m + n) log n) → O(n log n + m) になる(<a href="../Academic/dijkstra_fheap.html">参考</a>).<br>
+始点からの距離が近いものから順に探索を繰り返す("始点から最も近い頂点"は優先度付きキューを用いて効率よく管理する). ここでヒープとして二分ヒープではなくフィボナッチヒープを用いると, $\O ((m + n) \log n) \rightarrow \O (n \log n + m)$ になる(<a href="../Academic/dijkstra_fheap.html">参考</a>).<br>
 また二分ヒープのかわりに Radix Heap を用いた Dijkstra 法の高速化の話もある(<a href="../Academic/dijkstra_rheap.html">参考</a>). <br>
-密なグラフ(m = Θ(n^2)) については優先度付きキューを使わず一番近い頂点を愚直に計算することで O(n^2) で解くことができる. <br>
+密なグラフ($m = \Theta (n^2)$) については優先度付きキューを使わず一番近い頂点を愚直に計算することで $\O (n^2)$ で解くことができる. <br>
 正の整数の重みの辺からなる無向グラフについては単一始点最短経路問題が線形時間で解けることが知られている. <br>
 "Undirected Single-Source Shortest Paths with Positive Integer Weights in Linear Time" [Thorup 1997]
 </p>
@@ -65,7 +73,7 @@ add_edge(u, v, cost): u から v に向かう重み cost の有向辺を追加�
 solve(s): s を始点として各頂点までの最短距離を求める
 </p>
 <p>
-時間計算量: O((n + m) log n)
+時間計算量: $\O ((n + m) \log n)$
 </p>
 <h3>コード</h3>
 <div class="codebox">

@@ -10,6 +10,14 @@
 
   gtag('config', 'UA-131511873-1');
 </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
 
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -52,7 +60,7 @@
 <h2>01 Knapsack Bound Branch</h2>
 <h3>コードについての説明</h3>
 <p>
-01ナップサック問題の分割統治法を用いた解法. yukicoder の<a href="https://yukicoder.me/problems/no/626">これ</a>で出題されたもので愚直に O(nW) の DP ができないような制約に対して効果的である. <br>
+01ナップサック問題の分割統治法を用いた解法. yukicoder の<a href="https://yukicoder.me/problems/no/626">これ</a>で出題されたもので愚直に $\O (nW)$ の DP ができないような制約に対して効果的である. <br>
 <a href="https://qiita.com/hamko/items/cceb1a92da14e2755527">このスライド</a> とかを見るとよいかも. 単純に 「価値 / 重さ」 の降順に並べて分割統治法を行っている.
 </p>
 <p>

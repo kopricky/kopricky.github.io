@@ -10,6 +10,14 @@
 
   gtag('config', 'UA-131511873-1');
 </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
 
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -52,11 +60,11 @@
 <h2>Namori</h2>
 <h3>コードについての説明</h3>
 <p>
-なもりグラフとは n 頂点 n 辺の連結な無向グラフのことでグラフはサイクル+サイクルから生える木の構造になる. 名称の由来は <a href="https://twitter.com/_namori_">このアカウント</a> のアイコンだそうです. <br>
+なもりグラフとは $n$ 頂点 $n$ 辺の連結な無向グラフのことでグラフはサイクル+サイクルから生える木の構造になる. 名称の由来は <a href="https://twitter.com/_namori_">このアカウント</a> のアイコンだそうです. <br>
 以下の実装はサイクル上の頂点を loop に, サイクルから生える木を graph に格納する(分解する)ような実装になっている.
 </p>
 <p>
-時間計算量: O(n)
+時間計算量: $\O (n)$
 </p>
 <h3>コード</h3>
 <div class="codebox">

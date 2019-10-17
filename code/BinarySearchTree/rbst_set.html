@@ -10,6 +10,14 @@
 
   gtag('config', 'UA-131511873-1');
 </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
 
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -52,13 +60,14 @@
 <h2>RBST Set</h2>
 <h3>コードについての説明</h3>
 <p>
-Randomized binary search tree (乱択平衡二分探索木) を用いたランダムアクセス可能な set の実装である. deterministic に深さが O(logn) になる平衡二分探索木(AVL 木や赤黒木など)とは異なり,
+Randomized binary search tree (乱択平衡二分探索木) を用いたランダムアクセス可能な set の実装である.
+deterministic に深さが $\O( \log n)$ になる平衡二分探索木(AVL 木や赤黒木など)とは異なり,
 木をマージする際にそれぞれの木のサイズに比例した確率で片方の木の根をもう一方の木の根につけるかを決めるという randomize をおこなっている(<a href="./rbst_query.html">同様のコード</a>). <br>
 GNU C++ の標準ライブラリには赤黒木があるらしいがどうみても使いにくそうだし、それにあまり速くないみたい(<a href="https://codeforces.com/blog/entry/11080">参考</a>)<br>
 経験上, <a href="./splay_tree.html">Splay Tree</a> の方が速くなることが多い気がする.
 </p>
 <p>
-時間計算量: 各関数 O(logn) (期待計算量)
+時間計算量: 各関数 $\O (\log n)$ (期待計算量)
 </p>
 <h3>コード</h3>
 <div class="codebox">

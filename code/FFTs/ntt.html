@@ -10,6 +10,14 @@
 
   gtag('config', 'UA-131511873-1');
 </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
 
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -51,12 +59,12 @@
 <h2>Fast Number Theoretic Transform</h2>
 <h3>コードについての説明</h3>
 <p>
-高速数論変換のアルゴリズム. 特殊な素数 p について有限体 Z / pZ 上で高速フーリエ変換を行うアルゴリズム. <br>
-k × 2^n + 1 の形の素数が剰余の場合 Cooley-Tukey の FFT アルゴリズムを用いてサイズ 2^n 以下の数列について高速に NTT を求めることが可能になる. <Br>
-1 の原始 n 乗根が Z / pZ の原始根 g に対応し, 一般の離散フーリエ変換と異なり, 計算機上で扱っても誤差が生じないためうれしい.<br>
+高速数論変換のアルゴリズム. 特殊な素数 $p$ について有限体 $\mathbb{Z} / p \mathbb{Z}$ 上で高速フーリエ変換を行うアルゴリズム. <br>
+$k \times 2^n + 1$ の形の素数が剰余の場合 Cooley-Tukey の FFT アルゴリズムを用いてサイズ $2^n$ 以下の数列について高速に NTT を求めることが可能になる. <Br>
+$1$ の原始 $n$ 乗根が $\mathbb{Z} / p \mathbb{Z}$ の原始根 $g$ に対応し, 一般の離散フーリエ変換と異なり, 計算機上で扱っても誤差が生じないためうれしい.<br>
 <a href="../MultiPrecisionIntegar/multi_precision_integar.html">多倍長整数の実装</a>では乗算にこの NTT を用いた. <br>
-任意の素数 p について有限体 Z/pZ 上で高速フーリエ変換を行うこともでき, 複数の mod について下記のアルゴリズムで数論変換を行い <a href="../Computation_Advanced/garner.html">garner のアルゴリズム</a> を用いて復元する手法が
- <a href="http://math314.hateblo.jp/entry/2015/05/07/014908">このページ</a> に紹介されている.
+任意の素数 $p$ について有限体 $\mathbb{Z} / p \mathbb{Z}$ 上で高速フーリエ変換を行うこともでき,
+複数の mod について下記のアルゴリズムで数論変換を行い <a href="../Computation_Advanced/garner.html">garner のアルゴリズム</a> を用いて復元する手法が <a href="http://math314.hateblo.jp/entry/2015/05/07/014908">このページ</a> に紹介されている.
 </p>
 <p>
 <p>
@@ -65,7 +73,7 @@ mul(a, b): 配列 a, b の畳み込みを行う
 <p>
 </p>
 <p>
-時間計算量: O(n log n)
+時間計算量: $\O (n \log n)$
 </p>
 <h3>コード</h3>
 <div class="codebox">

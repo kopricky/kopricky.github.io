@@ -10,6 +10,14 @@
 
   gtag('config', 'UA-131511873-1');
 </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
 
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -56,7 +64,7 @@ RBST とは randomized binary search tree の略で平衡二分木の乱択を�
 こういう単純だけどうまくいく系はしっかりと解析することが大事なので考えてみるとよい気がする(<a href="http://citeseer.ist.psu.edu/viewdoc/download;jsessionid=F4F5586ACF14EFD688A8A58D032E79D0?doi=10.1.1.17.243&rep=rep1&type=pdf">参考</a>).
 ただ, 完全に理解するの結構大変そうなので長い鎖になる確率は merge 条件を考えると急激に減少するしまあ期待値的には O(log n) になってくれるだろうという甘い理解にとどまっている.
 加えて研究されているかどうかは知らないが, それなりに sharp な concentration が成り立つ気がしているので木が大きく平衡から外れるケースはめったになさそう？(怪)<br>
-以下の実装では平衡二分木に遅延処理をのっけたデータ構造になっています. 具体的には範囲への加算(a_i ← a_i + x (i ∈ [l, r)) + 範囲の swap ([a_p, a_q) と [a_r, a_s) (q-p = s-r)を swap) のようなクエリなどを処理できます. <br>
+以下の実装では平衡二分木に遅延処理をのっけたデータ構造になっています. 具体的には範囲への加算 $a_i \leftarrow a_i + x (i \in [l, r)$ + 範囲の swap ($[a_p, a_q)$ と $[a_r, a_s)$ ($q-p = s-r$) を swap) のようなクエリなどを処理できます. <br>
 また擬似乱数の生成に xor shift と呼ばれる手法を用いています(メルセンヌ・ツイスタとかだと遅くなるので). <br>
 経験上, <a href="./splay_tree.html">Splay Tree</a> の方が速くなることが多い(入力で与えられた数列などから始める場合は bst_build で最初に完全平衡二分探索木を作ってから始めるとかなり速くなる). <br>
 (追記) <br>
@@ -65,7 +73,7 @@ RBST とは randomized binary search tree の略で平衡二分木の乱択を�
 記事のように自分と自分を merge させるというような操作を繰り返したときに自分がもし偏った木になった場合には自浄作用が働かず, 平衡状態に戻る確率は低くなると予想される.
 </p>
 <p>
-時間計算量: insert, erase, get および 各クエリ O(logn) (期待計算量)
+時間計算量: insert, erase, get および 各クエリ $\O (\log n)$ (期待計算量)
 </p>
 <h3>コード</h3>
 <div class="codebox">

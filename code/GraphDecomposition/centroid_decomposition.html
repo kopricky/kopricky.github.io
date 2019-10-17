@@ -10,6 +10,14 @@
 
   gtag('config', 'UA-131511873-1');
 </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
 
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -52,8 +60,8 @@
 <h2>Cenroid Decomposition</h2>
 <h3>コードについての説明</h3>
 <p>
-重心分解と呼ばれる, 重心で木を再帰的に分解していくことで高さが O(logn) になるような分解を行うアルゴリズムである. <br>
-各階層であつかう木構造をすべて合わせても空間計算量が O(nlogn) なのですべての木について DFS なりの探索を行うことが可能. <br>
+重心分解と呼ばれる, 重心で木を再帰的に分解していくことで高さが $\O (\log n)$ になるような分解を行うアルゴリズムである. <br>
+各階層であつかう木構造をすべて合わせても空間計算量が $\O (n \log n)$ なのですべての木について DFS なりの探索を行うことが可能. <br>
 申しわけ程度に説明を書いているけれども結局 <a href="https://qiita.com/drken/items/4b4c3f1824339b090202">わかりやすく説明してくれている記事</a> を参考にする方が圧倒的に理解しやすい.<br>
 多くの問題は重心分解をただやるだけでなく前処理として行ったあとに問題に応じた操作を行う. 一応親子関係を伝播させることもできるが,基本的には親子関係は壊れてしまうので部分木についての条件など元の木上での親子関係が必要となる問題については使えない. 以下に挙げた verify 問題みたいなものについては有効である.
 </p>
@@ -62,7 +70,7 @@
 add_edge(): 辺を追加する <br>
 build(): 重心分解を行う
 <p>
-時間計算量: O(nlogn)
+時間計算量: $\O (n \log n)$
 </p>
 <h3>コード</h3>
 <div class="codebox">

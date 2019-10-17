@@ -10,6 +10,14 @@
 
   gtag('config', 'UA-131511873-1');
 </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
 
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -52,11 +60,11 @@
 <h2>RangeUpdateQuery RangeAddQuery and RangeSumQuery</h2>
 <h3>コードについての説明</h3>
 <p>
-区間更新 (a_i ← val (i ∈ [l, r)), 区間加算 (a_i ← a_i + val (i ∈ [l, r)), 区間和 (sum_(l <= i < r) a_i) のクエリを効率的に処理できる. <br>
+区間更新 $a_i \leftarrow val (i \in [l, r))$, 区間加算 $a_i \leftarrow a_i + val (i \in [l, r))$, 区間和 $\underset{l \le i < r}{\mathrm{sum}} a_i$ のクエリを効率的に処理できる. <br>
 更新と加算の両方の遅延伝播をいい感じに処理すればできる.
 </p>
 <p>
-時間計算量: 構築 O(n), 各クエリ O(logn)
+時間計算量: 構築 $\O (n)$, 各クエリ $\O (\log n)$
 </p>
 <h3>コード</h3>
 <div class="codebox">

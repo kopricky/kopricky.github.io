@@ -10,6 +10,14 @@
 
   gtag('config', 'UA-131511873-1');
 </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
 
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -53,8 +61,8 @@
 <h3>コードについての説明</h3>
 <p>
 有向グラフの強連結成分分解を行うアルゴリズム. また強連結成分分解後の各強連結成分を頂点とする DAG を, 頂点をトポロジカル順序に番号付けした形で求める. <br>
-強連結成分分解は DFS 2 回で求めることができ, 1 回目の DFS では適当な頂点から始めて帰りがけ順に番号を振っていく. 2 回目の DFS ではもとのグラフの辺をすべて逆にしたグラフ上でまだたどっていない頂点で先ほど振った頂点番号が大きいものからたどっていく. このときたどることのできた頂点集合が 1 つの強連結成分に対応し, これを繰り返す. <br>
-2 回目の DFS ではトポロジカル順序に沿って強連結性成分を探しているので各強連結成分を頂点とする DAG の頂点の番号付けも同時に行える.
+強連結成分分解は DFS $2$ 回で求めることができ, $1$ 回目の DFS では適当な頂点から始めて帰りがけ順に番号を振っていく. $2$ 回目の DFS ではもとのグラフの辺をすべて逆にしたグラフ上でまだたどっていない頂点で先ほど振った頂点番号が大きいものからたどっていく. このときたどることのできた頂点集合が $1$ つの強連結成分に対応し, これを繰り返す. <br>
+$2$ 回目の DFS ではトポロジカル順序に沿って強連結性成分を探しているので各強連結成分を頂点とする DAG の頂点の番号付けも同時に行える.
 </p>
 <p>
 (関数)<br>
@@ -62,7 +70,7 @@ add_edge(u, v): 有向辺(u,v) を追加する <br>
 make_graph(): solve() 後に呼び出すと各強連結成分を頂点とする DAG が graph に入る
 </p>
 <p>
-時間計算量: O(n+m)
+時間計算量: $\O (n+m)$
 </p>
 <h3>コード</h3>
 <div class="codebox">

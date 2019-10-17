@@ -10,6 +10,14 @@
 
   gtag('config', 'UA-131511873-1');
 </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
 
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -53,16 +61,16 @@
 <h3>コードについての説明</h3>
 <p>
 Red Black Tree(赤黒木) は値の検索, 挿入, 削除などを最悪時 O(log n) (要素数を n とする) 回の要素比較で達成する平衡二分探索木であり, C++ の std::set, std::map などにも用いられている代表的なデータ構造である. <br>
-赤黒木は常に次の 3 つの条件を保つ. (1) 各ノードには赤もしくは黒の色がつけられている, (2) 赤色のノードの子は必ず黒色のノードである, (3) あるノードからそのノードの子孫である葉までのパス上に含まれる黒色のノードの数は葉の選択に依らず一定である. <br>
-この 3 つの条件からあるノードからそのノードの子孫である葉までの距離について (最大距離) が (最小距離) の 2 倍で抑えられることが言える. 文脈によって "根は黒", "葉は黒", "葉以外のノードはちょうど 2 つの子を持つ" などの条件が入ることもあるが本質的ではない. <br>
-赤黒木は insert/delete ベースと merge/split ベースの 2 つがあり std::set, std::map などは前者であるが, 下の実装では merge/split を行いたいので merge/split ベースにしている.
+赤黒木は常に次の $3$ つの条件を保つ. (1) 各ノードには赤もしくは黒の色がつけられている, (2) 赤色のノードの子は必ず黒色のノードである, (3) あるノードからそのノードの子孫である葉までのパス上に含まれる黒色のノードの数は葉の選択に依らず一定である. <br>
+この $3$ つの条件からあるノードからそのノードの子孫である葉までの距離について (最大距離) が (最小距離) の $2$ 倍で抑えられることが言える. 文脈によって "根は黒", "葉は黒", "葉以外のノードはちょうど $2$ つの子を持つ" などの条件が入ることもあるが本質的ではない. <br>
+赤黒木は insert/delete ベースと merge/split ベースの $2$ つがあり std::set, std::map などは前者であるが, 下の実装では merge/split を行いたいので merge/split ベースにしている.
 </p>
 <p>
 (関数)<br>
 add_edge(): 辺を追加する <br>
 </p>
 <p>
-時間計算量: O(mlogn)
+時間計算量: $\O (m \log n)$
 </p>
 <h3>コード</h3>
 <div class="codebox">

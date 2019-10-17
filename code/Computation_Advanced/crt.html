@@ -10,6 +10,14 @@
 
   gtag('config', 'UA-131511873-1');
 </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
 
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -52,7 +60,7 @@
 <h2>Chinese Remainder Theorem</h2>
 <h3>コードについての説明</h3>
 <p>
-Chinese Remainder Theorem(中国剰余定理) は p_1 と p_2 が互いに素で x = q_1 (mod p_1), x = q_2 (mod p_2) が成り立つとき, これを満たす x は [0, p_1*p_2) にただ一つ存在するという定理のことであり, 以下の実装は実際にその唯一の解を求めるアルゴリズムである <br>
+Chinese Remainder Theorem(中国剰余定理) は $p_1$ と $p_2$ が互いに素で $x = q_1\ (\mathrm{mod}\ p_1), x = q_2\ (\mathrm{mod}\ p_2)$ が成り立つとき, これを満たす $x$ は $[0, p_1 p_2)$ にただ一つ存在するという定理のことであり, 以下の実装は実際にその唯一の解を求めるアルゴリズムである <br>
 結局式変形すると拡張ユークリッドの互除法(extgcd)を解くことと同じであることが分かり, それを実装する. 以下の実装では一般の場合(法が互いに素でない場合)に拡張したものも含まれています.
 </p>
 <p>
@@ -60,7 +68,7 @@ Chinese Remainder Theorem(中国剰余定理) は p_1 と p_2 が互いに素で
 CRT(a1, a2): a1(q_1, p_1), a2(q_2, p_2) を引数とし, x = q (mod p) を満たす (q, p) を返す
 </p>
 <p>
-時間計算量: O(log p) (p は法の値)
+時間計算量: $\O (\log p)$ ($p$ は法の値)
 </p>
 <h3>コード</h3>
 <div class="codebox">

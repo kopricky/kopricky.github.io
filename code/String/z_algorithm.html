@@ -10,6 +10,15 @@
 
   gtag('config', 'UA-131511873-1');
 </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
+
 
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -52,14 +61,14 @@
 <h2>Z algorithm</h2>
 <h3>コードについての説明</h3>
 <p>
-文字列 S が与えられたとき 0 <= i < n について S と S[i:|S|-1] の最長共通接頭辞の長さを求める線形時間アルゴリズム(<a href="https://snuke.hatenablog.com/entry/2014/12/03/214243">参考</a>). <br>
-1 つ目の while 文では愚直に S と S[i:|S|-1] の最長共通接頭辞を求めています. これだけだと線形にならないので 2 つ目の while 文では S と S[k:|S|-1] の最長共通接頭辞が S と S[i:|S|-1] の最長共通接頭辞に含まれている(k + res[k] < j) とき S と S[i+k:|S|-1] の最長共通接頭辞はそれと一致するので res[i+k] を更新する.
-完全に含まれていない場合でも部分的に含まれていればその情報は利用できるので while 文を抜けた後は j ← j - k とし次のループ時に i+k を始点とする最長共通接頭辞を調べるときにキョリ j - k + 1 番目の部分から始めることにする. <br>
-計算量を考える. まず 1 つ目の while ループは i + j の値に注目することで bound できる. i + j は 1 つ目のループを回るごとに 1 増え, 2 つ目のループでは変化しない. i + j は |S| 以下なので 1 つ目の while ループを回る回数は高々 |S| 回.
-2 つ目の while ループは i の値に注目することで bound できる. i は 1 つ目のループでは変化せず 2 つ目の while ループでは回るごとに 1 増える. i は |S| 以下なので 2 つ目の while ループを回る回数は高々 |S| 回. よって合わせて O(|S|) となる.
+文字列 $S$ が与えられたとき $0 \le i < n$ について $S$ と $S[i:|S|-1]$ の最長共通接頭辞の長さを求める線形時間アルゴリズム(<a href="https://snuke.hatenablog.com/entry/2014/12/03/214243">参考</a>). <br>
+$1$ つ目の while 文では愚直に $S$ と $S[i:|S|-1]$ の最長共通接頭辞を求めています. これだけだと線形にならないので $2$ つ目の while 文では $S$ と $S[k:|S|-1]$ の最長共通接頭辞が $S$ と $S[i:|S|-1]$ の最長共通接頭辞に含まれている($k + res[k] < j$) とき $S$ と $S[i+k:|S|-1]$ の最長共通接頭辞はそれと一致するので $res[i+k]$ を更新する.
+完全に含まれていない場合でも部分的に含まれていればその情報は利用できるので while 文を抜けた後は $j \rightarrow j - k$ とし次のループ時に $i+k$ を始点とする最長共通接頭辞を調べるときにキョリ $j - k + 1$ 番目の部分から始めることにする. <br>
+計算量を考える. まず $1$ つ目の while ループは $i + j$ の値に注目することで bound できる. $i + j$ は 1 つ目のループを回るごとに $1$ 増え, $2$ つ目のループでは変化しない. $i + j$ は $|S|$ 以下なので $1$ つ目の while ループを回る回数は高々 $|S|$ 回.
+$2$ つ目の while ループは $i$ の値に注目することで bound できる. $i$ は $1$ つ目のループでは変化せず $2$ つ目の while ループでは回るごとに $1$ 増える. $i$ は $|S|$ 以下なので $2$ つ目の while ループを回る回数は高々 $|S|$ 回. よって合わせて $\O (|S|)$ となる.
 </p>
 <p>
-時間計算量: O(|S|)
+時間計算量: $\O (|S|)$
 </p>
 <h3>コード</h3>
 <div class="codebox">

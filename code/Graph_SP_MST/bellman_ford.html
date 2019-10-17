@@ -10,6 +10,14 @@
 
   gtag('config', 'UA-131511873-1');
 </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
 
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -53,7 +61,7 @@
 <h3>コードについての説明</h3>
 <p>
 負辺を含むグラフに対する単一始点最短経路問題(SSSP) を効率よく解くことができるアルゴリズム. また負の有向閉路の検出(3種類)も同じ計算量で行うことが可能. <br>
-全辺を見て始点からの最短距離が更新されるなら更新するという操作を n 回行う. それ以降もなお最短距離が更新される場合は始点から到達可能な負の有向閉路が存在することになる.
+全辺を見て始点からの最短距離が更新されるなら更新するという操作を $n$ 回行う. それ以降もなお最短距離が更新される場合は始点から到達可能な負の有向閉路が存在することになる.
 </p>
 <p>
 (関数)<br>
@@ -61,7 +69,7 @@ add_edge(u, v, cost): u から v に向かう重み cost の有向辺を追加�
 solve(s): s を始点として各頂点までの最短距離を求める
 </p>
 <p>
-時間計算量: O(nm)
+時間計算量: $\O (nm)$
 </p>
 <h3>コード</h3>
 <div class="codebox">

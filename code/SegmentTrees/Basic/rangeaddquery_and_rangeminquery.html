@@ -10,6 +10,14 @@
 
   gtag('config', 'UA-131511873-1');
 </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
 
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -52,13 +60,14 @@
 <h2>range add query and range min query</h2>
 <h3>コードについての説明</h3>
 <p>
-区間加算 (a_i ← a_i + val (i ∈ [l, r)), 区間最小値 (min_(l <= i < r) a_i) のクエリを効率的に処理できる. <br>
-区間加算のクエリを要素一つ一つに愚直にやっていると遅くなるが区間がセグ木のノードに対応する区間を含んだ場合そのノードにそれより下に伝播されるべき加算の記録を持っておく. そしてその後実際に区間最小値のクエリで探索された時に初めてその下に伝播させるようにしてやると O(logn) で効率よくクエリを処理できる. <br>
+区間加算 $a_i \leftarrow a_i + val (i \in [l, r))$, 区間最小値 $\underset{l \le i < r}{\min} a_i$ のクエリを効率的に処理できる. <br>
+区間加算のクエリを要素一つ一つに愚直にやっていると遅くなるが区間がセグ木のノードに対応する区間を含んだ場合そのノードにそれより下に伝播されるべき加算の記録を持っておく.
+そしてその後実際に区間最小値のクエリで探索された時に初めてその下に伝播させるようにしてやると $\O (\log n)$ で効率よくクエリを処理できる. <br>
 このような処理は遅延評価と呼ばれ, Haskell などの言語で取り入れられているらしい. <br>
 以下の実装では高速化のため query 関数を非再帰での実装にしている(非再帰で書かないほうが意味的には理解しやすいが...).
 </p>
 <p>
-時間計算量: 構築 O(n), 各クエリ O(logn)
+時間計算量: 構築 $\O (n)$, 各クエリ $\O (\log n)$
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">

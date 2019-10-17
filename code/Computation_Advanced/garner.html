@@ -10,6 +10,14 @@
 
   gtag('config', 'UA-131511873-1');
 </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
 
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -49,17 +57,17 @@
 <div id="contents">
 
 <section>
-<h2>Garner's Algorithm</h2>
+<h2>Garner Algorithm</h2>
 <h3>コードについての説明</h3>
 <p>
-Garner のアルゴリズムは <a href="./crt.html">中国剰余定理</a> の拡張で, ある数 x(0 ≦ x < Π p_i) について p_i で割った余りが a_i (i = 1,..,n) という情報 n 個与えられたときに
-その x を mod で割った余りを効率よく求めるアルゴリズムである. ただし p_i は互いに素であるとする. <br>
-x がとても大きい数であっても x % mod を overflow することなく求めることができるのがうれしい. <br>
+Garner のアルゴリズムは <a href="./crt.html">中国剰余定理</a> の拡張で, ある数 $x(0 \le x < \Pi p_i)$ について $p_i$ で割った余りが $a_i (i = 1, \ldots ,n)$ という情報 $n$ 個与えられたときに
+その $x$ を $mod$ で割った余りを効率よく求めるアルゴリズムである. ただし $p_i$ は互いに素であるとする. <br>
+$x$ がとても大きい数であっても $x \% mod$ を overflow することなく求めることができるのがうれしい. <br>
 <a href="https://cp-algorithms.com/algebra/chinese-remainder-theorem.html">参考 1</a> や <a href="https://lumakernel.github.io/ecasdqina/math/number-theory/Garner">参考 2</a> を参考に理解した.
 garner のアルゴリズムについては分かりやすい解説を書いている人が多いので他の人のものを参考にしてもらいたい.
 </p>
 <p>
-時間計算量: O(n^2 + n log (max_i p_i))
+時間計算量: $\O (n^2 + n \log (\max p_i))$
 </p>
 <h3>コード</h3>
 <div class="codebox">
