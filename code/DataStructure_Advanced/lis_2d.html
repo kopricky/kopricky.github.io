@@ -10,6 +10,14 @@
 
   gtag('config', 'UA-131511873-1');
 </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
 
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -52,15 +60,15 @@
 <h2>LIS 2D</h2>
 <h3>コードについての説明</h3>
 <p>
-2次元LIS とは {(x_1, y_1), (x_2, y_2), ... , (x_n, y_n)} (x_i <= x_i+1 かつ y_i <= y_i+1 かつ (x_i, y_i) ≠ (x_i+1, y_i+1)) というような単調増加する組の列のことをいう(イコール周りは定義がいろいろ) <br>
-本実装では {(x_1, y_1), (x_2, y_2), ... , (x_n, y_n)} (x_i <= x_i+1 かつ y_i >= y_i+1 かつ (x_i, y_i) ≠ (x_i+1, y_i+1)) というような x の増加に伴い, y が単調に減少する列を動的に管理するデータ構造になっている <br>
+$2$ 次元 LIS とは $\{ (x_1, y_1), (x_2, y_2), ... , (x_n, y_n) \}$ ($x_i \le x_{i+1}$ かつ $y_i \le y_{i+1}$ かつ $(x_i, y_i) \neq (x_{i+1}, y_{i+1})$) というような単調増加する組の列のことをいう(イコール周りは定義がいろいろ) <br>
+本実装では $\{ (x_1, y_1), (x_2, y_2), ... , (x_n, y_n) \}$ ($x_i \le x_{i+1}$ かつ $y_i \ge y_{i+1}$ かつ $(x_i, y_i) \neq (x_{i+1}, y_{i+1})$) というような $x$ の増加に伴い, $y$ が単調に減少する列を動的に管理するデータ構造になっている <br>
 </p>
 <p>
 (関数)<br>
-insert(val): 点 val (∈ R^2) を追加する. 実際に下側 envelope に組み込まれたか(true / false)を返す.<br>
+$insert(val)$ : 点 $val (\in \mathbb{R}^2)$ を追加する. 実際に下側 envelope に組み込まれたか(true / false)を返す.<br>
 </p>
 <p>
-時間計算量: insert ならしO(logn)
+時間計算量: insert ならし $\O (\log n)$
 </p>
 <h3>コード</h3>
 <div class="codebox">

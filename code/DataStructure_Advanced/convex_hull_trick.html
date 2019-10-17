@@ -10,6 +10,14 @@
 
   gtag('config', 'UA-131511873-1');
 </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
 
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -52,14 +60,15 @@
 <h2>Convex Hull Trick</h2>
 <h3>コードについての説明</h3>
 <p>
-傾きが単調であるような(以下の実装は単調減少しているような) n 個の直線について, 各 x 座標における、 n 個の直線の最小値を効率よく計算するアルゴリズムである. <br>
-add する際に最小値を取る可能性が無いような直線は取り除き, またクエリ(最小値を求めたい x 座標)が単調なら前から順に直線を見ていき最小値をこれ以降取らなくなった段階で取り除くということをする. 考え方としては <a href="../Computation_Advanced/slide_min.html">スライド最小値</a> と同じである. <br>
-クエリが単調でない場合についても二分探索をすることで求めたい x 座標について最小値を取る直線が得られるのでそれを用いて最小値を計算すればよい.
+傾きが単調であるような(以下の実装は単調減少しているような) $n$ 個の直線について, 各 $x$ 座標における、 $n$ 個の直線の最小値を効率よく計算するアルゴリズムである. <br>
+add する際に最小値を取る可能性が無いような直線は取り除き, またクエリ(最小値を求めたい $x$ 座標)が単調なら前から順に直線を見ていき最小値をこれ以降取らなくなった段階で取り除くということをする.
+考え方としては <a href="../Computation_Advanced/slide_min.html">スライド最小値</a> と同じである. <br>
+クエリが単調でない場合についても二分探索をすることで求めたい $x$ 座標について最小値を取る直線が得られるのでそれを用いて最小値を計算すればよい.
 </p>
 <p>
 (関数)<br>
-add(a,b) : 直線 y=ax+b を追加する <br>
-get(x) : x での最小値を返す
+$add(a,b)$ : 直線 $y=ax+b$ を追加する <br>
+$get(x)$ : $x$ での最小値を返す
 </p>
 <h3>コード</h3>
 <div class="codebox">

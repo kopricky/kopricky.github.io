@@ -10,6 +10,14 @@
 
   gtag('config', 'UA-131511873-1');
 </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
 
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -52,11 +60,11 @@
 <h2>BIT 2D</h2>
 <h3>コードについての説明</h3>
 <p>
-2次元の BIT. "(i, j) に加算する" と "[0,i]×[0,j] の範囲の和を求める" の 2 つのクエリを効率よく処理するデータ構造. <br>
-x 軸方向に BIT の配列を持ってその配列の要素 1 つ 1 つが y 軸方向の BIT 配列を持っている感じ.
+$2$ 次元の BIT. "$(i, j)$ に加算する" と "$[0,i] \times [0,j]$ の範囲の和を求める" の $2$ つのクエリを効率よく処理するデータ構造. <br>
+$x$ 軸方向に BIT の配列を持ってその配列の要素 $1$ つ $1$ つが $y$ 軸方向の BIT 配列を持っている感じ.
 </p>
 <p>
-時間計算量: add, sum O(log^2(n))
+時間計算量: add, sum $\O (\log^2 n)$
 </p>
 <h3>コード</h3>
 <div class="codebox">
