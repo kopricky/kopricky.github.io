@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-131511873-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-131511873-1');
+</script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
+
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<link rel="shortcut icon" type="image/x-icon" href="../../favicon.ico">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>Counting the Number of Distinct Substrings</h2>
+<h3>コードについての説明</h3>
+<p>
+文字列 $s$ 内に含まれる相異なる(連続とは限らない)部分文字列の数を求めるアルゴリズム. <br>
+結論から述べると接尾辞配列 sa および隣接する接尾辞の最長共通接頭辞の長さを表す配列 lcp を構築することで可能になる.
+これらの概念についてはある程度有名なのでここには書かない.<br>
+例えば $S =$ "abcbcba" とする. このとき $sa =$ {"a", "abcbcba", "ba", "bcba", "bcbcba", "cba", "cbcba"} となる.
+接尾辞配列を前から見ていき, まず先頭の "a" を見て "a" を部分文字列として数え上げる.　その次に "abcbcba" を見て "ab", "abc", "abcb", "abcbc", "abcbcb", "abcbcba" を数え上げる.
+このとき部分文字列の数は ("abcbcba" の長さ) - ("a" と "abcbcba" の最長共通接頭辞) のようにして計算することができる.<br>
+同様に "ba" を見て "b", "ba" を数え上げる. 部分文字列の数は ("ba" の長さ) - ("abcbcba" と "ba" の最長共通接頭辞) に対応する.<br>
+同様に "bcba" を見て "bc", "bcb", "bcba" を数え上げる. 部分文字列の数は ("bcba" の長さ) - ("ba" と "bcba" の最長共通接頭辞) に対応する.<br>
+以下これを繰り返して最終的に $22$ が答えとなる(空文字を部分文字列の $1$ つとして考えています).
+このようにして接尾辞の長さと前の接尾辞との最長共通接頭辞の長さの差が新たに数えあげられる部分文字列の数に対応していることが分かる).
+以下では接尾辞配列の構築に $\O (|S| \log^2 |S|)$ 時間かけているが SA_IS などの線形時間での接尾辞配列構築アルゴリズムを用いることで $\O (|S|)$ 時間で計算することが可能である.
+</p>
+<p>
+時間計算量: $\O( |S| \log^2 |S|)$ (線形時間での接尾辞配列構築アルゴリズムを用いることで $\O (|S|)$ 時間に改善可能)
+</p>
+<h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
+<pre class="prettyprint linenums">
+class SuffixArray {
+public:
+    int sz, index1, index2;
+    vector&lt;int&gt; rnk, tmp, sa, lcp;
+    SuffixArray(const string&amp; arg)
+        : sz((int)arg.size()), rnk(sz+1), tmp(sz+1), sa(sz+1), lcp(sz+1){
+        make_sa(arg), make_lcp(arg);
+    }
+    void make_sa(const string&amp; s){
+        index1 = sz;
+        for(int i = 0; i &lt;= index1; ++i){
+            sa[i] = i;
+            rnk[i] = (i &lt; index1) ? s[i] : -1;
+        }
+        auto comp = [&amp;](const int i, const int j){
+            if(rnk[i] != rnk[j]){
+                return rnk[i] &lt; rnk[j];
+            }else{
+                const int ri = (i + index2 &lt;= index1) ? rnk[i + index2] : -1;
+                const int rj = (j + index2 &lt;= index1) ? rnk[j + index2] : -1;
+                return ri &lt; rj;
+            }
+        };
+        for(index2 = 1; index2 &lt;= index1; index2 *= 2){
+            sort(sa.begin(), sa.end(), comp);
+            tmp[sa[0]] = 0;
+            for(int i = 1; i &lt;= index1; ++i){
+                tmp[sa[i]] = tmp[sa[i-1]] + (comp(sa[i-1], sa[i]) ? 1 : 0);
+            }
+            for(int i = 0; i &lt;= index1; ++i){
+                rnk[i] = tmp[i];
+            }
+        }
+    }
+    void make_lcp(const string&amp; s){
+        for(int i = 0; i &lt;= sz; ++i){
+            rnk[sa[i]] = i;
+        }
+        int h = 0;
+        lcp[0] = 0;
+        for(int i = 0; i &lt; sz; ++i){
+            int j = sa[rnk[i]-1];
+            if(h &gt; 0){
+                --h;
+            }
+            for(; j + h &lt; sz &amp;&amp; i + h &lt; sz; ++h){
+                if(s[j+h] != s[i+h]){
+                    break;
+                }
+            }
+            lcp[rnk[i]-1] = h;
+        }
+    }
+};
+
+long long solve(const string&amp; s)
+{
+    int n = (int)s.size();
+    long long ans = 1;
+    SuffixArray SA(s);
+    for(int i = 0; i &lt; n; ++i){
+        ans += n - SA.sa[i+1] - SA.lcp[i];
+    }
+    return ans;
+}
+</pre>
+<h3>verify 用の問題</h3>
+<p>yosupo さんの library checker : <a href="https://judge.yosupo.jp/problem/number_of_substrings">Number of Substrings</a>
+  <a href="https://judge.yosupo.jp/submission/916">提出コード</a></p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>
