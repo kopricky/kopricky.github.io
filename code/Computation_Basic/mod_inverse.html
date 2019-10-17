@@ -10,6 +10,14 @@
 
   gtag('config', 'UA-131511873-1');
 </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
 
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -52,12 +60,12 @@
 <h2>Mod Inverse</h2>
 <h3>コードについての説明</h3>
 <p>
-Z/pZ 上で p と互いに素である a の逆元を拡張ユークリッドの互除法を用いて計算するアルゴリズム. <br>
-"a と p が互いに素 ⇔ Z/pZ 上で a の逆元が存在する" が成り立つことに注意する.
+$\mathbb{Z} / p \mathbb{Z}$ 上で $p$ と互いに素である $a$ の逆元を拡張ユークリッドの互除法を用いて計算するアルゴリズム. <br>
+"$a$ と $p$ が互いに素 $\Leftrightarrow$ $\mathbb{Z} / p \mathbb{Z}$ 上で $a$ の逆元が存在する" が成り立つことに注意する.
 </p>
 <p>
 (関数)<br>
-mod_inverse(a, p): Z/pZ 上で a の逆元を求める(ただし a と p は互いに素とする). <br>
+$mod_inverse(a, p)$ : $\mathbb{Z} / p \mathbb{Z}$ 上で $a$ の逆元を求める(ただし $a$ と $p$ は互いに素とする). <br>
 </p>
 <p>
 時間計算量: O(log a)

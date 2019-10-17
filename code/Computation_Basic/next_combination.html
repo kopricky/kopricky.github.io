@@ -10,6 +10,14 @@
 
   gtag('config', 'UA-131511873-1');
 </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
 
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -52,8 +60,8 @@
 <h2>Next Combination</h2>
 <h3>コードについての説明</h3>
 <p>
-要素数 n の数列から r 個の要素の取り方 nCr 通りをなめたいときに使うテク. <br>
-STL にある next_permutation を用いて true/false の配列で mask する形で r 個選んでくると良い
+要素数 $n$ の数列から $r$ 個の要素の取り方 $n \mathrm{C} r$ 通りをなめたいときに使うテク. <br>
+STL にある next_permutation を用いて true/false の配列で mask する形で $r$ 個選んでくると良い
 </p>
 <h3>コード</h3>
 <div class="codebox">

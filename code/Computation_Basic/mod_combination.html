@@ -10,6 +10,14 @@
 
   gtag('config', 'UA-131511873-1');
 </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
 
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -52,16 +60,16 @@
 <h2>Mod Combination</h2>
 <h3>コードについての説明</h3>
 <p>
-Z/pZ (p は素数) 上で nCr の計算を行う. <br>
-階乗,階乗逆元を前計算しておけば O(1) で combination を計算可能になる.
+$\mathbb{Z} / p \mathbb{Z}$ ($p$ は素数) 上で $n \mathrm{C} r$ の計算を行う. <br>
+階乗,階乗逆元を前計算しておけば $\O (1)$ で combination を計算可能になる.
 </p>
 <p>
 (関数) <br>
-make() で階乗,階乗逆元を前計算する. <br>
-comb(a, b) で aCb を返す
+$make()$ : 階乗,階乗逆元を前計算する. <br>
+$comb(a, b)$ : $a \mathrm{C} b$ を返す(事前に $make()$ が必要)
 </p>
 <p>
-時間計算量: 前計算 make() O(n), comb(a, b) O(1)
+時間計算量: 前計算 $make()$ $\O (n)$, $comb(a, b)$ $\O (1)$
 </p>
 <h3>コード</h3>
 <div class="codebox">

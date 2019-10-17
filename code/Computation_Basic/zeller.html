@@ -10,6 +10,14 @@
 
   gtag('config', 'UA-131511873-1');
 </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
 
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -52,11 +60,11 @@
 <h2>Zeller</h2>
 <h3>コードについての説明</h3>
 <p>
-ツェラーの公式とは西暦の年、月、日から曜日(mod 7)を求める公式である. <br>
-以下の実装では日曜日始まりで日曜日が0になる.
+ツェラーの公式とは西暦の年、月、日から曜日($\mathrm{mod}\ 7$)を求める公式である. <br>
+以下の実装では日曜日始まりで日曜日が $0$ になる.
 </p>
 <p>
-時間計算量: O(1)
+時間計算量: $\O (1)$
 </p>
 <h3>コード</h3>
 <div class="codebox">
