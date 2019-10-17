@@ -10,6 +10,14 @@
 
   gtag('config', 'UA-131511873-1');
 </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
 
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -52,12 +60,12 @@
 <h2>Reccurence Formula Solver</h2>
 <h3>コードについての説明</h3>
 <p>
-k 項間線形漸化式の n 番目の値 a[n] を求めるアルゴリズム. 行列累乗を用いると O(k^3 log n) の計算量で求めることができるが, 以下の実装ではより高速なきたまさ法を用いて O(k^2 log n) で求めている. <br>
+$k$ 項間線形漸化式の $n$ 番目の値 $a[n]$ を求めるアルゴリズム. 行列累乗を用いると $\O (k^3 \log n)$ の計算量で求めることができるが, 以下の実装ではより高速なきたまさ法を用いて $\O (k^2 \log n)$ で求めている. <br>
 <a href="http://yosupo.hatenablog.com/entry/2015/03/27/025132">このブログ</a>が参考になった. 以下では定数項が存在する場合にも対応した実装にしている. <br>
-高速に多項式乗算(FFT)と多項式剰余(Montgomery乗算)を計算することできたまさ法のオーダーを O(k log k log n) に落とせるらしいがよくわかっていない.
+高速に多項式乗算(FFT) と多項式剰余(Montgomery 乗算) を計算することできたまさ法のオーダーを $\O (k \log k \log n)$ に落とせるらしいがよくわかっていない.
 </p>
 <p>
-時間計算量: O(k^2 log n)
+時間計算量: $\O (k^2 \log n)$
 </p>
 <h3>コード</h3>
 <div class="codebox">

@@ -10,6 +10,14 @@
 
   gtag('config', 'UA-131511873-1');
 </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
 
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -52,11 +60,11 @@
 <h2>Inversion Count Algorithm</h2>
 <h3>コードについての説明</h3>
 <p>
-転倒数と呼ばれる数を計算するアルゴリズム. 数列 {a_i} の転倒数とは 「a_i > a_j (i < j) となる組 (i, j) の数」 のことでバブルソートの交換回数とも一致する. <br>
+転倒数と呼ばれる数を計算するアルゴリズム. 数列 $\{ a_i \}$ の転倒数とは 「$a_i > a_j\ (i < j)$ となる組 $(i, j)$ の数」 のことでバブルソートの交換回数とも一致する. <br>
 この値は BIT を用いて効率よく計算できる(アルゴリズムは蟻本などを参照してください).
 </p>
 <p>
-時間計算量: O(nlogn)
+時間計算量: $\O (n \log n)$
 </p>
 <h3>コード</h3>
 <div class="codebox">

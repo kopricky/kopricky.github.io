@@ -10,6 +10,14 @@
 
   gtag('config', 'UA-131511873-1');
 </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
 
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -53,16 +61,16 @@
 <h3>コードについての説明</h3>
 <p>
 シンプレックス法(単体法)は線形計画問題を効率的に解くアルゴリズムである. 多項式時間で終了することは証明されていないが実用上は高速に動作することが知られている. <br>
-実際に verify 用問題のように係数行列が疎なら 2万(制約式の数)×200(変数の数) とかでも計算できる. 行列が疎な場合にある程度特化して実装しているのでそうでない場合は通常の実装より遅いと思う.<br>
+実際に verify 用問題のように係数行列が疎なら $2$ 万(制約式の数) $\times 200$ (変数の数) とかでも計算できる. 行列が疎な場合にある程度特化して実装しているのでそうでない場合は通常の実装より遅いと思う.<br>
 多面体の面上で目的関数を最大にする方向の頂点へと移動していく手法(雑)で, 単体法と双璧をなす内点法は多面体内を移動する. <br>
 愚直に更新を行うと有限回のステップで終了しないようなケースが存在することが知られていて, 以下の実装ではそれを回避するために Blend の最小添字規則を用いている. <br>
 コメントアウトしたものは最小添字規則に反するピボット選択であるが実際にはこっちのほうが高速に動く. たぶんコメントアウトの方を使うと有限回ステップで終了しないような恣意的なケースを作れてしまいそうなのであまりおすすめはしない(まあそんなケースそうそうないと思うけど). <br>
-verify のため 5,6問 Simplex 法で問題を解いたが一度だけ 2 個目のコメントアウトの方を使うとループが永遠に続く場合がテストケースに混じっていたことがあった. <br>
+verify のため $5,6$ 問 Simplex 法で問題を解いたが $1$ 度だけ $2$ 個目のコメントアウトの方を使うとループが永遠に続く場合がテストケースに混じっていたことがあった. <br>
 (誤差に強くない + もう少し verify しないといけないとは思っている.)
 </p>
 <p>
 (コンストラクタ) <br>
-Simplex(A,b,c): max c*x s.t. A*x &lt;= b, x &gt;= 0 で表される最適化問題を解く(ans(もしくは infinity, none) に答えが格納).
+$Simplex(A,b,c)$ : $\max c^\top x$ s.t. $Ax \le b,\ x \ge 0$ で表される最適化問題を解く(ans(もしくは infinity, none) に答えが格納).
 </p>
 <h3>コード</h3>
 <div class="codebox">

@@ -10,6 +10,14 @@
 
   gtag('config', 'UA-131511873-1');
 </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
 
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -52,19 +60,20 @@
 <h2>Tetration</h2>
 <h3>コードについての説明</h3>
 <p>
-テトレーション(a ↑↑ b) (% mod) を求めるアルゴリズム. つまり a^a^a^a^....(a が b 個続く) の Z_mod 上での値を求めるアルゴリズム. ここでべき乗の演算は右結合的であることに注意.<br>
-verify 問題の <a href="https://drive.google.com/drive/folders/1MZLE7H3x4xOwf7HIXsffjMMfEaW_eq79">解説記事</a> を参考にすると, オイラーの定理(a^φ(mod) = 1 mod m) を用いて (a ↑↑ b) の指数部分は (a ↑↑ (b-1)) mod φ(mod) と等しいことが分かり, これを再帰的に繰り返すことで元の値が求まる.<br>
-ここで φ(φ(φ(… mod …))) は O(log(mod)) 回で 1 に収束するため再帰の深さは b が大きかったとしても O(log(mod)) となり, テトレーションを高速に計算することが可能になる. <br>
-注意として b が小さい場合(mod が 32 bit 整数なら高々 32 以下)、 周期が始まる前なので(mod を法とした値ではなく)そのままの値を持って計算する. <br>
-以下の実装では b が小さい場合(32 以下の場合) は値をそのまま [0,32] に, b が 32 より大きい場合は mod を法とした値に +mod して (mod + 32, 2*mod) の範囲に値をマップしている. <br>
-(注) [0, 2*mod) にマップしているので mod の値は 2^30 以下とする. <br>
+テトレーション($a ↑↑ b$) ($\% mod$) を求めるアルゴリズム. つまり $a^{a^{a^{a^{\ldots}}}}$ ($a$ が $b$ 個続く) の $\mathbb{Z}_{mod}$ 上での値を求めるアルゴリズム. ここでべき乗の演算は右結合的であることに注意.<br>
+verify 問題の <a href="https://drive.google.com/drive/folders/1MZLE7H3x4xOwf7HIXsffjMMfEaW_eq79">解説記事</a> を参考にすると,
+オイラーの定理($a^{\phi(mod)} = 1\ \mathrm{mod}\ m$) を用いて ($a ↑↑ b$) の指数部分は $(a ↑↑ (b-1))\ \mathrm{mod}\ \phi(mod)$ と等しいことが分かり, これを再帰的に繰り返すことで元の値が求まる.<br>
+ここで $φ(φ(φ(\cdots mod \cdots)))$ は $\O (\log (mod))$ 回で $1$ に収束するため再帰の深さは $b$ が大きかったとしても $\O (\log (mod))$ となり, テトレーションを高速に計算することが可能になる. <br>
+注意として $b$ が小さい場合($mod$ が $32$ bit 整数なら高々 $32$ 以下)、 周期が始まる前なので($mod$ を法とした値ではなく)そのままの値を持って計算する. <br>
+以下の実装では $b$ が小さい場合($32$ 以下の場合) は値をそのまま $[0,32]$ に, $b$ が $32$ より大きい場合は $mod$ を法とした値に $+mod$ して $(mod + 32, 2mod)$ の範囲に値をマップしている. <br>
+(注) $[0, 2 mod)$ にマップしているので $mod$ の値は $2^{30}$ 以下とする. <br>
 </p>
 <p>
 (関数)<br>
-tetration(a, b, mod): a ↑↑ b % mod を求める. <br>
+$tetration(a, b, mod)$ : $(a ↑↑ b) \% mod$ を求める. <br>
 </p>
 <p>
-時間計算量: O(log^2(mod)) (b の方が log(mod) よりも大きいと仮定した場合)
+時間計算量: $\O (\log^2 (mod))$ ($b$ の方が $\log (mod)$ よりも大きいと仮定した場合)
 </p>
 <h3>コード</h3>
 <div class="codebox">
