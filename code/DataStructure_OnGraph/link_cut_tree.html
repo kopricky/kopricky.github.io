@@ -86,11 +86,11 @@ splay 操作をする回数は preferred child の変化する回数で抑えら
 この部分はならし $\O (\log n)$ である.
 よって後は (preferred child の変化する回数), つまり (non-preferred である辺が preferred になる回数) がならし $\O (\log n)$ であることを示せばよい. <br>
 ここで元の木について edge を heavy edge, light edge の $2$ 種類に分類する.
-$e = (u, v)$ が heavy とは $u$ が $v$ の親であるとした場合 ($u$ を根とする部分木のサイズ) $\le 2 \ast$($v$ を根とする部分木のサイズ) となるもののことをいうとする.
+$e = (u, v)$ が heavy とは $u$ が $v$ の親であるとした場合 ($u$ を根とする部分木のサイズ) $\le 2 \times$($v$ を根とする部分木のサイズ) となるもののことをいうとする.
 結果的に今 edge は heavy / light, preferred / non-preferred の $2 \times 2 = 4$ 種類あることになり, また heavy, light については常に変化しないことに注意する. <br>
-$1$ 回の access(v) で light かつ non-preferred な辺が preferred になる回数は根からのパス上に light edge は高々 $\log n$ 個以下しかないことから $\log n$ 個で抑えられるので,
+$1$ 回の access(v) で light かつ non-preferred な辺が preferred になる回数は根からのパス上に light edge は高々 $\lceil \log n \rceil$ 個以下しかないことから $\lceil \log n\rceil$ 個で抑えられるので,
 heavy かつ non-preferred な辺が preferred になる回数を考える.
-そこで $1$ 回の access(v) で heavy かつ preferred な辺が preferred から non-preferred になる回数を考えると, これは同じタイミングで light edge が non-preferred から preferred になるので $\log n$ 回で抑えられる.
+そこで $1$ 回の access(v) で heavy かつ preferred な辺が preferred から non-preferred になる回数を考えると, これは同じタイミングで light edge が non-preferred から preferred になるので $\lceil \log n\rceil$ 回で抑えられる.
 ゆえに (heavy かつ non-preferred な辺が preferred になる回数) $\le$ (初めの段階で heavy かつ non-preferred な辺の個数) + (heavy かつ preferred な辺が preferred から non-preferred になる回数) であることを考えると
 全 $m(\ge n)$ 回の access(v) の操作で (heavy かつ non-preferred な辺が preferred になる回数) は $\O (m \log n)$ 回となり, $1$ 回の access(v) ではならし $\O (\log n)$ 回であることが分かる. ゆえにすべて示せた. <br>
 <br>
