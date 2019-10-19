@@ -126,9 +126,9 @@ private:
     function&lt; T(T, T) &gt; func[4];
 
 public:
-    SyntaxTree(string&amp; s){
-        func[0] = [&amp;](T x, T y){ return x + y; }, func[1] = [&amp;](T x, T y){ return x - y; };
-        func[2] = [&amp;](T x, T y){ return x * y; }, func[3] = [&amp;](T x, T y){ return x / y; };
+    SyntaxTree(const string&amp; s){
+        func[0] = [&amp;](const T x, const T y){ return x + y; }, func[1] = [&amp;](const T x, const T y){ return x - y; };
+        func[2] = [&amp;](const T x, const T y){ return x * y; }, func[3] = [&amp;](const T x, const T y){ return x / y; };
         int pos = 0;
         root = expr(s, pos);
     }
