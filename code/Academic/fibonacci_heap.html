@@ -10,6 +10,14 @@
 
   gtag('config', 'UA-131511873-1');
 </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
 
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -54,39 +62,39 @@
 <p>
 単一始点最短経路の高速化のために考えられた手法で Dijkstra 法の計算量オーダーを改善できたり, 他にもプリム法や無向グラフの大域最小カットなどの計算量オーダーを改善できる.
 (<a href="./dijkstra_fheap.html">参考 1</a>, <a href="./prim_heap.html">参考 2</a>, <a href="./undirected_mincut.html">参考 3</a>) <br>
-一般的な二分ヒープとは異なり, push を O(1), pop(最小値削除) を ならし O(logn) の時間計算量で行うことができる. <br>
-二分ヒープと比べて優位な点としてキーの値を減らす方向への更新(decrease_key) がならし O(1) の時間計算量で行えることが挙げられ, 上記のアルゴリズムについてもこの影響でオーダーが落ちる. またヒープの併合も簡単に行うことができる.<br>
-具体的には binomial heap(二項ヒープ) の改良版で binomial heap では push, union 時に厳密に二項ヒープの条件 "次数 k の二項木は次数 0 〜 k-1 の二項木を子として持つ", "同じ次数の二項木は高々 1 つ" という条件を常に満たしていたため,
-各クエリの最悪計算量が O(log n) であったが, fibonacci heap では decrease_key を含めたそれらのクエリを delete_min クエリに遅延処理をすることで delete_min のみならし O(log n) 時間で push, union, decrease key などをならし O(1) 時間で行うことができる. <br>
+一般的な二分ヒープとは異なり, push を $\O (1)$, pop(最小値削除) を ならし $\O (\log n)$ の時間計算量で行うことができる. <br>
+二分ヒープと比べて優位な点としてキーの値を減らす方向への更新(decrease_key) がならし $\O (1)$ の時間計算量で行えることが挙げられ, 上記のアルゴリズムについてもこの影響でオーダーが落ちる. またヒープの併合も簡単に行うことができる.<br>
+具体的には binomial heap(二項ヒープ) の改良版で binomial heap では push, union 時に厳密に二項ヒープの条件 "次数 $k$ の二項木は次数 $0 \sim k-1$ の二項木を子として持つ", "同じ次数の二項木は高々 $1$ つ" という条件を常に満たしていたため,
+各クエリの最悪計算量が $\O (\log n)$ であったが, fibonacci heap では decrease_key を含めたそれらのクエリを delete_min クエリに遅延処理をすることで delete_min のみならし $\O (\log n)$ 時間で push, union, decrease key などをならし $\O (1)$ 時間で行うことができる. <br>
 push, delete_min クエリのみの場合は単に push クエリ時の処理が delete_min 時に遅延処理されるだけなので delete_min 操作の終了時には二項ヒープになるが,
 decrease_key クエリによってヒープ木内の任意の頂点についてその頂点を根とする部分木が脱離する可能性がでてくるため二項ヒープの条件は崩れる.
-ここでむやみやたらに部分木の脱離を許すのではなく, 根を除く頂点について子が脱離する回数を高々 1 回と制限すると木の根の次数が頂点数の log で抑えることができる.
-このときに根の次数が k となるような木でありうる最小の頂点数が k についてフィボナッチ数列(二項ヒープの場合は 2 べき)を成し, これが名前の由来だと思う. <br>
+ここでむやみやたらに部分木の脱離を許すのではなく, 根を除く頂点について子が脱離する回数を高々 $1$ 回と制限すると木の根の次数が頂点数の $\log$ で抑えることができる.
+このときに根の次数が $k$ となるような木でありうる最小の頂点数が $k$ についてフィボナッチ数列(二項ヒープの場合は $2$ べき)を成し, これが名前の由来だと思う. <br>
 <a href="https://www.cs.princeton.edu/~wayne/teaching/fibonacci-heap.pdf">このスライド</a>の説明をもとに実装した. <br>
 キー値減算を行いたい場合は push 時に push されたノードへのポインタを返すのでそれを配列などで保持しておき, decrease_key(ノードへのポインタ, 減らす値) を呼ぶことで実現できる. <br>
 Dijkstra 法での応用のようにヒープにキー値(最短距離)だけでなくデータ(頂点)も持たせたくなる場合が多い. ただキー値減算をサポートしている影響でキー値の型に対して減算が定義されている必要があり,
-そのまま普通の Dijkstra 法のようにキー値を std::pair にすることはできなくて煩わしい. なのでキー値だけ保持するヒープだけでなくキー値とデータを保持するヒープも 2 つ目の実装として置いた. <br>
+そのまま普通の Dijkstra 法のようにキー値を std::pair にすることはできなくて煩わしい. なのでキー値だけ保持するヒープだけでなくキー値とデータを保持するヒープも $2$ つ目の実装として置いた. <br>
 元論文は "Fibonacci Heaps and Their Uses in Improved Network
 Optimization Algorithms" [Fredman, Tarjan 1984] <br>
 <br>
 (上記の参考スライドの補足) <br>
-ポテンシャルを tree(H) + 2 * marks(H) と取っているイメージは木の根の頂点については後にマージされる際にかかる計算量の分の 1,
-マークされている頂点については後に部分木として離脱し, 新たに木の根になるのにかかる計算量の分に 1, そして木の根になった後に同じくマージされる際にかかる計算量の分に 1 の合計 2 がかかっていると見ることができる. <br>
+ポテンシャルを $tree(H) + 2 marks(H)$ と取っているイメージは木の根の頂点については後にマージされる際にかかる計算量の分の $1$,
+マークされている頂点については後に部分木として離脱し, 新たに木の根になるのにかかる計算量の分に $1$, そして木の根になった後に同じくマージされる際にかかる計算量の分に $1$ の合計 $2$ がかかっていると見ることができる. <br>
 一般的なならし計算量の解析と同様にならしコストは (実際にかかるコスト) + (ポテンシャルの差分) で計算され, ポテンシャルが増えることは後の計算のために貯金すること, 減ることは貯金していた分を使うことに対応している. <br>
 <br>
 (fibonacci heap 以降のヒープの(雑な)話) <br>
 fibonacci heap における delete_min, delete_key にかかるならし計算量を最悪計算量で実現するヒープとして relaxed heap がある(Driscoll, Gabow, Sharairman, Tarjan 1988).
-このヒープはその名の通り厳密にはヒープではなくヒープの条件を満たさないノードを log n 個くらい許すという条件を常に保つように更新をする. ただその影響で find_min には O(log n) 時間がかかる. <br>
+このヒープはその名の通り厳密にはヒープではなくヒープの条件を満たさないノードを $\log n$ 個くらい許すという条件を常に保つように更新をする. ただその影響で find_min には $\O (\log n)$ 時間がかかる. <br>
 他にもヒープ操作にかかる計算量の情報理論的下界を下回る計算量を実現したものとして soft heap がある(chazelle 2000).
 こちらはヒープ内の key の値を途中で変化させることで保持する要素の情報量を落としさらなる高速化を測るもので, 厳密にはヒープではない.
-delete, findmin などのクエリを O(1) で処理でき, さらに insert された要素の個数を n としたときパラメーター ε について, insert にかかる計算量が O(log 1/ε), かつヒープ内の変更された key の値は高々 εn 個のようにパラメタライズされる. <br>
-ここで comparison based model において sort にかかる時間計算量は決定木を用いた証明から Ω(n log n) であることを思い出すと, n 回のヒープ操作にかかる計算量は Ω(n log n) である.
+delete, findmin などのクエリを $\O (1)$ で処理でき, さらに insert された要素の個数を $n$ としたときパラメーター $\epsilon$ について, insert にかかる計算量が $\O (\log 1/\epsilon )$, かつヒープ内の変更された key の値は高々 $\epsilon n$ 個のようにパラメタライズされる. <br>
+ここで comparison based model において sort にかかる時間計算量は決定木を用いた証明から $\Omega(n \log n)$ であることを思い出すと, $n$ 回のヒープ操作にかかる計算量は $\Omega (n \log n)$ である.
 つまり soft heap はヒープの操作にかかる計算量の情報理論的下界を下回る計算量を達成していることが分かる(繰り返しになるが soft heap はキー値を恣意的に変化させているので厳密にはヒープではない). <br>
-この soft heap は種々のアルゴリズムに応用されていて例えば最小全域木を最悪計算量 O(m α(m, n)) で求めるアルゴリズムなどに使われている(fibonacci heap では prim 法を用いて O(n log n + m) time が限界だった).
+この soft heap は種々のアルゴリズムに応用されていて例えば最小全域木を最悪計算量 $\O(m \alpha(m, n))$ で求めるアルゴリズムなどに使われている(fibonacci heap では prim 法を用いて $\O (n \log n + m)$ time が限界だった).
 論文を読んでいないのでどういう風に用いるかは知らない...(一応 <a href="https://en.wikipedia.org/wiki/Soft_heap">wikipedia の記事</a> の Application には soft heap を selection algorithm に応用する例が載っている.)
 </p>
 <p>
-時間計算量: push O(1), pop ならし O(log n), decrease_key(キー値減算) ならし O(1), meld O(1)
+時間計算量: push $\O (1)$, pop ならし $\O (\log n)$, decrease_key(キー値減算) ならし $\O (1)$, meld $\O (1)$
 </p>
 <h3>コード(キー値のみを保持)</h3>
 <div class="codebox">

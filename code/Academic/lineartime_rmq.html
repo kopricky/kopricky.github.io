@@ -10,6 +10,14 @@
 
   gtag('config', 'UA-131511873-1');
 </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
 
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -52,17 +60,17 @@
 <h2>Lineartime RangeMinimumQuery</h2>
 <h3>コードについての説明</h3>
 <p>
-静的 RMQ(更新のない区間最小値クエリ) に O(1) で答えるデータ構造を O(n) 時間で構築するアルゴリズム. ブロック分割をしている影響で要素数が 2 以上を仮定しています. <br>
+静的 RMQ(更新のない区間最小値クエリ) に $\O (1)$ で答えるデータ構造を $\O (n)$ 時間で構築するアルゴリズム. ブロック分割をしている影響で要素数が $2$ 以上を仮定しています. <br>
 実測はあまり速くなく, SparseTable とほぼ同じ. <br>
 元論文は "Fast algorithms for finding nearest common ancestors" [Harel, Tarjan 1984], "The LCA Problem Revisited" [Bender, Colton 2000] <br>
 この<a href="https://www.slideshare.net/yumainoue965/lca-and-rmq">スライド</a>の説明を参考に実装した
 <p>
 (関数)<br>
-build(arg1, max_query): 配列 arg1 についてのデータ構造を構築する(max_query=true なら最大値を返す) <br>
-query(st, ed) (最小(大)値を達成するインデックス, 値) を返す
+build$(arg1, max_query)$ : 配列 $arg1$ についてのデータ構造を構築する(max_query=true なら最大値を返す) <br>
+query$(st, ed)$ : (最小(大)値を達成するインデックス, 値) を返す
 </p>
 <p>
-時間計算量: 構築 O(n), クエリ O(1)
+時間計算量: 構築 $\O (n)$, クエリ $\O (1)$
 </p>
 <h3>コード</h3>
 <div class="codebox">

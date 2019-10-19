@@ -10,6 +10,14 @@
 
   gtag('config', 'UA-131511873-1');
 </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
 
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -52,14 +60,14 @@
 <h2>Dijkstra with Fibonacci Heap</h2>
 <h3>コードについての説明</h3>
 <p>
-Dijkstra 法を <a href="./fibonacci_heap.html">Fibonacci Heap</a> を用いて高速化したアルゴリズム. 時間計算量が O((n + m) logn) から O(n log n + m) に落ちる. <br>
-すでにフィボナッチヒープ内にある頂点についての最短距離の更新はキー値減算を用いることで 1 回あたりならし O(1) で行えるため, 新たに要素を insert する必要はない.
-結果 insert および delete は n 回となるので計算量は O(n log n + m) となる. <br>
+Dijkstra 法を <a href="./fibonacci_heap.html">Fibonacci Heap</a> を用いて高速化したアルゴリズム. 時間計算量が $\O ((n + m) \log n)$ から $\O (n \log n + m)$ に落ちる. <br>
+すでにフィボナッチヒープ内にある頂点についての最短距離の更新はキー値減算を用いることで $1$ 回あたりならし $\O (1)$ で行えるため, 新たに要素を insert する必要はない.
+結果 insert および delete は $n$ 回となるので計算量は $\O (n \log n + m)$ となる. <br>
 元論文は "Fibonacci Heaps and Their Uses in Improved Network
 Optimization Algorithms" [Fredman, Tarjan 1984]
 </p>
 <p>
-時間計算量: O(n log n + m)
+時間計算量: $\O (n \log n + m)$
 </p>
 <h3>コード</h3>
 <div class="codebox">

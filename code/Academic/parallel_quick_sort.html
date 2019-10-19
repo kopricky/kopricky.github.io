@@ -10,6 +10,14 @@
 
   gtag('config', 'UA-131511873-1');
 </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
 
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -52,7 +60,7 @@
 <h2>Parallel Quick Sort</h2>
 <h3>コードについての説明</h3>
 <p>
-クイックソートの並列計算アルゴリズム. クイックソートはピボットの値以上の要素、 未満の要素と分割したときにそれぞれの部分問題は独立しているためそれらを並列に計算するという効率的なアルゴリズムをまず考えることができる. 1 つ目の実装としてこちらを載せている.
+クイックソートの並列計算アルゴリズム. クイックソートはピボットの値以上の要素、 未満の要素と分割したときにそれぞれの部分問題は独立しているためそれらを並列に計算するという効率的なアルゴリズムをまず考えることができる. $1$ つ目の実装としてこちらを載せている.
 ある程度の THRESHOLD でそれ以下になった場合は分割せず通常の std::sort を用いてソートをすることにしている.<br>
 これでもある程度高速になるのだが、 std::partition を愚直に行っている部分が配列が大きくなったときにボトルネックになってしまう. 加えて, (ピボット以上の要素) と (ピボット未満の要素) の要素数に差が生じた場合に一方のスレッドの実行をもう一方が待つ時間が長くなってしまうというようなことも起こりうる. <br>
 partion アルゴリズムを parallel に行うのは考えてみると結構難しいことが分かり、 実際に研究されていることも調べてわかった(<a href="https://www.cs.upc.edu/~lfrias/research/parpar/wea08.pdf">参考スライド</a>, <a href="https://www.cs.upc.edu/~lfrias/research/parpar/parpar.pdf">その論文</a>). <br>
@@ -65,7 +73,7 @@ std::partition を用いて並び替える(Cleanup 操作). <br>
 </p>
 <p>
 (関数)<br>
-parallel_quick_sort(first, last, comp): 通常の std::sort のように呼び出す(comp は optional で default は std::less). <br>
+parallel_quick_sort$(first, last, comp)$ : 通常の std::sort のように呼び出す(comp は optional で default は std::less). <br>
 ※ thread 関連のライブラリを用いているのでコンパイルオプションとして -pthread を指定する.
 </p>
 <h3>コード(簡単版)</h3>
