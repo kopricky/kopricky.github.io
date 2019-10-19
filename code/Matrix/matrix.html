@@ -65,7 +65,7 @@ mat&lt;T&gt; は vector&lt;vector&lt;T&gt; &gt; の子クラスとして実装�
 </p>
 <p>
 (コンストラクタ)
-mat&lt;int&gt; A(n, n, val); で全要素が val の n × n の行列を構築(val はデフォルトで 0)
+mat&lt;int&gt; $A(n, n, val)$; で全要素が $val$ の $n \times n$ の行列を構築($val$ はデフォルトで $0$)
 </p>
 <p>
 時間計算量: rank, det, inverse, 連立方程式の求解 $\O (n^3)$, pow, mod_pow $\O (n^3 \log T)$ ($T$ 乗を求める場合)
@@ -388,6 +388,7 @@ template&lt;typename T&gt; mat&lt;T&gt; mod_pow(mat&lt;T&gt; A,long long cnt)
     return B;
 }
 </pre>
+</div>
 <h3>verify 用の問題</h3>
 <p>
 det の verify <br>

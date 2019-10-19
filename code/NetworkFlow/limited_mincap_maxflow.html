@@ -10,6 +10,14 @@
 
   gtag('config', 'UA-131511873-1');
 </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
 
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -57,12 +65,12 @@
 </p>
 <p>
 (関数)<br>
-add_edge(from, to, cap): from から to に向かう流量が min_cap 以上 max_cap 以下の有向辺を追加する <br>
-check(s, t): s から t に最小流量制約を満たすように流すことができるかどうか(true/false)を計算する <br>
-max_flow(s, t): s から t に最小流量制約を満たしたうえでの最大流を計算する
+add_edge$(from, to, cap)$ : $from$ から $to$ に向かう流量が $min \_ cap$ 以上 $max \_ cap$ 以下の有向辺を追加する <br>
+check$(s, t)$ : $s$ から $t$ に最小流量制約を満たすように流すことができるかどうか(true/false)を計算する <br>
+max_flow$(s, t)$ : $s$ から $t$ に最小流量制約を満たしたうえでの最大流を計算する
 </p>
 <p>
-時間計算量: check, max_flow O(n^2 m)
+時間計算量: check, max_flow $\O (n^2 m)$
 </p>
 <h3>コード</h3>
 <pre class="prettyprint linenums">
@@ -161,6 +169,7 @@ public:
     }
 };
 </pre>
+</div>
 <h3>verify 用の問題</h3>
 <p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1615&lang=jp">Gift Exchange Party</a>
   <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=2766168#1">提出コード</a>(非想定解)</p>

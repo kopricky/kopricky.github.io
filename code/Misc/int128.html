@@ -10,6 +10,14 @@
 
   gtag('config', 'UA-131511873-1');
 </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
 
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -52,7 +60,7 @@
 <h2>Int 128</h2>
 <h3>コードについての説明</h3>
 <p>
-int 128 型の入力および出力をするためのコードです(int 128 はデフォルトで cin や cout が働きません). Codeforces では int 128 が使えないので注意.
+int_128 型の入力および出力をするためのコードです(int_128 はデフォルトで cin や cout が働きません). Codeforces では int_128 が使えないので注意.
 </p>
 <h3>コード</h3>
 <div class="codebox">
@@ -88,6 +96,7 @@ ostream&amp; operator&lt;&lt;(ostream&amp; os, const LL&amp; v)
     return (os &lt;&lt; s);
 }
 </pre>
+</div>
 </section>
 
 </div>

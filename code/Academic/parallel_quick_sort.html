@@ -131,9 +131,8 @@ void parallel_quick_sort(const BidirectionalIterator first, const BidirectionalI
 }
 </pre>
 <h3>コード(高速版)</h3>
-<div class="codebox">
-<input type="checkbox" id="label" class="csscode" />
-<label for="label"></label>
+<input type="checkbox" id="label2" class="csscode" />
+<label for="label2"></label>
 <pre class="prettyprint linenums">
 template&lt;typename RandomAccessIterator, class UnaryPredicate&gt;
 class ParallelPartitionSolver
@@ -523,6 +522,7 @@ void parallel_quick_sort(const RandomAccessIterator first, const RandomAccessIte
     solver();
 }
 </pre>
+</div>
 <h3>verify 用の問題</h3>
 <p>
 verify していません(verify 問題を知らない) <br>

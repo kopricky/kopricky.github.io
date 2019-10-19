@@ -10,6 +10,14 @@
 
   gtag('config', 'UA-131511873-1');
 </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
 
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -53,7 +61,7 @@
 <h3>コードについての説明</h3>
 <p>
 int 型の入出力高速化のコード. <br>
-10^5 個以上のクエリが飛んでくるみたいな場合には少し速くなる. コドフォではたぶん使えない.
+$10^5$ 個以上のクエリが飛んでくるみたいな場合には少し速くなる. コドフォではたぶん使えない.
 </p>
 <h3>コード</h3>
 <div class="codebox">
@@ -80,6 +88,7 @@ inline void out(int n) {
     putchar('\n');
 }
 </pre>
+</div>
 </section>
 
 </div>

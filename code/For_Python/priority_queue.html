@@ -10,6 +10,14 @@
 
   gtag('config', 'UA-131511873-1');
 </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
 
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -57,7 +65,7 @@
 ちなみに python には heapq というライブラリがあり, そっちを使ったほうが速く計算できる.
 </p>
 <p>
-時間計算量: 挿入, 削除 O(logn), 最大値の参照 O(1)
+時間計算量: 挿入, 削除 $\O (\log n)$, 最大値の参照 $\O (1)$
 </p>
 <h3>コード</h3>
 <div class="codebox">
@@ -109,6 +117,7 @@ class PriorityQueue:
                 else:
                     break
 </pre>
+</div>
 <h3>verify 用の問題</h3>
 <p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=ALDS1_9_C&lang=jp">Priority Queue</a>
     <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3226528#1">提出コード</a> (heapq を用いていないため TLE にはなっているがすべてのクエリに正答している)</p>

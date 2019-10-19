@@ -89,7 +89,7 @@ alignment 等を気にした結果 dist が short int だったり aligned_stora
 あとバケットのサイズは $2$ べきにしています. $2$ べきだと % ではなく & でバケットの位置を計算できて高速になるので.<br>
 関数 maximum_distance() は現在のハッシュテーブルにおいて find の際の linear probing にかかる時間の最大値を求めていて, 速度がなぜか遅くなるみたいな場合はこれを用いることでハッシュの衝突がその原因になっているかどうかを確かめることができる.
 先述のように真にランダムなハッシュ関数を用いた場合期待値 $\O (\log \log n)$ でまたばらつきも小さくなるので maximum_distance() はちゃんとしたハッシュ関数を用いていればとても小さくなる. <br>
-第 4 引数の DOWNSIZE は rehash でバケット数の拡大だけでなく縮小も行うかどうかを表している. つまりバケット数に対して要素数が少ないときにバケットのサイズを縮小させるかどうかを決めることができる.
+第 $4$ 引数の DOWNSIZE は rehash でバケット数の拡大だけでなく縮小も行うかどうかを表している. つまりバケット数に対して要素数が少ないときにバケットのサイズを縮小させるかどうかを決めることができる.
 unordered_map を for_each でなめたり, erase したりなどは要素数だけでなくバケット数にも比例するので, バケットサイズの縮小をしないととても速度が遅くなることがあったので用意した. <br>
 まあまあ verify はしたが, 変な使い方をするとおかしな挙動をするかもしれない.
 </p>
@@ -401,9 +401,8 @@ public:
 </pre>
 </div>
 <h3>コード(高速版) (キー値比較が高速な型に対して用いる. 具体的にはキー値が int や long long などの場合)</h3>
-<div class="codebox">
-<input type="checkbox" id="label" class="csscode" />
-<label for="label"></label>
+<input type="checkbox" id="label2" class="csscode" />
+<label for="label2"></label>
 <pre class="prettyprint linenums">
 template&lt;class _Key, class _Tp, class _Hash, bool DOWNSIZE&gt; class UnorderedMapIterator;
 

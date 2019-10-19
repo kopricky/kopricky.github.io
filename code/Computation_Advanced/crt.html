@@ -65,7 +65,7 @@ Chinese Remainder Theorem(中国剰余定理) は $p_1$ と $p_2$ が互いに�
 </p>
 <p>
 (関数)<br>
-CRT(a1, a2): a1(q_1, p_1), a2(q_2, p_2) を引数とし, x = q (mod p) を満たす (q, p) を返す
+CRT$(a1, a2)$ : $a1(q_1, p_1), a2(q_2, p_2)$ を引数とし, $x = q\ (\mathrm{mod}\ p)$ を満たす $(q, p)$ を返す
 </p>
 <p>
 時間計算量: $\O (\log p)$ ($p$ は法の値)
@@ -131,6 +131,7 @@ pair&lt;T, T&gt; CRT(const pair&lt;T, T&gt;&amp; a1, const pair&lt;T, T&gt;&amp;
 //     return make_pair((res >= 0 ? res : res + m), m);
 // }
 </pre>
+</div>
 <h3>verify 用の問題</h3>
 <p>Codeforces : <a href="https://codeforces.com/problemset/problem/982/E">Billiard</a>
   <a href="https://codeforces.com/contest/982/submission/62667846">提出コード</a></p>

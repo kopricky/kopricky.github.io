@@ -10,6 +10,14 @@
 
   gtag('config', 'UA-131511873-1');
 </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
 
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -52,11 +60,12 @@
 <h2>Binary Trie</h2>
 <h3>コードについての説明</h3>
 <p>
-Binary Trie(トライ)木とよばれる木構造を構築するアルゴリズム. Trie(トライ)木の子を2つに限定したようなデータ構造で数字の2進数表現を上手く管理するときに使う(<a href="./trie.html">同様のアルゴリズム</a>). <br>
+Binary Trie(トライ)木とよばれる木構造を構築するアルゴリズム.
+Trie(トライ)木の子を2つに限定したようなデータ構造で数字の $2$ 進数表現を上手く管理するときに使う(<a href="./trie.html">同様のアルゴリズム</a>). <br>
 数字の xor についての問題は各数字をビットごとに見ると上手くいくことが多く,その際にこのデータ構造が使える印象がある.
 </p>
 <p>
-時間計算量: 構築, クエリ O(L) (L=挿入する数の総ビット長)
+時間計算量: 構築, クエリ $\O (L)$ ($L$ = 挿入する数の総ビット長)
 </p>
 <h3>コード</h3>
 <div class="codebox">
@@ -103,6 +112,7 @@ public:
 	}
 };
 </pre>
+</div>
 <h3>verify 用の問題</h3>
 <p>Atcoder : <a href="https://beta.atcoder.jp/contests/arc087/tasks/arc087_c">Prefix-free Game</a>
   <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3122547#1">提出コード</a></p>

@@ -10,6 +10,14 @@
 
   gtag('config', 'UA-131511873-1');
 </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
 
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -52,22 +60,23 @@
 <h2>Minimum Vertex Cover Algorithm</h2>
 <h3>コードについての説明</h3>
 <p>
-最小頂点被覆問題を解くアルゴリズム. 最小頂点被覆問題とは, 重みなし無向グラフ G = (V, E) が与えられたときに 頂点集合 U (⊆ V) で E に含まれる任意の辺 e = (u, v) について u ∈ U もしくは v ∈ U を満たすような集合で頂点数最小のものを求める問題である. <br>
+最小頂点被覆問題を解くアルゴリズム.
+最小頂点被覆問題とは, 重みなし無向グラフ $G = (V, E)$ が与えられたときに頂点集合 $U (\subseteq V)$ で $E$ に含まれる任意の辺 $e = (u, v)$ について $u \in U$ もしくは $v \in U$ を満たすような集合で頂点数最小のものを求める問題である. <br>
 この問題は(判定問題としてみたとき) NP 完全であることが知られており, 多項式時間で解くアルゴリズムは存在しないだろうと考えられている. <br>
 以下の実装は枝刈りでの実装で <a href="https://www.slideshare.net/wata_orz/ss-12131479">岩田さんのスライド</a> を参考に実装をおこなった. (端的に説明されていて分かりやすい.) <br>
-"頂点数 k 以下の頂点被覆集合は存在するか, するならばその内で最小のものを求めよ" という問題に対し, O(1.467^k * n) (n は元のグラフ G の頂点数) の計算量で求めることのできる FPT アルゴリズムであり, パラメーター k が小さければサイズの大きいグラフに対しても高速に動作する. <br>
+"頂点数 $k$ 以下の頂点被覆集合は存在するか, するならばその内で最小のものを求めよ" という問題に対し, $\O (n 1.467^k)$ ($n$ は元のグラフ $G$ の頂点数) の計算量で求めることのできる FPT アルゴリズムであり, パラメーター $k$ が小さければサイズの大きいグラフに対しても高速に動作する. <br>
 またスライドにあるとおりこのような探索問題の実際の計算時間は理論評価した計算量と比べて非常に高速に動作することが多い(理論評価が難しい)ので実際には上記の計算量よりも高速に動作する. <br>
 実装において高速化のためグラフの頂点や枝を削除していく部分を順序付き集合ではなくリストでおこなっている. (この実装は stl の std::list を用いてできないので <a href="../OriginalContainer/list.html">自作のリスト</a> を用いて実装した.) <br>
-(注) 多重辺が存在しないことを仮定しています. 頂点数が小さい場合(高々 127 以下)は途中の探索の集合を __int128 型のビット集合で表現することで高速化できるため 2 種類の実装をした(頂点数が小さい場合の方は gcc では動作するがサポートしていないコンパイラもある.) <br>
+(注) 多重辺が存在しないことを仮定しています. 頂点数が小さい場合(高々 $127$ 以下)は途中の探索の集合を __int128 型のビット集合で表現することで高速化できるため $2$ 種類の実装をした(頂点数が小さい場合の方は gcc では動作するがサポートしていないコンパイラもある.) <br>
 手元で作ったランダムのケースでは最大独立集合問題についても以下のアルゴリズム(頂点数が小さい場合)を用いたほうが<a href="./maximum_independent_set.html">こちらのアルゴリズム</a>よりも少し速く動作した.
 </p>
 <p>
 (関数)<br>
-add_edge(u, v): 無向辺(u, v) を追加する <br>
-solve(K): 頂点数 K 以下の頂点被覆集合は存在するかの答え (true / false) を返す (true ならば ans_set に最適値を実現する頂点集合が格納される)
+add_edge$(u, v)$ : 無向辺$(u, v)$ を追加する <br>
+solve$(K)$ : 頂点数 $K$ 以下の頂点被覆集合は存在するかの答え (true / false) を返す (true ならば $ans_set$ に最適値を実現する頂点集合が格納される)
 </p>
 <p>
-時間計算量: O(1.467^k * n)
+時間計算量: $\O(n 1.467^k)$
 </p>
 <h3>コード</h3>
 <div class="codebox">
@@ -333,9 +342,8 @@ public:
 };
 </pre>
 <h3>コード(頂点数が小さい場合の実装)</h3>
-<div class="codebox">
-<input type="checkbox" id="label" class="csscode" />
-<label for="label"></label>
+<input type="checkbox" id="label2" class="csscode" />
+<label for="label2"></label>
 <pre class="prettyprint linenums">
 template&lt;typename T&gt; class ListIterator;
 
@@ -602,6 +610,7 @@ public:
     }
 };
 </pre>
+</div>
 <h3>verify 用の問題</h3>
 <p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2558">Medical Inspection</a>
   <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3317124#1">提出コード</a><br>

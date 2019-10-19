@@ -10,6 +10,14 @@
 
   gtag('config', 'UA-131511873-1');
 </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
 
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -53,18 +61,18 @@
 <h3>コードについての説明</h3>
 <p>
 Eldös Gallai の定理はグラフの次数列が与えられたときにそれに対応する単純グラフが存在するかどうかの必要十分条件を与える定理である. <br>
-具体的には降順に並べた次数列 d_1,...,d_n の総和が偶数であることと以下の関係式が 1 <= k <= n について成り立つことが必要十分条件である. <br>
+具体的には降順に並べた次数列 $d_1,\ldots,d_n$ の総和が偶数であることと以下の関係式が $1 \le k \le n$ について成り立つことが必要十分条件である. <br>
 <img src="./texclip20190506173214.png" height="100" width="300"> <br>
 必要条件であることは難しくなく, 十分条件であることは <a href="./havel_hakimi.html">Havel-Hakimi</a> アルゴリズム + 帰納法を用いることで構成的に示すことができる. <br>
 このような頂点集合に接続する辺の意味での必要条件を書き並べると十分条件になっているというのを見ると Hall の結婚定理が想起される(？). <br>
-(注)実装は std::sort を用いているため計算量は O(nlogn) である(バケットソートなどで O(n) time に改善できる).
+(注)実装は std::sort を用いているため計算量は $\O (n \log n)$ である(バケットソートなどで $\O (n)$ time に改善できる).
 </p>
 <p>
 (関数)<br>
-IsExist(d): 次数列を引数に存在するかどうか (true / false) を返す. <br>
+IsExist$(d)$: 次数列を引数に存在するかどうか (true / false) を返す. <br>
 </p>
 <p>
-時間計算量: O(nlogn) (バケットソートを用いれば O(n))
+時間計算量: $\O (n \log n)$ (バケットソートを用いれば $\O (n)$)
 </p>
 <h3>コード</h3>
 <div class="codebox">
@@ -87,6 +95,7 @@ bool IsExist(vector&lt;int&gt; d){
     return true;
 }
 </pre>
+</div>
 <h3>verify 用の問題</h3>
 <p>Atcoder : <a href="https://yahoo-procon2018-qual.contest.atcoder.jp/tasks/yahoo_procon2018_qual_e">グラフの問題</a>
   <a href="https://yahoo-procon2018-qual.contest.atcoder.jp/submissions/5294244">提出コード</a></p>

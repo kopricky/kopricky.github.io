@@ -10,6 +10,14 @@
 
   gtag('config', 'UA-131511873-1');
 </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
 
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -53,13 +61,14 @@
 <h3>コードについての説明</h3>
 <p>
 HL 分解とは木上のパス(+部分木)についてのクエリに効率よく答えることのできるデータ構造である. <br>
-部分木のうち最も要素数の大きいものに heavy edge, それ以外のものに light edge を貼って heavy edge でつながれた path の部分をまとめて管理することで実質木の高さが O(logn) になる. <br>
+部分木のうち最も要素数の大きいものに heavy edge,
+それ以外のものに light edge を貼って heavy edge でつながれた path の部分をまとめて管理することで実質木の高さが $\O (\log n)$ になる. <br>
 これだけ読んでも絶対にわからない(ごめんなさい)ので、<a href="http://math314.hateblo.jp/entry/2014/06/24/220107">こちらのブログ</a>を参考にしてください.<br>
 以下の実装は一般的な HL 分解とは異なり, heavy edge から順番に探索することで部分木についてのクエリにも同じセグ木を用いて高速に答えることができるようにしている.<br>
 詳しくは<a href="http://codeforces.com/blog/entry/53170">こちらのブログ</a>を参考にしてください.
 </p>
 <p>
-時間計算量: 構築 O(nlogn), 部分木クエリ O(log n), パスクエリ O(log^2 n)
+時間計算量: 構築 $\O (n \log n)$, 部分木クエリ $\O (\log n)$, パスクエリ $\O (\log^2 n)$
 </p>
 <h3>コード</h3>
 <div class="codebox">
@@ -141,6 +150,7 @@ public:
         pathtop(V, -1), in(V, -1), out(V, -1){}
 };
 </pre>
+</div>
 <h3>verify 用の問題</h3>
 <p>Atcoder : <a href="https://atcoder.jp/contests/iroha2019-day2/tasks/iroha2019_day2_k">虫取り</a>
   <a href="https://atcoder.jp/contests/iroha2019-day2/submissions/7342842">提出コード</a></p>

@@ -10,6 +10,14 @@
 
   gtag('config', 'UA-131511873-1');
 </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
 
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -55,25 +63,25 @@
 部分永続 Union Find の実装である. <br>
 部分永続データ構造とは過去のすべてのバージョンの参照および現在のバージョンの更新を行うことできるデータ構造のことを言う(過去のバージョンを参照できるというところが普通のデータ構造と異なる).
 過去のバージョンも更新することができるようなものを完全永続データ構造と呼ぶ. <br>
-経路圧縮を行わない場合は各クエリ最悪 O(log n) 時間で応答するデータ構造を簡単に実装できる. ポイントは Union find 森の親が 1 度できるとその後変化しないので,
-各頂点について親ができた時間とその親の頂点の 2 つを保持しておけば, あとは参照(同じ連結成分に属するかの判定)するときにその情報をもとに木の親をたどっていけば高々 O(log n) 回でその時点での親にたどり着く.
-このとき, 親に向かう辺のできた時間は単調であることと rank の大きいものに小さいものを unite した場合高さは常に O(log n) になるという事実を使っている. <br>
-size も併合の更新があった際に新しい値に (時間, 新しい木のサイズ) の情報を vector として持たせておけば, 参照時に根のもつ vector を 2 分探索することで結果を求められる. <br>
-少し考えてみると Find 操作は頂点と親を結ぶパス上の 2 分探索で求めることもできるのでダブリングの要領でならし計算量 O(log log n) も達成できる. さらに union find 森の構造(高さ h の頂点は高々 n / 2^h 個しかないという性質) に注目して,
-各頂点にダブリングのように O(log log n) 個の頂点ではなくいい感じに間引いて配置することで空間計算量 O(n) でも可能になった(実装が結構めんどくなりそうだったのでもう少しいい方法があるかもしれない).
-この場合 size はまあ y-fast-trie を使えば期待計算量ではあるものの O(log log n) でできる(無理矢理感すごい).<br>
+経路圧縮を行わない場合は各クエリ最悪 $\O (\log n)$ 時間で応答するデータ構造を簡単に実装できる. ポイントは Union find 森の親が $1$ 度できるとその後変化しないので,
+各頂点について親ができた時間とその親の頂点の $2$ つを保持しておけば, あとは参照(同じ連結成分に属するかの判定)するときにその情報をもとに木の親をたどっていけば高々 $\O (\log n)$ 回でその時点での親にたどり着く.
+このとき, 親に向かう辺のできた時間は単調であることと rank の大きいものに小さいものを unite した場合高さは常に $\O (\log n)$ になるという事実を使っている. <br>
+size も併合の更新があった際に新しい値に (時間, 新しい木のサイズ) の情報を vector として持たせておけば, 参照時に根のもつ vector を $2$ 分探索することで結果を求められる. <br>
+少し考えてみると Find 操作は頂点と親を結ぶパス上の $2$ 分探索で求めることもできるのでダブリングの要領でならし計算量 $\O (\log \log n)$ も達成できる. さらに union find 森の構造(高さ $h$ の頂点は高々 $n / 2^h$ 個しかないという性質) に注目して,
+各頂点にダブリングのように $\O (\log \log n)$ 個の頂点ではなくいい感じに間引いて配置することで空間計算量 $\O (n)$ でも可能になった(実装が結構めんどくなりそうだったのでもう少しいい方法があるかもしれない).
+この場合 size はまあ y-fast-trie を使えば期待計算量ではあるものの $\O (\log \log n)$ でできる(無理矢理感すごい).<br>
 論文を調べてみると, なんと経路圧縮と永続化は(特殊な)永続配列を用いて両立させることができるらしく, <a href="https://www.lri.fr/~filliatr/ftp/publis/puf-wml07.pdf">こちら</a> にその話がある. <br>
 ちなみに部分永続化より真に難しい <a href="../Academic/fully_retroactive_union_find.html">retroactive union find</a> も効率よく行うことができる.
 </p>
 <p>
 (関数)<br>
-find(u): 時刻 _time の直後において u を含む木の根を答える.
-unite(u, v, _time): 時刻 _time において u と v を同じ連結成分にする. (ただし部分永続なので _time は最後に unite を呼び出した時間以降とする.)<br>
-same(u, v, _time): 時刻 _time の直後において u と v が同じ連結成分に入っているかを判定する.
-size(u, _time): 時刻 _time の直後において u を含む木の頂点数を答える.
+find$(u)$ : 時刻 $\_ time$ の直後において $u$ を含む木の根を答える.
+unite$(u, v, \_ time)$ : 時刻 $\_ time$ において $u$ と $v$ を同じ連結成分にする. (ただし部分永続なので $\_ time$ は最後に unite を呼び出した時間以降とする.)<br>
+same$(u, v, \_ time)$ : 時刻 $\_ time$ の直後において $u$ と $v$ が同じ連結成分に入っているかを判定する.
+size$(u, \_ time)$ : 時刻 $\_ time$ の直後において $u$ を含む木の頂点数を答える.
 </p>
 <p>
-時間計算量: O(log n)
+時間計算量: $\O (\log n)$
 </p>
 <h3>コード</h3>
 <div class="codebox">
@@ -125,6 +133,7 @@ public:
     }
 };
 </pre>
+</div>
 <h3>verify 用の問題</h3>
 <p>Atcoder : <a href="https://code-thanks-festival-2017.contest.atcoder.jp/tasks/code_thanks_festival_2017_h">Union Sets</a>
   <a href="https://code-thanks-festival-2017.contest.atcoder.jp/submissions/7068142">提出コード</a>(size 以外の verify)</p>

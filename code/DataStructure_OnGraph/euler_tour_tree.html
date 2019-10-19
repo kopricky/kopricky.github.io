@@ -10,6 +10,14 @@
 
   gtag('config', 'UA-131511873-1');
 </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
 
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -52,20 +60,21 @@
 <h2>Euler Tour Tree</h2>
 <h3>コードについての説明</h3>
 <p>
-木のオイラーツアー(DFS で探索するときの頂点順)を動的に管理するデータ構造. 辺の追加, 削除, 頂点間の連結性判定, 根の付け替えおよび連結成分内の全ての頂点に対する演算もしくはある部分木内の全ての頂点に対する演算などが O(log n) で行える. 辺の追加はもちろん閉路ができないような追加のみ許される.<br>
+木のオイラーツアー(DFS で探索するときの頂点順)を動的に管理するデータ構造. 辺の追加, 削除, 頂点間の連結性判定,
+根の付け替えおよび連結成分内の全ての頂点に対する演算もしくはある部分木内の全ての頂点に対する演算などが $\O (\log n)$ で行える. 辺の追加はもちろん閉路ができないような追加のみ許される.<br>
 LinkCutTree とは異なり, 部分木もしくは連結成分全体に対する処理が効率よく行え, <a href="../Academic/dynamic_connectivity.html">動的連結性クエリに対するアルゴリズム</a>にも用いられている. <br>
 実装は平衡二分木の split, merge を用いてでき, 説明は<a href="http://web.stanford.edu/class/archive/cs/cs166/cs166.1166/lectures/17/Small17.pdf">このスライド</a>がわかりやすい. <br>
-以下の実装では平衡二分木として splay 木を用いているためならし O(log n) となっている. (正直 merge-split ベースの赤黒木で実装するより実測はこっちの方が速い気がしているし, merge-split ベースの赤黒木はメモリ効率が悪くなるから自分は永続以外では使わない.)
-また頂点数を n, 辺数を m とすると n+2*m 個のノードからなる平衡二分探索木を保持するため定数倍が少々重い. 平衡二分探索木ではなく O(log n)-分木で保持することで計算量上では O(log log n) factor の改善が可能になる<br>
+以下の実装では平衡二分木として splay 木を用いているためならし $\O (\log n)$ となっている. (正直 merge-split ベースの赤黒木で実装するより実測はこっちの方が速い気がしているし, merge-split ベースの赤黒木はメモリ効率が悪くなるから自分は永続以外では使わない.)
+また頂点数を $n$, 辺数を $m$ とすると $n + 2m$ 個のノードからなる平衡二分探索木を保持するため定数倍が少々重い. 平衡二分探索木ではなく $\O (\log n)$-分木で保持することで計算量上では $\O (\log \log n)$ factor の改善が可能になる<br>
 部分木内の頂点集合に対する演算は op(node v, function f) みたいな形で呼べたらうれしいが, reroot の影響でそれが難しい.<br>
-そのため部分木内の頂点集合に対する演算は op(node v, node p, function f) の形(v が根なら p は -1 とする) で与えることにしている(どうしても op(node v, function f) にしたいなら並行して <a href="./link_cut_tree.html">LinkCutTree</a> を持つとできる). <br>
-ヘルパー関数は例えば最初辺数 0 からスタートではなくある木や森からスタートというときにそのグラフに対応する完全平衡二分木を効率よく構築し, それを初めの splay 木としてやることでそれ以降の操作の高速化が望めそう(？)なので置いてある. <br>
+そのため部分木内の頂点集合に対する演算は op(node v, node p, function f) の形($v$ が根なら $p$ は $-1$ とする) で与えることにしている(どうしても op(node v, function f) にしたいなら並行して <a href="./link_cut_tree.html">LinkCutTree</a> を持つとできる). <br>
+ヘルパー関数は例えば最初辺数 $0$ からスタートではなくある木や森からスタートというときにそのグラフに対応する完全平衡二分木を効率よく構築し, それを初めの splay 木としてやることでそれ以降の操作の高速化が望めそう(？)なので置いてある. <br>
 元論文は "Randomized Dynamic Graph Algorithms with Polylogarithmic Time per Operation" [Henzinger, King 1995] <br>
 (追記) <br>
 高速な自作 <a href="../OriginalContainer/unordered_map.html">Unordered Map</a> を用いた高速版も一応用意した. <br>
 </p>
 <p>
-時間計算量: 各クエリならし O(log n) (本来は最悪 O(log n))
+時間計算量: 各クエリならし $\O (\log n)$ (本来は最悪 $\O (\log n)$)
 </p>
 <h3>コード</h3>
 <div class="codebox">
@@ -361,9 +370,8 @@ private:
 };
 </pre>
 <h3>コード(高速版)</h3>
-<div class="codebox">
-<input type="checkbox" id="label" class="csscode" />
-<label for="label"></label>
+<input type="checkbox" id="label2" class="csscode" />
+<label for="label2"></label>
 <pre class="prettyprint linenums">
 template&lt;class _Key, class _Tp, class _Hash, bool DOWNSIZE&gt; class UnorderedMapIterator;
 
@@ -963,6 +971,7 @@ private:
     }
 };
 </pre>
+</div>
 <h3>verify 用の問題</h3>
 <p>yukicoder : <a href="https://yukicoder.me/problems/no/828">全方位神童数</a>
   <a href="https://yukicoder.me/submissions/345770">提出コード</a>

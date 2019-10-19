@@ -10,6 +10,14 @@
 
   gtag('config', 'UA-131511873-1');
 </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
 
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -53,11 +61,12 @@
 <h3>コードについての説明</h3>
 <p>
 木の重心を求めるアルゴリズム. <br>
-頂点 u が木の重心であるとは u を根と見たときに u の子を根とするすべての部分木のサイズが n / 2 以下(木の頂点数を n とする)であることをいう. また重心は 1 つの木に対して 1 個または 2 個存在する.<br>
+頂点 $u$ が木の重心であるとは $u$ を根と見たときに $u$ の子を根とするすべての部分木のサイズが $n / 2$ 以下(木の頂点数を $n$ とする)であることをいう.
+また重心は $1$ つの木に対して $1$ 個または $2$ 個存在する.<br>
 ある頂点を根としてそのときの各頂点を根とする部分木のサイズを dfs で求めておけば簡単に求まる.
 </p>
 <p>
-時間計算量: O(n)
+時間計算量: $\O (n)$
 </p>
 <h3>コード</h3>
 <div class="codebox">
@@ -94,6 +103,7 @@ public:
 	}
 };
 </pre>
+</div>
 <h3>verify 用の問題</h3>
 <p>Atcoder : <a href="https://beta.atcoder.jp/contests/arc087/tasks/arc087_d">Squirrel Migration</a>
   <a href="https://beta.atcoder.jp/contests/arc087/submissions/3187077">提出コード</a></p>

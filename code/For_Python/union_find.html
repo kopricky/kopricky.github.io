@@ -10,6 +10,14 @@
 
   gtag('config', 'UA-131511873-1');
 </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
 
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -53,24 +61,24 @@
 <h3>コードについての説明</h3>
 <p>
 Unionf Find は競技プログラミングでは基本的なアルゴリズムなので, 説明は蟻本または<a href="https://www.slideshare.net/chokudai/union-find-49066733">このスライド</a>にゆずる. <br>
-各クエリの計算量は数学的には解析が難しいが, 実用上は定数と考えて問題ない <br>
+各クエリの計算量は数学的には解析が難しいが, 実用上は定数と考えて問題ない. <br>
 <br>
 (計算量の細かい話) <br>
-計算量は m(≧ n) 回の Find 操作, n 回の Union 操作のクエリ列を処理するのに O(n + m α(m, n)) 時間であることが証明されている(後の解析で O(n + m α(m + n, n)) 時間に落ちることがわかっている).
-ここで α(m, n) はアッカーマン関数 A(i, j) を用いて以下のように定義される. <br>
-まず増加の非常に急激な関数であるアッカーマン関数は A(i, j) は以下のように再帰的に定義される. <br>
-A(1, j) = 2^j (j ≧ 1), A(i, 1) = A(i - 1, 2) (i ≧ 2), A(i, j) = A(i - 1, A(i, j - 1)) (i, j ≧ 2) <br>
-このとき α(m, n) = min{i ≧ 1 | A(i, 4 ceil(m / n)) > log n} と定義される. これを見ると m = Ω(n log log n) で α(m, n) = 1, m = Ω(n slog n) で α(m, n) ≦ 2 みたいなことが分かり,
-要をするにアッカーマン関数の逆関数 α(m, n) は実用上定数と考えてよい.. <br>
-次に a(i, n) = min{j ≧ 1 | A(i, j) > log n} を定義する.
-このとき任意の正整数 k(定数) について m (≧ n a(k, n)) 回の Find 操作, n 回の Union 操作のクエリ列を処理するのにかかる時間は O(m) time であることも言える(α(n a(k, n), n) ≦ k より). <br>
+計算量は $m(\ge n)$ 回の Find 操作, $n$ 回の Union 操作のクエリ列を処理するのに $\O (n + m \alpha(m, n))$ 時間であることが証明されている(後の解析で $\O (n + m \alpha(m + n, n))$ 時間に落ちることがわかっている).
+ここで $\alpha(m, n)$ はアッカーマン関数 $A(i, j)$ を用いて以下のように定義される. <br>
+まず増加の非常に急激な関数であるアッカーマン関数は $A(i, j)$ は以下のように再帰的に定義される. <br>
+$A(1, j) = 2^j (j \ge 1)$, $A(i, 1) = A(i - 1, 2) (i \ge 2)$, $A(i, j) = A(i - 1, A(i, j - 1)) (i, j \ge 2)$ <br>
+このとき $\alpha(m, n) = \min \{ i \ge 1 \mid A(i, 4 \lceil m / n \rceil) > \log n \}$ と定義される. これを見ると $m = \Omega(n \log \log n)$ で $\alpha(m, n) = 1$, $m = \Omega(n \mathrm{slog} n)$ で $\alpha(m, n) \le 2$ みたいなことが分かり,
+要をするにアッカーマン関数の逆関数 $\alpha(m, n)$ は実用上定数と考えてよい.. <br>
+次に $a(i, n) = \min \{ j \ge 1 \mid A(i, j) > \log n \}$ を定義する.
+このとき任意の正整数 $k$(定数) について $m (\ge n a(k, n))$ 回の Find 操作, $n$ 回の Union 操作のクエリ列を処理するのにかかる時間は $\O (m)$ time であることも言える($\alpha(n a(k, n), n) \le k$ より).
 Union Find の計算量の解析の論文としては "Efficiency of a Good But Not Linear Set Union Algorithm" [Tarjan 1975] や "Worst-Case Analysis of Set Union Algorithms" [Tarjan, LEEUWEN 1984] が詳しい. <br>
 <br>
-過去に上記論文の簡易版として Union Find の計算量についての記事を書きました. 簡単ではないので興味のある方は読んでみてください. <br>
+過去に上記論文の簡易版として Union Find の計算量についての記事を昔書きました. 簡単ではないので興味のある方は読んでみてください. <br>
 U-TOKYO AP Advent Calendar 2017 8 日目: <a href="https://qiita.com/kopricky/items/3e5847ab1451fe990367">Union Find の計算量の話</a>
 </p>
 <p>
-時間計算量: Find クエリ, Union クエリ ならし O(α(m, n)) (α(m, n) は上記で定義された増加の非常にゆるやかな関数. 実用上は定数と考えて良い.)
+時間計算量: Find クエリ, Union クエリ ならし $\O (\alpha(m, n))$ ($\alpha(m, n)$ は上記で定義された増加の非常にゆるやかな関数. 実用上は定数と考えて良い.)
 </p>
 <h3>コード</h3>
 <div class="codebox">
@@ -120,6 +128,7 @@ if __name__ == '__main__':
         else:
             print(&quot;no&quot;)
 </pre>
+</div>
 <h3>verify 用の問題</h3>
 <p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=ALDS1_11_D">Connected Components</a>
   <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3030132#1">提出コード</a></p>

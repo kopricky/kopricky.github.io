@@ -10,6 +10,14 @@
 
   gtag('config', 'UA-131511873-1');
 </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
 
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -53,14 +61,14 @@
 <h3>コードについての説明</h3>
 <p>
 <a href="./min_cost_flow.html">最小費用流を求めるアルゴリズム</a>のグラフが DAG の場合の改良版. <br>
-グラフが DAG である場合, 負辺が含まれていても初期ポテンシャルの計算がトポロジカル順序に沿って DP を行うことで求めることができるので愚直に <a href="../Graph_SP_MST/bellman_ford.html">Bellman Ford</a> 法を用いる場合(時間計算量 O(nm))よりも高速になる.
+グラフが DAG である場合, 負辺が含まれていても初期ポテンシャルの計算がトポロジカル順序に沿って DP を行うことで求めることができるので愚直に <a href="../Graph_SP_MST/bellman_ford.html">Bellman Ford</a> 法を用いる場合(時間計算量 $\O (nm)$)よりも高速になる.
 </p>
 <p>
 (関数)<br>
-solve(s,t,f) : s から t へ流量 f 流すのにかかる最小費用<br>
+solve$(s,t,f)$ : $s$ から $t$ へ流量 $f$ 流すのにかかる最小費用<br>
 </p>
 <p>
-時間計算量: O(|F| m log n) (流量を |F| とする)
+時間計算量: $\O (|F| m \log n)$ (流量を $|F|$ とする)
 </p>
 <h3>コード</h3>
 <div class="codebox">
@@ -165,8 +173,8 @@ public:
         return res;
     }
 };
-
 </pre>
+</div>
 <h3>verify 用の問題</h3>
 <p>Atcoder : <a href="https://atcoder.jp/contests/tdpc/tasks/tdpc_graph">グラフ</a>
   <a href="https://atcoder.jp/contests/tdpc/submissions/4081877">提出コード</a>(非想定解)</p>

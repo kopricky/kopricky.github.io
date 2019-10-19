@@ -10,6 +10,14 @@
 
   gtag('config', 'UA-131511873-1');
 </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
 
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -56,16 +64,16 @@
 また彩色数は補グラフでの最小クリーク被覆の値と等しいことが知られている. <br>
 <a href="https://www.slideshare.net/wata_orz/ss-12131479">このスライド</a>がとても参考になる. <br>
 (以下スライドの説明) <br>
-分かりやすく, "グラフ G = (V, E) が k 彩色可能 ⇔ V を k 個の独立集合で被覆可能" と言い換える. ここで各独立集合は disjoint とは限らないと定義しておく(こう定義しても同値性は変わらない). <br>
-このとき頂点集合 S (⊆ V) について f_k(S) を S に含まれる独立集合を k 個選ぶ場合の数、 g_k(S) を k 個の独立集合を選んでその和集合が S となるような場合の数とする. <br>
+分かりやすく, "グラフ $G = (V, E)$ が $k$ 彩色可能 ⇔ $V$ を $k$ 個の独立集合で被覆可能" と言い換える. ここで各独立集合は disjoint とは限らないと定義しておく(こう定義しても同値性は変わらない). <br>
+このとき頂点集合 $S (\subseteq V)$ について $f_k(S)$ を S に含まれる独立集合を $k$ 個選ぶ場合の数、 $g_k(S)$ を $k$ 個の独立集合を選んでその和集合が $S$ となるような場合の数とする. <br>
 包除原理から次の式が成り立つ. <img src="./texclip20190716094432.png" height="80" width="240"> <br>
 直接成り立つと考えてもいいし、 <img src="./texclip20190716094429.png" height="50" width="150"> は明らかに成り立つのでその逆変換(Mobius 変換) と考えても良い. <br>
-I(S) を S に含まれる独立集合の個数とすると, f_k(S) = I(S)^k であり, I(S) は I(S) = I(S<span style="font-family: Arial;">\</span>{v]) + I(S<span style="font-family: Arial;">\</span>adj[v]) の漸化式を用いて O(n*2^n) 時間で求めることができる.
-漸化式は v を含まない独立集合 と v を含む独立集合を分けて数え上げている(注 adj[v] は v および v に隣接する頂点集合とする). <br>
-最終的には g_k(V) が非ゼロとなるような最小の k が彩色数となる. 実装を行う際はオーバーフローを避けるため大きい素数 p を用いた Z_p 上で計算を行う.
+$I(S)$ を $S$ に含まれる独立集合の個数とすると, $f_k(S) = I(S)^k$ であり, $I(S)$ は $I(S) = I(S \setminus \{ v \} ) + I(S \setminus adj[v])$ の漸化式を用いて $\O (n 2^n)$ 時間で求めることができる.
+漸化式は $v$ を含まない独立集合 と $v$ を含む独立集合を分けて数え上げている(注 $adj[v]$ は $v$ および $v4 に隣接する頂点集合とする). <br>
+最終的には $g_k(V)$ が非ゼロとなるような最小の $k$ が彩色数となる. 実装を行う際はオーバーフローを避けるため大きい素数 $p$ を用いた $\mathbb{Z}_p$ 上で計算を行う.
 </p>
 <p>
-時間計算量: O(n*2^n)
+時間計算量: $\O (n 2^n)$
 </p>
 <h3>コード</h3>
 <div class="codebox">
@@ -105,6 +113,7 @@ public:
     }
 };
 </pre>
+</div>
 <h3>verify 用の問題</h3>
 <p>
 verify していません(verify 問題を知らない)

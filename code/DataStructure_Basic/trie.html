@@ -10,6 +10,14 @@
 
   gtag('config', 'UA-131511873-1');
 </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
 
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -53,11 +61,11 @@
 <h3>コードについての説明</h3>
 <p>
 Trie(トライ)木とよばれる木構造を構築するアルゴリズム. 文字列集合を効率的に管理することのできるデータ構造(<a href="./binary_trie.html">同様のアルゴリズム</a>). <br>
-例えば, n 個の文字列集合を受け取ってそのあとクエリとして "(長さ x の) s という文字列はその中に含まれていますか" というものを処理する際 set などを使うと O(xlogn) かかってしまうが Trie 木を用いると O(x) と線形で線形で判定することができる. <br>
+例えば, $n$ 個の文字列集合を受け取ってそのあとクエリとして "(長さ $x$ の) $s$ という文字列はその中に含まれていますか" というものを処理する際 set などを使うと $\O (x \log n)$ かかってしまうが Trie 木を用いると $\O (x)$ と線形で線形で判定することができる. <br>
 構造自体はとても単純で, 言葉で説明するより図を見たほうが早いと思うので他の方の説明ページを参考にしてください(図を作れない...).
 </p>
 <p>
-時間計算量: 構築, クエリ O(L) (L=挿入する文字列の総長)
+時間計算量: 構築, クエリ $\O (L)$ ($L$ = 挿入する文字列の総長)
 </p>
 <h3>コード</h3>
 <div class="codebox">
@@ -107,6 +115,7 @@ public:
 	}
 };
 </pre>
+</div>
 <h3>verify 用の問題</h3>
 <p>Codeforces : <a href="http://codeforces.com/contest/965/problem/E">Short Code</a>
   <a href="http://codeforces.com/contest/965/submission/38195978">提出コード</a></p>

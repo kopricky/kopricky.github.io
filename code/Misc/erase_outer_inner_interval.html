@@ -10,6 +10,14 @@
 
   gtag('config', 'UA-131511873-1');
 </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
 
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -52,11 +60,11 @@
 <h2>Erase Outer Interval Inner Interval</h2>
 <h3>コードについての説明</h3>
 <p>
-区間が n 個与えられたときにある別の区間を完全に含んでいるような区間を削除(EraseOuterInterval), ある別の区間に完全に含まれているような区間を削除(EraseInnerInterval) という操作を効率良く行うアルゴリズム. <br>
+区間が $n$ 個与えられたときにある別の区間を完全に含んでいるような区間を削除(EraseOuterInterval), ある別の区間に完全に含まれているような区間を削除(EraseInnerInterval) という操作を効率良く行うアルゴリズム. <br>
 前処理として使いたくなるときがたまにある.
 </p>
 <p>
-時間計算量: O(n log n)
+時間計算量: $\O (n \log n)$
 </p>
 <h3>コード</h3>
 <div class="codebox">
@@ -122,6 +130,7 @@ vector&lt;pair&lt;T, T&gt; &gt; EraseInnerInterval(vector&lt;pair&lt;T, T&gt; &g
     return res;
 }
 </pre>
+</div>
 <h3>verify 用の問題</h3>
 <p>Atcoder : <a href="https://atcoder.jp/contests/kupc2018/tasks/kupc2018_h">カラフル数列</a>
   <a href="https://atcoder.jp/contests/kupc2018/submissions/3673631">提出コード</a></p>

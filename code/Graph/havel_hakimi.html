@@ -10,6 +10,14 @@
 
   gtag('config', 'UA-131511873-1');
 </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
 
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -53,21 +61,24 @@
 <h3>コードについての説明</h3>
 <p>
 グラフの次数列が与えられたときにそれに対応する単純グラフを構成するアルゴリズムである. <br>
-次数列を降順に D = {d_1,...,d_n} のように並べたときに (d_1, d_2),...,(d_1, d_{d_1+1}) の辺を張り, 残りの次数列 d_2-1,..,d_{d_1+1}-1,d_{d_1+2},...d_n を降順に並べたもの(D' とする)に再帰的に同様の操作を繰り返す. <br>
-次数列に対応する単純グラフが存在することを graphical であるということにしたとき, D' が graphical なら D も graphical になることは明らかである. <br>
-D が graphical なら D' も graphical となることを背理法で示す.<br>
-G (V(G) = {v_1,..,v_n}) を 1 <= i <= n で deg(v_i) = d_i を満たす単純グラフのうち v_1 と隣接している頂点の次数の総和が最大となるようなものとする. このときこのようなグラフ G において v_1 に隣接している頂点の次数の集合は必ず {d_2,...d_{d_1+1}} となることを示す. これが示せれば上記の再帰的に頂点を削っていく操作によって graphical 性を損うことがないことが分かる. <br>
-これが成り立たないとすると d_j > d_k となるような異なる 2 頂点 v_j, v_k で辺 (v_1, v_k) は存在するが, 辺 (v_1, v_j) は存在しないというようなものが取れる. また d_j > d_k よりある頂点 v_l で辺 (v_j, v_l) は存在するが, 辺 (v_j, v_k) は存在しないというようなものが取れる. <br>
-ここで辺 (v_1, v_k), 辺 (v_j, v_l) を辺 (v_1, v_j), 辺 (v_k, v_l) に付け替える操作を行っても次数は変化せず, また単純性も保たれる. このような操作を行うと, 頂点 v_1 に隣接している頂点の次数の総和が変更前よりも大きなグラフが得られることになり矛盾. よって示せた. <br>
-言い換えると, 次数列 D を満たす任意の単純グラフについて上記の辺 swap を繰り返すことで次数の条件, 単純の条件を保ったまま v_1 に隣接している頂点の次数の集合が {d_2,...d_{d_1+1}} となるようなグラフに変形することができるとも言える. <br>
+次数列を降順に $D = \{ d_1, \ldots ,d_n \}$ のように並べたときに $(d_1, d_2), \ldots ,(d_1, d_{d_1+1})$ の辺を張り, 残りの次数列 $d_2-1,\ldots,d_{d_1+1}-1,d_{d_1+2},\ldots,d_n$ を降順に並べたもの($D'$ とする)に再帰的に同様の操作を繰り返す. <br>
+次数列に対応する単純グラフが存在することを graphical であるということにしたとき, $D'$ が graphical なら $D$ も graphical になることは明らかである. <br>
+$D$ が graphical なら $D'$ も graphical となることを背理法で示す.<br>
+$G (V(G) = {v_1,\ldots,v_n})$ を $1 \le i \le n$ で $\mathrm{deg}(v_i) = d_i$ を満たす単純グラフのうち $v_1$ と隣接している頂点の次数の総和が最大となるようなものとする.
+このときこのようなグラフ $G$ において $v_1$ に隣接している頂点の次数の集合は必ず $\{ d_2,\ldots,d_{d_1+1} \}$ となることを示す. これが示せれば上記の再帰的に頂点を削っていく操作によって graphical 性を損うことがないことが分かる. <br>
+これが成り立たないとすると $d_j > d_k$ となるような異なる $2$ 頂点 $v_j, v_k$ で辺 $(v_1, v_k)$ は存在するが, 辺 $(v_1, v_j)$ は存在しないというようなものが取れる.
+また $d_j > d_k$ よりある頂点 $v_l$ で辺 $(v_j, v_l)$ は存在するが, 辺 $(v_j, v_k)$ は存在しないというようなものが取れる. <br>
+ここで辺 $(v_1, v_k)$, 辺 $(v_j, v_l)$ を辺 $(v_1, v_j)$, 辺 $(v_k, v_l)$ に付け替える操作を行っても次数は変化せず, また単純性も保たれる. このような操作を行うと, 頂点 $v_1$ に隣接している頂点の次数の総和が変更前よりも大きなグラフが得られることになり矛盾.
+よって示せた. <br>
+言い換えると, 次数列 $D$ を満たす任意の単純グラフについて上記の辺 swap を繰り返すことで次数の条件, 単純の条件を保ったまま $v_1$ に隣接している頂点の次数の集合が $\{ d_2,\ldots,d_{d_1+1} \}$ となるようなグラフに変形することができるとも言える. <br>
 計算量は並び替えをバケットソートの要領で行ってやると, 線形時間で構築可能. <br>
 </p>
 <p>
 (関数)<br>
-given_degree_simple_graph(degree, graph): 次数列 degree を満たす単純グラフが構成可能かどうか (true / false) を返し, 可能な場合 graph に結果を格納.
+given_degree_simple_graph$(degree, graph)$: 次数列 $degree$ を満たす単純グラフが構成可能かどうか (true / false) を返し, 可能な場合 $graph$ に結果を格納.
 </p>
 <p>
-時間計算量: O(n+m)
+時間計算量: $\O (n+m)$
 </p>
 <h3>コード</h3>
 <div class="codebox">
@@ -109,6 +120,7 @@ bool given_degree_simple_graph(const vector&lt;int&gt;&amp; degree, vector&lt;ve
     return true;
 }
 </pre>
+</div>
 <h3>verify 用の問題</h3>
 <p>
 verify していません(verify 問題を知らない)

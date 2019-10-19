@@ -70,10 +70,10 @@ $p$ と $q$ の真に間に存在する有理数 $r$ で (分子) + (分母) が
 </p>
 <p>
 (関数)<br>
-rtocf(val, res): 有理数 val を 連分数展開形 res に変換する(２種類ある). <br>
-cftor(val): 連分数展開形 val を有理数に変換し, それを返す. <br>
-find_rational(val1, val2): 2 つの有理数 val1, val2 が与えられたときに val1 と val2 の真に間に存在する有理数で (分子) + (分母) が最も小さいものを返す. val2 <= 1 ならその中で分子が一番小さいものを val1 < 1 < val2 なら 1/1 を val1 <= 1 ならその中で分母が最も小さいものを返す. <br>
-(注: 例えば val2 <= 1 で "(分子)+(分母) 最小 の中で (分子) 最小" は "(分子) 最小 の中で (分子)+(分母) 最小" と同じになる. なぜなら 2 つの基準で異なるものが得られた場合 Stern-Brocot 木上で考えたとき, その 2 つの LCA として両方と異なるものが得られ矛盾する.)
+rtocf$(val, res)$: 有理数 $val$ を 連分数展開形 $res$ に変換する(２種類ある). <br>
+cftor$(val)$: 連分数展開形 $val$ を有理数に変換し, それを返す. <br>
+find_rational$(val1, val2)$: $2$ つの有理数 $val1, val2$ が与えられたときに $val1$ と $val2$ の真に間に存在する有理数で (分子) + (分母) が最も小さいものを返す. $val2 \le 1$ ならその中で分子が一番小さいものを $val1 < 1 < val2$ なら $1/1$ を $val1 \le 1$ ならその中で分母が最も小さいものを返す. <br>
+(注: 例えば $val2 \le 1$ で "(分子)+(分母) 最小 の中で (分子) 最小" は "(分子) 最小 の中で (分子)+(分母) 最小" と同じになる. なぜなら $2$ つの基準で異なるものが得られた場合 Stern-Brocot 木上で考えたとき, その $2$ つの LCA として両方と異なるものが得られ矛盾する.)
 </p>
 <p>
 時間計算量: 各操作 $\O (\log A)$ ($A = \max(分子, 分母)$ とする.)
@@ -217,6 +217,7 @@ Rational&lt;T&gt; find_rational(const Rational&lt;T&gt; val1, const Rational&lt;
     return Rational&lt;T&gt;();
 }
 </pre>
+</div>
 <h3>verify 用の問題</h3>
 <p>GCJ : <a href="https://codingcompetitions.withgoogle.com/codejam/round/0000000000051679/0000000000146184">New Elements: Part 2</a></p>
 </section>

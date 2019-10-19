@@ -78,7 +78,7 @@ $\O (1)$ で変形できる方法があるのか分からないが, 悪くない
 </p>
 <p>
 (関数)<br>
-$general \_ baby \_ step \_ giant \_ step(a, b, p)$: $a^x = b\ (\mathrm{mod}\ p)$
+general_baby_step_giant_step$(a, b, p)$ : $a^x = b\ (\mathrm{mod}\ p)$
 $(0 \le a < p, 0 \le b < p, p \ge 1)$ を満たす最小の非負整数 $x$, 存在しなければ $-1$ を返す.<br>
 </p>
 <p>
@@ -161,6 +161,7 @@ int general_baby_step_giant_step(int a, int b, int p)
     return (res &lt; 0) ? res : res + cnt;
 }
 </pre>
+</div>
 <h3>verify 用の問題</h3>
 <p>yosupo さんの library-checker : <a href="https://judge.yosupo.jp/problem/discrete_logarithm_mod">Discrete Logarithm</a>
   <a href="https://judge.yosupo.jp/submission/900">提出コード</a>

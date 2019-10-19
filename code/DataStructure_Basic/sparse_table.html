@@ -10,6 +10,14 @@
 
   gtag('config', 'UA-131511873-1');
 </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
 
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -52,13 +60,14 @@
 <h2>Sparse Table</h2>
 <h3>コードについての説明</h3>
 <p>
-静的 RMQ(更新のない区間最小値クエリ) に O(1) で答えるデータ構造を O(nlogn) 時間で構築するアルゴリズム. <br>
-「table[i][k] : インデックス i から始まる 2^k 個の要素の中の最小値」 という配列を O(nlogn) かけて前計算しておけば区間[l,r)のクエリに対して k = floor(r-l) とすると min(table[l][k], table[r-2^k][k]) のように O(1) で答えることができる. <br>
-ちなみに和や xor などもう少し広いクラス(半群をなすもの) に対してもクエリの計算時間 O(1) を達成するデータ構造を考えることができ,
+静的 RMQ(更新のない区間最小値クエリ) に $\O (1)$ で答えるデータ構造を $\O (n \log n)$ 時間で構築するアルゴリズム. <br>
+「$table[i][k]$ : インデックス $i$ から始まる $2^k$ 個の要素の中の最小値」 という配列を $\O (n \log n)$ かけて前計算しておけば区間 $[l,r)$ のクエリに対して
+$k = \lfloor r-l \rfloor$ とすると $\min (table[l][k], table[r-2^k][k])$ のように $\O (1)$ で答えることができる. <br>
+ちなみに和や xor などもう少し広いクラス(半群をなすもの) に対してもクエリの計算時間 $\O (1)$ を達成するデータ構造を考えることができ,
 本アルゴリズムと異なり, クエリで呼び出される区間が重ならないことから disjoint sparse table と呼ばれています(参考 <a href="http://noshi91.hatenablog.com/entry/2018/05/08/183946#f-8405daed">noshi さんのブログ</a>).
 </p>
 <p>
-時間計算量: 構築 O(n log n), クエリ O(1)
+時間計算量: 構築 $\O (n \log n)$, クエリ $\O (1)$
 </p>
 <h3>コード</h3>
 <div class="codebox">
@@ -91,6 +100,7 @@ public:
     }
 };
 </pre>
+</div>
 <h3>verify 用の問題</h3>
 <p>AOJ : <a href="https://arc067.contest.atcoder.jp/tasks/arc067_d">Yakiniku Restaurants</a>
   <a href="https://arc067.contest.atcoder.jp/submissions/3174716">提出コード</a></p>

@@ -10,6 +10,14 @@
 
   gtag('config', 'UA-131511873-1');
 </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
 
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -53,17 +61,17 @@
 <h3>コードについての説明</h3>
 <p>
 重みつきの Union Find. <br>
-たとえば天秤を用いて 「おもり 1 がおもり 2 よりも 5 g重く, おもり 2 がおもり 3 よりも 3 g軽い」 みたいなことがわかっていれば 「おもり 1 はおもり 3 よりも 2 g重い」ということがわかる. <br>
-このような推移的な関係(ここでは同じ連結成分内の 2 頂点間の重さの差)をうまく保持するデータ構造が Weigthted Union Find であり, Union Find の find 操作の際に, 親を根に付け替えるだけでなく同時に根との重みの差を伝播させることで Union Find と同じ計算量で行うことができる. <br>
+たとえば天秤を用いて 「おもり $1$ がおもり $2$ よりも $5$ g重く, おもり $2$ がおもり $3$ よりも $3$ g軽い」 みたいなことがわかっていれば 「おもり $14 はおもり $3$ よりも $2$ g重い」ということがわかる. <br>
+このような推移的な関係(ここでは同じ連結成分内の $2$ 頂点間の重さの差)をうまく保持するデータ構造が Weigthted Union Find であり, Union Find の find 操作の際に, 親を根に付け替えるだけでなく同時に根との重みの差を伝播させることで Union Find と同じ計算量で行うことができる. <br>
 Union Find はこのようにある種の演算も効率良く行うことができる. <a href="http://sigma425.hatenablog.com/entry/2015/12/07/185047">この記事</a>が参考になるかもしれない.
 </p>
 <p>
 (関数)<br>
-unite(a, b, w): おもり b がおもり a よりも w グラム重い <br>
-diff(x, y): おもり y がおもり x より何グラム重いかを返す
+unite$(a, b, w)$ : おもり $b$ がおもり $a$ よりも $w$ グラム重い <br>
+diff$(x, y)$ : おもり $y$ がおもり $x$ より何グラム重いかを返す
 </p>
 <p>
-時間計算量: クエリ O(α(n)) (α(n)はアッカーマンの逆関数)
+時間計算量: クエリ $\O (\alpha (m, n))$ ($\alpha (m, n)$ はアッカーマン関数の逆関数(<a href="./union_find.html">参考</a>))
 </p>
 <h3>コード</h3>
 <div class="codebox">
@@ -112,6 +120,7 @@ public:
     }
 };
 </pre>
+</div>
 <h3>verify 用の問題</h3>
 <p>Atcoder : <a href="https://beta.atcoder.jp/contests/arc090/tasks/arc090_b">People on a Line</a>
   <a href="https://beta.atcoder.jp/contests/arc090/submissions/3165879">提出コード</a></p>

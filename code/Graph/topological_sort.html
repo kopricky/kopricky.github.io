@@ -10,6 +10,14 @@
 
   gtag('config', 'UA-131511873-1');
 </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
 
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -52,19 +60,19 @@
 <h2>Topological Sort</h2>
 <h3>コードについての説明</h3>
 <p>
-有向グラフ G = (V, E) が DAG(有向閉路を持たないグラフ) であるかの判定および DAG の場合は頂点をトポロジカル順序にソートするアルゴリズム. <br>
-頂点集合 V から始めて, 現在残っている頂点集合 S から辺が入ってこないような頂点 v を選び, S = S - v として空集合となるまで続ける.
-途中で頂点 v が存在しなくなったらグラフが DAG でないと判定する.
-S から辺が入ってこないような頂点は残りの頂点集合から入ってくる辺の次数が 0 である頂点をキューで管理することで効率よく取ってくることが可能. <br>
-正当性は残りの頂点の中で上のように選んだ頂点 v を先頭においてもトポロジカル順序に反さないこと,
+有向グラフ $G = (V, E)$ が DAG(有向閉路を持たないグラフ) であるかの判定および DAG の場合は頂点をトポロジカル順序にソートするアルゴリズム. <br>
+頂点集合 $V$ から始めて, 現在残っている頂点集合 $S$ から辺が入ってこないような頂点 $v$ を選び, $S = S \setminus \{ v \}$ として空集合となるまで続ける.
+途中で頂点 $v$ が存在しなくなったらグラフが DAG でないと判定する.
+$S$ から辺が入ってこないような頂点は残りの頂点集合から入ってくる辺の次数が $0$ である頂点をキューで管理することで効率よく取ってくることが可能. <br>
+正当性は残りの頂点の中で上のように選んだ頂点 $v$ を先頭においてもトポロジカル順序に反さないこと,
 そして元のグラフが DAG である場合そのような頂点は残りの頂点集合が空集合でない限り常に存在することから言える. <br>
 </p>
 <p>
 (関数) <br>
-solve(): DAG かどうか(true / false) を返し, true なら res にトポロジカル順序にソートされた頂点列が格納される.
+solve(): DAG かどうか(true / false) を返し, true なら $res$ にトポロジカル順序にソートされた頂点列が格納される.
 </p>
 <p>
-時間計算量: O(n + m)
+時間計算量: $\O (n + m)$
 </p>
 <h3>コード</h3>
 <div class="codebox">
@@ -102,6 +110,7 @@ public:
 	}
 };
 </pre>
+</div>
 <h3>verify 用の問題</h3>
 <p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2181">Neko's Treasure</a>
   <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3122758#1">提出コード</a></p>
