@@ -81,7 +81,7 @@ public:
         : from(_from), to(_to), sz(0), value(id1), al(id2), lazy(id1),
             left(nullptr), right(nullptr), par(nullptr){}
     BSTNode(const int _from, const int _to, const _Tp&amp; _value) noexcept
-        : from(_from), to(_to), sz(1), value(_value), al(id2), lazy(id1),
+        : from(_from), to(_to), sz(1), value(_value), al(value), lazy(id1),
             left(nullptr), right(nullptr), par(nullptr){}
     static const _Tp id1 = (_Tp)0;
     static const _Tp id2 = (_Tp)0;
@@ -179,18 +179,19 @@ private:
     };
     BSTNode&lt;T&gt;** vertex_set;
     unordered_map&lt;pair&lt;int, int&gt;, pair&lt;BSTNode&lt;T&gt;*, BSTNode&lt;T&gt;*&gt;, pair_hash&gt; edge_set;
-    void reroot(BSTNode&lt;T&gt; *ver) noexcept {
+    BSTNode&lt;T&gt; *reroot(BSTNode&lt;T&gt; *ver) noexcept {
         BSTNode&lt;T&gt; *res = splay(ver)-&gt;left;
-        if(!res) return;
+        if(!res) return ver;
+        ver-&gt;left = nullptr, ver-&gt;eval();
         while(ver-&gt;right) ver-&gt;push(), ver = ver-&gt;right;
-        ver-&gt;right = res, ver-&gt;eval(), res-&gt;par = ver, splay(res);
+        splay(ver), ver-&gt;right = res, ver-&gt;eval(), res-&gt;par = ver;
+        return ver;
     }
     void link(BSTNode&lt;T&gt; *ver1, BSTNode&lt;T&gt; *ver2) noexcept {
-        reroot(ver1), reroot(ver2);
         BSTNode&lt;T&gt;* e1 = new BSTNode&lt;T&gt;(ver1-&gt;from, ver2-&gt;from);
         BSTNode&lt;T&gt;* e2 = new BSTNode&lt;T&gt;(ver2-&gt;from, ver1-&gt;from);
         edge_set[{ver1-&gt;from, ver2-&gt;from}] = {e1, e2};
-        join(join(ver1, e1), join(ver2, e2));
+        join(join(reroot(ver1), e1), join(reroot(ver2), e2));
     }
     void cut(BSTNode&lt;T&gt; *edge1, BSTNode&lt;T&gt; *edge2) noexcept {
         splay(edge1), splay(edge2);
@@ -228,77 +229,15 @@ private:
         T res = res2.first-&gt;al;
         return join(join(res1.first,res2.first), res2.second), res;
     }
-public:
-    const int V;
-    EulerTourTree(const vector&lt;T&gt;&amp; init_node_value, bool helper=false) noexcept
-        : V((int)init_node_value.size()){
-        vertex_set = new BSTNode&lt;T&gt;*[V];
-        for(int i = 0; i &lt; V; ++i) vertex_set[i] = new BSTNode&lt;T&gt;(i, i, init_node_value[i]);
-        if(helper) G.resize(V);
-    }
-    // ~EulerTourTree(){
-    //     for(auto it : edge_set){
-    //         delete (it.second).first;
-    //         delete (it.second).second;
-    //     }
-    //     for(int i = 0; i &lt; V; ++i) delete vertex_set[i];
-    //     delete[] vertex_set;
-    // }
-    void reroot(const int node_id) noexcept { reroot(vertex_set[node_id]); }
-    void link(int node1_id, int node2_id) noexcept {
-        if(node1_id &gt; node2_id) swap(node1_id, node2_id);
-        link(vertex_set[node1_id], vertex_set[node2_id]);
-    }
-    void cut(int node1_id, int node2_id){
-        if(node1_id &gt; node2_id) swap(node1_id, node2_id);
-        auto it = edge_set.find({node1_id, node2_id});
-        assert(it != edge_set.end());
-        BSTNode&lt;T&gt; *edge1 = (it-&gt;second).first, *edge2 = (it-&gt;second).second;
-        edge_set.erase(it);
-        cut(edge1, edge2);
-    }
-    bool IsConnected(const int node1_id, const int node2_id)
-        noexcept { return IsConnected(vertex_set[node1_id], vertex_set[node2_id]);}
-    T&amp; get(int ver_id){ return get(vertex_set[ver_id]); }
-    void component_range(const int ver_id, const T&amp; val){ range(ver_id, -1, val); }
-    void range(const int ver_id, const int par_id, const T&amp; val){
-        if(par_id &lt; 0) return BSTNode&lt;T&gt;::opr1(splay(vertex_set[ver_id])-&gt;lazy, val);
-        if(ver_id &lt; par_id){
-            auto it = edge_set.find({ver_id, par_id});
-            assert(it != edge_set.end());
-            range((it-&gt;se).se, (it-&gt;se).fi, val);
-        }else{
-            auto it = edge_set.find({par_id, ver_id});
-            assert(it != edge_set.end());
-            range((it-&gt;se).fi, (it-&gt;se).se, val);
-        }
-    }
-    T component_query(const int ver_id){ return query(ver_id, -1); }
-    T query(const int ver_id, const int par_id){
-        if(par_id &lt; 0) return splay(vertex_set[ver_id])-&gt;al;
-        if(ver_id &lt; par_id){
-            auto it = edge_set.find({ver_id, par_id});
-            assert(it != edge_set.end());
-            return query((it-&gt;se).se, (it-&gt;se).fi);
-        }else{
-            auto it = edge_set.find({par_id, ver_id});
-            assert(it != edge_set.end());
-            return query((it-&gt;se).fi, (it-&gt;se).se);
-        }
-    }
-
-// ヘルパー関数
-    vector&lt;vector&lt;int&gt; &gt; G;
-    void add_edge(const int u, const int v) noexcept { G[u].push_back(v), G[v].push_back(u); }
     void dfs(const int u, const int p, const BSTNode&lt;T&gt; *cur,
-        vector&lt;int&gt;&amp; parent, vector&lt;BSTNode&lt;T&gt;*&gt;&amp; nodes) noexcept {
-        parent[u] = p;
+        bool *visit, vector&lt;BSTNode&lt;T&gt;*&gt;&amp; nodes, const vector&lt;vector&lt;int&gt; &gt;&amp; G) noexcept {
+        visit[u] = true;
         nodes.push_back(vertex_set[u]);
         for(auto&amp; v : G[u]){
             if(v != p){
                 BSTNode&lt;T&gt;* e1 = new BSTNode&lt;T&gt;(u, v);
                 nodes.push_back(e1);
-                dfs(v, u, cur, parent, nodes);
+                dfs(v, u, cur, visit, nodes, G);
                 BSTNode&lt;T&gt;* e2 = new BSTNode&lt;T&gt;(v, u);
                 if(u &lt; v) edge_set[{u, v}] = {e1, e2};
                 else edge_set[{v, u}] = {e2, e1};
@@ -319,14 +258,99 @@ public:
             st &lt;&lt;= 1;
         }
     }
-    vector&lt;int&gt; build(const int _root) noexcept {
-        vector&lt;int&gt; parent(V, -1);
+    void build_forest(const vector&lt;vector&lt;int&gt; &gt;&amp; forest) noexcept {
+        bool *visit = new bool[V]();
+        for(int i = 0; i &lt; V; i++){
+            if(!visit[i]){
+                vector&lt;BSTNode&lt;T&gt;* &gt; nodes;
+                BSTNode&lt;T&gt; *cur = nullptr;
+                dfs(i, -1, cur, visit, nodes, forest);
+                bst_build(nodes);
+            }
+        }
+        delete[] visit;
+    }
+    void build_tree(const int root, const vector&lt;vector&lt;int&gt; &gt;&amp; tree) noexcept {
+        bool *visit = new bool[V]();
         vector&lt;BSTNode&lt;T&gt;* &gt; nodes;
         BSTNode&lt;T&gt; *cur = nullptr;
-        dfs(_root, -1 , cur, parent, nodes);
+        dfs(root, -1, cur, visit, nodes, tree);
         bst_build(nodes);
-        return parent;
+        delete[] visit;
     }
+
+public:
+    const int V;
+    EulerTourTree(const vector&lt;T&gt;&amp; ver_value) noexcept : V((int)ver_value.size()){
+        vertex_set = new BSTNode&lt;T&gt;*[V];
+        for(int i = 0; i &lt; V; i++) vertex_set[i] = new BSTNode&lt;T&gt;(i, i, ver_value[i]);
+    }
+    EulerTourTree(const vector&lt;T&gt;&amp; ver_value, const vector&lt;vector&lt;int&gt; &gt;&amp; forest) noexcept
+        : EulerTourTree(ver_value){ build_forest(forest); }
+    EulerTourTree(const vector&lt;T&gt;&amp; ver_value, const int root, const vector&lt;vector&lt;int&gt; &gt;&amp; tree) noexcept
+        : EulerTourTree(ver_value){ build_tree(root, tree); }
+    // ~EulerTourTree(){
+    //     for(auto it : edge_set){
+    //         delete (it.second).first;
+    //         delete (it.second).second;
+    //     }
+    //     for(int i = 0; i &lt; V; ++i) delete vertex_set[i];
+    //     delete[] vertex_set;
+    // }
+    // 根を node_id にする
+    void reroot(const int node_id) noexcept { reroot(vertex_set[node_id]); }
+    // 辺(node1_id, node2_id) を追加
+    void link(int node1_id, int node2_id) noexcept {
+        if(node1_id &gt; node2_id) swap(node1_id, node2_id);
+        link(vertex_set[node1_id], vertex_set[node2_id]);
+    }
+    // 辺(node1_id, node2_id) を削除(逆向きでも問題ない)
+    void cut(int node1_id, int node2_id){
+        if(node1_id &gt; node2_id) swap(node1_id, node2_id);
+        auto it = edge_set.find({node1_id, node2_id});
+        assert(it != edge_set.end());
+        BSTNode&lt;T&gt; *edge1 = (it-&gt;second).first, *edge2 = (it-&gt;second).second;
+        edge_set.erase(it);
+        cut(edge1, edge2);
+    }
+    // node1_id と node2_id が同じ木(連結成分)に属するか
+    bool IsConnected(const int node1_id, const int node2_id) noexcept {
+        if(node1_id == node2_id) return true;
+        return IsConnected(vertex_set[node1_id], vertex_set[node2_id]);
+    }
+    // 頂点 ver_id の値を取得
+    T&amp; get(int ver_id) noexcept { return get(vertex_set[ver_id]); }
+    // 頂点 ver_id の存在する連結成分内の頂点全体に val を加える
+    void component_range(const int ver_id, const T&amp; val){ range(ver_id, -1, val); }
+    // 親が par_id であるような頂点 ver_id の部分木内に存在する頂点全体に val を加える
+    void range(const int ver_id, const int par_id, const T&amp; val){
+        if(par_id &lt; 0) return BSTNode&lt;T&gt;::opr1(splay(vertex_set[ver_id])-&gt;lazy, val);
+        if(ver_id &lt; par_id){
+            auto it = edge_set.find({ver_id, par_id});
+            assert(it != edge_set.end());
+            range((it-&gt;second).second, (it-&gt;second).first, val);
+        }else{
+            auto it = edge_set.find({par_id, ver_id});
+            assert(it != edge_set.end());
+            range((it-&gt;second).first, (it-&gt;second).second, val);
+        }
+    }
+    // 頂点 ver_id の存在する連結成分内の頂点全体の総和を取得
+    T component_query(const int ver_id){ return query(ver_id, -1); }
+    // 親が par_id であるような頂点 ver_id の部分木内に存在する頂点全体の総和を取得
+    T query(const int ver_id, const int par_id){
+        if(par_id &lt; 0) return splay(vertex_set[ver_id])-&gt;al;
+        if(ver_id &lt; par_id){
+            auto it = edge_set.find({ver_id, par_id});
+            assert(it != edge_set.end());
+            return query((it-&gt;second).second, (it-&gt;second).first);
+        }else{
+            auto it = edge_set.find({par_id, ver_id});
+            assert(it != edge_set.end());
+            return query((it-&gt;second).first, (it-&gt;second).second);
+        }
+    }
+
 private:
     void check_dfs(const BSTNode&lt;T&gt;* cur) const noexcept {
         cur-&gt;push();
@@ -380,8 +404,9 @@ private:
         }
     };
     inline static unsigned int ceilpow2(unsigned int u) noexcept {
+        if(u == 0u) return 0u;
         --u, u |= u &gt;&gt; 1, u |= u &gt;&gt; 2, u |= u &gt;&gt; 4, u |= u &gt;&gt; 8;
-        return (u | (u &gt;&gt; 16)) + 1;
+        return (u | (u &gt;&gt; 16)) + 1u;
     }
     inline static bucket *increment(bucket *cur) noexcept {
         for(++cur; !cur-&gt;_end; ++cur){
@@ -450,6 +475,10 @@ private:
         data_type new_data = forward&lt;Data&gt;(data);
         return insert(cur, move(new_data.first), dist, move(new_data.second));
     }
+    template&lt;typename... Args&gt;
+    bucket *emplace(Args&amp;&amp;... args){
+        return find_insert(data_type(forward&lt;Args&gt;(args)...));
+    }
     bucket *backward_shift(bucket *cur, bool next_ret){
         bucket *next = next_bucket(cur), *ret = cur;
         if(next-&gt;_dist &lt; 1) return next_ret ? increment(cur) : cur;
@@ -476,7 +505,10 @@ private:
         return erase_impl(_find(key), next_ret);
     }
     bool rehash_check(){
-        if(load_rate() &gt;= MAX_LOAD_RATE){
+        if(_bucket_count == 0){
+            rehash(1u);
+            return true;
+        }else if(load_rate() &gt;= MAX_LOAD_RATE){
             rehash(_bucket_count * 2u);
             return true;
         }else if(DOWNSIZE){
@@ -514,10 +546,12 @@ public:
     const float MAX_LOAD_RATE = 0.5f;
     const float MIN_LOAD_RATE = 0.1f;
     const unsigned int DOWNSIZE_THRESHOLD = 16u;
-    UnorderedMap(unsigned int bucket_size = 1u)
-     : _bucket_count(ceilpow2(max(bucket_size, 1u))), _mask(_bucket_count - 1),
+    UnorderedMap(unsigned int bucket_size = 0u)
+     : _bucket_count(ceilpow2(bucket_size)), _mask(_bucket_count - 1),
         _data_count(0u), _buckets(new bucket[_bucket_count + 1]){
-        _buckets[_bucket_count - 1]._last = true, _buckets[_bucket_count]._end = true;
+        if(_bucket_count &gt; 0) _buckets[_bucket_count - 1]._last = true;
+        else _mask = 0;
+        _buckets[_bucket_count]._end = true;
     }
     UnorderedMap(const UnorderedMap&amp; another)
         : _bucket_count(another._bucket_count), _mask(another._mask), _data_count(another._data_count){
@@ -551,6 +585,9 @@ public:
         another._buckets = nullptr;
         return *this;
     }
+    void allocate(unsigned int element_size){
+        rehash(ceilpow2(ceil(element_size / MAX_LOAD_RATE) + 1));
+    }
     ~UnorderedMap(){ delete[] _buckets; }
     friend ostream&amp; operator&lt;&lt; (ostream&amp; os, UnorderedMap&amp; ump) noexcept {
         for(auto val : ump) os &lt;&lt; '{' &lt;&lt; val.first &lt;&lt; ',' &lt;&lt; val.second &lt;&lt; &quot;} &quot;;
@@ -570,11 +607,15 @@ public:
     size_t size() const noexcept { return _data_count; }
     size_t bucket_count() const noexcept { return _bucket_count; }
     bool empty() const noexcept { return (_data_count == 0); }
-    iterator begin() const noexcept { return _buckets-&gt;empty() ? iterator(increment(_buckets)) : iterator(_buckets); }
-    iterator end() const noexcept { return iterator(_buckets + _bucket_count); }
+    iterator begin() noexcept {
+        return (_buckets-&gt;empty() &amp;&amp; _bucket_count &gt; 0) ? iterator(increment(_buckets)) : iterator(_buckets);
+    }
+    iterator end() noexcept { return iterator(_buckets + _bucket_count); }
     iterator find(const _Key&amp; key){ return iterator(_find(key)); }
     iterator insert(const data_type&amp; data){ return iterator(find_insert(data)); }
     iterator insert(data_type&amp;&amp; data){ return iterator(find_insert(move(data))); }
+    template&lt;typename... Args&gt;
+    iterator emplace(Args&amp;&amp;... args){ return iterator(_emplace(forward&lt;Args&gt;(args)...)); }
     iterator erase(const _Key&amp; key){ return iterator(erase_key(key)); }
     iterator erase(const iterator&amp; itr){ return iterator(erase_itr(itr.bucket_ptr)); }
     void simple_erase(const _Key&amp; key){ erase_key(key, false); }
@@ -781,13 +822,75 @@ private:
         T res = res2.first-&gt;al;
         return join(join(res1.first,res2.first), res2.second), res;
     }
+    void dfs(const int u, const int p, const BSTNode&lt;T&gt; *cur,
+        bool *visit, vector&lt;BSTNode&lt;T&gt;*&gt;&amp; nodes, const vector&lt;vector&lt;int&gt; &gt;&amp; G) noexcept {
+        visit[u] = true;
+        nodes.push_back(vertex_set[u]);
+        for(auto&amp; v : G[u]){
+            if(v != p){
+                BSTNode&lt;T&gt;* e1 = new BSTNode&lt;T&gt;(u, v);
+                nodes.push_back(e1);
+                dfs(v, u, cur, visit, nodes, G);
+                BSTNode&lt;T&gt;* e2 = new BSTNode&lt;T&gt;(v, u);
+                if(u &lt; v) edge_set[pair_to_ll(u, v)] = {e1, e2};
+                else edge_set[pair_to_ll(v, u)] = {e2, e1};
+                nodes.push_back(e2);
+            }
+        }
+    }
+    void bst_build(vector&lt;BSTNode&lt;T&gt;* &gt;&amp; nodes) noexcept {
+        int i, n = (int)nodes.size(), st = 2, isolate = ((n % 4 == 1) ? (n-1) : -1);
+        while(st &lt;= n){
+            for(i = st-1; i &lt; n; i += 2*st){
+                nodes[i]-&gt;left = nodes[i-st/2], nodes[i-st/2]-&gt;par = nodes[i];
+                if(i+st/2 &lt; n) nodes[i]-&gt;right = nodes[i+st/2], nodes[i+st/2]-&gt;par = nodes[i];
+                else if(isolate &gt;= 0) nodes[i]-&gt;right = nodes[isolate], nodes[isolate]-&gt;par = nodes[i];
+                nodes[i]-&gt;eval();
+            }
+            isolate = ((n % (4*st) &gt;= st &amp;&amp; (n % (4*st) &lt; 2*st)) ? (i-2*st): isolate);
+            st &lt;&lt;= 1;
+        }
+    }
+    void build_forest(const vector&lt;vector&lt;int&gt; &gt;&amp; forest) noexcept {
+        bool *visit = new bool[V]();
+        for(int i = 0; i &lt; V; i++){
+            if(!visit[i]){
+                vector&lt;BSTNode&lt;T&gt;* &gt; nodes;
+                BSTNode&lt;T&gt; *cur = nullptr;
+                dfs(i, -1, cur, visit, nodes, forest);
+                bst_build(nodes);
+            }
+        }
+        delete[] visit;
+    }
+    void build_tree(const int root, const vector&lt;vector&lt;int&gt; &gt;&amp; tree) noexcept {
+        bool *visit = new bool[V]();
+        vector&lt;BSTNode&lt;T&gt;* &gt; nodes;
+        BSTNode&lt;T&gt; *cur = nullptr;
+        dfs(root, -1, cur, visit, nodes, tree);
+        bst_build(nodes);
+        delete[] visit;
+    }
+
 public:
     const int V;
-    EulerTourTree(const vector&lt;T&gt;&amp; ver_value, bool helper=false) noexcept
-        : V((int)ver_value.size()){
+    EulerTourTree(const vector&lt;T&gt;&amp; ver_value) noexcept : V((int)ver_value.size()){
         vertex_set = new BSTNode&lt;T&gt;*[V];
         for(int i = 0; i &lt; V; i++) vertex_set[i] = new BSTNode&lt;T&gt;(i, i, ver_value[i]);
-        if(helper) G.resize(V);
+    }
+    EulerTourTree(const vector&lt;T&gt;&amp; ver_value, const vector&lt;vector&lt;int&gt; &gt;&amp; forest) noexcept
+        : EulerTourTree(ver_value){
+        unsigned int element_size = 0;
+        for(int i = 0; i &lt; V; ++i) element_size += forest[i].size();
+        edge_set.allocate(element_size);
+        build_forest(forest);
+    }
+    EulerTourTree(const vector&lt;T&gt;&amp; ver_value, const int root, const vector&lt;vector&lt;int&gt; &gt;&amp; tree) noexcept
+        : EulerTourTree(ver_value){
+        unsigned int element_size = 0;
+        for(int i = 0; i &lt; V; ++i) element_size += tree[i].size();
+        edge_set.allocate(element_size);
+        build_tree(root, tree);
     }
     // ~EulerTourTree(){
     //     for(auto it : edge_set){
@@ -830,9 +933,9 @@ public:
             assert(it != edge_set.end());
             range(((*it).second).second, ((*it).second).first, val);
         }else{
-            auto it = edge_set.find(pair_to_ll(ver_id, par_id));
+            auto it = edge_set.find(pair_to_ll(par_id, ver_id));
             assert(it != edge_set.end());
-            range(((*it).second).second, ((*it).second).first, val);
+            range(((*it).second).first, ((*it).second).second, val);
         }
     }
     // 頂点 ver_id の存在する連結成分内の頂点全体の総和を取得
@@ -841,69 +944,14 @@ public:
     T query(const int ver_id, const int par_id){
         if(par_id &lt; 0) return splay(vertex_set[ver_id])-&gt;al;
         if(ver_id &lt; par_id){
-            auto it = edge_set.find(pair_to_ll(ver_id, par_id));
+            auto it = edge_set.find({ver_id, par_id});
             assert(it != edge_set.end());
-            return query(((*it).second).second, ((*it).second).first);
+            return query((it-&gt;second).second, (it-&gt;second).first);
         }else{
             auto it = edge_set.find({par_id, ver_id});
             assert(it != edge_set.end());
-            return query(((*it).second).second, ((*it).second).first);
+            return query((it-&gt;second).first, (it-&gt;second).second);
         }
-    }
-
-// ヘルパー関数
-    vector&lt;vector&lt;int&gt; &gt; G;
-    void add_edge(const int u, const int v) noexcept { G[u].push_back(v), G[v].push_back(u); }
-    void dfs(const int u, const int p, const BSTNode&lt;T&gt; *cur,
-        vector&lt;int&gt;&amp; parent, vector&lt;BSTNode&lt;T&gt;*&gt;&amp; nodes) noexcept {
-        parent[u] = p;
-        nodes.push_back(vertex_set[u]);
-        for(auto&amp; v : G[u]){
-            if(v != p){
-                BSTNode&lt;T&gt;* e1 = new BSTNode&lt;T&gt;(u, v);
-                nodes.push_back(e1);
-                dfs(v, u, cur, parent, nodes);
-                BSTNode&lt;T&gt;* e2 = new BSTNode&lt;T&gt;(v, u);
-                if(u &lt; v) edge_set[pair_to_ll(u, v)] = {e1, e2};
-                else edge_set[pair_to_ll(v, u)] = {e2, e1};
-                nodes.push_back(e2);
-            }
-        }
-    }
-    void bst_build(vector&lt;BSTNode&lt;T&gt;* &gt;&amp; nodes) noexcept {
-        int i, n = (int)nodes.size(), st = 2, isolate = ((n % 4 == 1) ? (n-1) : -1);
-        while(st &lt;= n){
-            for(i = st-1; i &lt; n; i += 2*st){
-                nodes[i]-&gt;left = nodes[i-st/2], nodes[i-st/2]-&gt;par = nodes[i];
-                if(i+st/2 &lt; n) nodes[i]-&gt;right = nodes[i+st/2], nodes[i+st/2]-&gt;par = nodes[i];
-                else if(isolate &gt;= 0) nodes[i]-&gt;right = nodes[isolate], nodes[isolate]-&gt;par = nodes[i];
-                nodes[i]-&gt;eval();
-            }
-            isolate = ((n % (4*st) &gt;= st &amp;&amp; (n % (4*st) &lt; 2*st)) ? (i-2*st): isolate);
-            st &lt;&lt;= 1;
-        }
-    }
-    // _root を根とする木を構築(親の vector を返す)
-    vector&lt;int&gt; build_tree(const int _root) noexcept {
-        vector&lt;int&gt; parent(V, -1);
-        vector&lt;BSTNode&lt;T&gt;* &gt; nodes;
-        BSTNode&lt;T&gt; *cur = nullptr;
-        dfs(_root, -1, cur, parent, nodes);
-        bst_build(nodes);
-        return parent;
-    }
-    // 森を構築
-    vector&lt;int&gt; build_forest() noexcept {
-        vector&lt;int&gt; parent(V, -1);
-        for(int i = 0; i &lt; V; i++){
-            if(parent[i] &lt; 0){
-                vector&lt;BSTNode&lt;T&gt;* &gt; nodes;
-                BSTNode&lt;T&gt; *cur = nullptr;
-                dfs(i, -1, cur, parent, nodes);
-                bst_build(nodes);
-            }
-        }
-        return parent;
     }
 
 private:
