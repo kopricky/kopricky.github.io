@@ -72,10 +72,12 @@ Edmonds-Karp, Dinic などは (1) の条件を常に満たしながら (2) の�
 <br>
 (補足) <br>
 各頂点 $v$ について今見ている辺の index をちゃんと持っておいて、 もし途中で saturating push を行って終了してまたそのあともう一度活性点となった場合は続きの index から始めるとすると良い. $v$ の隣接リストを $1$ 周したら必ず Relabel 操作が呼ばれ, この Relabel 操作は各頂点で高々 $\O (n)$ 回なので探索の for 文なめるのは全体で $\O (nm)$ 回になる.<br>
-<strike>以下の実装は組み合わせ最適化本に沿って実装したけど、こうした方が絶対実装楽だし, 計算量もちゃんと $\O (n^2 m^{1/2})$ なので時間があれば変更したい</strike>(⇒ 追記) <br>
+<strike>以下の実装は組み合わせ最適化本に沿って実装したけど、こうした方が絶対実装楽だし, 計算量もちゃんと O (n^2 m^{1/2}) なので時間があれば変更したい</strike>(⇒ 追記) <br>
 <br>
 (追記) <br>
-"On Implementing Push-Relabel Method For The Maximum Flow Problem" [Cherkassky, Goldberg 1994] をもとに実装を変更した. 上記の gap_relabel(ある高さの活性点がなくなったらそれ以上の高さの活性点を再ラベリング) および global_relabel(ときどき全部を再ラベリング) を行った実装にしたことで高速になり, 多くのケースでは <a href="../NetworkFlow/dinic.html">Dinic</a> より速くなった. <a href="https://min-25.hatenablog.com/entry/2017/08/22/211034">この記事</a> が頂点の管理を自作リストで行っていて, 確かに高速化できそうだったので採用させていただいた. <br>
+"On Implementing Push-Relabel Method For The Maximum Flow Problem" [Cherkassky, Goldberg 1994] をもとに実装を変更した. 上記の gap_relabel(ある高さの活性点がなくなったらそれ以上の高さの活性点はそれ以降 inactive にする) および global_relabel(ときどき全部を再ラベリング) を行った実装にしたことで高速になり,
+多くのケースでは <a href="../NetworkFlow/dinic.html">Dinic</a> より速くなった. <a href="https://min-25.hatenablog.com/entry/2017/08/22/211034">この記事</a> が頂点の管理を自作リストで行っていて, 確かに高速化できそうだったので採用させていただいた. <br>
+最大流の値を高速に求めるためにデフォルトでは高さが $n$ 以上の頂点については excess を解消していないので最終的な preflow が依然として flow の条件を満たしていない可能性がある. valid な flow を求めたい場合は valiate() のコメントアウトを外す.
 </p>
 <p>
 (関数)<br>
@@ -88,7 +90,7 @@ solve$(s, t)$ : $s$, $t$ 間の最大フローを計算する
 <h3>コード</h3>
 <div class="codebox">
 <input type="checkbox" id="label" class="csscode" />
-<label for="label"></label>]
+<label for="label"></label>
 <pre class="prettyprint linenums">
 class Stack {
 private:
@@ -111,7 +113,7 @@ public:
     const int N, H;
     vector&lt;size_t&gt; sz;
     vector&lt;node&gt; dat;
-    List(const int _N, const int _H) : N(_N), H(_H), sz(H, 0), dat(N+H){ clear(); }
+    List(const int _N, const int _H) : N(_N), H(_H), sz(H), dat(N+H){ clear(); }
     inline size_t size(const int h) const { return sz[h]; }
     inline bool empty(const int h) const { return (sz[h] == 0); }
     inline void insert(const int h, const int u){
@@ -124,7 +126,7 @@ public:
         dat[dat[u].prev].next = dat[u].next, dat[dat[u].next].prev = dat[u].prev;
     }
     inline void clear(){
-        for(int i = N; i &lt; N+H; ++i) dat[i].prev = dat[i].next = i;
+        for(int i = N; i &lt; N+H; ++i) sz[i-N] = 0, dat[i].prev = dat[i].next = i;
     }
 };
 
@@ -233,6 +235,54 @@ private:
         }
         return cur;
     }
+    int validate_discharge(const int u){
+        for(int&amp; i = cur_edge[u]; i &lt; (int)G[u].size(); ++i){
+            edge&amp; e = G[u][i];
+            if(potential[u] == potential[e.to] + 1 &amp;&amp; e.cap &gt; 0){
+                if(validate_push(u, e)) return potential[u] - V;
+            }
+        }
+        return validate_relabel(u);
+    }
+    bool validate_push(const int u, edge&amp; e){
+        T f = min(e.cap, excess[u]);
+        const int v = e.to;
+        e.cap -= f, excess[u] -= f;
+        G[v][e.rev].cap += f, excess[v] += f;
+        if(excess[v] == f &amp;&amp; v != s) act_ver.push(potential[v] - V, v);
+        return (excess[u] == 0);
+    }
+    int validate_relabel(const int u){
+        int cur = 2 * V;
+        for(int i = 0; i &lt; (int)G[u].size(); ++i){
+            const edge&amp; e = G[u][i];
+            if(cur &gt; potential[e.to] + 1 &amp;&amp; e.cap &gt; 0){
+                cur_edge[u] = i;
+                cur = potential[e.to] + 1;
+            }
+        }
+        potential[u] = cur;
+        act_ver.push(cur - V, u);
+        return cur - V;
+    }
+    void validate(){
+        for(int i = 0; i &lt; V; ++i){
+            if(potential[i] &gt;= V){
+                cur_edge[i] = 0, potential[i] = V;
+                if(excess[i] &gt; 0 &amp;&amp; i != s) act_ver.push(0, i);
+            }
+        }
+        int level = 0;
+        while(level &gt;= 0){
+            if(act_ver.empty(level)){
+                --level;
+                continue;
+            }
+            int u = act_ver.top(level);
+            act_ver.pop(level);
+            level = validate_discharge(u);
+        }
+    }
 public:
     vector&lt;vector&lt;edge&gt; &gt; G;
     PushRelabel(const int node_size)
@@ -252,13 +302,13 @@ public:
             }
             int u = act_ver.top(level);
             act_ver.pop(level);
-            if(excess[u] == 0) continue;
             level = discharge(u);
             if(checker &gt;= V / 2){
                 level = global_relabel();
                 checker = 0;
             }
         }
+        // validate();
         return excess[t];
     }
 };
@@ -266,7 +316,7 @@ public:
 </div>
 <h3>verify 用の問題</h3>
 <p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_6_A">Maximum Flow</a>
-  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3768548#1">提出コード</a></p>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3941770#1">提出コード</a></p>
 </section>
 
 </div>
