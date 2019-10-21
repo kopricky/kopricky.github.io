@@ -242,41 +242,41 @@ public:
 
 template&lt;typename T&gt; class Dijkstra {
 public:
-	struct edge{
-		int to; T cost;
-	};
+    struct edge{
+        int to; T cost;
+    };
     const int V;
-	vector&lt;vector&lt;edge&gt; &gt; G;
-	vector&lt;T&gt; d;
+    vector&lt;vector&lt;edge&gt; &gt; G;
+    vector&lt;T&gt; d;
     FibonacciHeap&lt;T, int&gt; fheap;
     typename FibonacciHeap&lt;T, int&gt;::node** keep;
-	Dijkstra(int node_size) : V(node_size), G(V), d(V, numeric_limits&lt;T&gt;::max()),
+    Dijkstra(int node_size) : V(node_size), G(V), d(V, numeric_limits&lt;T&gt;::max()),
         keep(new typename FibonacciHeap&lt;T, int&gt;::node*[V]){}
     // ~Dijkstra(){
         // delete[] keep;
     // }
-	// 有向グラフの場合
-	void add_edge(int u,int v,T cost){
-		G[u].pb((edge){v, cost});
+    // 有向グラフの場合
+    void add_edge(int u,int v,T cost){
+        G[u].pb((edge){v, cost});
 	}
-	void solve(int s){
-		d[s] = 0;
-		keep[s] = fheap.push(0, s);
-		while(!fheap.empty()){
+    void solve(int s){
+        d[s] = 0;
+        keep[s] = fheap.push(0, s);
+        while(!fheap.empty()){
             int v = fheap.top().second;
             fheap.pop();
-			for(auto&amp; w : G[v]){
-				if(d[w.to] &gt; d[v] + w.cost){
+            for(autoamp; w : G[v]){
+                if(d[w.to] &gt; d[v] + w.cost){
                     if(d[w.to] == numeric_limits&lt;T&gt;::max()){
                         keep[w.to] = fheap.push(d[v] + w.cost, w.to);
                     }else{
                         fheap.decrease_key(keep[w.to], d[w.to] - (d[v] + w.cost));
                     }
                     d[w.to] = d[v] + w.cost;
-				}
-			}
-		}
-	}
+                }
+            }
+        }
+    }
 };
 </pre>
 </div>
