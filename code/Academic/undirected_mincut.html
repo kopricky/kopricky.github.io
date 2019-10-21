@@ -93,7 +93,7 @@ $2$ 頂点間に張られている辺の数は暫定の最適なカットとし�
 また一回の試行にかかる時間 $T(n)$ は $T(n) = 2 T(n / \sqrt{2}) + \O (n^2)$ より $\O (n^2 \log n)$ であることが分かる. <br>
 <br>
 (補足 3) <br>
-無向グラフの大域最小容量カットを求めるアルゴリズムは近年でもよく研究されていて, 重みなしの場合は λ をグラフの連結度としたときに計算量 O(m + λ^2 n) (Gabow) の deterministic algorithm や
+無向グラフの大域最小容量カットを求めるアルゴリズムは近年でもよく研究されていて, 重みなしの場合は λ をグラフの連結度としたときに計算量 $\O (m + λ^2 n)$ (Gabow) の deterministic algorithm や
 他にも deterministic algorithm として $\O (m \log^{12} n)$ (Kawarabayashi, Thorup 2014) (初の nearly linear time), $\O (m \log^2 n \log \log^2 n)$ (Henzinger, Rao, Wang 2017)
 (unit flow(push relabel の高さを制限した局所的な flow routing) を用いることで low conductance cut を求める部分を高速化した) などがある. 重みつきの場合は randomized algorithm として
 $\O (m \log^3 n)$ (Karger 2000) がある.
