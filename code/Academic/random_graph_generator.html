@@ -10,6 +10,14 @@
 
   gtag('config', 'UA-131511873-1');
 </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
 
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -55,7 +63,7 @@
 ランダムグラフを生成するアルゴリズム. $1$ つ目は簡単なものの寄せ集め(Erdős–Rényi (ER)モデルとか) で 2 つ目は次数列が与えられたときにそれを満たすような(連結な)グラフを一様ランダムで生成するアルゴリズムになっている.
 元論文は "Efficient Generation of Large Random Networks" [Batagelj Brandes 2005] および "Efficient and simple generation of random simple connected graphswith prescribed degree sequence" [Viger, Latapy 2011] <br>
 (1 つ目のコードについて) <br>
-$G(n, p)$ が愚直にやると $\O (n^2)$ かかるが次にどの辺を取るかを幾何分布に従う乱数によって決める(次に取るのが i 個先となる確率は p(1-p)^(i-1) なので)ことで平均計算量 $\O (np)$ で求めることができる.
+$G(n, p)$ が愚直にやると $\O (n^2)$ かかるが次にどの辺を取るかを幾何分布に従う乱数によって決める(次に取るのが $i$ 個先となる確率は $p(1-p)^{i-1}$ なので)ことで平均計算量 $\O (np)$ で求めることができる.
 よく見る random tree の構築は一様ランダムというわけではないので, 一様ランダムな木の生成として prufer code から復元する実装を載せている. ランダムグラフの理論でよく目にする Galton-Watson 過程に基づいて木を構築する方法もあるらしいので勉強する時間が取れたら書きたい. 他の関数については普通. <br>
 後半のアルゴリズムは出力されるグラフが非連結を許さない場合(こちらのほうが難しい)について説明する(以下の $3$ つのステップからなる). <br>
 (I) 与えられた次数列を満たすグラフを構築する(<a href="../Graph/havel_hakimi.html">Havel-Hakimi</a> アルゴリズム). (II) 得られたグラフを swap 操作(グラフ $G_1$ 内の辺 $(a, b)$, $G_2$ 内の辺 $(c, d)$ を ⇒ 辺 $(a, c)$, 辺 $(b, d)$ に付け替える操作)を繰り返すことで連結にする. swap 操作は各頂点の次数を変化させないことに注意する.<br>
