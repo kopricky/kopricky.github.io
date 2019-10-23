@@ -80,6 +80,9 @@ solve$(s,t,f)$ : $s$ から $t$ へ流量 $f$ 流すのにかかる最小費用<
 時間計算量: $\O (|F| m \log n)$ (流量を $|F|$ とする)
 </p>
 <h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
 <pre class="prettyprint linenums">
 template&lt;typename CapType, typename CostType&gt; class MinCostFlow {
 public:

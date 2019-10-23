@@ -83,7 +83,7 @@ link cut tree においてはこの $\mathrm{rank} (x)$ を次のように定め
 すると access$(v)$ で splay 操作にかかる総ならしコストは $3(\mathrm{rank}(root) - \mathrm{rank}(v)) + $(preferred child の変化する回数) で抑えられることがわかる.
 splay 操作をする回数は preferred child の変化する回数で抑えられることに注意する.
 また preferred child の変化に伴って, 頂点の $\mathrm{rank}$ が変化することがないことも確認する.<br>
-全 $m(\ge n)$ 回の access(v) の操作について $3(\mathrm{rank}(root) - \mathrm{rank}(v))$ の和は $0 \le \mathrm{rank}(v) \le \log n$ より $\O (m \log n)$ となり,
+全 $m(\ge n)$ 回の access$(v)$ の操作について $3(\mathrm{rank}(root) - \mathrm{rank}(v))$ の和は $0 \le \mathrm{rank}(v) \le \log n$ より $\O (m \log n)$ となり,
 この部分はならし $\O (\log n)$ である.
 よって後は (preferred child の変化する回数), つまり (non-preferred である辺が preferred になる回数) がならし $\O (\log n)$ であることを示せばよい. <br>
 ここで元の木について edge を heavy edge, light edge の $2$ 種類に分類する.
