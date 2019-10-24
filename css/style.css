@@ -407,8 +407,22 @@ footer .pr {
 	margin-left: 18px
 }
 
+.codebox_en label:before {
+	content: 'Expand';
+	font-weight: bold;
+	color: #4344ff;
+	text-decoration: underline;
+	cursor :pointer;
+	margin-left: 18px
+}
+
 .csscode:checked + label:before {
 	content: "コードを折りたたむ";
+	font-weight: bold
+}
+
+.csscode_en:checked + label:before {
+	content: "Collapse";
 	font-weight: bold
 }
 
@@ -416,7 +430,15 @@ footer .pr {
     display: none;
 }
 
+.codebox_en input {
+    display: none;
+}
+
 .csscode:checked + label + .prettyprint {
+	max-height: none
+}
+
+.csscode_en:checked + label + .prettyprint {
 	max-height: none
 }
 
