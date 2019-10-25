@@ -60,7 +60,10 @@ $\newcommand{\O}{\mathrm{O}}$
 <h2>$\O(m \log \log n)$-time MST</h2>
 <h3>コードについての説明</h3>
 <p>
-<a href="../Graph_SP_MST/boruvka.html">Boruvka 法</a> + <a href="./prim_fheap.html">Fibonacciheap を用いたプリム法の高速化</a>
+<a href="../Graph_SP_MST/boruvka.html">Boruvka 法</a> + <a href="./prim_fheap.html">Fibonacciheap を用いた Prim 法の高速化</a> で可能. <br>
+ブルーフカ法を $\lceil \log \log n \rceil$ step 進めた後には高々頂点数 $n / \log n$ のグラフになっているのでそこからは高速版の
+Prim 法を用いることで残りを $\O (n + m)$ time で求めることができる. よって合計で $\O (m \log \log n)$ time. <br>
+もはや当然だが実測が目に見えて速くなることはない.
 </p>
 <p>
 (関数)<br>
