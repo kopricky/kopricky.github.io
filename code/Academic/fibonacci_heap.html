@@ -91,7 +91,7 @@ delete, findmin などのクエリを $\O (1)$ で処理でき, さらに insert
 ここで comparison based model において sort にかかる時間計算量は決定木を用いた証明から $\Omega(n \log n)$ であることを思い出すと, $n$ 回のヒープ操作にかかる計算量は $\Omega (n \log n)$ である.
 つまり soft heap はヒープの操作にかかる計算量の情報理論的下界を下回る計算量を達成していることが分かる(繰り返しになるが soft heap はキー値を恣意的に変化させているので厳密にはヒープではない). <br>
 この soft heap は種々のアルゴリズムに応用されていて例えば最小全域木を最悪計算量 $\O(m \alpha(m, n))$ で求めるアルゴリズムなどに使われている(fibonacci heap では prim 法を用いて $\O (n \log n + m)$ time が限界だった).
-論文を読んでいないのでどういう風に用いるかは知らない...(一応 <a href="https://en.wikipedia.org/wiki/Soft_heap">wikipedia の記事</a> の Application には soft heap を selection algorithm に応用する例が載っている.)
+ブルーフカ法ベースで行っているらしいが論文を読んでいないので soft heap をどういう風に用いるかは知らない...(一応 <a href="https://en.wikipedia.org/wiki/Soft_heap">wikipedia の記事</a> の Application には soft heap を selection algorithm に応用する例が載っている.)
 </p>
 <p>
 時間計算量: push $\O (1)$, pop ならし $\O (\log n)$, decrease_key(キー値減算) ならし $\O (1)$, meld $\O (1)$
