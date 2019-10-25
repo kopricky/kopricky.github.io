@@ -63,20 +63,21 @@ $\newcommand{\O}{\mathrm{O}}$
 一般のグラフを対象に辺の追加, 削除, 頂点間の連結性判定を効率よく行うことのできるアルゴリズム. <a href="../DataStructure_OnGraph/link_cut_tree.html">Link Cut Tree</a>, <a href="../DataStructure_OnGraph/euler_tour_tree.html">Euler Tour Tree</a> などは森を対象にしていたためそれの一般化にあたる.<br>
 元論文は "Poly-logarithmic deterministic fully-dynamic algorithms for connectivity, minimum spannning tree, 2-edge, and biconnectivity" [Holm, Lichtenberg, Thorup 1998]<br>
 グラフ $G$ の全域森を管理する. このとき $\log n$ 個の Euler Tour Tree を用いて Scaling(Layering) することで辺を削除した際の restore 操作の高速化を(ならしの意味で)可能にしている. 具体的に (i) 第 $i$ 層では森 $F_i$ を管理し, $F_i$ 内の連結成分の最大サイズは $2^i$ 以下 (ii) $F_0 ⊇ F_1 ... ⊇ F_{\log n}$ (iii) $F_0$ は $G$ の全域森 の $3$ つの条件を常に満たすように更新をします. <br>
-$F_i$ に含まれない辺 $e$ (off tree edge) については端点に対応する EulerTourTree のノードに格納して, 例えば $F_i$ 内の辺が cut され新たに連結成分が増えてしまうという場合に off tree edge の中から非連結となった頂点集合どうしを再び連結させるような辺がないかを探索するときに参照される.
+$F_i$ に含まれない辺 $e$ (off tree edge) については端点に対応する EulerTourTree のノードに情報を格納して, 例えば $F_i$ 内の辺が cut され新たに連結成分が増えてしまうという場合に off tree edge の中から非連結となった頂点集合どうしを再び連結させるような辺がないかを探索する(restore 操作) ときに参照される.
 このときに効率よく探索する必要があり, そのために Euler Tour Tree の各ノードに "そのノードを根とする部分木内に off tree edge があるか" などの情報を平衡二分探索木上で適切に遅延伝播させたりなどする.
 何を言っているかわからないと思うので詳しく知りたい方は元論文を参照してもらいたい.<br>
 Euler Tour Tree 上で情報を正しく伝播させる必要があるため実装は割と気をつける必要がある. 計算量は辺の追加, 削除がならし $\O (\log^2 n)$, 連結性判定が $\O (\log n)$ である. Euler Tour Tree を平衡二分木ではなく $\O (\log n)$-分木で管理することで計算量上は $\O (\log \log n)$ factor の改善が可能になる. <br>
-restore 操作を辺の重みが小さいものから順に走査することで $F_0$ が常に最小全域森となるように保つことができる. つまりこれは deletion-only の場合削除クエリに対してならし $\O (\log^2 n)$ の計算量で最小全域森を保持できることを意味している. insertion 込みだとコストの小さい辺が入ってきたときにコストの小さい辺は削除時の探索順の関係で level の高い位置に置く必要があるが, そうするとならしが回らないので単純には無理そう. <br>
-話が逸れるが, 最小全域森の online Fully Dynamic アルゴリズムについてはクエリにかかる計算量が長年 $\O (\sqrt{n})$ だったが最近になって進展があり $\O (n^{\mathrm{o(1)}})$ の計算量で管理できるアルゴリズムが発表された(FOCS 2017). ちゃんと読んでいないが dynamic expander pruning が本質っぽい（？). dynamic expander pruning について SODA 2019 の "Expander Decomposition and Pruning:
-Faster, Stronger, and Simpler" を先にまず読んだ方が良さそうなので読む.(⇒ 読んで完全に理解した. (追記 2))<br>
+restore 操作を辺の重みが小さいものから順に走査することで $F_0$ が常に最小全域森となるように保つことができる. これから deletion-only の場合削除クエリに対してならし $\O (\log^2 n)$ の計算量で最小全域森を保持できることも言える. insertion 込みだとコストの小さい辺が入ってきたときにコストの小さい辺は削除時の探索順の関係で level の高い位置に置く必要があるが, そうするとならしが回らないので単純には無理そう. <br>
+ちなみに最小全域森の online Fully Dynamic アルゴリズムについてはクエリにかかる最悪計算量は長年 $\O (\sqrt{n})$ であることが知られていて, 最近になって進展があり $\O (n^{\mathrm{o(1)}})$ の計算量で管理できるアルゴリズムが発表された(FOCS 2017). ちゃんと読んでいないが dynamic expander pruning が本質っぽい（？). dynamic expander pruning について SODA 2019 の "Expander Decomposition and Pruning:
+Faster, Stronger, and Simpler" を先にまず読んだ方が良さそうなので読む.(⇒ 読んで理解した.)<br>
+一般グラフの動的連結性クエリに答えるデータ構造も同じ感じで最悪計算量を $\O (\sqrt{n})$ から $\O (n^{\mathrm{o(1)}})$ にしようという気運が高まっている. <br>
 連結性判定だけでなく連結成分内の頂点全体への演算も $F_0$ に対する操作で簡単に行えるので計算量は $\O (\log n)$. 連結成分内の辺全体への演算は $F_0$ において全ての level の off tree edge を保持しておくようにすればこちらも計算量 $\O (\log n)$ で行える(はず). <br>
 以下の実装では平衡二分木として splay 木を用いている. 少し高速化を行っているため restore 操作時の処理がわかりにくいと思われる(本当に変更を伝播する必要のあるときのみ伝播するみたいなことをしている). グラフは単純グラフであることを仮定している(多重辺, 自己ループがあっても外部で適切に処理すれば問題ない). <br>
 <br>
 (補足) <br>
 "Lower Bounds for Dynamic Connectivity" [Patrascu, Demaine 2004] により動的連結性の operation の lower bound が amortized でも randomized でも $\Omega(\log n)$ time となることが示された(これは update もしくは query の少なくとも一方が $\Omega(\log n)$ time の意味).
 また更新時間(link, cut) とクエリに応答する時間(connected) の間に存在する trade-off 関係も示している.
-具体的に update time を $t_u$, query time を $t_q$ とすると <img src="./texclip20190808090008.png" height="100" width="350"> という関係が成り立つ. また trade-off の lower bound を達成するアルゴリズムとして [Thorup 2000] や [Holm, Lichtenberg, Thorup 2001] がある. <br>
+具体的に update time を $t_u$, query time を $t_q$ とすると <img src="./texclip20190808090008.png" height="100" width="350"> という関係が成り立つ. また trade-off の lower bound をオーダーの意味で達成するアルゴリズムとして [Thorup 2000] や [Holm, Lichtenberg, Thorup 2001] がある. <br>
 worst input の構成などのより詳しい内容は論文もしくは <a href="https://courses.csail.mit.edu/6.851/fall17/scribe/L21.pdf">Demaine 先生の講義</a> が参考になると思うが, 少々とっつきにくかったので暇があれば解説記事などを書きたい. (暇があれば...) <br>
 ちなみに worst case はパスの集合で構成できるため森の動的連結性クエリの lower bound も $\Omega (\log n)$ であることが言え, Link Cut Tree や Euler Tour Tree は漸近的に最適であることが分かる. <br>
 <br>
