@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-131511873-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-131511873-1');
+</script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
+
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<link rel="shortcut icon" type="image/x-icon" href="../../favicon.ico">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>Boruvka</h2>
+<h3>コードについての説明</h3>
+<p>
+ブルーフカ法の起源については "The Origins of Minimal Spanning Tree Algorithms - Boruvka and Jarnik" [Nesetril, Nesetrilova 2001] を参考
+</p>
+<p>
+(関数)<br>
+solve(): 最小全域木のコストを返す. 存在しなければ inf を返す. <br>
+</p>
+<p>
+時間計算量: $\O (m \log n)$
+</p>
+<h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
+<pre class="prettyprint linenums">
+class UnionFind {
+private:
+    int sz;
+    vector&lt;int&gt; par, nrank;
+public:
+    UnionFind(){}
+    UnionFind(int node_size) : sz(node_size), par(sz), nrank(sz, 0){
+        iota(par.begin(), par.end(), 0);
+    }
+    int find(int x){
+        if(par[x] == x) return x;
+        else return par[x] = find(par[x]);
+    }
+    int unite(int x, int y){
+    	if(nrank[x] &lt; nrank[y]) swap(x,y);
+        par[y] = x;
+        if(nrank[x] == nrank[y]) nrank[x]++;
+        return x;
+    }
+};
+
+template&lt;typename T&gt; class Boruvka {
+private:
+    struct edge {
+        int to;
+        T cost;
+        typename list&lt;edge&gt;::iterator rev;
+        edge(const int _to, const T _cost)
+            : to(_to), cost(_cost){}
+        edge(const int _to, const T _cost, const typename list&lt;edge&gt;::iterator _rev)
+            : to(_to), cost(_cost), rev(_rev){}
+    };
+    struct info {
+        T cost;
+        typename list&lt;edge&gt;::iterator itr;
+        info(){}
+        info(const T _cost) : cost(_cost){}
+        info(const T _cost, const typename list&lt;edge&gt;::iterator _itr) : cost(_cost), itr(_itr){}
+    };
+    const int V;
+    const T inf;
+    UnionFind uf;
+    vector&lt;list&lt;edge&gt; &gt; G;
+    void cleanup(vector&lt;int&gt;&amp; rem_node, vector&lt;info&gt;&amp; check){
+        vector&lt;int&gt; tmp;
+        for(int v : rem_node){
+            for(auto it = G[v].begin(); it != G[v].end();){
+                const edge&amp; e = *it;
+                const int p = uf.find(e.to);
+                if(p == v){
+                    it = G[v].erase(it);
+                    continue;
+                }
+                if(e.cost &lt; check[p].cost){
+                    if(check[p].cost == inf) tmp.push_back(p);
+                    else G[p].erase(check[p].itr-&gt;rev), G[v].erase(check[p].itr);
+                    check[p].cost = e.cost, check[p].itr = it++;
+                }else{
+                    G[p].erase(e.rev), it = G[v].erase(it);
+                }
+            }
+            for(int id : tmp) check[id].cost = inf;
+            tmp.clear();
+        }
+    }
+    bool contract(vector&lt;int&gt;&amp; rem_node, vector&lt;int&gt;&amp; check){
+        vector&lt;int&gt; new_rem_node;
+        bool update = false;
+        for(int v : rem_node){
+            const int p = uf.find(v);
+            if(G[p].empty() || p != v) continue;
+            T mn = inf; int id = -1;
+            for(const edge&amp; e : G[v]){
+                if(e.cost &lt; mn) mn = e.cost, id = e.to;
+            }
+            id = uf.find(id);
+            if(id != v){
+                ans += mn, update = true, uf.unite(id, v);
+            }
+        }
+        for(int v : rem_node){
+            const int p = uf.find(v);
+            if(v == p) new_rem_node.push_back(v);
+            else G[p].splice(G[p].begin(), move(G[v]));
+        }
+        swap(rem_node, new_rem_node);
+        return update;
+    }
+
+public:
+    T ans;
+    Boruvka(const int node_size)
+        : V(node_size), inf(numeric_limits&lt;T&gt;::max()), uf(V), G(V), ans(0){}
+    void add_edge(const int from, const int to, const T cost){
+        G[from].emplace_back(to, cost);
+        G[to].emplace_back(from, cost, --G[from].end());
+        G[from].back().rev = --G[to].end();
+    }
+    T solve(){
+        vector&lt;int&gt; rem_node(V), erase_check(V, 0);
+        iota(rem_node.begin(), rem_node.end(), 0);
+        vector&lt;info&gt; multiple_check(V);
+        for(int i = 0; i &lt; V; ++i) multiple_check[i] = info(inf);
+        while((int)rem_node.size() &gt; 1){
+            if(!contract(rem_node, erase_check)) return inf;
+            cleanup(rem_node, multiple_check);
+        }
+        return ans;
+    }
+};
+</pre>
+</div>
+<h3>verify 用の問題</h3>
+<p>
+verify していません(verify 問題を知らない)
+</p>
+<p>Atcoder : <a href=""></a>
+  <a href="">提出コード</a></p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>
