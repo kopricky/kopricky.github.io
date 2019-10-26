@@ -123,7 +123,7 @@ private:
     static uint inverse(int a, int m){
         int u[] = {a, 1, 0}, v[] = {m, 0, 1}, t;
         while(*v){
-            t = *u / *v; 
+            t = *u / *v;
             swap(u[0] -= t * v[0], v[0]), swap(u[1] -= t * v[1], v[1]), swap(u[2] -= t * v[2], v[2]);
         }
         return (u[1] % m + m) % m;
