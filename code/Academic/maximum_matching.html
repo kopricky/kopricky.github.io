@@ -68,7 +68,8 @@ Shwartz-Zippel Lemma より $\det T$ が恒等的に $0$ でないのに上記�
 (注) $G$ の最大マッチングの数は $\mathrm{rank} (T) / 2$ に等しい($\mathrm{rank}$ が $r$ の交代行列は $r \times r$ の正則な主小行列を持つことから言える $\Rightarrow$ 補足 1). <br>
 <br>
 (構築の話) <br>
-構築だがグラフが完全マッチングを持つという条件を保ったまま縮小していくことをする. 愚直に全辺についてそれを除いたグラフが完全マッチングを持つかどうかを調べていくと $\O (n^5)$ かかる. <br>
+構築だがグラフが完全マッチングを持つという条件を保ったまま縮小していくことをする. ただし $G$ が完全マッチングを持たない場合は Gaussian elimination を用いて Tutte 行列の中に含まれる $\mathrm{rank} (T) \times \mathrm{rank} (T)$ の正則な主小行列を事前に求めておく.
+愚直に全辺についてそれを除いたグラフが完全マッチングを持つかどうかを調べていくと $\O (n^5)$ かかる. <br>
 行列 $T$ から $\{ u_1, \ldots, u_k \} \subseteq [n]$ に含まれる添字の行および $\{ v_1, \ldots, v_l \} \subseteq [n]$ に含まれる添字の列を削除したものを $T_{\{ u_1 \ldots, u_k \} , \{ v_1 \ldots, v_l \} }$ と書くことにする. $\det T$ を $1$ 行目で余因子展開したものを<br>
 <img src="./texclip20190503140758.png" height="100" width="300"> と表せ, $\det T \neq 0$ なら $T_{1,j} \neq 0$(辺 $(1, j)$ が存在する) で $\det (T_{ \{ 1 \} ,\{ j \} }) \neq 0$ となるものが存在する. <br>
 また $\det (T_{\{ 1 \} ,\{ j\} }) \neq 0 \Rightarrow \det (T_{ \{ 1,j \} ,\{ 1,j \} }) \neq 0$ より辺 $(1, j)$ を取り除いた後のグラフは完全マッチングを持つ($\Rightarrow$ 補足 2). <br>
@@ -76,7 +77,6 @@ Shwartz-Zippel Lemma より $\det T$ が恒等的に $0$ でないのに上記�
 これを再帰的に繰り返すことで $\O (n^4)$ で構築することが可能になった(正確には $\O (n^{ω+1})$ time). <br>
 ここで逆行列計算を毎回する必要はなく $T^{-1}$ をブロック行列と見てその Schur 補行列が $\left( T_ { \{ i,j \} ,\{ i,j \} } \right) ^ {-1}$ と一致するので辺を取り除いた後の Tutte 行列の逆行列は $T^{-1}$ が求まっていると $\O (n^2)$ 時間で構築することができる.
 つまり全体で $\O (n^3)$ time で計算可能. ちなみにもっと頑張ると $\O (n^ω)$ まで落ちるらしい<br>
-(注) 完全マッチングを持たないグラフの場合 $n - \mathrm{rank} (T)$ 個の頂点を加えて元の全頂点に辺を貼ることで完全マッチングを持つグラフに変形可能(構成したマッチングのうち元からあった辺のものが最大マッチングに対応). <br>
 <br>
 以下では交代行列の性質を用いて導かれる本文中の自明でない結果 (補足 1), (補足 2) について証明を雑に記す. <br>
 証明は (補足 1) の方は随分前に何かの資料で見て知ったのだが、出典を覚えていない. (補足 2) の方は参考資料に基づく. <br>
@@ -118,7 +118,7 @@ class ModInt {
 private:
     uint v;
     static uint norm(const uint&amp; x){ return x &lt; mod ? x : x - mod; }
-    static ModInt make(const uint&amp; x){ ModInt m; return m.v = x, m; }
+	static ModInt make(const uint&amp; x){ ModInt m; return m.v = x, m; }
     static ModInt inv(const ModInt&amp; x){ return make(inverse(x.v, mod)); }
     static uint inverse(int a, int m){
         int u[] = {a, 1, 0}, v[] = {m, 0, 1}, t;
@@ -220,16 +220,17 @@ public:
         }
         return X;
     }
-    int rank(){
+    vector&lt;int&gt; rank(){
         mat&lt;T&gt; X(r, c);
         for(int i = 0; i &lt; r; i++){
             for(int j = 0; j &lt; c; j++){
                 X[i][j] = (*this)[i][j];
             }
         }
+        vector&lt;int&gt; index;
         int res = 0;
         for(int i = 0; i &lt; c; i++){
-            if(res == r) return res;
+            if(res == r) break;
             if(!X[res][i]){
                 int pivot = res + 1;
                 for(; pivot &lt; r; pivot++){
@@ -248,9 +249,9 @@ public:
                     X[j][k] -= X[res][k] * X[j][i];
                 }
             }
-            res++;
+            index.push_back(i), ++res;
         }
-        return res;
+        return index;
     }
     bool det_zero() const {
         mat&lt;T&gt; X(r);
@@ -323,13 +324,13 @@ public:
 
 class Matching {
 private:
-    int V;
+    const int V;
     vector&lt;pair&lt;int, int&gt; &gt; es;
-    vector&lt;int&gt; cnt;
+    vector&lt;int&gt; index, cnt;
     random_device rnd;
-    mt19937 mt;
+	mt19937 mt;
     uniform_int_distribution&lt;&gt; randval;
-    static constexpr int LOOP = 2;
+    static constexpr int LOOP = 1;
     static constexpr uint mod = 1000000007;
     mat&lt;ModInt&lt;mod&gt; &gt; inverse_22(const int id, const mat&lt;ModInt&lt;mod&gt; &gt;&amp; invT){
         ModInt&lt;mod&gt; invdev = (ModInt&lt;mod&gt;)1 / (invT[0][0]*invT[id][id] - invT[0][id]*invT[id][0]);
@@ -353,29 +354,28 @@ private:
         }
         invT = N_12_12 - N_12_3n * inverse_22(id, invT) * N_3n_12;
     }
-    vector&lt;pair&lt;int, int&gt; &gt; find_matching(const mat&lt;ModInt&lt;mod&gt; &gt;&amp; T){
+    void find_matching(const mat&lt;ModInt&lt;mod&gt; &gt;&amp; T){
         int sz = T.row();
-        vector&lt;pair&lt;int, int&gt; &gt; res;
         mat&lt;ModInt&lt;mod&gt; &gt; invT = T.inverse();
         vector&lt;int&gt; vset(sz); iota(vset.begin(), vset.end(), 0);
         for(int i = sz; i &gt; 0; i -= 2){
             for(int j = 1; j &lt; i; j++){
                 if(invT[0][j] &amp;&amp; T[vset[0]][vset[j]]){
-                    if(vset[j] &lt; V) res.emplace_back(vset[0], vset[j]);
+                    ans.emplace_back(index[vset[0]], index[vset[j]]);
                     vset.erase(vset.begin()), vset.erase(vset.begin() + j - 1);
                     schur_complement(j, invT);
                     break;
                 }
             }
         }
-        return res;
     }
 
 public:
-    Matching(int node_size) : V(node_size), cnt(V+1, 0), mt(rnd()), randval(0, mod-1){}
-    void add_edge(int u, int v){
-        es.push_back(make_pair(u, v));
-    }
+    vector&lt;pair&lt;int, int&gt; &gt; ans;
+
+    Matching(const int node_size)
+        : V(node_size), cnt(V + 1, 0), mt(rnd()), randval(1, mod - 1){}
+    void add_edge(const int u, const int v){ es.emplace_back(u, v); }
     bool perfect_matchching(){
         for(int i = 0; i &lt; LOOP; i++){
             mat&lt;ModInt&lt;mod&gt; &gt; A(V);
@@ -394,22 +394,33 @@ public:
                 int r = randval(mt);
                 A[e.first][e.second] = r, A[e.second][e.first] = -r;
             }
-            cnt[A.rank()]++;
+            vector&lt;int&gt; res = A.rank();
+            ++cnt[res.size()];
+            if((size_t)(max_element(cnt.begin(), cnt.end()) - cnt.begin()) == res.size()){
+                index = move(res);
+            }
         }
         return (int)(max_element(cnt.begin(), cnt.end()) - cnt.begin()) / 2;
     }
-    vector&lt;pair&lt;int, int&gt; &gt; find_maximum_matching(){
-        int res = maximum_matchching();
-        int newV = 2*(V-res);
-        for(int i = 0; i &lt; V; i++) for(int j = V; j &lt; newV; j++) add_edge(i, j);
+    int find_maximum_matching(){
+        const int sz = maximum_matchching();
+        vector&lt;pair&lt;int, int&gt; &gt; ans_tmp;
+        vector&lt;int&gt; unzip(V, -1);
+        for(int i = 0; i &lt; 2 * sz; ++i) unzip[index[i]] = i;
         for(int i = 0; i &lt; LOOP; i++){
-            mat&lt;ModInt&lt;mod&gt; &gt; A(newV);
+            mat&lt;ModInt&lt;mod&gt; &gt; A(2 * sz);
             for(auto e : es){
+                const int u = unzip[e.first], v = unzip[e.second];
+                if(u &lt; 0 || v &lt; 0) continue;
                 int r = randval(mt);
-                A[e.first][e.second] = r, A[e.second][e.first] = -r;
+                A[u][v] = r, A[v][u] = -r;
             }
-            if(!A.det_zero()) return find_matching(A);
+            if(!A.det_zero()){
+                find_matching(A);
+                break;
+            }
         }
+        return sz;
     }
 };
 </pre>
