@@ -70,12 +70,12 @@ Shwartz-Zippel Lemma より $\det T$ が恒等的に $0$ でないのに上記�
 (構築の話) <br>
 構築だがグラフが完全マッチングを持つという条件を保ったまま縮小していくことをする. ただし $G$ が完全マッチングを持たない場合は Gaussian elimination を用いて Tutte 行列の中に含まれる $\mathrm{rank} (T) \times \mathrm{rank} (T)$ の正則な主小行列を事前に求めておく.
 愚直に全辺についてそれを除いたグラフが完全マッチングを持つかどうかを調べていくと $\O (n^5)$ かかる. <br>
-行列 $T$ から $\{ u_1, \ldots, u_k \} \subseteq [n]$ に含まれる添字の行および $\{ v_1, \ldots, v_l \} \subseteq [n]$ に含まれる添字の列を削除したものを $T_{\{ u_1 \ldots, u_k \} , \{ v_1 \ldots, v_l \} }$ と書くことにする. $\det T$ を $1$ 行目で余因子展開したものを<br>
-<img src="./texclip20190503140758.png" height="100" width="300"> と表せ, $\det T \neq 0$ なら $T_{1,j} \neq 0$(辺 $(1, j)$ が存在する) で $\det (T_{ \{ 1 \} ,\{ j \} }) \neq 0$ となるものが存在する. <br>
-また $\det (T_{\{ 1 \} ,\{ j\} }) \neq 0 \Rightarrow \det (T_{ \{ 1,j \} ,\{ 1,j \} }) \neq 0$ より辺 $(1, j)$ を取り除いた後のグラフは完全マッチングを持つ($\Rightarrow$ 補足 2). <br>
-あとは $\det (T_{ \{ 1 \} ,\{ j \} }) \neq 0$ となるような $j$ をどうやって見つけてくるかだが <img src="./texclip20191024014222.png" height="100" width="250"> より, $\det (T_ { \{ 1 \} ,\{ j \} }) \neq 0 \Leftrightarrow \left( T^{-1} \right) _{i,j} \neq 0$ が得られるので $T$ の逆行列を計算することで $j$ を求めることができる. <br>
+行列 $T$ から $\{ u_1, \ldots, u_k \} \subseteq [n]$ に含まれる添字の行および $\{ v_1, \ldots, v_l \} \subseteq [n]$ に含まれる添字の列を削除したものを $T_{ \langle u_1 \ldots, u_k \rangle , \langle v_1 \ldots, v_l \rangle }$ と書くことにする. $\det T$ を $1$ 行目で余因子展開したものを
+$\det (T) = \sum_{j=1}^n (-1)^{i+j} T_{1, j} \det (T_{\langle 1 \rangle, \langle j \rangle})$ と表せ, $\det T \neq 0$ なら $T_{1,j} \neq 0$(辺 $(1, j)$ が存在する) で $\det (T_{ \langle 1 \rangle ,\langle j \rangle }) \neq 0$ となるものが存在する. <br>
+また $\det (T_{\langle 1 \rangle ,\langle j\rangle }) \neq 0 \Rightarrow \det (T_{ \langle 1,j \rangle ,\langle 1,j \rangle }) \neq 0$ より辺 $(1, j)$ を取り除いた後のグラフは完全マッチングを持つ($\Rightarrow$ 補足 2). <br>
+あとは $\det (T_{ \langle 1 \rangle ,\langle j \rangle }) \neq 0$ となるような $j$ をどうやって見つけてくるかだが $(T^{-1})_{i, j} = (-1)^{i+j} \cdot \frac{\det \left( {T_{\langle i \rangle, \langle j \rangle}} \right)}{\det \left( T \right) }$ より, $\det (T_ { \langle 1 \rangle ,\langle j \rangle }) \neq 0 \Leftrightarrow \left( T^{-1} \right) _{i,j} \neq 0$ が得られるので $T$ の逆行列を計算することで $j$ を求めることができる. <br>
 これを再帰的に繰り返すことで $\O (n^4)$ で構築することが可能になった(正確には $\O (n^{ω+1})$ time). <br>
-ここで逆行列計算を毎回する必要はなく $T^{-1}$ をブロック行列と見てその Schur 補行列が $\left( T_ { \{ i,j \} ,\{ i,j \} } \right) ^ {-1}$ と一致するので辺を取り除いた後の Tutte 行列の逆行列は $T^{-1}$ が求まっていると $\O (n^2)$ 時間で構築することができる.
+ここで逆行列計算を毎回する必要はなく $T^{-1}$ をブロック行列と見てその Schur 補行列が $\left( T_ { \langle i,j \rangle ,\langle i,j \rangle } \right) ^ {-1}$ と一致するので辺を取り除いた後の Tutte 行列の逆行列は $T^{-1}$ が求まっていると $\O (n^2)$ 時間で構築することができる.
 つまり全体で $\O (n^3)$ time で計算可能. ちなみにもっと頑張ると $\O (n^ω)$ まで落ちるらしい<br>
 <br>
 以下では交代行列の性質を用いて導かれる本文中の自明でない結果 (補足 1), (補足 2) について証明を雑に記す. <br>
@@ -88,16 +88,16 @@ $2$ つ目の等式は $k = | \{ i \mid \sigma(i) = i \} |$ について足し�
 つまり $\exists X \subseteq [n], |X| = r$ について $\det (A_{X, X}) \neq 0$ が成り立つ.
 <br>
 (補足 2) <br>
-$\det (T_{\{ 1 \} ,\{ j\} }) \neq 0 \Rightarrow \det (T_{ \{ 1,j \} ,\{ 1,j \} }) \neq 0$ を示す. <br>
+$\det (T_{\langle 1 \rangle ,\langle j\rangle }) \neq 0 \Rightarrow \det (T_{ \langle 1,j \rangle ,\langle 1,j \rangle }) \neq 0$ を示す. <br>
 初めに以下に証明に用いる交代行列に関するフロベニウスの定理を記す. <br>
 $A \in \mathbb{R}^{n \times n}$ を交代行列とし, $\alpha, \beta \subseteq [n]$ を $|\alpha| = |\beta| = \mathrm{rank}(A)$ を満たすインデックスの集合とする.
 このとき $\det (A_{\alpha, \alpha}) \det (A_{\beta, \beta}) = (-1)^{|\alpha|} \det (A_{\alpha, \beta})^2$ が成り立つ. <br>
 これを用いて定理を示す. <br>
 まず $j = 2$ として一般性を失わない.
-$n$ が奇数のとき交代行列の行列式は $0$ となるので $T_{\{ 1 \}, \{ 1 \} } = 0$ であるが, 仮定より $T_{\{ 1 \}, \{ 2 \} } \neq 0$ なので
-$T_{\{ 1 \}, \{ 1, 2 \} }$ は列フルランクである. よって $\mathrm{rank}\ T_{\{ 1 \}, \{ 1 \} }$ は $n-2$ となる. さらに $\beta = \{ 3, \cdots, n \}$ としたとき, $\exists \alpha \subseteq \{ 2, \cdots, n \}, |\alpha | = n - 2$
+$n$ が奇数のとき交代行列の行列式は $0$ となるので $T_{\langle 1 \rangle, \langle 1 \rangle } = 0$ であるが, 仮定より $T_{\langle 1 \rangle, \langle 2 \rangle } \neq 0$ なので
+$T_{\langle 1 \rangle, \langle 1, 2 \rangle }$ は列フルランクである. よって $\mathrm{rank} \left( T_{\langle 1 \rangle, \langle 1 \rangle } \right)$ は $n-2$ となる. さらに $\beta = \{ 3, \cdots, n \}$ としたとき, $\exists \alpha \subseteq \{ 2, \cdots, n \}, |\alpha | = n - 2$
 で $A_{\alpha, \beta}$ が正則となるようなものが存在することも分かる.
-最後にフロベニウスの定理より, $\det (A_{\alpha, \beta}) \neq 0 \Rightarrow \det (A_{\beta, \beta}) \neq 0$ が導けるので確かに $\det \left( T_{\{ 1, 2 \}, \{ 1, 2 \} } \right) \neq 0$ が言える.
+最後にフロベニウスの定理より, $\det (A_{\alpha, \beta}) \neq 0 \Rightarrow \det (A_{\beta, \beta}) \neq 0$ が導けるので確かに $\det \left( T_{\langle 1, 2 \rangle, \langle 1, 2 \rangle } \right) \neq 0$ が言える.
 </p>
 <p>
 (関数)<br>
@@ -114,14 +114,14 @@ find_maximum_matching() : 最大マッチングの数を計算し, その組を�
 <input type="checkbox" id="label" class="csscode" />
 <label for="label"></label>
 <pre class="prettyprint linenums">
-template &lt;uint mod&gt;
+template &lt;unsigned int mod&gt;
 class ModInt {
 private:
-    uint v;
-    static uint norm(const uint&amp; x){ return x &lt; mod ? x : x - mod; }
-	static ModInt make(const uint&amp; x){ ModInt m; return m.v = x, m; }
+    unsigned int v;
+    static unsigned int norm(const unsigned int&amp; x){ return x &lt; mod ? x : x - mod; }
+	static ModInt make(const unsigned int&amp; x){ ModInt m; return m.v = x, m; }
     static ModInt inv(const ModInt&amp; x){ return make(inverse(x.v, mod)); }
-    static uint inverse(int a, int m){
+    static unsigned int inverse(int a, int m){
         int u[] = {a, 1, 0}, v[] = {m, 0, 1}, t;
         while(*v){
             t = *u / *v;
@@ -160,7 +160,7 @@ public:
     bool operator!=(const ModInt&amp; val) const { return !(*this == val); }
     bool operator==(const long long val) const { return v == norm(val % mod + mod); }
     bool operator!=(const long long val) const { return !(*this == val); }
-    uint operator()() const { return v; }
+    unsigned int operator()() const { return v; }
     friend ModInt operator+(const long long val, const ModInt&amp; n) { return n + val; }
     friend ModInt operator-(const long long val, const ModInt&amp; n) { return ModInt{val - n()}; }
     friend ModInt operator*(const long long val, const ModInt&amp; n) { return n * val; }
@@ -168,7 +168,7 @@ public:
     friend bool operator==(const long long val, const ModInt&amp; n) { return n == val; }
     friend bool operator!=(const long long val, const ModInt&amp; n) { return !(val == n); }
     friend istream&amp; operator&gt;&gt;(istream&amp; is, ModInt&amp; n){
-        uint v;
+        unsigned int v;
         return is &gt;&gt; v, n = v, is;
     }
     friend ostream&amp; operator&lt;&lt;(ostream&amp; os, const ModInt&amp; n){ return (os &lt;&lt; n()); }
@@ -332,7 +332,7 @@ private:
     mt19937 mt;
     uniform_int_distribution&lt;&gt; randval;
     static constexpr int LOOP = 1;
-    static constexpr uint mod = 1000000007;
+    static constexpr unsigned int mod = 1000000007;
     mat&lt;ModInt&lt;mod&gt; &gt; inverse_22(const int id, const mat&lt;ModInt&lt;mod&gt; &gt;&amp; invT){
         ModInt&lt;mod&gt; invdev = (ModInt&lt;mod&gt;)1 / (invT[0][0]*invT[id][id] - invT[0][id]*invT[id][0]);
         mat&lt;ModInt&lt;mod&gt; &gt; invN_3n_3n(2, 2);
