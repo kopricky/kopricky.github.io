@@ -64,7 +64,7 @@ $\newcommand{\O}{\mathrm{O}}$
 グラフ $G$ が完全マッチングを持つことと $G$ の Tutte 行列の行列式が恒等的に非ゼロであることの同値性を用いる. $\det$ 計算における置換に注目すると奇閉路(奇数位数の軌道)の存在する項は逆向きの項と打ち消し合って消え, 偶閉路のみからなる項のみ残りうる. もし偶閉路のみからなる非ゼロの項が残った場合はグラフ $G$ 上で対応する完マを取ることができるので "Tutte 行列の行列式が非ゼロ $\rightarrow$ $G$ は完マを持つ" が成り立つ.<br>
 また逆にグラフ $G$ に完マが存在するならそれに対応して Tutte 行列の行列式に偶閉路のみからなる非ゼロ項が存在し, その項は他の項と打ち消し合って消えることはない. よって "$G$ は完マを持つ $\rightarrow$ Tutte 行列の行列式が非ゼロ" も成り立つ. <br>
 よって $\O (n^2)$ 次の多変数多項式($\det T$) が恒等的に $0$ であることが判定できれば良いのだが deterministic に行おうとすると効率的に解けないため各変数に乱数を代入し, その結果が $0$ に等しいかどうかで判定する($\mathbb{Z}_p$ 上で行う). <br>
-Shwartz-Zippel Lemma より $\det T$ が恒等的に $0$ でないのに上記の計算結果が $0$ になってしまう(完全マッチングを持つのに持たないと判定する)確率は $\O (n^2 / p)$ となり, 例えば $n = 10^2$, $p = 10^9 + 7$ のときは $1$ 度の試行で十分である(念のため $LOOP = 2$ にしている). <br>
+Shwartz-Zippel Lemma より $\det T$ が恒等的に $0$ でないのに上記の計算結果が $0$ になってしまう(完全マッチングを持つのに持たないと判定する)確率は $\O (n^2 / p)$ となり, 例えば $n = 10^2$, $p = 10^9 + 7$ のときは $1$ 度の試行で十分である(不安なら $LOOP$ の回数を大きくする). <br>
 (注) $G$ の最大マッチングの数は $\mathrm{rank} (T) / 2$ に等しい($\mathrm{rank}$ が $r$ の交代行列は $r \times r$ の正則な主小行列を持つことから言える $\Rightarrow$ 補足 1). <br>
 <br>
 (構築の話) <br>
@@ -421,9 +421,9 @@ AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2347">Su
   <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3804014#1">提出コード</a><br>
 最大マッチングの判定および構築の verify<br>
 Atcoder : <a href="https://joisc2016matching.contest.atcoder.jp/tasks/joisc2016matching_a">一般最大マッチング</a>
-  <a href="https://joisc2016matching.contest.atcoder.jp/submissions/5238195">提出コード</a>(非想定解のため TLE しています.)<br>
+  <a href="https://joisc2016matching.contest.atcoder.jp/submissions/8208685">提出コード</a><br>
 yosupo さんの library checker : <a href="https://judge.yosupo.jp/problem/general_matching">Matching on General Graph</a>
-  <a href="https://judge.yosupo.jp/submission/1027">提出コード</a>
+  <a href="https://judge.yosupo.jp/submission/1211">提出コード</a>
 </p>
 </section>
 
