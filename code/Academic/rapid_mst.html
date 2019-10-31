@@ -65,10 +65,8 @@ $\newcommand{\O}{\mathrm{O}}$
 ブルーフカ法を $\lceil \log \log n \rceil$ step 進めた後には高々頂点数 $n / \log n$ のグラフになっているのでそこからは高速版の
 Prim 法を用いることで残りを $\O (n + m)$ time で求めることができる. よって合計で $\O (m \log \log n)$ time. <br>
 もはや当然だが実測が目に見えて速くなることはない. <br>
-ちなみに現在の最速の最小全域木アルゴリズムの計算量は $\O (m \alpha (m, n))$ とかで Boruvka ベースの構成 + soft heap(キー値を恣意的に変更することで情報量を落としたヒープ的なもの)
-で何かをするということしか知らない.
 <br>
-(補足) <br>
+(補足 1) <br>
 他にも Yao 先生の $\O (m \log \log n)$ time アルゴリズムもある. <br>
 もしグラフの各辺がコストについてソートされていたなら Boruvka 法は $\O (n \log n + m)$ 時間で解ける.
 各頂点についてそれに隣接する最小コストの辺はその頂点に縮約された全頂点についてそれに隣接する最小コストの辺を見れば良い.
@@ -81,8 +79,21 @@ $1$ 回あたり $\O (1)$ の計算量で行う. <br>
 $\O (m / k)$. よって最小全域木を $\O (m + (m / k) \log n + n \log n)$ 時間で求めることができる. <br>
 最初に $\lceil \log \log n \rceil$ 回通常の Boruvka 法を行い, 頂点数を $n / \log n$ に落としたうえで上記の修正した Boruvka 法を動かすことで
 $\O (m \log \log n)$ 時間で最小全域木を求めることが可能になる. <br>
+この内容については CMU の Advanced Algoirthms の授業の Homework を実際に解いてみると分かる. (<a href="http://www.cs.cmu.edu/~15850/hws/h1.pdf">参考</a>) <br>
 <br>
-上記の内容については CMU の Advanced Algoirthms の授業の Homework を実際に解いてみると分かる. (<a href="http://www.cs.cmu.edu/~15850/hws/h1.pdf">参考</a>)
+(補足 2) <br>
+これより速いアルゴリズムとして Fredman-Tarjan の $\O (m \log^* n)$ アルゴリズムがある. "Fibonacci Heaps and Their Uses in Improved Network
+Optimization Algorithms" [Fredman, Tarjan 1987]<br>
+Prim 法は Fibonacci Heap を用いることで $\O (n \log n + m)$ 時間で行えるがこれを改良する.
+Fibonacci Heap は要素の削除にヒープのサイズを $U$ としたとき $\O (\log U)$ のならしコストがかかってしまう.
+Prim 法の場合 Fibonacci Heap に入っている要素の数は今保持している木に隣接している頂点の数に等しい.
+そこで保持している木に隣接する頂点の数があるしきい値を超えたら一旦そこで探索を終了してまだたどっていない新しい頂点から新たに木を構築していくみたいなことをする.
+そして全頂点がたどられたあと今まで構築してきた森を縮約し, サイズの小さくなったグラフの最小全域木をまた同様の操作を繰り返すことで求める.
+このとき森を構築し, 縮約した後のグラフについて最小全域木を求めるみたいな手順で最小全域木が得られることの正当性は Boruvka 法と同様にして示すことができる.
+各回でしきい値を適切に設定することで $\O (m \log^* n)$ を達成できる. <br>
+ちなみに現在の最速の最小全域木アルゴリズムの計算量は
+$\O (m \alpha (m, n))$ で Boruvka ベースの構成 + soft heap(キー値を恣意的に変更することで情報量を落としたヒープ的なもの)
+で何かをするということしか知らない. "A Minimum Spanning Tree Algorithm with Inverse-Ackermann Type Complexity" [Chazelle 2000]
 </p>
 <p>
 (関数)<br>

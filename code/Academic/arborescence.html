@@ -95,7 +95,7 @@ $\newcommand{\O}{\mathrm{O}}$
 ここで change cost の変更によって頂点 $v^{\ast}$ のヒープ内の要素のキー値が変わるが, 各キー値が一様に増える or 減るなのでヒープの構造自体に変化はないことに注意する.
 また $y$($\ge x a(k, x)$ ($k$ は定数, $a(k, x)$ はアッカーマン関数の逆関数)) 回の Find 操作, $x - 1$ 回の Union 操作からなる任意の操作列についてかかる総計算量は $\O (y)$ であることも知られていて,
 そして最終的にこのアルゴリズムにおいて $y$ は $\O (n \log n + m)$ となるので Union Find を用いて頂点をマージしたり,
-change cost を求めたりというのは $\O(n \log n + m)$ 回ででき, Union Find 部分にかかる計算量は問題ない.
+change cost を求めたりというのは $\O(n \log n + m)$ の計算量ででき, Union Find 部分にかかる計算量は問題ない.
 ただこれは根を大きい方に付ける + 経路圧縮を行った場合の Union Find の話なのでよくある $\O(m \log n)$ time の実装のように根を自由に取ることはできない(⇒ ポイント 4). <br>
 (ポイント 2) <br>
 Fibonacci Heap の move 操作は例えば要素 $e$ をヒープ $h1$ からヒープ $h2$ に移動させるとき $e$ を根とする部分木を $h1$ から削除し, $h2$ のヒープの根にすることを指す. このとき $h1$ について要素 $e$ の親が存在するなら子が $1$ つ減ったことになるのでもし mark されていたら
@@ -122,7 +122,7 @@ Union Find の根を自由に取れないことで特に最小全域有向木を
 "Worst-Case Analysis of Set Union Algorithms" [Tarjan, LEEUWEN 1984] に解析が載っているのを見つけ, これによると $m \ge n$ について $\O (m \log_{\lfloor 1 + m / n \rfloor} n)$ らしくまたこれはタイトであるらしい(険しい).
 正確には $m = \Omega(n \log n)$ について $\O(m \log_{\lfloor 1 + m / n \rfloor} n)$ がタイトであることが言えて初めて上記の予想が偽であることがわかるのだが, 解析をちゃんと読んでないがたぶん予想は偽っぽい. <br>
 つまるところ計算量のオーダーを変えずに根を自由に取るのは厳しく, 以下の実装では通常の計算は併合の工夫と経路圧縮の両方を用いた Union Find を用いて, 復元のためだけに超頂点を導入して頂点が縮約される関係を木構造で表現し,
-それを復元時にのみ用いることで $\O(n \log n + m)$ time で最小全域木の復元も含めて行うことができるようにしている. ただ実装が少々わかりにくくなってしまう &amp; めんどくさくなる. <br>
+それを復元時にのみ用いることで $\O(n \log n + m)$ time で最小全域有向木の復元も含めて行うことができるようにしている. ただ実装が少々わかりにくくなってしまう &amp; めんどくさくなる. <br>
 <br>
 結局以上の議論よりアルゴリズムは $\O(n \log n + m)$ time であることが言える.
 </p>
@@ -518,7 +518,7 @@ public:
 <p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_2_B">Minimum-Cost Arborescence</a>
   <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3868692#1">提出コード</a><br>
 yosupo さんの library checker : <a href="https://judge.yosupo.jp/problem/directedmst">Directed MST</a>
-  <a href="https://judge.yosupo.jp/submission/189">提出コード</a></p>
+  <a href="https://judge.yosupo.jp/submission/214">提出コード</a></p>
 </section>
 
 </div>
