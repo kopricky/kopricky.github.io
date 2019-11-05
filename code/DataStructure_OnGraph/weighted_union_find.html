@@ -104,7 +104,7 @@ public:
         w += weight(x), w -= weight(y);
         x = par[x], y = par[y];
         if(x == y) return;
-    	if(nrank[x] &lt; nrank[y]){
+        if(nrank[x] &lt; nrank[y]){
             swap(x,y);
             w = -w;
         }
