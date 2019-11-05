@@ -60,7 +60,7 @@ $\newcommand{\O}{\mathrm{O}}$
 <h2>Fibonacci Heap</h2>
 <h3>コードについての説明</h3>
 <p>
-単一始点最短経路の高速化のために考えられた手法で Dijkstra 法の計算量オーダーを改善できたり, 他にもプリム法や無向グラフの大域最小カットなどの計算量オーダーを改善できる.
+単一始点最短経路の高速化のために考えられたヒープで Dijkstra 法の計算量オーダーを改善できたり, 他にもプリム法や無向グラフの大域最小カットなどの計算量オーダーを改善できる.
 (<a href="./dijkstra_fheap.html">参考 1</a>, <a href="./prim_heap.html">参考 2</a>, <a href="./undirected_mincut.html">参考 3</a>) <br>
 一般的な二分ヒープとは異なり, push を $\O (1)$, pop(最小値削除) を ならし $\O (\log n)$ の時間計算量で行うことができる. <br>
 二分ヒープと比べて優位な点としてキーの値を減らす方向への更新(decrease_key) がならし $\O (1)$ の時間計算量で行えることが挙げられ, 上記のアルゴリズムについてもこの影響でオーダーが落ちる. またヒープの併合も簡単に行うことができる.<br>
@@ -90,8 +90,8 @@ fibonacci heap における delete_min, delete_key にかかるならし計算�
 delete, findmin などのクエリを $\O (1)$ で処理でき, さらに insert された要素の個数を $n$ としたときパラメーター $\epsilon$ について, insert にかかる計算量が $\O (\log 1/\epsilon )$, かつヒープ内の変更された key の値は高々 $\epsilon n$ 個のようにパラメタライズされる. <br>
 ここで comparison based model において sort にかかる時間計算量は決定木を用いた証明から $\Omega(n \log n)$ であることを思い出すと, $n$ 回のヒープ操作にかかる計算量は $\Omega (n \log n)$ である.
 つまり soft heap はヒープの操作にかかる計算量の情報理論的下界を下回る計算量を達成していることが分かる(繰り返しになるが soft heap はキー値を恣意的に変化させているので厳密にはヒープではない). <br>
-この soft heap は種々のアルゴリズムに応用されていて例えば最小全域木を最悪計算量 $\O(m \alpha(m, n))$ で求めるアルゴリズムなどに使われている(fibonacci heap では prim 法を用いて $\O (n \log n + m)$ time が限界だった).
-ブルーフカ法ベースで行っているらしいが論文を読んでいないので soft heap をどういう風に用いるかは知らない...(一応 <a href="https://en.wikipedia.org/wiki/Soft_heap">wikipedia の記事</a> の Application には soft heap を selection algorithm に応用する例が載っている.)
+この soft heap は種々のアルゴリズムに応用されていて例えば最小全域木を最悪計算量 $\O(m \alpha(m, n))$ で求めるアルゴリズムなどに使われている(fibonacci heap では prim 法を用いて $\O (n \log n + m)$ time とかが限界だった).
+論文を読んでいないのでどういう風に用いるかは知らない...(一応 <a href="https://en.wikipedia.org/wiki/Soft_heap">wikipedia の記事</a> の Application には soft heap を selection algorithm に応用する例が載っている.)
 </p>
 <p>
 時間計算量: push $\O (1)$, pop ならし $\O (\log n)$, decrease_key(キー値減算) ならし $\O (1)$, meld $\O (1)$
