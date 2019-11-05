@@ -104,7 +104,7 @@ public:
 };
 
 template&lt;typename T&gt; class Kruskal{
-private:
+public:
     struct edge{
         int u,v;
         T cost;
@@ -112,10 +112,8 @@ private:
             return cost &lt; another.cost;
         }
     };
-    int V;
     vector&lt;edge&gt; es;
-
-public:
+    int V;
     Kruskal(int node_size) : V(node_size){}
     void add_edge(int u,int v,T cost){
         es.push_back((edge){u,v,cost});
