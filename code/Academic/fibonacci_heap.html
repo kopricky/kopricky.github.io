@@ -83,8 +83,10 @@ Optimization Algorithms" [Fredman, Tarjan 1984] <br>
 一般的なならし計算量の解析と同様にならしコストは (実際にかかるコスト) + (ポテンシャルの差分) で計算され, ポテンシャルが増えることは後の計算のために貯金すること, 減ることは貯金していた分を使うことに対応している. <br>
 <br>
 (fibonacci heap 以降のヒープの(雑な)話) <br>
-fibonacci heap における delete_min, delete_key にかかるならし計算量を最悪計算量で実現するヒープとして relaxed heap がある(Driscoll, Gabow, Sharairman, Tarjan 1988).
-このヒープはその名の通り厳密にはヒープではなくヒープの条件を満たさないノードを $\log n$ 個くらい許すという条件を常に保つように更新をする. ただその影響で find_min には $\O (\log n)$ 時間がかかる. <br>
+fibonacci heap における push, delete_min, decrease_key にかかる各ならし計算量を最悪計算量で実現するヒープとして relaxed heap がある(Driscoll, Gabow, Sharairman, Tarjan 1988).
+このヒープはその名の通り厳密にはヒープではなくヒープの条件を満たさないノードを $\log n$ 個くらい許すという条件を常に保つように更新をする. ただ find_min には $\O (\log n)$ 時間がかかる.
+一応 Horrow heap(Hansen, Kaplan, Tarjan, Zwick 2015) も同じことができる. こちらは仕組みはとても簡単だけど計算量の解析が難解なヒープ.
+<br>
 他にもヒープ操作にかかる計算量の情報理論的下界を下回る計算量を実現したものとして soft heap がある(chazelle 2000).
 こちらはヒープ内の key の値を途中で変化させることで保持する要素の情報量を落としさらなる高速化を測るもので, 厳密にはヒープではない.
 delete, findmin などのクエリを $\O (1)$ で処理でき, さらに insert された要素の個数を $n$ としたときパラメーター $\epsilon$ について, insert にかかる計算量が $\O (\log 1/\epsilon )$, かつヒープ内の変更された key の値は高々 $\epsilon n$ 個のようにパラメタライズされる. <br>
