@@ -60,7 +60,7 @@ $\newcommand{\O}{\mathrm{O}}$
 <h2>van Emde Boas Tree</h2>
 <h3>コードについての説明</h3>
 <p>
-van Emde Boas Tree の実装. van Emde Boas Tree は $[0, U)$ 内の要素について
+van Emde Boas Tree (vEB 木)の実装. van Emde Boas Tree は $[0, U)$ 内の要素について
  insert, delete, prdecessor, successor クエリに最悪計算量 $\O (\log \log U)$ で答えるデータ構造で, その空間計算量 $\O (U)$ である. <br>
 y fast trie と比べて実装が楽かつ最悪計算量を保証している点が優れている. おそらく実測もこちらのほうが速いが, 空間計算量が要素数ではなく, 値域分だけ必要である点が劣っている. <br>
 実装は <a href="http://web.stanford.edu/class/archive/cs/cs166/cs166.1166/lectures/14/Slides14.pdf">こちらの資料</a> を参考にした. <br>

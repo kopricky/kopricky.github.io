@@ -75,8 +75,8 @@ template&lt;typename T&gt; class SyntaxTree {
 private:
     class node {
     public:
-        int opr;
-        T val;
+        int opr; // the type of operations
+        T val; // the result of its subtree
         node *left, *right;
         node(int opr_, T val_, node *lc, node *rc)
             : opr(opr_), val(val_), left(lc), right(rc){};
