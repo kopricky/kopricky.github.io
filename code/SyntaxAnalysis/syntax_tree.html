@@ -57,7 +57,7 @@ $\newcommand{\O}{\mathrm{O}}$
 <div id="contents">
 
 <section>
-<h2>Syntax Tree</h2>
+<h2>Constructing the Syntax Tree</h2>
 <h3>コードについての説明</h3>
 <p>
 計算式をパースして構文木を構築するアルゴリズム. <br>
@@ -127,8 +127,10 @@ private:
 
 public:
     SyntaxTree(const string&amp; s){
-        func[0] = [&amp;](const T x, const T y){ return x + y; }, func[1] = [&amp;](const T x, const T y){ return x - y; };
-        func[2] = [&amp;](const T x, const T y){ return x * y; }, func[3] = [&amp;](const T x, const T y){ return x / y; };
+        func[0] = [&amp;](const T x, const T y){ return x + y; };
+        func[1] = [&amp;](const T x, const T y){ return x - y; };
+        func[2] = [&amp;](const T x, const T y){ return x * y; };
+        func[3] = [&amp;](const T x, const T y){ return x / y; };
         int pos = 0;
         root = expr(s, pos);
     }
