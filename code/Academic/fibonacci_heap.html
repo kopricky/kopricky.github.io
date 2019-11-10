@@ -83,11 +83,12 @@ Optimization Algorithms" [Fredman, Tarjan 1984] <br>
 一般的なならし計算量の解析と同様にならしコストは (実際にかかるコスト) + (ポテンシャルの差分) で計算され, ポテンシャルが増えることは後の計算のために貯金すること, 減ることは貯金していた分を使うことに対応している. <br>
 <br>
 (fibonacci heap 以降のヒープの(雑な)話) <br>
-fibonacci heap における push, delete_min, decrease_key にかかる各ならし計算量を最悪計算量で実現するヒープとして relaxed heap がある(Driscoll, Gabow, Sharairman, Tarjan 1988).
-このヒープはその名の通りヒープの条件を緩めたもので子の要素は親の要素より小さくないという条件を満たさないノードを $\log n$ 個くらい許すことにして更新をする. ただ find_min には $\O (\log n)$ 時間がかかる.
-一応 Horrow heap(Hansen, Kaplan, Tarjan, Zwick 2015) も同じことができる. こちらは仕組みは簡単だけど計算量の解析が難解なヒープ.
+fibonacci heap における push, delete_min, decrease_key にかかる各ならし計算量を最悪計算量で実現するヒープとして relaxed heap がある([Driscoll, Gabow, Sharairman, Tarjan 1988]).
+このヒープはその名の通りヒープの条件を緩めたもので子の要素は親の要素より小さくないという条件を満たさないノードを $\log n$ 個くらい許すことにして更新をする. ただ find_min には $\O (\log n)$ 時間がかかるのと merge もならし $\O (\log n)$ かかる.
+一応 [Brodal 1996] で削除以外の操作がすべて最悪定数時間, 削除は最悪 $\O (\log n)$ 時間を達成する comparison based のヒープが紹介されていて漸近的に最適である(ただかなりややこしそう).
+<!-- 一応 Hollow heap(Hansen, Kaplan, Tarjan, Zwick 2015) も同じことができる. こちらは仕組みは簡単だけど計算量の解析が難解なヒープ. -->
 <br>
-他にもヒープ操作にかかる計算量の情報理論的下界を下回る計算量を実現したものとして soft heap がある(chazelle 2000).
+他にもヒープ操作にかかる計算量の情報理論的下界を下回る計算量を実現したものとして soft heap がある([chazelle 2000]).
 こちらはヒープ内の key の値を途中で変化させることで保持する要素の情報量を落としさらなる高速化を測るもので, 厳密にはヒープではないし, もっというと relaxed heap と違い insert や delete_min クエリを正しく処理することはできない.
 ただ key の値をある程度恣意的に変化させて良いという条件の下で delete, findmin などのクエリを $\O (1)$ で処理でき, さらに insert された要素の個数を $n$ としたときパラメーター $\epsilon$ について, insert にかかる計算量が $\O (\log 1/\epsilon )$, かつヒープ内の変更された key の値は高々 $\epsilon n$ 個のようにパラメタライズされる. <br>
 ここで comparison based model において sort にかかる時間計算量は決定木を用いた証明から $\Omega(n \log n)$ であることを思い出すと, $n$ 回のヒープ操作にかかる計算量は $\Omega (n \log n)$ である.
