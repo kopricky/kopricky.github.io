@@ -68,7 +68,7 @@ Unionf Find は競技プログラミングでは基本的なアルゴリズム�
 ここで $\alpha(m, n)$ はアッカーマン関数 $A(i, j)$ を用いて以下のように定義される. <br>
 まず増加の非常に急激な関数であるアッカーマン関数は $A(i, j)$ は以下のように再帰的に定義される. <br>
 $A(1, j) = 2^j (j \ge 1)$, $A(i, 1) = A(i - 1, 2) (i \ge 2)$, $A(i, j) = A(i - 1, A(i, j - 1)) (i, j \ge 2)$ <br>
-このとき $\alpha(m, n) = \min \{ i \ge 1 \mid A(i, 4 \lceil m / n \rceil) > \log n \}$ と定義される. これを見ると $m = \Omega(n \log \log n)$ で $\alpha(m, n) = 1$, $m = \Omega(n \mathrm{slog} n)$ で $\alpha(m, n) \le 2$ みたいなことが分かり,
+このとき $\alpha(m, n) = \min \{ i \ge 1 \mid A(i, 4 \lceil m / n \rceil) > \log n \}$ と定義される. これを見ると $m = \Omega(n \log \log n)$ で $\alpha(m, n) = 1$, $m = \Omega(n \log^* n)$ で $\alpha(m, n) \le 2$ みたいなことが分かり,
 要をするにアッカーマン関数の逆関数 $\alpha(m, n)$ は実用上定数と考えてよい.. <br>
 次に $a(i, n) = \min \{ j \ge 1 \mid A(i, j) > \log n \}$ を定義する.
 このとき任意の正整数 $k$(定数) について $m (\ge n a(k, n))$ 回の Find 操作, $n$ 回の Union 操作のクエリ列を処理するのにかかる時間は $\O (m)$ time であることも言える($\alpha(n a(k, n), n) \le k$ より).
