@@ -57,32 +57,152 @@ $\newcommand{\O}{\mathrm{O}}$
 <div id="contents">
 
 <section>
-<h2>アルゴリズム名</h2>
+<h2>Making Heaps Meldable</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
+元論文は "Melding priority queues" [Mendelson, Tarjan, Thorup, Zwick 2004].
 </p>
 <p>
 (関数)<br>
 add_edge(): 辺を追加する <br>
 </p>
 <p>
-時間計算量: O(mlogn)
+時間計算量: insert, meld ならし $\O (1)$, find_min $\O (1)$, erase ならし $\O \left( pq(n) \alpha(n, n / pq(n)) \right)$
 </p>
 <h3>コード</h3>
 <div class="codebox">
 <input type="checkbox" id="label" class="csscode" />
 <label for="label"></label>
 <pre class="prettyprint linenums">
-あ
+template&lt;typename _Key, class _Compare=less&lt;_Key&gt; &gt; class BaseHeap {
+private:
+    multiset&lt;_Key, _Compare&gt; heap;
+
+public:
+    BaseHeap(){}
+    bool empty() const {
+        return heap.empty();
+    }
+    void insert(const _Key&amp; key){
+        heap.insert(key);
+    }
+    void erase(const _Key&amp; key){
+        heap.erase(heap.find(key));
+    }
+    const _Key&amp; find_min() const {
+        return *heap.begin();
+    }
+};
+
+template&lt;typename _Key, class _Compare=less&lt;_Key&gt; &gt; class MeldableHeapNode {
+private:
+    BaseHeap&lt;_Key, _Compare&gt; bheap;
+    MeldableHeapNode *par;
+    unsigned int rank;
+
+public:
+    MeldableHeapNode(const _Key&amp; key) : par(this), rank(0u){
+        bheap.insert(key);
+    }
+    bool empty() const {
+        return bheap.empty();
+    }
+    MeldableHeapNode*&amp; get_parent(){
+        return par;
+    }
+    MeldableHeapNode*&amp; get_grandparent(){
+        return par-&gt;get_parent();
+    }
+    unsigned int&amp; get_rank(){
+        return rank;
+    }
+    bool is_root() const {
+        return this == par;
+    }
+    void insert(const _Key&amp; key){
+        bheap.insert(key);
+    }
+    void erase(const _Key&amp; key){
+        bheap.erase(key);
+    }
+    const _Key&amp; find_min() const {
+        return bheap.find_min();
+    }
+};
+
+template&lt;typename _Key, class _Compare=less&lt;_Key&gt; &gt; class MeldableHeaps {
+private:
+    stack&lt;MeldableHeapNode&lt;_Key, _Compare&gt;*&gt; free_pointer;
+    void cut_path(MeldableHeapNode&lt;_Key, _Compare&gt; *cur_heap){
+        if(!cur_heap-&gt;is_root()){
+            cut_path(cur_heap-&gt;get_parent());
+            unhang(cur_heap, cur_heap-&gt;get_parent());
+        }
+    }
+    void compress_path(MeldableHeapNode&lt;_Key, _Compare&gt; *cur_heap){
+        if(!cur_heap-&gt;is_root()){
+            compress_path(cur_heap-&gt;get_parent());
+            hang(cur_heap, cur_heap-&gt;get_grandparent());
+        }
+    }
+    void hang(MeldableHeapNode&lt;_Key, _Compare&gt; *heap1,
+                                            MeldableHeapNode&lt;_Key, _Compare&gt; *heap2){
+        if(!heap1-&gt;empty()) heap2-&gt;insert(heap1-&gt;find_min());
+        heap1-&gt;get_parent() = heap2;
+    }
+    void unhang(MeldableHeapNode&lt;_Key, _Compare&gt; *heap1,
+                                            MeldableHeapNode&lt;_Key, _Compare&gt; *heap2){
+        heap2-&gt;erase(heap1-&gt;find_min());
+    }
+
+public:
+    MeldableHeaps(){}
+    ~MeldableHeaps(){
+        while(!free_pointer.empty()){
+            MeldableHeapNode&lt;_Key, _Compare&gt; *heap = free_pointer.top();
+            free_pointer.pop();
+            delete heap;
+        }
+    }
+    MeldableHeapNode&lt;_Key, _Compare&gt; *make_heap(const _Key&amp; key){
+        free_pointer.push(new MeldableHeapNode&lt;_Key, _Compare&gt;(key));
+        return free_pointer.top();
+    }
+    MeldableHeapNode&lt;_Key, _Compare&gt; *insert(MeldableHeapNode&lt;_Key, _Compare&gt; *heap,
+                                                const _Key&amp; key){
+        assert(heap-&gt;is_root());
+        MeldableHeapNode&lt;_Key, _Compare&gt; *return_heap = make_heap(key);
+        meld(heap, return_heap);
+        return return_heap;
+    }
+    void erase(MeldableHeapNode&lt;_Key, _Compare&gt; *key_heap, const _Key&amp; key){
+        cut_path(key_heap);
+        key_heap-&gt;erase(key);
+        compress_path(key_heap);
+    }
+    const _Key&amp; find_min(MeldableHeapNode&lt;_Key, _Compare&gt; *heap){
+        assert(heap-&gt;is_root() &amp;&amp; !heap-&gt;empty());
+        return heap-&gt;find_min();
+    }
+    MeldableHeapNode&lt;_Key, _Compare&gt; *meld(MeldableHeapNode&lt;_Key, _Compare&gt; *heap1,
+                                            MeldableHeapNode&lt;_Key, _Compare&gt; *heap2){
+        assert(heap1-&gt;is_root() &amp;&amp; heap2-&gt;is_root());
+        if(heap1-&gt;get_rank() &lt; heap2-&gt;get_rank()) swap(heap1, heap2);
+        hang(heap2, heap1);
+        if(heap1-&gt;get_rank() == heap2-&gt;get_rank()) ++heap1-&gt;get_rank();
+        return heap1;
+    }
+    MeldableHeapNode&lt;_Key, _Compare&gt; *find_root(MeldableHeapNode&lt;_Key, _Compare&gt; *heap){
+        cut_path(heap);
+        compress_path(heap);
+    }
+};
 </pre>
 </div>
 <h3>verify 用の問題</h3>
 <p>
 verify していません(verify 問題を知らない)
 </p>
-<p>Atcoder : <a href=""></a>
-  <a href="">提出コード</a></p>
 </section>
 
 </div>
