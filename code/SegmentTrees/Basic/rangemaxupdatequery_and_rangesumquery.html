@@ -169,6 +169,144 @@ public:
     }
 };
 </pre>
+<h3>コード(RangeAddQuery などを追加したもの)</h3>
+<input type="checkbox" id="label2" class="csscode" />
+<label for="label2"></label>
+<pre class="prettyprint linenums">
+template&lt;typename T&gt; class segtree {
+private:
+    int n, sz, h;
+    const T inf;
+    vector&lt;T&gt; node, min_val, second_val, max_val, lazy, lazy_add;
+    vector&lt;int&gt; count;
+    void update(int id){
+        node[id] = node[2*id] + node[2*id+1];
+        max_val[id] = max(max_val[2*id], max_val[2*id+1]);
+        if(min_val[2*id] &lt; min_val[2*id+1]){
+            min_val[id] = min_val[2*id];
+            second_val[id] = min(second_val[2*id], min_val[2*id+1]);
+            count[id] = count[2*id];
+        }else if(min_val[2*id] &gt; min_val[2*id+1]){
+            min_val[id] = min_val[2*id+1];
+            second_val[id] = min(min_val[2*id], second_val[2*id+1]);
+            count[id] = count[2*id+1];
+        }else{
+            min_val[id] = min_val[2*id];
+            second_val[id] = min(second_val[2*id], second_val[2*id+1]);
+            count[id] = count[2*id] + count[2*id+1];
+        }
+    }
+public:
+    segtree(const vector&lt;T&gt;&amp; v)
+        : n(1), sz((int)v.size()), h(0), inf(numeric_limits&lt;T&gt;::max() / 2){
+        while(n &lt; sz) n *= 2, ++h;
+        node.resize(2*n, 0), min_val.resize(2*n, inf), second_val.resize(2*n, inf);
+        max_val.resize(2*n, -inf), lazy.resize(2*n, inf), lazy_add.resize(2*n, 0);
+        count.resize(2*n, 1);
+        for(int i = 0; i &lt; sz; ++i){
+            node[i+n] = min_val[i+n] = max_val[i+n] = v[i];
+        }
+        for(int i = n-1; i &gt;= 1; --i) update(i);
+    }
+    void eval(int k, int length){
+        if(lazy_add[k] != 0){
+            node[k] += lazy_add[k] * length;
+            min_val[k] += lazy_add[k], second_val[k] += lazy_add[k], max_val[k] += lazy_add[k];
+            if(k &lt; n){
+                lazy[2*k] += lazy_add[k], lazy[2*k+1] += lazy_add[k];
+                lazy_add[2*k] += lazy_add[k], lazy_add[2*k+1] += lazy_add[k];
+            }
+            lazy_add[k] = 0;
+        }
+        if(lazy[k] &lt; (inf &gt;&gt; 1)){
+            if(lazy[k] &gt; min_val[k]){
+                node[k] += (lazy[k] - min_val[k]) * count[k];
+                min_val[k] = lazy[k], max_val[k] = max(max_val[k], lazy[k]);
+                if(k &lt; n){
+                    lazy[2*k] = lazy[2*k+1] = lazy[k];
+                }
+            }
+            lazy[k] = inf;
+        }
+    }
+    void range_maxupdate(int a, int b, T x, int k=1, int l=0, int r=-1){
+        if(r &lt; 0) r = n;
+        eval(k, r-l);
+        if(b &lt;= l || r &lt;= a || min_val[k] &gt;= x) return;
+        if(a &lt;= l &amp;&amp; r &lt;= b &amp;&amp; second_val[k] &gt; x){
+            lazy[k] = x, eval(k, r-l);
+        }else{
+            range_maxupdate(a, b, x, 2*k, l, (l+r)&gt;&gt;1);
+            range_maxupdate(a, b, x, 2*k+1, (l+r)&gt;&gt;1, r);
+            update(k);
+        }
+    }
+    void range_add(int a, int b, T x, int k=1, int l=0, int r=-1){
+        if(r &lt; 0) r = n;
+        eval(k, r-l);
+        if(b &lt;= l || r &lt;= a) return;
+        if(a &lt;= l &amp;&amp; r &lt;= b){
+            lazy_add[k] += x, eval(k, r-l);
+        }else{
+            range_add(a, b, x, 2*k, l, (l+r)&gt;&gt;1);
+            range_add(a, b, x, 2*k+1, (l+r)&gt;&gt;1, r);
+            update(k);
+        }
+    }
+    T query_min(int a, int b){
+        int length = n;
+        a += n, b += n - 1;
+        for(int i = h; i &gt; 0; i--, length &gt;&gt;= 1){
+            eval(a &gt;&gt; i, length), eval(b &gt;&gt; i, length);
+        }
+        b++;
+        T res1 = inf, res2 = inf;
+        while(a &lt; b){
+            if(a &amp; 1) eval(a, length), res1 = min(res1, min_val[a++]);
+            if(b &amp; 1) eval(--b, length), res2 = min(res2, min_val[b]);
+            a &gt;&gt;= 1, b &gt;&gt;= 1, length &lt;&lt;= 1;
+        }
+        return min(res1, res2);
+    }
+    T query_max(int a, int b){
+        int length = n;
+        a += n, b += n - 1;
+        for(int i = h; i &gt; 0; i--, length &gt;&gt;= 1){
+            eval(a &gt;&gt; i, length), eval(b &gt;&gt; i, length);
+        }
+        b++;
+        T res1 = -inf, res2 = -inf;
+        while(a &lt; b) {
+            if(a &amp; 1) eval(a, length), res1 = max(res1, max_val[a++]);
+            if(b &amp; 1) eval(--b, length), res2 = max(res2, max_val[b]);
+            a &gt;&gt;= 1, b &gt;&gt;= 1, length &lt;&lt;= 1;
+        }
+        return max(res1, res2);
+    }
+    T query_sum(int a, int b){
+        int length = n;
+        a += n, b += n - 1;
+        for(int i = h; i &gt; 0; i--, length &gt;&gt;= 1){
+            eval(a &gt;&gt; i, length), eval(b &gt;&gt; i, length);
+        }
+        b++;
+        T res1 = 0, res2 = 0;
+        while(a &lt; b) {
+            if(a &amp; 1) eval(a, length), res1 += node[a++];
+            if(b &amp; 1) eval(--b, length), res2 += node[b];
+            a &gt;&gt;= 1, b &gt;&gt;= 1, length &lt;&lt;= 1;
+        }
+        return res1 + res2;
+    }
+    void print()
+    {
+        for(int i = 0; i &lt; sz; i++){
+            cout &lt;&lt; query_sum(i,i+1) &lt;&lt; &quot; &quot;;
+        }
+        cout &lt;&lt; endl;
+    }
+};
+</pre>
 </div>
 <h3>verify 用の問題</h3>
 <p>Atcoder : <a href="https://atcoder.jp/contests/tenka1-2018/tasks/tenka1_2018_f">Circular</a>
