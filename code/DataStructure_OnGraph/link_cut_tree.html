@@ -76,7 +76,7 @@ link cut tree とは木の動的な変化(辺の挿入, 辺の削除)を効率�
 結局 access$(v)$ がならし $\O (\log n)$ であることを示せば十分である. つまり splay 木を回転する回数が各 access$(v)$ でならし $\O (\log n)$ となることを示す. <br>
 まず splay 木がならし $\O (\log n)$ になる理由(Access Lemma) を用います. 具体的には "頂点 $u$ を根とする splay 木に含まれる頂点 $v$ に対して splay$(v)$ を行なったときのならしコストが
 $3( \mathrm{rank} (u) - \mathrm{rank} (v)) + 1$ で抑えられる" である. <br>
-link cut tree においてはこの $\mathrm{rank} (x)$ を次のように定める. $x$ の属する splay 木を $T(x)$, その splay 木内の $x$ を根とする部分木を $T'(x)$ とする.
+link cut tree においてはこの $\mathrm{rank} (x)$ を次のように定める. $x$ の属する splay 木を $T(x)$, その splay 木内において $x$ を根とする部分木を $T'(x)$ とする.
 このとき $\mathrm{rank}(x) = \log ( |T'(x)| + $($y \in T'(x)$, $y$ の non-preferred child $z$ について $\mathrm{rank} (z)$ の和) ) とする.
 つまり $x$ を含む splay 木に限らず, $x$ 以下にあるすべての頂点の数の合計の $\log$ とする.
 そしてポテンシャルはもちろん $\sum_{x} r(x)$ である.<br>

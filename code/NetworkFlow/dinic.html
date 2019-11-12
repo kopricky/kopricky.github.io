@@ -176,6 +176,7 @@ public:
 <pre class="prettyprint linenums">
 template&lt;typename T&gt; class Dinic {
 private:
+    static_assert(std::is_integral&lt;T&gt;::value, "Integral required.");
     struct edge{
         int to;
         T cap;

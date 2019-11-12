@@ -106,7 +106,7 @@ public:
         eval(k);
         if(b &lt;= l || r &lt;= a) return;
         if(a &lt;= l &amp;&amp; r &lt;= b){
-            lazy_add[k] = 0; lazy_update[k] = x*(r-l); lazyFlag[k] = true; eval(k);
+            lazy_update[k] = x*(r-l); lazyFlag[k] = true; eval(k);
         }else{
             update(a, b, x, 2*k, l, (l+r)/2); update(a, b, x, 2*k+1, (l+r)/2, r);
             node[k] = node[2*k] + node[2*k+1];
@@ -140,7 +140,6 @@ public:
 </pre>
 </div>
 <h3>verify 用の問題</h3>
-<p>
 <p>Atcoder : <a href="https://atcoder.jp/contests/nikkei2019-final/tasks/nikkei2019_final_d">Deforestation</a>
     <a href="https://atcoder.jp/contests/nikkei2019-final/submissions/4302281">提出コード</a></p>
 </p>
