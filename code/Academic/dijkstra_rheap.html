@@ -61,15 +61,12 @@ $\newcommand{\O}{\mathrm{O}}$
 <h3>コードについての説明</h3>
 <p>
 Dijkstra 法を Radix Heap を用いて高速化したアルゴリズム. 辺のコストが非負"整数"の場合に用いることができる高速化である. <br>
-辺コストが int である場合について<a href="https://www.slideshare.net/yosupo/ss-46612984">このスライドの話</a>をもとに実装した.<br>
 push を $\O (1)$, pop を ならし $\log (MAX \_ VAL)$ ($MAX \_ VAL$ は辺コストの最大値) で実現し定数倍も軽いが, push の際に最後に pop した値より小さな値を入れることができないという制限がある.
 この制限は Dijkstra 法のアルゴリズムとコンフリクトしないので Dijkstra 法の高速化に用いることができる.<br>
-以下の実装は辺コストの最大値が int 型で表せる場合の実装である. 実測では priority_queue を用いた Dijkstra 法より少し速くなった. <br>
+元論文は "Faster Algorithms for the Shortest Path Problem" [Ahuja, Mehlhorn, Orlin, Tarjan 1990]. <br>
 <br>
 (Radix Heap の補足) <br>
 radix heap から最後に pop した値を $last$ とする. このときヒープ内の各要素 $x$ は vec[($x \oplus last$ の最上位ビットの位置) $+ 1$] に格納されている(ただし $0$ の最上位ビットの位置は $-1$ とする).
-ここで Dijkstra アルゴリズムの性質からヒープ内のすべての要素は $last$ 以上 $last + MAX \_ VAL$ 以下
-$\Theta$
 push($x$) は要素 $x$ を vec[($x \oplus last$ の最上位ビット) $+ 1$] に入れるだけなので最上位ビットを求めるのにかかる計算を $\O (1)$ と考えると $\O (1)$ でできる. 以下 pop の説明をする.<br>
 ここで最後に pop した値より大きな値を push できないという制約からヒープ内のすべての数は $last$ 以上である.
 これより ($x \oplus last$ の最上位ビット) はビットを大きい方から見ていき $last$ が $0$ で, $x$ が $1$ であるような最も左のビットと言える.

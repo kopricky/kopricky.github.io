@@ -129,7 +129,7 @@ public:
         dat[u].prev = dat[N+h].prev, dat[u].next = N+h;
         dat[dat[N+h].prev].next = u, dat[N+h].prev = u;
     }
-    inline void erase(const int h, const int u){
+    inline void erase(const int u){
         dat[dat[u].prev].next = dat[u].next, dat[dat[u].next].prev = dat[u].prev;
     }
     inline void clear(){
@@ -230,7 +230,7 @@ private:
             }
         }
         if(all_ver.more_one(prv)){
-            all_ver.erase(prv, u);
+            all_ver.erase(u);
             if((potential[u] = cur) == V) return potential[u] = V+1, prv;
             act_ver.push(cur, u);
             all_ver.insert(cur, u);
@@ -352,7 +352,7 @@ public:
         dat[u].prev = dat[N+h].prev, dat[u].next = N+h;
         dat[dat[N+h].prev].next = u, dat[N+h].prev = u;
     }
-    inline void erase(const int h, const int u){
+    inline void erase(const int u){
         dat[dat[u].prev].next = dat[u].next, dat[dat[u].next].prev = dat[u].prev;
     }
     inline void clear(){
@@ -460,7 +460,7 @@ private:
             }
         }
         if(all_ver.more_one(prv)){
-            all_ver.erase(prv, u);
+            all_ver.erase(u);
             if((potential[u] = cur) == V) return;
             act_ver.push(cur, u);
             all_ver.insert(cur, u);
