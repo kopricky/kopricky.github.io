@@ -64,6 +64,7 @@ Dijkstra 法を Radix Heap を用いて高速化したアルゴリズム. 辺の
 push を $\O (1)$, pop を ならし $\log (n MAX \_ VAL)$ ($MAX \_ VAL$ は辺コストの最大値)
 で実現し定数倍も軽いが, push の際に最後に pop した値より小さな値を入れることができないという制限がある.
 この制限は Dijkstra 法のアルゴリズムとコンフリクトしないので Dijkstra 法の高速化に用いることができる.<br>
+アルゴリズムの理解には <a href="https://www.slideshare.net/yosupo/ss-46612984">このスライド</a> が参考になった. <br>
 元論文は "Faster Algorithms for the Shortest Path Problem" [Ahuja, Mehlhorn, Orlin, Tarjan 1990]. <br>
 <br>
 (Radix Heap(簡単版) の説明) <br>
@@ -86,16 +87,16 @@ $last$ について考えた vec[($x \oplus last$ の最上位ビット) $+ 1$] 
 コスト更新の際に新たに要素を push するのではなく decrease_key で移動させることで $\O (m + n \log(n MAX \_ VAL))$ で行える.
 また Dijkstra 法の性質よりヒープ内のすべての要素は $last$ 以上 $last + MAX \_ VAL$ 以下であることからヒープで保持すべき値の範囲は $MAX \_ VAL$ である.
 pop の際に各バケットの管理する要素の範囲を適切に更新することで $\O (m + n \log(MAX \_ VAL))$ を達成することができる. <br>
-さらに "各バケットの管理する値の範囲" と "各要素が異なるバケットに再格納される回数" のトレードオフを考えて, いい感じに値を設定し, 加えて
-非空のバケットを効率よく見つけるために Fibonacci heap (の改良版)を用いることで $\O (m + n \sqrt{\log (MAX \_ VAL)})$ まで計算量が落ちる(みたい). <br>
+さらに "各バケットの管理する値の範囲" と "各要素が異なるバケットに再格納される回数" のトレードオフを考えて, いい感じに各バケットの管理する範囲を設定し, 加えて
+非空のバケットを効率よく見つけるために Fibonacci heap (の改良版)を用いることで $\O (m + n \sqrt{\log (MAX \_ VAL)})$ まで計算量が落ちる(とかいうことがその後に書いているがちゃんと読んでいない). <br>
 <br>
 (補足 2) <br>
 "Integer priority queues with decrease key in constant time and the single source shortest paths problem" [Thorup 2004] でキー値が整数の場合に
 delete を $\O (\log \log n)$ で達成する優先度付きキューが発表されたため非負整数重みの有向グラフに対して Dijkstra 法は $\O (m + n \log \log n)$
 の計算量で動作するように実装できる(非負整数重みの "無向" グラフの場合は同じく Thorup の論文で線形時間で解けることが知られている[Thorup 1997].) <br>
-この論文, 結果自体は非常にすごいのだがかなり力技というところがあっておもしろい知見がありそうに見えなかったので読んでいない.
-このヒープを <a href="./make_heap_meldable.html">ヒープを併合可能ヒープにする手法</a> を用いて meldable heap にして最小全域有向木の Chu-Liu-Edmonds のアルゴリズムに用いることで
-計算量を $\O (m \log \log n)$ に落とすことができるという話もある.
+この論文, 結果自体は非常にすごいのだがかなり力技というところがあって結局読んでいない.
+ちなみにこのヒープを <a href="./make_heap_meldable.html">ヒープを併合可能ヒープにする手法</a> を用いて meldable heap にして最小全域有向木の Chu-Liu-Edmonds のアルゴリズムに用いることで
+計算量を $\O (m \log \log n)$ に落とすことができる.
 </p>
 <p>
 時間計算量: $\O ((n + m) \log(n MAX \_ VAL))$ (辺コストの最大値を $MAX \_ VAL$ とする)
