@@ -73,7 +73,7 @@ Shwartz-Zippel Lemma より $\det T$ が恒等的に $0$ でないのに上記�
 行列 $T$ から $\{ u_1, \ldots, u_k \} \subseteq [n]$ に含まれる添字の行および $\{ v_1, \ldots, v_l \} \subseteq [n]$ に含まれる添字の列を削除したものを $T_{ \langle u_1 \ldots, u_k \rangle , \langle v_1 \ldots, v_l \rangle }$ と書くことにする. $\det T$ を $1$ 行目で余因子展開したものを
 $\det (T) = \sum_{j=1}^n (-1)^{i+j} T_{1, j} \det (T_{\langle 1 \rangle, \langle j \rangle})$ と表せ, $\det T \neq 0$ なら $T_{1,j} \neq 0$(辺 $(1, j)$ が存在する) で $\det (T_{ \langle 1 \rangle ,\langle j \rangle }) \neq 0$ となるものが存在する. <br>
 また $\det (T_{\langle 1 \rangle ,\langle j\rangle }) \neq 0 \Rightarrow \det (T_{ \langle 1,j \rangle ,\langle 1,j \rangle }) \neq 0$ より辺 $(1, j)$ を取り除いた後のグラフは完全マッチングを持つ($\Rightarrow$ 補足 2). <br>
-あとは $\det (T_{ \langle 1 \rangle ,\langle j \rangle }) \neq 0$ となるような $j$ をどうやって見つけてくるかだが $(T^{-1})_{i, j} = (-1)^{i+j} \cdot \frac{\det \left( {T_{\langle i \rangle, \langle j \rangle}} \right)}{\det \left( T \right) }$ より, $\det (T_ { \langle 1 \rangle ,\langle j \rangle }) \neq 0 \Leftrightarrow \left( T^{-1} \right) _{i,j} \neq 0$ が得られるので $T$ の逆行列を計算することで $j$ を求めることができる. <br>
+あとは $\det (T_{ \langle 1 \rangle ,\langle j \rangle }) \neq 0$ となるような $j$ をどうやって見つけてくるかだが $(T^{-1})_{i, j} = (-1)^{i+j} \cdot \frac{\det \left( {T_{\langle i \rangle, \langle j \rangle}} \right)}{\det \left( T \right) }$ より, $\det (T_ { \langle 1 \rangle ,\langle j \rangle }) \neq 0 \Leftrightarrow \left( T^{-1} \right) _{1,j} \neq 0$ が得られるので $T$ の逆行列を計算することで $j$ を求めることができる. <br>
 これを再帰的に繰り返すことで $\O (n^4)$ で構築することが可能になった(正確には $\O (n^{ω+1})$ time). <br>
 ここで逆行列計算を毎回する必要はなく $T^{-1}$ をブロック行列と見てその Schur 補行列が $\left( T_ { \langle i,j \rangle ,\langle i,j \rangle } \right) ^ {-1}$ と一致するので辺を取り除いた後の Tutte 行列の逆行列は $T^{-1}$ が求まっていると $\O (n^2)$ 時間で構築することができる.
 つまり全体で $\O (n^3)$ time で計算可能. ちなみにもっと頑張ると $\O (n^ω)$ まで落ちるらしい<br>
@@ -81,7 +81,7 @@ $\det (T) = \sum_{j=1}^n (-1)^{i+j} T_{1, j} \det (T_{\langle 1 \rangle, \langle
 以下では交代行列の性質を用いて導かれる本文中の自明でない結果 (補足 1), (補足 2) について証明を雑に記す. <br>
 証明は (補足 1) の方は随分前に何かの資料で見て知ったのだが、出典を覚えていない. (補足 2) の方は参考資料に基づく. <br>
 (補足 1) <br>
-$\mathrm{rank}$ が $r$ の交代行列 $A \in \mathbb{R}^{ns \times n}$ が $r \times r$ の正則な主小行列を持つことを示す(小行列ではなく主小行列であるところが本質).
+$\mathrm{rank}$ が $r$ の交代行列 $A \in \mathbb{R}^{n \times n}$ が $r \times r$ の正則な主小行列を持つことを示す(小行列ではなく主小行列であるところが本質).
 $A$ の固有多項式を考える. すると $\det (xI - A) = \underset{\sigma}{\sum} \mathrm{sign} (\sigma) (xI - A)_{i, \sigma(i)} = \sum_{0 \le k \le n} \underset{X \subseteq [n], |X| = n - k}{\sum} \det (A_{X, X}) x^k$ が言える.
 $2$ つ目の等式は $k = | \{ i \mid \sigma(i) = i \} |$ について足し合わせる + $A$ の対角成分は交代行列なので $0$ である ことに注意すると成り立つことが分かる. <br>
 交代行列は正規行列であることから対角化可能であり, 固有値の幾何的重複度と代数的重複度が一致するため, 今 $r = \mathrm{rank} A$ から固有多項式の最小の非ゼロ係数項の指数は $n - r$ となる.
