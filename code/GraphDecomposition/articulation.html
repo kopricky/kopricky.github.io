@@ -81,56 +81,56 @@ solve() : 関節点を求める($art$ に true/false が入る), コメントア
 <pre class="prettyprint linenums">
 class Articulation {
 public:
-	int V;
-	vector&lt;vector&lt;int&gt; &gt; G;
-	vector&lt;int&gt; ord;	//訪問時間
-	vector&lt;int&gt; low; //low[u]はuから高々1個の後退辺を通ってたどりつけるノードのordの最小値
-	vector&lt;bool&gt; visit; //訪問したかどうかのフラグ
-	vector&lt;bool&gt; art; //関節点かどうかの判定
-	// vector&lt;vector&lt;P&gt; &gt; edgeset;
-	// stack&lt;P&gt; st;
-	Articulation(int node_size) : V(node_size), G(V), ord(V, -1), low(V), visit(V, false), art(V, false){}
-	void add_edge(int a,int b){
-		G[a].push_back(b), G[b].push_back(a);
-	}
-	void dfs(int v,int p,int &amp;k){
-		visit[v] = true;
-		ord[v] = low[v] = k++;
-		int ct = 0;	//ノードvの次数
-		for(int w : G[v]){
-			// if(w != p &amp;&amp; ord[w] &lt; ord[v]) st.push(P(v, w));
-			if(!visit[w]){
-				ct++;
-				dfs(w,v,k);
-				low[v] = min(low[v],low[w]);	//子のノードのlowと比較する
-				if(p &gt;= 0 &amp;&amp; ord[v] &lt;= low[w]){
-					art[v] = true;
-				}
-				// if(low[w] &gt;= ord[v]){
-				//     edgeset.push_back(vector&lt;P&gt;());
-				//     while(1){
-				//         P p = st.top();
-				//         st.pop();
-				//         edgeset.back().push_back(p);
-				//         if(p == P(v, w)) break;
-				//     }
-				// }
-			}else if(w != p &amp;&amp; ord[w] &lt; low[v]){
-				low[v] = ord[w];
-			}
-		}
-		if(p == -1 &amp;&amp; ct &gt; 1){
-			art[v] = true;	//根の次数が2以上なら根は関節点
-		}
-	}
-	void solve(){
-		for(int i = 0; i &lt; V; i++){
-			int k = 0;
-			if(!visit[i]){
-				dfs(i, -1, k);
-			}
-		}
-	}
+    int V;
+    vector&lt;vector&lt;int&gt; &gt; G;
+    vector&lt;int&gt; ord;	//訪問時間
+    vector&lt;int&gt; low; //low[u]はuから高々1個の後退辺を通ってたどりつけるノードのordの最小値
+    vector&lt;bool&gt; visit; //訪問したかどうかのフラグ
+    vector&lt;bool&gt; art; //関節点かどうかの判定
+    // vector&lt;vector&lt;P&gt; &gt; edgeset;
+    // stack&lt;P&gt; st;
+    Articulation(int node_size) : V(node_size), G(V), ord(V, -1), low(V), visit(V, false), art(V, false){}
+    void add_edge(int a,int b){
+        G[a].push_back(b), G[b].push_back(a);
+    }
+    void dfs(int v,int p,int &amp;k){
+        visit[v] = true;
+        ord[v] = low[v] = k++;
+        int ct = 0;	//ノードvの次数
+        for(int w : G[v]){
+            // if(w != p &amp;&amp; ord[w] &lt; ord[v]) st.push(P(v, w));
+            if(!visit[w]){
+                ct++;
+                dfs(w,v,k);
+                low[v] = min(low[v],low[w]);	//子のノードのlowと比較する
+                if(p &gt;= 0 &amp;&amp; ord[v] &lt;= low[w]){
+                    art[v] = true;
+                }
+                // if(low[w] &gt;= ord[v]){
+                //     edgeset.push_back(vector&lt;P&gt;());
+                //     while(1){
+                //         P p = st.top();
+                //         st.pop();
+                //         edgeset.back().push_back(p);
+                //         if(p == P(v, w)) break;
+                //     }
+                // }
+            }else if(w != p &amp;&amp; ord[w] &lt; low[v]){
+                low[v] = ord[w];
+            }
+        }
+        if(p == -1 &amp;&amp; ct &gt; 1){
+            art[v] = true;	//根の次数が2以上なら根は関節点
+        }
+    }
+    void solve(){
+        for(int i = 0; i &lt; V; i++){
+            int k = 0;
+            if(!visit[i]){
+                dfs(i, -1, k);
+            }
+        }
+    }
 };
 </pre>
 </div>
