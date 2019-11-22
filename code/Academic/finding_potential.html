@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-131511873-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-131511873-1');
+</script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
+
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<link rel="shortcut icon" type="image/x-icon" href="../../favicon.ico">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>Finding Potential</h2>
+<h3>コードについての説明</h3>
+<p>
+元論文は "Scaling algorithms for the shortest paths problem" [Goldberg 1995].
+</p>
+<p>
+時間計算量: $\O (m \sqrt{n} \log M)$ (グラフ $G$ の辺コストがすべて $-M$ 以上の場合)
+</p>
+<h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
+<pre class="prettyprint linenums">
+template&lt;typename _Tp&gt; class Goldberg95 {
+public:
+    static_assert(std::is_integral&lt;_Tp&gt;::value, &quot;Integral required.&quot;);
+private:
+    struct base_edge {
+        int to;
+        _Tp cost;
+        base_edge(const int _to, const _Tp _cost) : to(_to), cost(_cost){}
+    };
+    struct edge : base_edge {
+        _Tp roundup;
+        edge(const int _to, const _Tp _cost) : base_edge(_to, _cost), roundup(0){}
+    };
+    const int V;
+    int E, comp_count, head;
+    _Tp min_cost;
+    vector&lt;vector&lt;edge&gt; &gt; G;
+    vector&lt;vector&lt;base_edge&gt; &gt; graph;
+    vector&lt;vector&lt;int&gt; &gt; dag, que;
+    vector&lt;int&gt; ord, low, st, cmp, repr, dist, prv, ng, layer_cnt;
+    int compute_roundup(){
+        int cnt = 0;
+        _Tp tmp = -min_cost;
+        while(tmp &gt;= 2) tmp &gt;&gt;= 1, ++cnt;
+        if(cnt &gt; 0){
+            for(int i = 0; i &lt; V; ++i){
+                for(edge&amp; e : G[i]){
+                    if(e.cost &lt; 0){
+                        _Tp tmp = -e.cost;
+                        for(int j = 0; j &lt; cnt; ++j){
+                            e.roundup &lt;&lt;= 1, e.roundup |= (tmp &amp; 1);
+                            tmp &gt;&gt;= 1;
+                        }
+                        e.cost = -tmp;
+                    }else{
+                        for(int j = 0; j &lt; cnt; ++j){
+                            e.roundup &lt;&lt;= 1, e.roundup |= (e.cost &amp; 1);
+                            e.cost = ((e.cost + 1) &gt;&gt; 1);
+                        }
+                    }
+                }
+            }
+        }
+        return cnt;
+    }
+    void scc_dfs(const int u, int&amp; tm){
+        ord[u] = low[u] = tm++, st[++head] = u;
+        for(const edge&amp; e : G[u]){
+            if(e.cost + potential[u] - potential[e.to] &gt; 0) continue;
+            const int v = e.to;
+            if(ord[v] &lt; 0){
+                scc_dfs(v, tm);
+                low[u] = min(low[u], low[v]);
+            }else if(ord[v] &lt; V){
+                low[u] = min(low[u], ord[v]);
+            }
+        }
+        if(ord[u] == low[u]){
+            while(true){
+                const int v = st[head--];
+                ord[v] = V, cmp[v] = comp_count;
+                if(v == u) break;
+            }
+            repr[comp_count++] = u;
+        }
+    }
+    void strongly_connected_component(){
+        comp_count = 0, head = -1;
+        fill(ord.begin(), ord.end(), -1);
+        int tm = 0;
+        for(int i = 0; i &lt; V; ++i){
+            if(ord[i] &lt; 0) scc_dfs(i, tm);
+        }
+    }
+    bool construct_dag(bool&amp; finish){
+        for(int i = 0; i &lt; comp_count; ++i) dag[i].clear();
+        bool minus_edge = false;
+        for(int i = 0; i &lt; V; ++i){
+            for(const edge&amp; e : G[i]){
+                const _Tp edge_cost = e.cost + potential[i] - potential[e.to];
+                if(cmp[i] == cmp[e.to]){
+                    if(edge_cost &lt; 0) return false;
+                }else{
+                    if(edge_cost == 0) dag[cmp[i]].emplace_back(cmp[e.to]);
+                    else if(edge_cost &lt; 0){
+                        dag[cmp[i]].emplace_back(cmp[e.to] + V);
+                        minus_edge = true;
+                    }
+                }
+            }
+        }
+        if(!minus_edge) finish = true;
+        return true;
+    }
+    bool contract_graph(bool&amp; finish){
+        strongly_connected_component();
+        return construct_dag(finish);
+    }
+    void graph_layering(){
+        fill(dist.begin(), dist.begin() + comp_count, 0);
+        fill(ng.begin(), ng.begin() + comp_count, 0);
+        for(int i = comp_count - 1; i &gt;= 0; --i){
+            for(const int v : dag[i]){
+                const int w = ((v &lt; V) ? v : v - V);
+                ng[w] |= (v &gt;= V);
+                if(dist[w] &gt; dist[i] + (v &lt; V) - 1){
+                    dist[w] = dist[i] + (v &lt; V) - 1, prv[w] = i;
+                }
+            }
+        }
+    }
+    void cancel_layer(const int layer_num){
+        for(int i = 0; i &lt; V; ++i){
+            potential[i] -= (-dist[cmp[i]] &gt;= layer_num);
+        }
+    }
+    bool cancel_path(const int max_len){
+        for(int i = 0; i &lt; max_len; ++i){
+            for(int j = 0; j &lt; (int)que[i].size(); ++j){
+                const int u = que[i][j];
+                if(dist[u] &lt; i) continue;
+                for(const edge&amp; e : G[u]){
+                    const _Tp edge_cost = e.cost + potential[u] - potential[e.to];
+                    const _Tp edge_cost_plus = (edge_cost &gt;= 0) ? edge_cost : 0;
+                    if(edge_cost &lt; 0){
+                        if(prv[cmp[e.to]] &lt; 0 &amp;&amp; dist[e.to] &gt;= dist[u]) return false;
+                    }else if(dist[e.to] &gt; dist[u] + edge_cost_plus){
+                        dist[e.to] = dist[u] + edge_cost_plus;
+                        que[dist[e.to]].push_back(e.to);
+                    }
+                }
+            }
+        }
+        for(int i = 0; i &lt; V; ++i) potential[i] += dist[i];
+        return true;
+    }
+    bool cancel_negative_edges(){
+        fill(layer_cnt.begin(), layer_cnt.begin() + comp_count, 0);
+        int max_len = 0, max_vertex = 0, max_cnt = 0, max_layer = 0;
+        for(int i = 0; i &lt; comp_count; ++i){
+            if(dist[i] &lt; 0 &amp;&amp; ng[i] &gt; 0 &amp;&amp; max_cnt &lt; ++layer_cnt[-dist[i]]){
+                ++max_cnt, max_layer = -dist[i];
+            }
+            if(max_len &lt; -dist[i]){
+                max_len = -dist[i], max_vertex = i;
+            }
+        }
+        if((long long)(4 * E + 3 * max_len + V) * max_cnt &gt;= (long long)V * max_len){
+            cancel_layer(max_layer);
+            return true;
+        }else{
+            fill(dist.begin(), dist.end(), max_len);
+            int nx = -1;
+            for(int i = max_len; i &gt; 0; --i){
+                dist[repr[max_vertex]] = max_len - i;
+                que[max_len - i] = {repr[max_vertex]};
+                nx = prv[max_vertex];
+                prv[max_vertex] = -1;
+                max_vertex = nx;
+            }
+            cancel_path(max_len);
+            return true;
+        }
+    }
+    bool solve(){
+        bool finish = false;
+        while(!finish){
+            if(!contract_graph(finish)) return false;
+            if(finish) return true;
+            graph_layering();
+            if(!cancel_negative_edges()) return false;
+        }
+        return true;
+    }
+    void change_cost(){
+        _Tp min_potential = *min_element(potential.begin(), potential.end());
+        for(int i = 0; i &lt; V; ++i){
+            potential[i] = 2 * (potential[i] - min_potential);
+            for(edge&amp; e : G[i]){
+                e.cost = e.cost * 2 - (e.roundup &amp; 1), e.roundup &gt;&gt;= 1;
+            }
+        }
+    }
+
+public:
+    vector&lt;_Tp&gt; potential;
+    Goldberg95(const int node_size)
+        : V(node_size), E(0), min_cost(0), G(V), graph(V), dag(V), que(V),
+            ord(V), low(V), st(V), cmp(V), repr(V), dist(V), prv(V, 0), ng(V),
+                layer_cnt(V), potential(V, 0){}
+    void add_edge(const int u, const int v, const _Tp cost){
+        G[u].emplace_back(v, cost), ++E;
+        min_cost = min(min_cost, cost);
+    }
+    bool compute_potential(){
+        if(min_cost &lt; 0){
+            int num = compute_roundup();
+            for(; num &gt;= 0; --num){
+                if(!solve()) return false;
+                if(num &gt; 0) change_cost();
+            }
+        }
+        return true;
+    }
+    // DEBUG
+    bool check(){
+        for(int i = 0; i &lt; V; ++i){
+            for(const edge&amp; e : G[i]){
+                if(e.cost + potential[i] - potential[e.to] &lt; 0) return false;
+            }
+        }
+        return true;
+    }
+};
+</pre>
+</div>
+<h3>verify 用の問題</h3>
+<p>Atcoder : <a href="https://atcoder.jp/contests/utpc2013/tasks/utpc2013_08">Asteroids2</a>
+  <a href="https://atcoder.jp/contests/utpc2013/submissions/8559172">提出コード</a></p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>
