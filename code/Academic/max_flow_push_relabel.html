@@ -170,7 +170,7 @@ private:
         potential[t] = 0;
         int qh = 0, qt = 0;
         for(que[qt++] = t; qh++ &lt; qt;){
-            int u = que[qh-1];
+            int u = que[qh - 1];
             for(const edge&amp; e : G[u]){
                 if(potential[e.to] == V &amp;&amp; G[e.to][e.rev].cap &gt; 0){
                     potential[e.to] = potential[u] + 1, que[qt++] = e.to;
@@ -199,7 +199,7 @@ private:
             for(int id = all_ver.dat[V+i].next; id &lt; V; id = all_ver.dat[id].next){
                 potential[id] = V + 1;
             }
-            all_ver.dat[V+i].prev = all_ver.dat[V+i].next = V+i;
+            all_ver.dat[V+i].prev = all_ver.dat[V+i].next = V + i;
         }
     }
     int discharge(const int u){
@@ -399,7 +399,7 @@ private:
         potential[t] = 0;
         int qh = 0, qt = 0;
         for(que[qt++] = t; qh++ &lt; qt;){
-            int u = que[qh-1];
+            int u = que[qh - 1];
             for(const edge&amp; e : G[u]){
                 if(potential[e.to] == V &amp;&amp; G[e.to][e.rev].cap &gt; 0){
                     potential[e.to] = potential[u] + 1, que[qt++] = e.to;
@@ -427,7 +427,7 @@ private:
             for(int id = all_ver.dat[V+i].next; id &lt; V; id = all_ver.dat[id].next){
                 potential[id] = V + 1;
             }
-            all_ver.dat[V+i].prev = all_ver.dat[V+i].next = V+i;
+            all_ver.dat[V+i].prev = all_ver.dat[V+i].next = V + i;
         }
     }
     void discharge(const int u, const T K){
