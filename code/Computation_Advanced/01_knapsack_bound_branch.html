@@ -57,7 +57,7 @@ $\newcommand{\O}{\mathrm{O}}$
 <div id="contents">
 
 <section>
-<h2>01 Knapsack Bound Branch</h2>
+<h2>01 Knapsack Branch and Bound</h2>
 <h3>コードについての説明</h3>
 <p>
 01ナップサック問題の分割統治法を用いた解法. yukicoder の<a href="https://yukicoder.me/problems/no/626">これ</a>で出題されたもので愚直に $\O (nW)$ の DP ができないような制約に対して効果的である. <br>
@@ -72,53 +72,69 @@ solve$(n, W, vec)$ : $n$ 個の商品 vec(価値, 重さ) を用いて, 重さ $
 <input type="checkbox" id="label" class="csscode" />
 <label for="label"></label>
 <pre class="prettyprint linenums">
-void dfs(int n, long long W, long long value, long long weight, long long&amp; opt, int index, vector&lt;pair&lt;long long,long long&gt; &gt;&amp; vec)
+void dfs(const int n, const long long W, const long long value, const long long weight, long long&amp; opt,
+        const int index, const vector&lt;long long&gt;&amp; rsumw, const vector&lt;int&gt;&amp; rminw, const vector&lt;pair&lt;int, int&gt; &gt;&amp; vec)
 {
-    if(index == (int)vec.size()){
+    if(index == n){
         opt = max(opt, value);
         return;
     }
+    if(rsumw[index] &lt;= W - weight){
+        long long tvalue = value;
+        for(int i = index; i &lt; n; ++i){
+            tvalue += vec[i].first;
+        }
+        opt = max(opt, tvalue);
+        return;
+    }
+    if(rminw[index] &gt; W - weight) return;
     //使う
     if(weight + vec[index].second &lt;= W){
         opt = max(opt, value + vec[index].first);
-        long long tweight = weight + vec[index].second;;
-        long long tvalue = value + vec[index].first;
-        for(int i=index+1;i&lt;(int)vec.size();i++){
+        long long tweight = weight + vec[index].second, tvalue = value + vec[index].first;
+        for(int i = index + 1; i &lt; n; ++i){
             if(tweight + vec[i].second &lt;= W){
-                tweight += vec[i].second;
-                tvalue += vec[i].first;
+                tweight += vec[i].second, tvalue += vec[i].first;
             }else{
                 tvalue += vec[i].first * (W - tweight) / vec[i].second;
                 break;
             }
         }
-        if(tvalue &gt; opt){
-            dfs(n, W, value+vec[index].first, weight+vec[index].second, opt, index+1, vec);
+        if(opt &lt; tvalue){
+            dfs(n, W, value + vec[index].first, weight + vec[index].second, opt, index + 1, rsumw, rminw, vec);
         }
     }
     //使わない
-    long long tweight = weight;
-    long long tvalue = value;
-    for(int i=index+1;i&lt;(int)vec.size();i++){
+    long long tweight = weight, tvalue = value;
+    for(int i = index + 1; i &lt; n; ++i){
         if(tweight + vec[i].second &lt;= W){
-            tweight += vec[i].second;
-            tvalue += vec[i].first;
+            tweight += vec[i].second, tvalue += vec[i].first;
         }else{
             tvalue += vec[i].first * (W - tweight) / vec[i].second;
             break;
         }
     }
-    if(tvalue &gt; opt){
-        dfs(n, W, value, weight, opt, index+1, vec);
+    if(opt &lt; tvalue){
+        dfs(n, W, value, weight, opt, index + 1, rsumw, rminw, vec);
     }
 }
-//vecには(価値, 重さ)の順で商品を詰める
-long long solve(int n, long long W, vector&lt;pair&lt;long long,long long&gt; &gt;&amp; vec)
+
+//vec には (価値, 重さ) の順で詰める
+long long solve(const int n, const long long W, vector&lt;pair&lt;int, int&gt; &gt;&amp; vec)
 {
+    sort(vec.begin(), vec.end(), [&amp;](const pair&lt;int, int&gt;&amp; a, const pair&lt;int, int&gt;&amp; b){
+        return (long long)a.first * b.second &gt; (long long)a.second * b.first;
+    });
+    vector&lt;long long&gt; rsumw(n + 1, 0);
+    vector&lt;int&gt; rminw(n + 1, numeric_limits&lt;int&gt;::max());
+    for(int i = n - 1; i &gt;= 0; --i){
+        rsumw[i] = rsumw[i + 1] + vec[i].second, rminw[i] = min(rminw[i + 1], vec[i].second);
+    }
     long long opt = 0;
-    dfs(n, W, 0, 0, opt, 0, vec);
+    dfs(n, W, 0, 0, opt, 0, rsumw, rminw, vec);
     return opt;
 }
+
 </pre>
 </div>
 <h3>verify 用の問題</h3>

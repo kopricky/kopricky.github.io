@@ -239,7 +239,7 @@ private:
     }
     void _delete(node *cur){
         root_erase(cur);
-        delete cur;
+        // delete cur;
     }
     node *_push(data_type e){
         node *new_node = new node(e);
@@ -344,16 +344,19 @@ public:
     }
     friend FibonacciHeap *meld(FibonacciHeap *fh1, FibonacciHeap *fh2){
         if(!fh2-&gt;_minimum){
-            return delete fh2, fh1;
+            // delete fh2;
+            return fh1;
         }
         if(!fh1-&gt;_minimum){
-            return delete fh1, fh2;
+            // delete fh1
+            return fh2;
         }
         fh1-&gt;_minimum-&gt;_prev-&gt;_next = fh2-&gt;_minimum-&gt;_next;
         fh2-&gt;_minimum-&gt;_next-&gt;_prev = fh1-&gt;_minimum-&gt;_prev;
         fh2-&gt;_minimum-&gt;_next = fh1-&gt;_minimum;
         fh1-&gt;_minimum-&gt;_prev = fh2-&gt;_minimum;
-        return delete fh2, fh1;
+        // delete fh2;
+        return fh1;
     }
 };
 
@@ -518,7 +521,7 @@ public:
 <p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_2_B">Minimum-Cost Arborescence</a>
   <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3868692#1">提出コード</a><br>
 yosupo さんの library checker : <a href="https://judge.yosupo.jp/problem/directedmst">Directed MST</a>
-  <a href="https://judge.yosupo.jp/submission/214">提出コード</a></p>
+  <a href="https://judge.yosupo.jp/submission/1577">提出コード</a></p>
 </section>
 
 </div>
