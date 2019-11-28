@@ -57,7 +57,7 @@ $\newcommand{\O}{\mathrm{O}}$
 <div id="contents">
 
 <section>
-<h2>01 Knapsack Bound Branch</h2>
+<h2>01 Knapsack Branch and Bound</h2>
 <h3>コードについての説明</h3>
 <p>
 01ナップサック問題の分割統治法を用いた解法. yukicoder の<a href="https://yukicoder.me/problems/no/626">これ</a>で出題されたもので愚直に $\O (nW)$ の DP ができないような制約に対して効果的である. <br>
@@ -119,7 +119,7 @@ void dfs(const int n, const long long W, const long long value, const long long 
     }
 }
 
-//vec には(価値, 重さ)の順で詰める
+//vec には (価値, 重さ) の順で詰める
 long long solve(const int n, const long long W, vector&lt;pair&lt;int, int&gt; &gt;&amp; vec)
 {
     sort(vec.begin(), vec.end(), [&amp;](const pair&lt;int, int&gt;&amp; a, const pair&lt;int, int&gt;&amp; b){
