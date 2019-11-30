@@ -117,6 +117,7 @@ $\mu (G, c) = 0$ で負の有向閉路が存在しないことから最短距離
 <p>
 (関数)<br>
 solve(): (閉路の総重み, 閉路の長さ) の std::pair を返し, また $ans$ に実際の閉路の頂点番号が辺に沿った順番で格納される.<br>
+(注) 値は内部で最大 (辺コストの絶対値の最大) * (頂点数)^2 となりうるので注意して型 T を設定する.
 </p>
 <p>
 時間計算量: $\O (mn)$
@@ -135,32 +136,34 @@ private:
         T cost;
     };
     const int V;
-    const T inf = numeric_limits&lt;T&gt;::max();
+    const T inf;
     vector&lt;vector&lt;edge&gt; &gt; G;
     vector&lt;vector&lt;T&gt; &gt; dp;
     vector&lt;vector&lt;int&gt; &gt; prev;
 public:
     vector&lt;int&gt; ans;
     DirectedMinimumMeanWeightCycle(const int node_size)
-        : V(node_size), G(V), dp(V + 1, vector&lt;T&gt;(V, 0)), prev(V + 1, vector&lt;int&gt;(V)){}
+        : V(node_size), inf(numeric_limits&lt;T&gt;::max()),
+            G(V), dp(V + 1, vector&lt;T&gt;(V, 0)), prev(V + 1, vector&lt;int&gt;(V)){}
     void add_edge(const int from, const int to, const T cost){
         G[from].push_back((edge){to, cost});
     }
     pair&lt;T, int&gt; solve(){
         for(int k = 0; k &lt; V; ++k){
             for(int i = 0; i &lt; V; ++i){
-                dp[k+1][i] = inf;
+                dp[k + 1][i] = inf;
             }
             for(int i = 0; i &lt; V; ++i){
+                if(dp[k][i] == inf) continue;
                 for(const edge&amp; e : G[i]){
-                    if(dp[k+1][e.to] &gt; dp[k][i] + e.cost){
-                        dp[k+1][e.to] = dp[k][i] + e.cost;
-                        prev[k+1][e.to] = i;
+                    if(dp[k + 1][e.to] &gt; dp[k][i] + e.cost){
+                        dp[k + 1][e.to] = dp[k][i] + e.cost;
+                        prev[k + 1][e.to] = i;
                     }
                 }
             }
         }
-        if(*min_element(dp[V].begin(), dp[V].end()) == inf) return make_pair(inf, -1);
+        if(*min_element(dp[V].begin(), dp[V].end()) == inf) return make_pair(-inf, -1);
         int start = -1;
         T tnum = inf / V;
         int tden = 1;
@@ -169,31 +172,35 @@ public:
             T num = -inf / V;
             int den = 1;
             for(int k = 0; k &lt; V; ++k){
-                if(dp[k][i] == inf) continue;
-                if(num * (V-k) &lt;= den * (dp[V][i] - dp[k][i])){
+                if(dp[k][i] != inf &amp;&amp; num * (V - k) &lt;= den * (dp[V][i] - dp[k][i])){
                     num = dp[V][i] - dp[k][i], den = V - k;
                 }
             }
-            if(num &gt; -inf / V){
-                if((num * tden &lt; den * tnum) || (num * tden == den * tnum &amp;&amp; den &lt; tden)){
-                    tnum = num, tden = den;
-                    start = i;
-                }
+            if(num * tden &lt; den * tnum){
+                tnum = num, tden = den, start = i;
             }
         }
+        vector&lt;int&gt; route, used(V, -1);
         int level = V;
-        ans.resize(tden);
-        for(int i = 0; i &lt; tden; ++i){
-            start = prev[level--][ans[tden - i - 1] = start];
+        while(true){
+            if(used[start] &gt; 0){
+                for(int i = (int)route.size() - 1; i &gt; used[start]; --i){
+                    ans.push_back(route[i]);
+                }
+                break;
+            }
+            used[start] = (int)route.size();
+            route.push_back(start);
+            start = prev[level--][start];
         }
-        return {tnum, tden};
+        return {tnum * (int)ans.size() / tden, (int)ans.size()};
     }
 };
 </pre>
 </div>
 <h3>verify 用の問題</h3>
 <p>
-verify していません(verify 問題を知らない)
+問題で verify はしていないが手元でかなりテストはした.
 </p>
 </section>
 

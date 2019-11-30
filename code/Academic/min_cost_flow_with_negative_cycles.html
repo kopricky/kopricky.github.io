@@ -185,12 +185,13 @@ private:
     const Cot inf;
     vector&lt;vector&lt;Cot&gt; &gt; dp;
     vector&lt;vector&lt;edge*&gt; &gt; prev;
-    pair&lt;int, int&gt; minimum_mean_cycle(){
+    int minimum_mean_cycle(){
         for(int k = 0; k &lt; V; ++k){
             for(int i = 0; i &lt; V; ++i){
                 dp[k+1][i] = inf;
             }
             for(int i = 0; i &lt; V; ++i){
+                if(dp[k][i] == inf) continue;
                 for(edge&amp; e : G[i]){
                     if(e.cap &gt; 0 &amp;&amp; dp[k+1][e.to] &gt; dp[k][i] + e.cost){
                         dp[k+1][e.to] = dp[k][i] + e.cost;
@@ -199,7 +200,7 @@ private:
                 }
             }
         }
-        if(*min_element(dp[V].begin(), dp[V].end()) == inf) return make_pair(-1, -1);
+        if(*min_element(dp[V].begin(), dp[V].end()) == inf) return -1;
         int start = -1;
         Cot tnum = inf / V;
         int tden = 1;
@@ -213,33 +214,39 @@ private:
                     num = dp[V][i] - dp[k][i], den = V - k;
                 }
             }
-            if(num &gt; -inf / V){
-                if((num * tden &lt; den * tnum) || (num * tden == den * tnum &amp;&amp; den &lt; tden)){
-                    tnum = num, tden = den;
-                    start = i;
-                }
+            if(num * tden &lt; den * tnum){
+                tnum = num, tden = den, start = i;
             }
         }
-        return (tnum &lt; 0) ? make_pair(start, tden) : make_pair(-1, -1);
+        return (tnum &lt; 0) ? start : -1;
     }
     bool update(Cot&amp; res){
-        int level = V, start, length;
-        pair&lt;int, int&gt; info = minimum_mean_cycle();
-        start = info.first, length = info.second;
+        int start = minimum_mean_cycle();
         if(start &lt; 0) return false;
+        int level = V;
         Cat df = numeric_limits&lt;Cat&gt;::max();
-        for(int i = 0; i &lt; length; ++i){
+        vector&lt;Cat&gt; route;
+        vector&lt;int&gt; used(V, -1);
+        while(true){
+            if(used[start] &gt;= 0){
+                for(int i = used[start]; i &lt; (int)route.size(); ++i){
+                    df = min(df, route[i]);
+                }
+                level = V - used[start];
+                break;
+            }
+            used[start] = (int)route.size();
             edge *e = prev[level--][start];
-            df = min(df, e-&gt;cap);
+            route.push_back(e-&gt;cap);
             start = G[e-&gt;to][e-&gt;rev].to;
         }
-        level = V;
-        for(int i = 0; i &lt; length; ++i){
-            edge *e = prev[level--][start];
+        int cur = start;
+        do {
+            edge *e = prev[level--][cur];
             edge *reve = &amp;G[e-&gt;to][e-&gt;rev];
             e-&gt;cap -= df, reve-&gt;cap += df, res += df * e-&gt;cost;
-            start = reve-&gt;to;
-        }
+            cur = reve-&gt;to;
+        }while(level &gt;= 0 &amp;&amp; cur != start);
         return true;
     }
 public:
@@ -265,9 +272,8 @@ public:
 </pre>
 </div>
 <h3>verify 用の問題</h3>
-<p>
-まったく verify していません(verify 問題を知らない)
-</p>
+<p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_6_B&lang=ja">Minimum Cost Flow</a>
+    <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=4016415#1">提出コード</a></p>
 </section>
 
 </div>

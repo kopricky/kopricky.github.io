@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-131511873-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-131511873-1');
+</script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
+
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<link rel="shortcut icon" type="image/x-icon" href="../../favicon.ico">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>Finding All Simple Cycles</h2>
+<h3>コードについての説明</h3>
+<p>
+元論文は "Finding All the Elementary Circuits of a Directed Graph" [Johnson 1975]
+</p>
+<p>
+(関数)<br>
+solve(bool enumerate=true): 単純サイクルの個数を返す. enumerate=true なら全ての単純サイクルを ans に格納する. <br>
+</p>
+<p>
+時間計算量: $\O ((n + m)(C + 1))$ ($C$ はグラフに含まれる単純サイクルの個数とする)
+</p>
+<h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
+<pre class="prettyprint linenums">
+// 多重辺が存在しないことを仮定
+class FindingAllCycles {
+private:
+    struct node {
+        int prev, next, to;
+        node(const int _prev, const int _next, const int _to)
+            : prev(_prev), next(_next), to(_to){}
+    };
+    const int V;
+    vector&lt;vector&lt;node&gt; &gt; G;
+    vector&lt;stack&lt;int&gt; &gt; block_stack;
+    stack&lt;int&gt; st;
+    bool *fix, *blocked, *used;
+    bool enumerate;
+    void erase_edge(const int u, const int id){
+        G[u][G[u][id].next].prev = G[u][id].prev;
+        G[u][G[u][id].prev].next = G[u][id].next;
+    }
+    void scc_dfs(const int u, int&amp; tm, int&amp; cnt,
+            vector&lt;int&gt;&amp; ord, vector&lt;int&gt;&amp; low, vector&lt;int&gt;&amp; cmp, stack&lt;int&gt;&amp; st){
+        ord[u] = low[u] = tm++, st.push(u);
+        for(int id = G[u][0].next; id != 0; id = G[u][id].next){
+            const int v = G[u][id].to;
+            if(ord[v] &lt; 0){
+                scc_dfs(v, tm, cnt, ord, low, cmp, st);
+                low[u] = min(low[u], low[v]);
+            }else if(cmp[v] &lt; 0){
+                low[u] = min(low[u], ord[v]);
+            }
+            if(cmp[v] &gt;= 0) erase_edge(u, id);
+        }
+        if(ord[u] == low[u]){
+            while(true){
+                const int v = st.top();
+                st.pop(), cmp[v] = cnt;
+                if(v == u) break;
+            }
+            ++cnt;
+        }
+    }
+    void scc(){
+        vector&lt;int&gt; ord(V, -1), low(V), cmp(V, -1);
+        stack&lt;int&gt; st;
+        int tm = 0, cnt = 0;
+        for(int i = 0; i &lt; V; ++i){
+            if(ord[i] &lt; 0) scc_dfs(i, tm, cnt, ord, low, cmp, st);
+        }
+    }
+    void unblock(const int u){
+        blocked[u] = false;
+        while(!block_stack[u].empty()){
+            const int v = block_stack[u].top();
+            block_stack[u].pop();
+            if(blocked[v]) unblock(v);
+        }
+    }
+    bool dfs(const int u, const int s, vector&lt;int&gt;&amp; path, vector&lt;int&gt;&amp; ver_list){
+        bool flag = false;
+        path.push_back(u);
+        blocked[u] = true;
+        if(!used[u]) used[u] = true, ver_list.push_back(u);
+        for(int id = G[u][0].next; id != 0; id = G[u][id].next){
+            const int v = G[u][id].to;
+            if(fix[v]){
+                erase_edge(u, id);
+                continue;
+            }
+            if(v == s){
+                if(enumerate) ans.push_back(path);
+                ++count, flag = true;
+            }else if(!blocked[v]){
+                if(dfs(v, s, path, ver_list)) flag = true;
+            }
+        }
+        if(flag) unblock(u);
+        else{
+            for(int id = G[u][0].next; id != 0; id = G[u][id].next){
+                block_stack[G[u][id].to].push(u);
+            }
+        }
+        path.pop_back();
+        return flag;
+    }
+
+public:
+    vector&lt;vector&lt;int&gt; &gt; ans;
+    int count;
+    FindingAllCycles(const int node_size)
+        : V(node_size), G(V, vector&lt;node&gt;{{0, 0, -1}}), block_stack(V),
+            fix(new bool[V]()), blocked(new bool[V]()), used(new bool[V]()), count(0){}
+    ~FindingAllCycles(){
+        delete[] fix, delete[] blocked, delete[] used;
+    }
+    void add_edge(const int u, const int v){
+        if(u == v){
+            ans.push_back({u});
+            return;
+        }
+        G[u][0].prev = G[u].back().next = (int)G[u].size();
+        G[u].push_back((node){(int)G[u].size() - 1, 0, v});
+    }
+    int solve(bool _enumerate=true){
+        scc();
+        enumerate = _enumerate;
+        for(int i = 0; i &lt; V; ++i){
+            vector&lt;int&gt; path, ver_list;
+            dfs(i, i, path, ver_list);
+            fix[i] = true;
+            for(int j : ver_list){
+                used[j] = blocked[j] = false, block_stack[j] = stack&lt;int&gt;();
+            }
+        }
+        return count;
+    }
+};
+</pre>
+</div>
+<h3>verify 用の問題</h3>
+<p>
+問題で verify はしていないが手元でかなりテストはした.
+</p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>
