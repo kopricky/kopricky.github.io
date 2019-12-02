@@ -79,11 +79,11 @@ Edmonds-Karp, Dinic などは (1) の条件(フローの条件) を常に満た�
 <br>
 (追記 1) <br>
 "On Implementing Push-Relabel Method For The Maximum Flow Problem" [Cherkassky, Goldberg 1994] をもとに実装を変更した. 上記の gap_relabel(ある高さの頂点がなくなったらそれ以上の高さの頂点は sink $t$ に辿れないので以降 inactive にする) および global_relabel(ときどき全部を再ラベリング) を行った実装にしたことで高速になり,
-多くのケースでは <a href="../NetworkFlow/dinic.html">Dinic</a> より速くなった. <a href="https://min-25.hatenablog.com/entry/2017/08/22/211034">この記事</a> が頂点の管理を自作リストで行っていて, 確かに高速化できそうだったので採用させていただいた. <br>
+多くのケースでは <a href="../NetworkFlow/dinic.html">Dinic</a> より速くなった.<br>
 最大流の値を高速に求めるために高さが $n$ 以上の頂点については excess を解消していないので最終的な preflow が依然として flow の条件を満たしていない可能性がある. なので valid な flow を求めたい場合は valiate() のコメントアウトを外す. <br>
 <br>
 (追記 2) <br>
-容量が整数である場合に超過量を 2 べきでスケーリングしていく excess scaling 版をおいた. 時間計算量は超過量の最大値 $\left( \max_{e \in \delta^+ (s)} e.cap \right)$ を $U$ としたとき
+容量が整数である場合に超過量を 2 べきでスケーリングしていく excess scaling 版をおいた. 時間計算量は初期超過量の最大値 $\left( \max_{e \in \delta^+ (s)} e.cap \right)$ を $U$ としたとき
 $\mathrm{O} (nm + n^2 \log U)$ であるが, 手元のケースとかだと速くならなかった... <br>
 各頂点の超過量が残余グラフ $\Delta$ 未満であるグラフ $G$ が与えられたときにそれを各頂点の超過量が $\Delta / 2$ 未満のグラフに更新する操作を行う関数を Update$(G, \Delta)$ とする。
 この Update$(G, \Delta)$ にかかる計算量が $\O \left( n^2 \right)$ であることをポテンシャル関数 $\Phi$ として $\sum_{i \in V} p_i e_i / \Delta$ ($e(\cdot )$ は超過量とする) を用いることで示すことができる。
