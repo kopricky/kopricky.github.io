@@ -62,7 +62,7 @@ $\newcommand{\O}{\mathrm{O}}$
 <p>
 RBST とは randomized binary search tree の略で平衡二分木の乱択を用いた実装である. 2 つの二分木を merge する際にそれぞれの木のサイズに比例した確率で片方の木の根をもう一方の木の根につけるかを決める. <br>
 こういう単純だけどうまくいく系はしっかりと解析することが大事なので考えてみるとよい気がする(<a href="http://citeseer.ist.psu.edu/viewdoc/download;jsessionid=F4F5586ACF14EFD688A8A58D032E79D0?doi=10.1.1.17.243&rep=rep1&type=pdf">参考</a>). <br>
-サイズ $l$ の Treap とサイズ $r$ の Treap のマージを考えてみるとサイズ $l$ の方の Treap の根が新しくできる Treap の根になる確率は各頂点の優先度が
+サイズ $l$ の Treap とサイズ $r$ の Treap の merge を考えてみるとサイズ $l$ の方の Treap の根が新しくできる Treap の根になる確率は各頂点の優先度が
 $[0, 1]$ の一様分布に従うと仮定した場合 $l / (r + l)$ となることがわかる. つまり RBST の merge 操作のそれと一致するので,
 直感的には RBST も高さの期待値は $\O (\log n)$ になりそうな気がする.
 むしろ merge 操作を繰り返してできる木の高さの concentration は RBST の方が Treap よりも sharp になるような気がする(？)ので木が大きく平衡から外れるケースはめったになさそう(怪)<br>
