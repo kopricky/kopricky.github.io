@@ -93,7 +93,7 @@ fibonacci heap における push, delete_min, decrease_key にかかる各なら
 ただ key の値をある程度恣意的に変化させて良いという条件の下で delete, findmin などのクエリを $\O (1)$ で処理でき, さらに insert された要素の個数を $n$ としたときパラメーター $\epsilon$ について, insert にかかる計算量が $\O (\log 1/\epsilon )$, かつヒープ内の変更された key の値は高々 $\epsilon n$ 個のようにパラメタライズされる. <br>
 ここで comparison based model において sort にかかる時間計算量は決定木を用いた証明から $\Omega(n \log n)$ であることを思い出すと, $n$ 回のヒープ操作にかかる計算量は $\Omega (n \log n)$ である.
 つまり soft heap はヒープの操作にかかる計算量の情報理論的下界を下回る計算量を達成していることが分かる(繰り返しになるが soft heap は厳密にはヒープではないし, insert や delete_min クエリを正しく処理することはできない.). <br>
-この soft heap は種々のアルゴリズムに応用されていて例えば最小全域木を最悪計算量 $\O(m \alpha(m, n))$ で求めるアルゴリズムなどに使われている(fibonacci heap では prim 法を用いて $\O (n \log n + m)$ time とかが限界だった).
+この soft heap は種々のアルゴリズムに応用されていて例えば最小全域木を最悪計算量 $\O(m \alpha(m, n))$ で求めるアルゴリズムなどに使われている(fibonacci heap では prim 法を用いて $\O (n \log n + m)$ time とか $\O (m \log^* n)$ time とかが限界だった).
 論文を読んでいないのでどういう風に用いるかは知らない...(一応 <a href="https://en.wikipedia.org/wiki/Soft_heap">wikipedia の記事</a> の Application には soft heap を selection algorithm に応用する例が載っている.)
 </p>
 <p>
