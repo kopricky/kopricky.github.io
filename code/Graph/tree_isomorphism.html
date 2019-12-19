@@ -62,8 +62,8 @@ $\newcommand{\O}{\mathrm{O}}$
 <p>
 根つき(無順序)木の同型性判定をハッシュ値の比較によって求めるアルゴリズムである. <br>
 <a href="http://snuke.hatenablog.com/entry/2017/02/03/054210">この記事</a>の説明にあるとおり深さ $i$ に対応する乱数 $R_i\ (\in [0, mod)$を取った上で,
-ある深さ $j$ の頂点 $v$ について $v$ を根とする部分木のハッシュを ($R_j +$ 子を根とする部分木のハッシュ値)の積 $\% mod$ で計算すると良い. <br>
-根となる頂点には多変数多項式が対応するわけだがここで "$2$ つの木が同型 ⇔ $2$ つの木の根の多変数多項式が恒等的に等しい" が成り立つ(厳密には多項式環が一意分解整域であることから従うだろう).　<br>
+ある頂点 $v$ でその頂点を根とする部分木の深さが $i$ であるようなものについて $v$ を根とする部分木のハッシュを ($R_i +$ ($v$ の子を根とする部分木のハッシュ値)の積) $\% mod$ で計算すると良い. <br>
+根となる頂点には多変数多項式が対応するわけだがここで "$2$ つの木が同型 $\Leftrightarrow$ $2$ つの木の根の多変数多項式が恒等的に等しい" が成り立つ(厳密には体上の多項式環が一意分解整域であることから従うだろう).　<br>
 よって結局 Shwartz-Zippel Lemma より乱数を入れて恒等的に等しくないのに等しいと判定する確率は $\mathbb{Z}_p$ 上で $n / p$ 以下であることが言える <br>
 以下の実装では $2$ 種類の mod を用いてハッシュ値を計算している. <br>
 兄弟間の順序を区別する順序木の場合は DFS でたどって行きがけに '(', 帰りがけに ')' を配置した括弧列を考えると単射となるのでその文字列比較によって同形性判定を行える.
@@ -81,47 +81,49 @@ $\newcommand{\O}{\mathrm{O}}$
 <pre class="prettyprint linenums">
 class tree_hashing {
 private:
-    static vector&lt;long long&gt; rnum[2];
-    static constexpr long long mod[2] = {1000000007LL, 1000000009LL};
-    int V;
+    static vector&lt;unsigned long long&gt; rnum[2];
+    static constexpr unsigned long long mod[2] = {1000000007ULL, 1000000009ULL};
+    const int V;
     vector&lt;vector&lt;int&gt; &gt; G;
+    vector&lt;int&gt; depth_st;
 public:
-    tree_hashing(int node_size){
-        V = node_size;
-        G.resize(V);
+    tree_hashing(const int node_size) : V(node_size), G(V), depth_st(V, 0){
         random_device rnd;
         mt19937 mt(rnd());
-        uniform_int_distribution&lt;&gt; rand1(0,mod[0]-1),rand2(0,mod[1]-1);
+        uniform_int_distribution&lt;&gt; rand1(0, mod[0] - 1), rand2(0, mod[1] - 1);
         while((int)rnum[0].size() &lt; V){
             rnum[0].push_back(rand1(mt)), rnum[1].push_back(rand2(mt));
         }
     }
-    void add_edge(int a, int b){
+    void add_edge(const int a, const int b){
         G[a].push_back(b), G[b].push_back(a);
     }
-    pair&lt;long long,long long&gt; hash_dfs(int u, int p, int d)
+    pair&lt;long long,long long&gt; hash_dfs(const int u, const int p)
     {
-        long long res[] = {1LL, 1LL};
+        unsigned long long res[] = {1ULL, 1ULL};
         for(auto v : G[u]){
             if(v != p){
-                auto val = hash_dfs(v, u, d+1);
-                res[0] = (res[0] * (rnum[0][d] + val.first)) % mod[0];
-                res[1] = (res[1] * (rnum[1][d] + val.second)) % mod[1];
+                auto val = hash_dfs(v, u);
+                depth_st[u] = max(depth_st[u], depth_st[v]);
+                res[0] = (res[0] * val.first) % mod[0];
+                res[1] = (res[1] * val.second) % mod[1];
             }
         }
+        res[0] = (res[0] + rnum[0][depth_st[u]]) % mod[0];
+        res[1] = (res[1] + rnum[1][depth_st[u]]) % mod[1];
         return make_pair(res[0], res[1]);
     }
     pair&lt;long long,long long&gt; hash(int root=0)
     {
-        return hash_dfs(root, -1, 0);
+        return hash_dfs(root, -1);
     }
 };
-vector&lt;long long&gt; tree_hashing::rnum[2];
+vector&lt;unsigned long long&gt; tree_hashing::rnum[2];
 </pre>
 </div>
 <h3>verify 用の問題</h3>
-<p>AOJ : <a href="https://csacademy.com/contest/round-73/task/binary-isomorphism/">Binary Isomorphism</a>
-  <a href="https://csacademy.com/code/xEpuBJnB/">提出コード</a></p>
+<p>CSAcademy : <a href="https://csacademy.com/contest/round-73/task/binary-isomorphism/">Binary Isomorphism</a>
+  <a href="https://csacademy.com/code/NWBr9RZg/">提出コード</a></p>
 </section>
 
 </div>

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-131511873-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-131511873-1');
+</script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
+
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<link rel="shortcut icon" type="image/x-icon" href="../../favicon.ico">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>Polynomial Division</h2>
+<h3>コードについての説明</h3>
+<p>
+体 $K$ 上の多項式 $f, g$ ($\mathrm{deg}(f) = n$, $\mathrm{deg}(g) = m$, $g \neq 0$, $n \ge m$) を考える. <br>
+このとき $f = q \cdot g + r$ を満たす多項式 $q, r$ で $\mathrm{deg}(r) < m$ となるものを求めるアルゴリズムである. <br>
+体上の多項式環はユークリッド整域であることからそのような $q, r$ はかならず存在する.
+可換環上の多項式についても同様の division を考えることができるがその場合は $g$ がモニック多項式である場合に well-defined となる.<br>
+以下説明. <br>
+$f(x) = q(x) \cdot g(x) + r(x)$ を満たす $q(x), r(x)$ を求めたいのだが, 同値変形すると
+$x^n f(1/x) = \left( x^{n-m} q(1/x) \right) \cdot \left(x^m g(1 / x) \right) + x^{n-m+1} \cdot \left( x^{m-1} r(1/x) \right)$ となる. <br>
+今多項式 $h(x)$ について $h'_k(x)$ を $h'_k(x) = x^k h(1/x) (k \ge \mathrm{deg}(h))$ と定義すると, 上式は
+$f'_n(x) = q'_{n-m}(x) \cdot g'_m(x) + x^{n-m+1} \cdot r'_{m-1}(x)$ と書き直せる. さらに, <br>
+$\Rightarrow f'_n(x) = q'_{n-m}(x) \cdot g'_m(x)\ \mathrm{mod}\ x^{n-m+1}$
+$\Rightarrow q'_{n-m}(x) = f'_{n}(x) \cdot \left( g'_m(x) \right)^{-1}\ \mathrm{mod}\ x^{n-m+1}$ と変形することができる. <br>
+ここで $\left( g'_m(x) \right)^{-1}$ は $K[x] / (x^{n-m+1})$ 上の $g'_m(x)$ の乗法逆元を意味する.
+つまり $\left( g'_m(x) \right)^{-1} \cdot g'_m (x) = 1\ \mathrm{mod}\ x^{n-m+1}$ を満たすような多項式とする. <br>
+ただ, そもそもそのような $\left( g'_m(x) \right)^{-1}$ が存在するかどうかが怪しいので,
+$\left( g'_m(x) \right)^{-1}$ の存在を構成的に示すために以下の定理を紹介する. 定理の証明は簡単なので最後に書く.<br>
+<br>
+<b>Lemma</b>: 多項式 $h_i$ が $g'_m \cdot h_i = 1\ \mathrm{mod}\ x^{2^i}$ を満たすなら
+$g'_m \cdot h_{i+1} = 1\ \mathrm{mod}\ x^{2^{i+1}}$ を満たす多項式 $h_{i+1}$ は
+$h_{i+1} \overset{\mathrm{def}}{=} \left( \left(2 h_i - g'_m h_i^2\right) \ \mathrm{mod}\ x^{2^{i+1}} \right)$ と定めることで得られる. <br>
+<br>
+今初期値 $h_0$ は $h_0 = \left( g'_m(0) \right)^{-1}$ とすると $g'_m \cdot h_0 = 1\ \mathrm{mod}\ x$ が成り立つので取れる(可換環上でも
+$g$ がモニックであれば $g'_m(0) = 1$ であるので取れる). <br>
+最後に $l \overset{\mathrm{def}}{=} \lceil \log (n - m + 1) \rceil$ と定めると上記の定理を用いて
+$g'_m \cdot h_l = 1\ \mathrm{mod}\ x^{2^l}$ を満たす $h_l$ が計算でき,
+$\left( g'_m(x) \right)^{-1}$ として $h_l$ を取ると $\left( g'_m(x) \right)^{-1} \cdot g'_m (x) = 1\ \mathrm{mod}\ x^{n-m+1}$ を満たす.
+よって $\left( g'_m(x) \right)^{-1}$ の存在およびその構成方法については示せた. <br>
+$\mathrm{deg} (q'_{n-m}) \le n - m$ であることからゆえに
+$q'_{n-m}(x) = ( \left( f'_n(x) \cdot h_l(x) \right) \ \mathrm{mod}\ x^{n-m+1})$ となり, $q$ を求めることができる.
+加えて $r$ も $r = f - q \cdot g$ より計算することができる. <br>
+時間計算量だが $h_l$ を計算する部分にかかる計算量は各 $h_i$ を求めるために次数 $2^i$ 未満の多項式の乗算を定数回行うので
+$\O \left( \sum_{i=1}^l 2^i \log 2^i \right) = \O( n \log n)$ となる.
+その他の部分の計算も $\O( n \log n)$ で行うことができるので全体で $\O( n \log n)$ となる. <br>
+<br>
+(<b>Lemma</b> の証明) <br>
+$g'_m \cdot h_{i+1} = 2 g'_m h_i - {g'_m}^2 h_i^2 = 1 - (g'_m h_i - 1)^2 \ \mathrm{mod}\ x^{2^{i+1}}$ と式変形でき,
+仮定より $g'_m \cdot h_i - 1 = 0\ \mathrm{mod}\ x^{2^i}$ なので $g'_m \cdot h_{i+1} = 1\ \mathrm{mod}\ x^{2^{i+1}}$ が成り立つ. <br>
+<br>
+以下の実装は $K = \mathbb{Z} / p \mathbb{Z}$ ($p$ は素数) の場合の実装で特に素数 $p$ について
+$p = k * 2^l + 1 (k > 0, n + 1 \le 2^l)$ を満たすこと(数論変換に乗ること)を仮定している.<br>
+</p>
+<p>
+(関数)<br>
+add_edge(): 辺を追加する <br>
+</p>
+<p>
+時間計算量: O(n log n)
+</p>
+<h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
+<pre class="prettyprint linenums">
+あ
+</pre>
+</div>
+<h3>verify 用の問題</h3>
+<p>
+verify していません(verify 問題を知らない)
+</p>
+<p>Atcoder : <a href=""></a>
+  <a href="">提出コード</a></p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>

@@ -164,7 +164,7 @@ public:
     T query(int a, int b, node *k = root, int l=0, int r = MAX_SIZE){
         eval(k, l, r);
         if(b &lt;= l || r &lt;= a){
-            return id2;z
+            return id2;
         }
         if(a &lt;= l &amp;&amp; r &lt;= b){
             return k-&gt;val;

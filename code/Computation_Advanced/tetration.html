@@ -67,6 +67,7 @@ verify 問題の <a href="https://drive.google.com/drive/folders/1MZLE7H3x4xOwf7
 注意として $b$ が小さい場合($mod$ が $32$ bit 整数なら高々 $32$ 以下)、 周期が始まる前なので($mod$ を法とした値ではなく)そのままの値を持って計算する. <br>
 以下の実装では $b$ が小さい場合($32$ 以下の場合) は値をそのまま $[0,32]$ に, $b$ が $32$ より大きい場合は $mod$ を法とした値に $+mod$ して $(mod + 32, 2mod)$ の範囲に値をマップしている. <br>
 (注) $[0, 2 mod)$ にマップしているので $mod$ の値は $2^{30}$ 以下とする. <br>
+同じ $mod$ について何度も $a↑↑b \% mod$ を計算する場合は phi 関数の値を持っておくと毎回計算しなくて済む. <br>
 </p>
 <p>
 (関数)<br>
@@ -123,7 +124,10 @@ inline int tetration(int a, int b, int mod)
 </div>
 <h3>verify 用の問題</h3>
 <p>Atcoder : <a href="https://atcoder.jp/contests/summerfes2018-div1/tasks/summerfes2018_f">冪冪ゲーム (Powerful Fever!)</a>
-  <a href="https://atcoder.jp/contests/summerfes2018-div1/submissions/3868387">提出コード</a></p>
+  <a href="https://atcoder.jp/contests/summerfes2018-div1/submissions/3868387">提出コード</a><br>
+yosupo さんの library checker : <a href="https://judge.yosupo.jp/problem/tetration_mod">Tetration Mod</a>
+  <a href="https://judge.yosupo.jp/submission/1982">提出コード</a>
+</p>
 </section>
 
 </div>

@@ -57,67 +57,35 @@ $\newcommand{\O}{\mathrm{O}}$
 <div id="contents">
 
 <section>
-<h2>Garner Algorithm</h2>
+<h2>Multipoint Evaluation</h2>
 <h3>コードについての説明</h3>
 <p>
-Garner のアルゴリズムは <a href="./crt.html">中国剰余定理</a> の拡張で, ある数 $x(0 \le x < \Pi p_i)$ について $p_i$ で割った余りが $a_i (i = 1, \ldots ,n)$ という情報 $n$ 個与えられたときに
-その $x$ を $mod$ で割った余りを効率よく求めるアルゴリズムである. ただし $p_i$ は互いに素であるとする. <br>
-$x$ がとても大きい数であっても $x \% mod$ を overflow することなく求めることができるのがうれしい. <br>
-<a href="https://cp-algorithms.com/algebra/chinese-remainder-theorem.html">(参考 1)</a>
-や <a href="https://lumakernel.github.io/ecasdqina/math/number-theory/Garner">(参考 2)</a> を参考に理解した.
-garner のアルゴリズムについては分かりやすい解説を書いている人が多いので他の人のものを参考にしてもらいたい.
+$n$ 次多項式 f(x) と $m$ 個のクエリ $u_0, \dots, u_{m-1}$ が与えられたときに $f(u_0), \dots, f(u_{m-1})$ を高速に求めるアルゴリズム. <br>
+多項式 $r_0(x)$, $r_1(x)$ を $r_0(x) \overset{\mathrm{def}}{=} f(x) \ \mathrm{mod}\ \Pi_{i = 0}^{m / 2 - 1} (x - u_i)$, $r_1(x) \overset{\mathrm{def}}{=} f(x) \ \mathrm{mod}\ \Pi_{i = m / 2}^{m - 1} (x - u_i)$
+と定めると, $f(u_0), \dots, f(u_{m-1})$ の値は
+元論文は <a href=""></a>
 </p>
 <p>
-時間計算量: $\O (n^2 + n \log (\max p_i))$
+(関数)<br>
+add_edge(): 辺を追加する <br>
+</p>
+<p>
+時間計算量: $\O \left( (n + m) log (n + m) \right)$
 </p>
 <h3>コード</h3>
 <div class="codebox">
 <input type="checkbox" id="label" class="csscode" />
 <label for="label"></label>
 <pre class="prettyprint linenums">
-template&lt;typename T&gt;
-T mod_add(const T a, const T b, const T mod){
-    return (a + b) % mod;
-}
-
-template&lt;typename T&gt;
-T mod_mul(const T a, const T b, const T mod){
-    return a * b % mod;
-}
-
-template&lt;typename T&gt;
-T mod_inv(T a, T mod){
-    T u[] = {a, 1, 0}, v[] = {mod, 0, 1}, t;
-    while(*v){
-        t = *u / *v;
-        swap(u[0] -= t * v[0], v[0]);
-        swap(u[1] -= t * v[1], v[1]);
-        swap(u[2] -= t * v[2], v[2]);
-    }
-    u[1] %= mod;
-    return (u[1] &lt; 0) ? (u[1] + mod) : u[1];
-}
-
-template&lt;typename T&gt;
-T garner(const vector&lt;T&gt;&amp; a, vector&lt;T&gt; p, const T mod){
-    const unsigned int sz = a.size();
-    vector&lt;T&gt; kp(sz + 1, 0), rmult(sz + 1, 1);
-    p.push_back(mod);
-    for(unsigned int i = 0; i &lt; sz; ++i){
-        T x = mod_mul(a[i] - kp[i], mod_inv(rmult[i], p[i]), p[i]);
-        x = (x &lt; 0) ? (x + p[i]) : x;
-        for(unsigned int j = i + 1; j &lt; sz + 1; ++j){
-            kp[j] = mod_add(kp[j], rmult[j] * x, p[j]);
-            rmult[j] = mod_mul(rmult[j], p[i], p[j]);
-        }
-    }
-    return kp[sz];
-}
+あ
 </pre>
 </div>
 <h3>verify 用の問題</h3>
-<p>yukicoder : <a href="https://yukicoder.me/problems/no/187">中華風 (Hard)</a>
-  <a href="https://yukicoder.me/submissions/383220">提出コード</a></p>
+<p>
+verify していません(verify 問題を知らない)
+</p>
+<p>Atcoder : <a href=""></a>
+  <a href="">提出コード</a></p>
 </section>
 
 </div>
