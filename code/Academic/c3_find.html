@@ -57,14 +57,17 @@ $\newcommand{\O}{\mathrm{O}}$
 <div id="contents">
 
 <section>
-<h2>C3 Find Algorithm</h2>
+<h2>$C_3$ Find Algorithm</h2>
 <h3>コードについての説明</h3>
 <p>
 無向グラフ $G$ に長さ $3$ の単純閉路が含まれるかどうかを返すアルゴリズム. <br>
 threshold $α$ を決めて, 次数が $α$ 以下の各頂点についてはそこから出る異なる $2$ 辺についてもう一方の端点同士の間に辺があるかどうかを調べる(あれば true). <br>
 次数が $α$ より大きい頂点(個数は $2m / α$ 以下)については隣接行列の $3$ 乗($64$ bit高速化が使える)を計算して対角成分を見る(非ゼロの成分があれば true). <br>
 (この実装では端点同士の辺のあるなしを $\log m$ かけて調べているので) $α$ はだいたい $\O (\sqrt{m})$ とか $\O( \sqrt{m / \log m})$ とかにするのがよい.<br>
-元論文は "Finding and Counting Given Length Cycles" [Alon, Yuster, Zwick 1997]
+元論文は "Finding and Counting Given Length Cycles" [Alon, Yuster, Zwick 1997] <br>
+(補足) $C_3$ なら次数の小さい頂点からそれを含む $C_3$ の数を数えていくことで $\O (m^{1.5})$ で
+finding だけでなく counting もできるのでそちらのほうが良いかもしれない. 上記論文はより一般に, 与えられた $k$ について
+$C_k$ の find と count を効率良く行うアルゴリズムを与えている.<br>
 </p>
 <p>
 引数の $MAX \_ E$ は辺の数を表す.

@@ -57,24 +57,34 @@ $\newcommand{\O}{\mathrm{O}}$
 <div id="contents">
 
 <section>
-<h2>Multipoint Evaluation</h2>
+<h2>Polynomial Interpolation</h2>
 <h3>コードについての説明</h3>
 <p>
-可換環上の $n$ 次多項式 $f(x)$ と $m$ 個のクエリ $u_0, \dots, u_{m-1}$ が与えられたときに $f(u_0), \dots, f(u_{m-1})$ を高速に求めるアルゴリズム. <br>
+体上の未知の $n$ 次多項式 $f(x) = \sum_{i=0}^n c_i x^i$ に対して
+$n$ 個の値の組 $(u_0, v_0 = f(u_0)), \dots, (u_n, v_n = f(u_n))$ が分かっているとする.
+ただし, $u_i$ はすべて異なるものとする. <br>
+このとき $f(x)$ のすべての係数 $c_i (0 \le i \le n)$ を求めるアルゴリズムである. <br>
 以下の実装は $\mathbb{Z} / p \mathbb{Z}$ ($p$ は素数) の場合の実装で特に素数 $p$ について
 $p = k * 2^l + 1 (k > 0, n + 1 \le 2^l)$ を満たすこと(数論変換に乗ること)を仮定している.<br>
-多項式 $r_0(x)$, $r_1(x)$ を $r_0(x) \overset{\mathrm{def}}{=} f(x) \ \mathrm{mod}\ \Pi_{i = 0}^{m / 2 - 1} (x - u_i)$, $r_1(x) \overset{\mathrm{def}}{=} f(x) \ \mathrm{mod}\ \Pi_{i = m / 2}^{m - 1} (x - u_i)$
-と定めると, $f(u_0), \dots, f(u_{m-1})$ の値は $f(u_i) (0 \le i < m / 2)$ については $f(u_i) = r_0(u_i)$ より $r_0$ を用いて,
-$f(u_i) (m / 2 \le i < m)$ については $f(u_i) = r_1(u_i)$ より $r_1$ を用いて計算することができる. <br>
-つまり分割統治法によって $m$ 個のクエリに答えることができ, 多項式の除算は $\O (n \log n)$ で行うことができるのでその時間計算量 $T(n)$ は
-$T(n) = T(n / 2) + \O(n \log n) \Rightarrow T(n) = \O (n \log^2 n )$ となる($\Pi_{i = l}^{r} (x - u_i)$ の計算は事前に $\O( n \log^2 n)$ かけて計算できるので問題ない).<br>
+まずラグランジュの補間多項式より $f(x) = \sum_{i = 0}^{n-1} v_i \cdot \Pi_{j = 0, j \neq i}^{n-1} \frac{x - u_j}{u_i - u_j}$
+が成り立つ. ここで $s_i \overset{\mathrm{def}}{=} \Pi_{j=0, j \neq i}^{n-1} \frac{1}{u_i - u_j}$ とすると
+$f(x) = \sum_{i=0}^{n-1} v_i s_i \cdot \Pi_{j=0, j \neq i}^{n-1} (x - u_j)$ と書き直せる. <br>
+実はこの $s_i (0 \le i < n)$ は <a href="./multipoint_evaluation.html">multipoint_evaluation</a> を用いて高速に求めることができる. <br>
+今 $g(x) \overset{\mathrm{def}}{=} \Pi_{j=0}^{n-1} (x - u_j)$ とすると $s_i$ の値は $g(x)$ の導関数 $g'(x)$ を用いて $s_i = 1 / g'(u_i)$
+のように計算できるため結局 $g'(u_0), \dots, g'(u_{n-1})$ の値を multipoint_evaluation を用いて $\O(n \log^2 n)$
+で求めれば $s_i (0 \le i < n)$ の値は求まる. <br>
+多項式 $r_0(x), r_1(x)$ を
+$r_0(x) \overset{\mathrm{def}}{=} \sum_{i=0}^{n/2-1} v_i s_i \cdot \Pi_{j=0, j \neq i}^{n / 2 - 1} (x - u_j)$,
+$r_1(x) \overset{\mathrm{def}}{=} \sum_{i=n/2}^{n-1} v_i s_i \cdot \Pi_{j=n/2, j \neq i}^{n - 1} (x - u_j)$
+と定めれば $f(x) = r_0(x) \Pi_{i=n/2}^{n-1}
+元論文は <a href=""></a>
 </p>
 <p>
 (関数)<br>
 add_edge(): 辺を追加する <br>
 </p>
 <p>
-時間計算量: $\O \left( n \log^2 n + m \right)$
+時間計算量: O(mlogn)
 </p>
 <h3>コード</h3>
 <div class="codebox">
@@ -85,7 +95,10 @@ add_edge(): 辺を追加する <br>
 </pre>
 </div>
 <h3>verify 用の問題</h3>
-<p>yosupo さんの library checker : <a href="https://judge.yosupo.jp/problem/multipoint_evaluation">Multipoint Evaluation</a>
+<p>
+verify していません(verify 問題を知らない)
+</p>
+<p>Atcoder : <a href=""></a>
   <a href="">提出コード</a></p>
 </section>
 

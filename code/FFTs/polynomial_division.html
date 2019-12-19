@@ -64,6 +64,8 @@ $\newcommand{\O}{\mathrm{O}}$
 このとき $f = q \cdot g + r$ を満たす多項式 $q, r$ で $\mathrm{deg}(r) < m$ となるものを求めるアルゴリズムである. <br>
 体上の多項式環はユークリッド整域であることからそのような $q, r$ はかならず存在する.
 可換環上の多項式についても同様の division を考えることができるがその場合は $g$ がモニック多項式である場合に well-defined となる.<br>
+以下の実装は $K = \mathbb{Z} / p \mathbb{Z}$ ($p$ は素数) の場合の実装で特に素数 $p$ について
+$p = k * 2^l + 1 (k > 0, n + 1 \le 2^l)$ を満たすこと(数論変換に乗ること)を仮定している.<br>
 以下説明. <br>
 $f(x) = q(x) \cdot g(x) + r(x)$ を満たす $q(x), r(x)$ を求めたいのだが, 同値変形すると
 $x^n f(1/x) = \left( x^{n-m} q(1/x) \right) \cdot \left(x^m g(1 / x) \right) + x^{n-m+1} \cdot \left( x^{m-1} r(1/x) \right)$ となる. <br>
@@ -96,9 +98,6 @@ $\O \left( \sum_{i=1}^l 2^i \log 2^i \right) = \O( n \log n)$ となる.
 (<b>Lemma</b> の証明) <br>
 $g'_m \cdot h_{i+1} = 2 g'_m h_i - {g'_m}^2 h_i^2 = 1 - (g'_m h_i - 1)^2 \ \mathrm{mod}\ x^{2^{i+1}}$ と式変形でき,
 仮定より $g'_m \cdot h_i - 1 = 0\ \mathrm{mod}\ x^{2^i}$ なので $g'_m \cdot h_{i+1} = 1\ \mathrm{mod}\ x^{2^{i+1}}$ が成り立つ. <br>
-<br>
-以下の実装は $K = \mathbb{Z} / p \mathbb{Z}$ ($p$ は素数) の場合の実装で特に素数 $p$ について
-$p = k * 2^l + 1 (k > 0, n + 1 \le 2^l)$ を満たすこと(数論変換に乗ること)を仮定している.<br>
 </p>
 <p>
 (関数)<br>
