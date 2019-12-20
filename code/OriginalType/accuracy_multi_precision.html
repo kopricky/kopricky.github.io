@@ -76,7 +76,7 @@ private:
     static constexpr int MOD_ = 924844033;
 
     static void trim_digit(AMP&amp; num){
-        while((int)num.size() &gt;= 1 &amp;&amp; num.back() == 0) num.pop_back();
+        while((int)num.size() &gt; 1 &amp;&amp; num.back() == 0) num.pop_back();
         if((int)num.size() == 1 &amp;&amp; num[0] == 0){ num.zero = true; return; }
         while((int)num.size() &lt; acc) num.push_front(0), num.ex--;
         while((int)num.size() &gt; acc + 1) num.pop_front(), num.ex++;
@@ -303,7 +303,7 @@ private:
     };
 
     static void mpi_AMP(MPI&amp; a, const AMP&amp; b){
-        if(b.zero){ a = MPI(0); return; }
+        if(b.zero){ a = MPI(); return; }
         int n = (int)b.size();
         a.resize(n);
         for(int i = 0; i &lt; n; i++) a[i] = b[i];
@@ -338,10 +338,10 @@ public:
     }
 
     void print_decimal(int decimal) const {
-        if(zero){ cout &lt;&lt; &quot;0.&quot;; for(int i = 0; i &lt; decimal; i++) cout &lt;&lt; '0';}
+        if(zero){ cout &lt;&lt; &quot;0.&quot;; for(int i = 0; i &lt; decimal; i++) cout &lt;&lt; '0'; return; }
         if(sign) cout &lt;&lt; '-';
-        for(int i = max(ex+acc-1,0LL); i &gt;= -decimal; i--){
-            cout &lt;&lt; ((i-ex &gt;= 0 || i-ex &gt;= acc)?(*this)[i-ex]:'0');
+        for(int i = max(ex+acc-1, 0LL); i &gt;= -decimal; --i){
+            cout &lt;&lt; ((i-ex &gt;= 0 &amp;&amp; i-ex &lt; acc) ? ((*this)[i-ex]) : 0);
             if(i == 0) cout &lt;&lt; '.';
         }
     }
@@ -352,7 +352,7 @@ public:
         for(int i = 0; i &lt; acc; i++){
             res += (*this)[i] * d, d *= 10.0;
         }
-        return res * pow(10.0, ex);
+        return sign ? -res * pow(10.0, ex) : res * pow(10.0, ex);
     }
 
     AMP&amp; operator=(long long num) {
@@ -648,7 +648,7 @@ public:
     }
 
     friend AMP log10(const AMP&amp; x){
-        assert(x &gt; AMP(0));
+        assert(x &gt; AMP());
         return AMP(acc + x.ex);
     }
 
@@ -659,7 +659,7 @@ public:
         while(b){
             if(b % 2) res *= a;
             a *= a;
-            b = b/2;
+            b = b / 2;
         }
         return res;
     }
@@ -695,7 +695,7 @@ public:
 <p>yukicoder : <a href="https://yukicoder.me/problems/no/81">すべて足すだけの簡単なお仕事です。</a>
   <a href="https://yukicoder.me/submissions/290473">提出コード</a><br>
 yukicoder : <a href="https://yukicoder.me/problems/no/955">ax^2+bx+c=0</a>
-  <a href="https://yukicoder.me/submissions/410049">提出コード</a>
+  <a href="https://yukicoder.me/submissions/410739">提出コード</a>
 </p>
 </section>
 
