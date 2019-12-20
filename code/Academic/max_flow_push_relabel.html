@@ -85,7 +85,7 @@ Edmonds-Karp, Dinic などは (1) の条件(フローの条件) を常に満た�
 (追記 2) <br>
 容量が整数である場合に超過量を 2 べきでスケーリングしていく excess scaling 版をおいた. 時間計算量は初期超過量の最大値 $\left( \max_{e \in \delta^+ (s)} e.cap \right)$ を $U$ としたとき
 $\mathrm{O} (nm + n^2 \log U)$ であるが, 手元のケースとかだと速くならなかった... <br>
-各頂点の超過量が残余グラフ $\Delta$ 未満であるグラフ $G$ が与えられたときにそれを各頂点の超過量が $\Delta / 2$ 未満のグラフに更新する操作を行う関数を Update$(G, \Delta)$ とする。
+各頂点の超過量が $\Delta$ 未満である残余グラフ $G$ が与えられたときにそれを各頂点の超過量が $\Delta / 2$ 未満のグラフに更新する操作を行う関数を Update$(G, \Delta)$ とする。
 この Update$(G, \Delta)$ にかかる計算量が $\O \left( n^2 \right)$ であることをポテンシャル関数 $\Phi$ として $\sum_{i \in V} p_i e_i / \Delta$ ($e(\cdot )$ は超過量とする) を用いることで示すことができる。
 ちなみにこのようにラベル値 $p_i$ と超過量 $e_i$ の積の和をポテンシャル関数として設定することでプッシュの回数をよく評価することができるようになるので PushRelabel based のアルゴリズムの計算量解析をする際に使える。
 </p>
@@ -349,14 +349,16 @@ public:
     inline bool empty(const int h) const { return (dat[N+h].next == N+h); }
     inline bool more_one(const int h) const { return dat[N+h].prev != dat[N+h].next; }
     inline void insert(const int h, const int u){
+        if(dat[u].prev != u) return;
         dat[u].prev = dat[N+h].prev, dat[u].next = N+h;
         dat[dat[N+h].prev].next = u, dat[N+h].prev = u;
     }
     inline void erase(const int u){
         dat[dat[u].prev].next = dat[u].next, dat[dat[u].next].prev = dat[u].prev;
+        dat[u].prev = dat[u].next = u;
     }
     inline void clear(){
-        for(int i = N; i &lt; N+H; ++i) dat[i].prev = dat[i].next = i;
+        for(int i = 0; i &lt; N+H; ++i) dat[i].prev = dat[i].next = i;
     }
 };
 
@@ -389,7 +391,7 @@ private:
                     act_min = min(act_min, potential[i]);
                 }
             }else{
-                potential[i] = V+1;
+                potential[i] = V + 1;
             }
         }
         return act_min;
@@ -399,7 +401,7 @@ private:
         potential[t] = 0;
         int qh = 0, qt = 0;
         for(que[qt++] = t; qh++ &lt; qt;){
-            int u = que[qh - 1];
+            int u = que[qh-1];
             for(const edge&amp; e : G[u]){
                 if(potential[e.to] == V &amp;&amp; G[e.to][e.rev].cap &gt; 0){
                     potential[e.to] = potential[u] + 1, que[qt++] = e.to;
