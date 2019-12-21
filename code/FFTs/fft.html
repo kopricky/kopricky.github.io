@@ -77,69 +77,58 @@ mul$(a, b)$ : 配列 $a, b$ の畳み込みを行う
 <input type="checkbox" id="label" class="csscode" />
 <label for="label"></label>
 <pre class="prettyprint linenums">
-complex&lt;double&gt; operator* (const complex&lt;double&gt; a, const complex&lt;double&gt; b){
+complex&lt;double&gt; operator*(const complex&lt;double&gt; a, const complex&lt;double&gt; b)
+{
     return complex&lt;double&gt;(a.real()*b.real()-a.imag()*b.imag(),a.real()*b.imag()+a.imag()*b.real());
 }
 
-vector&lt;complex&lt;double&gt; &gt; fft(vector&lt;complex&lt;double&gt; &gt; a,bool rev = false)
+void fft(vector&lt;complex&lt;double&gt; &gt;&amp; a,bool rev = false)
 {
     constexpr double PI = std::acos(-1);
-    int n = a.size(),h = 0;
-    for(int i = 0; 1 &lt;&lt; i &lt; n; i++) h++;
-    for(int i = 0; i &lt; n; i++){
-        int j = 0;
-        for(int k = 0; k &lt; h; k++){
-            j |= (i &gt;&gt; k &amp; 1) &lt;&lt; (h-1-k);
-        }
-        if (i &lt; j) swap(a[i], a[j]);
-    }
-    for(int i = 1; i &lt; n; i *= 2) {
-        for(int j = 0; j &lt; i; j++){
-            complex&lt;double&gt; w = polar(1.0,2*PI/(i*2)*(rev?-1:1)*j);
-            for(int k = 0; k &lt; n; k += i * 2) {
-                complex&lt;double&gt; s = a[j+k];
-                complex&lt;double&gt; t = a[j+k+i]*w;
-                a[j+k+0] = s+t;
-                a[j+k+i] = s-t;
-            }
-        }
-    }
+    unsigned int i, j, k, l;
+    double r;
+    complex&lt;double&gt; p, q, s;
+    const unsigned int size = a.size();
+	if(size == 1) return;
+	vector&lt;complex&lt;double&gt; &gt; b(size);
+	r = rev ? (- 2 * PI / size) : 2 * PI / size;
+	s = polar(1.0, r);
+	vector&lt;complex&lt;double&gt; &gt; kp(size / 2 + 1, 1);
+	for(i = 0; i &lt; size / 2; ++i) kp[i + 1] = kp[i] * s;
+	for(i = 1, l = size / 2; i &lt; size; i &lt;&lt;= 1, l &gt;&gt;= 1){
+		for(j = 0, r = 0; j &lt; l; ++j, r += i){
+            for(k = 0, s = kp[i * j]; k &lt; i; ++k){
+				p = a[k + r], q = a[k + r + size / 2];
+				b[k + 2 * r] = p + q;
+				b[k + 2 * r + i] = (p - q) * s;
+			}
+		}
+		swap(a, b);
+	}
     if(rev){
-        for(int i = 0; i &lt; n; i++){
-            a[i] /= n;
-        }
+        for(i = 0; i &lt; size; i++){ a[i] /= size; }
     }
-    return a;
 }
-
-vector&lt;int&gt; mul(vector&lt;int&gt; a, vector&lt;int&gt; b)
+ 
+vector&lt;int&gt; mul(const vector&lt;int&gt;&amp; a, const vector&lt;int&gt;&amp; b)
 {
-    int s = (int)a.size() + (int)b.size() - 1,t = 1;
-    while (t &lt; s) t *= 2;
+    int s = (int)a.size() + (int)b.size() - 1, t = 1;
+    while(t &lt; s) t *= 2;
     vector&lt;complex&lt;double&gt; &gt; A(t), B(t);
-    for(int i = 0; i &lt; (int)a.size(); i++){
-        A[i].real(a[i]);
-    }
-    for(int i = 0; i &lt; (int)b.size(); i++){
-        B[i].real(b[i]);
-    }
-    A = fft(A), B = fft(B);
-    for(int i = 0; i &lt; t; i++){
-        A[i] *= B[i];
-    }
-    A = fft(A, true);
-    a.resize(s);
-    //整数に直す
-    for(int i = 0; i &lt; s; i++){
-        a[i] = round(A[i].real());
-    }
-    return a;
+    for(int i = 0; i &lt; (int)a.size(); i++) A[i].real(a[i]);
+    for(int i = 0; i &lt; (int)b.size(); i++) B[i].real(b[i]);
+    fft(A), fft(B);
+    for(int i = 0; i &lt; t; i++) A[i] *= B[i];
+    fft(A, true);
+    vector&lt;int&gt; res(s);
+    for(int i = 0; i &lt; s; i++) res[i] = round(A[i].real());
+    return res;
 }
 </pre>
 </div>
 <h3>verify 用の問題</h3>
 <p>Atcoder : <a href="https://beta.atcoder.jp/contests/atc001/tasks/fft_c">高速フーリエ変換</a>
-  <a href="https://beta.atcoder.jp/contests/atc001/submissions/3145096">提出コード</a></p>
+  <a href="https://atcoder.jp/contests/atc001/submissions/9035561">提出コード</a></p>
 </section>
 
 </div>

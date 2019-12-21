@@ -88,49 +88,63 @@ mul$(a, b)$ : 配列 $a, b$ の畳み込みを行う
 // (469762049, 3)
 // (1224736769, 3)
 
-#define MOD 924844033
-#define root 5
+##define MOD 998244353
+#define root 3
 
-int add(const int x, const int y) { return (x + y &lt; MOD) ? x + y : x + y - MOD; }
-int mul(const int x, const int y) { return (long long)x * y % MOD; }
-int power(int x, int n)
+unsigned int add(const unsigned int x, const unsigned int y)
 {
-    int res = 1;
-    while(n &gt; 0) {
-        if (n &amp; 1) { res = mul(res, x); }
+	return (x + y &lt; MOD) ? x + y : x + y - MOD;
+}
+
+unsigned int sub(const unsigned int x, const unsigned int y)
+{
+	return (x &gt;= y) ? (x - y) : (MOD - y + x);
+}
+
+unsigned int mul(const unsigned int x, const unsigned int y)
+{
+	return (unsigned long long)x * y % MOD;
+}
+
+unsigned int mod_pow(unsigned int x, unsigned int n)
+{
+    unsigned int res = 1;
+    while(n &gt; 0){
+        if(n &amp; 1){ res = mul(res, x); }
         x = mul(x, x);
         n &gt;&gt;= 1;
     }
     return res;
 }
-int inverse(const int x) { return power(x, MOD - 2); }
+
+unsigned int inverse(const unsigned int x)
+{
+	return mod_pow(x, MOD - 2);
+}
 
 void ntt(vector&lt;int&gt;&amp; a, const bool rev = false)
 {
-    int i,j,k,s,t,v,w,wn;
-    const int size = (int)a.size();
-    const int height = (int)log2(2 * size - 1);
-    for(i = 0; i &lt; size; i++) {
-        j = 0;
-        for(k = 0; k &lt; height; k++) { j |= (i &gt;&gt; k &amp; 1) &lt;&lt; (height - 1 - k); }
-        if(i &lt; j) swap(a[i], a[j]);
-    }
-    for(i = 1; i &lt; size; i *= 2) {
-        w = power(root, (MOD - 1) / (i * 2));
-        if(rev) w = inverse(w);
-        for(j = 0; j &lt; size; j += i * 2) {
-            wn = 1;
-            for(k = 0; k &lt; i; k++) {
-                s = a[j + k + 0], t = mul(a[j + k + i], wn);
-                a[j + k + 0] = add(s, t);
-                a[j + k + i] = add(s, MOD - t);
-                wn = mul(wn, w);
-            }
-        }
-    }
+    unsigned int i, j, k, l, p, q, r, s;
+    const unsigned int size = a.size();
+	if(size == 1) return;
+	vector&lt;int&gt; b(size);
+	r = rev ? (MOD - 1 - (MOD - 1) / size) : (MOD - 1) / size;
+	s = mod_pow(root, r);
+	vector&lt;unsigned int&gt; kp(size / 2 + 1, 1);
+	for(i = 0; i &lt; size / 2; ++i) kp[i + 1] = mul(kp[i], s);
+	for(i = 1, l = size / 2; i &lt; size; i &lt;&lt;= 1, l &gt;&gt;= 1){
+		for(j = 0, r = 0; j &lt; l; ++j, r += i){
+			for(k = 0, s = kp[i * j]; k &lt; i; ++k){
+				p = a[k + r], q = a[k + r + size / 2];
+				b[k + 2 * r] = add(p, q);
+				b[k + 2 * r + i] = mul(sub(p, q), s);
+			}
+		}
+		swap(a, b);
+	}
     if(rev){
-        v = inverse(size);
-        for (i = 0; i &lt; size; i++) { a[i] = mul(a[i], v); }
+        s = inverse(size);
+        for(i = 0; i &lt; size; i++){ a[i] = mul(a[i], s); }
     }
 }
 
@@ -138,12 +152,12 @@ vector&lt;int&gt; convolute(const vector&lt;int&gt;&amp; a, const vector&lt;int&
 {
     const int size = (int)a.size() + (int)b.size() - 1;
     int t = 1;
-    while (t &lt; size) { t &lt;&lt;= 1; }
+    while(t &lt; size){ t &lt;&lt;= 1; }
     vector&lt;int&gt; A(t, 0), B(t, 0);
-    for (int i = 0; i &lt; (int)a.size(); i++) { A[i] = a[i]; }
-    for (int i = 0; i &lt; (int)b.size(); i++) { B[i] = b[i]; }
+    for(int i = 0; i &lt; (int)a.size(); i++){ A[i] = a[i]; }
+    for(int i = 0; i &lt; (int)b.size(); i++){ B[i] = b[i]; }
     ntt(A), ntt(B);
-    for (int i = 0; i &lt; t; i++) { A[i] = mul(A[i], B[i]); }
+    for (int i = 0; i &lt; t; i++){ A[i] = mul(A[i], B[i]); }
     ntt(A, true);
     A.resize(size);
     return A;
@@ -152,7 +166,7 @@ vector&lt;int&gt; convolute(const vector&lt;int&gt;&amp; a, const vector&lt;int&
 </div>
 <h3>verify 用の問題</h3>
 <p>Atcoder : <a href="https://beta.atcoder.jp/contests/ukuku09/tasks/ukuku09_e">Couple</a>
-  <a href="https://beta.atcoder.jp/contests/ukuku09/submissions/3491542">提出コード</a></p>
+  <a href="https://atcoder.jp/contests/ukuku09/submissions/9022470">提出コード</a></p>
 </section>
 
 </div>
