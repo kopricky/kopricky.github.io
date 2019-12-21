@@ -57,42 +57,45 @@ $\newcommand{\O}{\mathrm{O}}$
 <div id="contents">
 
 <section>
-<h2>Polynomial Division</h2>
+<h2>Polynomial Exponential</h2>
 <h3>コードについての説明</h3>
 <p>
-体 $K$ 上の多項式 $f, g$ ($\mathrm{deg}(f) = n$, $\mathrm{deg}(g) = m$, ($g$ の最高次の係数) $\neq 0$) を考える. <br>
-このとき $f = q \cdot g + r$ を満たす多項式 $q, r$ で $\mathrm{deg}(r) < m$ となるものを求めるアルゴリズムである. <br>
-体上の多項式環はユークリッド整域であることからそのような $q, r$ はかならず存在する.
-可換環上の多項式についても同様の division を考えることができるがその場合は $g$ がモニック多項式である場合に well-defined となる.<br>
-以下の実装は $K = \mathbb{Z} / p \mathbb{Z}$ ($p$ は素数) の場合の実装で特に素数 $p$ について
-$p = k * 2^l + 1 (k > 0, n + 1 \le 2^l)$ を満たすこと(数論変換に乗ること)を仮定している.<br>
-こちらの<a href="https://www.csa.iisc.ac.in/~chandan/courses/CNT/notes/lec5.pdf">参考資料</a>が分かりやすく, それを基に実装を行った. <br>
-以下では $n < m$ の場合は明らかなので $n \ge m$ の場合について示す. <br>
-$f(x) = q(x) \cdot g(x) + r(x)$ を満たす $q(x), r(x)$ を求めたいのだが, 同値変形すると
-$x^n f(1/x) = \left( x^{n-m} q(1/x) \right) \cdot \left(x^m g(1 / x) \right) + x^{n-m+1} \cdot \left( x^{m-1} r(1/x) \right)$ となる. <br>
-今多項式 $h(x)$ について $h'_k(x)$ を $h'_k(x) = x^k h(1/x) (k \ge \mathrm{deg}(h))$ と定義すると, 上式は
-$f'_n(x) = q'_{n-m}(x) \cdot g'_m(x) + x^{n-m+1} \cdot r'_{m-1}(x)$ と書き直せる. さらに, <br>
-$\Rightarrow f'_n(x) = q'_{n-m}(x) \cdot g'_m(x)\ \mathrm{mod}\ x^{n-m+1}$
-$\Rightarrow q'_{n-m}(x) = f'_{n}(x) \cdot g'_m(x)^{-1}\ \mathrm{mod}\ x^{n-m+1}$ と変形することができる. <br>
-ここで $g'_m(x)^{-1}$ は $K[x] / (x^{n-m+1})$ 上の $g'_m(x)$ の乗法逆元を意味する.
-つまり $ g'_m (x) \cdot g'_m(x)^{-1} = 1\ \mathrm{mod}\ x^{n-m+1}$ を満たすような多項式とする. <br>
-これは<a href="./polynomial_inverse.html">こちらのアルゴリズム</a>を用いることで $\O (n \log n)$ 時間で求めることができる. <br>
-最後に $\mathrm{deg} (q'_{n-m}) \le n - m$ であることからゆえに
-$q'_{n-m}(x) = ( \left( f'_n(x) \cdot h_l(x) \right) \ \mathrm{mod}\ x^{n-m+1})$ となり, $q$ を求めることができる.
-加えて $r$ も $r = f - q \cdot g$ より計算することができる. <br>
-時間計算量だが 逆元を求める部分にかかる計算量が $\O( n \log n)$ で, その他の部分の計算も $\O( n \log n)$ で行うことができるので全体で $\O( n \log n)$ となる. <br>
+体 $K$ 上の多項式 $f$ ($\mathrm{deg}(f) = n$, $f(0) = 0)$ に対応する形式的べき級数 $F$ が与えられたときに
+形式的べき級数 $\exp (F)$ の $x^i (0 \le i < r)$ の係数を返す.<br>
+形式的べき級数の $\exp$ の求め方がよく分からなかったので
+あまり良くないが verify 問題の latte0199 さんのコードを参照させていただいた.<br>
+その上で逆手流に証明(っぽいもの)をしてみる.
+正直形式的べき級数をあまり良く理解しておらず, 雰囲気で書いているため不正確な記述になっているとは思う($\mathrm{mod}$ とか書くのもマズい気もするが$\ \mathrm{mod}\ x^i$
+と書いたときは $x^j (j \ge i)$ の項を無視した形式的べき級数と考えてほしい).<br>
 <br>
-(注) 便宜上長さ $n - m + 1$ の配列を解となる商の多項式として返しているが必ずしも $n - m$ 次多項式とは限らないことに注意する(最高次の係数が $\mathbb{Z} / p \mathbb{Z}$ 上で $0$ となる可能性があるので).
-剰余の多項式の方は $0$ でない限り最高次係数が非ゼロとなるようになっている.
+<b>Lemma</b>: $x_j (j \ge 2^i)$ の係数が $0$ であるような形式的べき級数 $g_i$ が $\exp(f) = g_i\ \mathrm{mod}\ x^{2^i}$ かつ ($g_i$ の定数項) $= 1$ を満たすなら
+$\exp(f) = g_{i+1}\ \mathrm{mod}\ x^{2^{i+1}}$ かつ ($g_i$ の定数項) $= 1$ を満たす $x_j (j \ge 2^{i+1})$ の係数が $0$ であるような形式的べき級数 $g_{i+1}$ は
+$g_{i+1} \overset{\mathrm{def}}{=} \left( \left( g_i \cdot (f + 1 - \log g_i) \right) \ \mathrm{mod}\ x^{2^{i+1}} \right)$ と定めることで得られる. <br><br>
+
+これより初期値を $g_0 = 1$ と取り, $\lceil \log r \rceil$ 回反復を繰り返すことで回が得られる.<br>
 <br>
+(<b>Lemma</b> の証明(っぽい何か)) <br>
+まず $\left( \left( g_i \cdot (f + 1 - \log g_i) \right) \ \mathrm{mod}\ x^{2^{i+1}} \right)$ の定数項に注目すると ($g_i$ の定数項) $= 1$ および ($\log g_i$
+の定数項) $= 0$ より ($g_{i+1}$ の定数項) は $1$ となることが分かる.<br>
+次に $a(x)$ を $g_i(x)$ の $x^i (1 \le i < x^{2^i})$ の項からなる形式的べき級数,
+$b(x)$ を $\exp(x)$ の $x^i (x^{2^i} \le i < x^{2^{i+1}})$ の項からなる形式的べき級数,
+$c(x)$ を $\exp(x)$ の $x^i (i \ge x^{2^{i+1}})$ の項からなる形式的べき級数とする.
+このとき $\exp(f) = g_i\ \mathrm{mod}\ x^{2^i}$ から
+$\exp(f(x)) = 1 + a(x) + b(x) + c(x)$ が成り立つ.<br>
+よって $\exp(f) - g_{i+1} = (1 + a + b) - (1 + a) \cdot (\log(1 + a + b + c) + 1 - \log (1 + a)) = 0\ \mathrm{mod}\ x^{2^{i+1}}$ を示せば良い(式 (1)).<br>
+$\log (1 + a + b + c) = \sum_{i \ge 1} \frac{(-1)^{i+1}}{i}(a + b + c)^i$ であり $x^{2^{i+1}}$ 以降の項は考えなくて良いので
+$c$ の寄与は考えなくて良いのと $b$ の寄与についても $b^i (i \ge 2)$ については考える必要がない.<br>
+ゆえに $\log (1 + a + b + c) = \sum_{i \ge 1} \frac{(-1)^{i+1}}{i}a^i + b \sum_{i \ge 0} (-1)^i a^i\ \mathrm{mod}\ x^{2^{i+1}}$ が成り立ち,
+$\log (1 + a + b + c) = \log (1 + a) + \frac{b}{1 + a}\ \mathrm{mod}\ x^{2^{i+1}}$ と書きなおすことができる.<br>
+これを式 (1) に代入することで成り立つことが示せた.
 </p>
 <p>
 (関数)<br>
-polynomial_division$(a, b)$: それぞれ $a, b$ を係数に持つ多項式 $f, g$ について $f = q \cdot g + r$ を満たす多項式 $q, r$ で $\mathrm{deg}(r) < m$
-を満たす多項式 $q, r$ の係数を ($q$ の係数, $r$ の係数) のように配列のペアとして返す.<br>
+polynomial_exp$(a, r)$: 多項式 $f$ の係数 $a$($a[0] = 0$) を与えたとき, それに対応する形式的べき級数 $F$ とする.
+このとき $\exp (F)$ の $x^i (0 \le i < r)$ の係数を返す.<br>
 </p>
 <p>
-時間計算量: $\O (n \log n)$
+時間計算量: $\O( n + r \log r)$
 </p>
 <h3>コード</h3>
 <div class="codebox">
@@ -101,22 +104,22 @@ polynomial_division$(a, b)$: それぞれ $a, b$ を係数に持つ多項式 $f,
 <pre class="prettyprint linenums">
 #define MOD 998244353
 #define root 3
-
+ 
 unsigned int add(const unsigned int x, const unsigned int y)
 {
     return (x + y &lt; MOD) ? x + y : x + y - MOD;
 }
-
+ 
 unsigned int sub(const unsigned int x, const unsigned int y)
 {
     return (x &gt;= y) ? (x - y) : (MOD - y + x);
 }
-
+ 
 unsigned int mul(const unsigned int x, const unsigned int y)
 {
     return (unsigned long long)x * y % MOD;
 }
-
+ 
 unsigned int mod_pow(unsigned int x, unsigned int n)
 {
     unsigned int res = 1;
@@ -127,12 +130,12 @@ unsigned int mod_pow(unsigned int x, unsigned int n)
     }
     return res;
 }
-
+ 
 unsigned int inverse(const unsigned int x)
 {
     return mod_pow(x, MOD - 2);
 }
-
+ 
 void ntt(vector&lt;int&gt;&amp; a, const bool rev = false)
 {
     unsigned int i, j, k, l, p, q, r, s;
@@ -158,7 +161,7 @@ void ntt(vector&lt;int&gt;&amp; a, const bool rev = false)
         for(i = 0; i &lt; size; i++){ a[i] = mul(a[i], s); }
     }
 }
-
+ 
 vector&lt;int&gt; convolute(const vector&lt;int&gt;&amp; a, const vector&lt;int&gt;&amp; b, int asize, int bsize, int _size)
 {
     const int size = asize + bsize - 1;
@@ -173,9 +176,10 @@ vector&lt;int&gt; convolute(const vector&lt;int&gt;&amp; a, const vector&lt;int&
     A.resize(_size);
     return A;
 }
-
+ 
 vector&lt;int&gt; polynomial_inverse(const vector&lt;int&gt;&amp; a, int r)
 {
+    assert(a[0] != 0);
     vector&lt;int&gt; h = {(int)inverse(a[0])};
     int t = 1;
     for(int i = 0; t &lt; r; ++i){
@@ -191,36 +195,60 @@ vector&lt;int&gt; polynomial_inverse(const vector&lt;int&gt;&amp; a, int r)
     return h;
 }
 
-pair&lt;vector&lt;int&gt;, vector&lt;int&gt; &gt; polynomial_division(const vector&lt;int&gt;&amp; a, const vector&lt;int&gt;&amp; b)
+vector&lt;int&gt; differentiate(const vector&lt;int&gt;&amp; a)
 {
-    const int n = a.size() - 1, m = b.size() - 1;
-    assert(b[m] != 0);
-    if(n &lt; m) return {vector&lt;int&gt;(n - m + 1, 0), a};
-    vector&lt;int&gt; reva(n + 1), revb(m + 1);
-    for(int i = 0; i &lt;= n; ++i) reva[n - i] = a[i];
-    for(int i = 0; i &lt;= m; ++i) revb[m - i] = b[i];
-    vector&lt;int&gt; inv_revb = polynomial_inverse(revb, n - m + 1);
-    vector&lt;int&gt; res = convolute(reva, inv_revb, n - m + 1, n - m + 1, n - m + 1);
-    vector&lt;int&gt; q(n - m + 1), r;
-    for(int i = 0; i &lt; n - m + 1; ++i) q[i] = res[n - m - i];
-    vector&lt;int&gt; qb = convolute(q, b, n - m + 1, m + 1, n + 1);
-    bool first = false;
-    for(int i = n; i &gt;= 0; --i){
-        const int val = sub(a[i], qb[i]);
-        if(!first &amp;&amp; val &gt; 0){
-            first = true, r.resize(i + 1);
-        }
-        if(first) r[i] = val;
+    const int n = (int)a.size();
+    vector&lt;int&gt; res(n - 1);
+    for(int i = 0; i &lt; n - 1; ++i){
+        res[i] = mul(a[i + 1], i + 1);
     }
-    return {q, r};
+    return res;
+}
+
+vector&lt;int&gt; integral(const vector&lt;int&gt;&amp; a)
+{
+    const int n = (int)a.size();
+    vector&lt;int&gt; res(n + 1, 0);
+    for(int i = 0; i &lt; n; ++i){
+        res[i + 1] = mul(a[i], inverse(i + 1));
+    }
+    return res;
+}
+
+vector&lt;int&gt; polynomial_log(const vector&lt;int&gt;&amp; a, int r)
+{
+    assert(a[0] == 1);
+    if(r == 0) return {0};
+    const int n = (int)a.size();
+    const vector&lt;int&gt; num = differentiate(a);
+    const vector&lt;int&gt; den = polynomial_inverse(a, r - 1);
+    const vector&lt;int&gt; res = convolute(num, den, min(n, r) - 1, r - 1, r - 1);
+    return integral(res);
+}
+
+vector&lt;int&gt; polynomial_exp(const vector&lt;int&gt;&amp; a, int r)
+{
+    assert(a[0] == 0);
+    const int n = (int)a.size();
+    vector&lt;int&gt; ans = {1};
+    for(int t = 1; t &lt; r;){
+        t &lt;&lt;= 1;
+        vector&lt;int&gt; res = polynomial_log(ans, t);
+        for(int i = 0; i &lt; t; ++i) res[i] = sub((int)0, res[i]);
+        res[0] = add(res[0], 1);
+        for(int i = 0; i &lt; min(n, t); ++i){
+            res[i] = add(res[i], a[i]);
+        }
+        ans = convolute(ans, res, t / 2, t, t);
+    }
+    ans.resize(r);
+    return ans;
 }
 </pre>
 </div>
 <h3>verify 用の問題</h3>
-<p>
-(参考) <a href="../Computation_Advanced/multipoint_evaluation.html">verify 1</a>,
-<a href="../Computation_Advanced/polynomial_interpolation.html">verify 2</a>
-</p>
+<p>yosupo さんの library checker : <a href="https://judge.yosupo.jp/problem/exp_of_formal_power_series">Exp of Formal Power Series</a>
+  <a href="https://judge.yosupo.jp/submission/2117">提出コード</a></p>
 </section>
 
 </div>
