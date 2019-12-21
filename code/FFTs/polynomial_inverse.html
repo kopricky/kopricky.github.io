@@ -65,6 +65,7 @@ $\newcommand{\O}{\mathrm{O}}$
 つまり $f (x) \cdot f(x)^{-1} = 1\ \mathrm{mod}\ x^{r}$ を満たす $f(x)^{-1}$ を求めるアルゴリズムである. <br>
 以下の実装は $\mathbb{Z} / p \mathbb{Z}$ ($p$ は素数) の場合の実装で特に素数 $p$ について
 $p = k * 2^l + 1 (k > 0, \lceil \log r \rceil \le 2^l)$ を満たすこと(数論変換に乗ること)を仮定している.<br>
+こちらの<a href="https://www.csa.iisc.ac.in/~chandan/courses/CNT/notes/lec5.pdf">参考資料</a>が分かりやすく, それを基に実装を行った. <br>
 $f(x)^{-1}$ の存在は以下のように構成的に示すことができ, この構成方法がそのまま $\O(n + r \log r)$ のアルゴリズムとなっている. <br>
 以下の Lemma を用いて構成する. <br>
 <br>

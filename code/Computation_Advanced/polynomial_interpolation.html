@@ -66,6 +66,7 @@ $n$ 個の値の組 $(u_0, v_0 = f(u_0)), \dots, (u_{n-1}, v_{n-1} = f(u_{n-1}))
 このとき $f(x)$ のすべての係数 $c_i (0 \le i < n)$ を求めるアルゴリズムである. <br>
 以下の実装は $\mathbb{Z} / p \mathbb{Z}$ ($p$ は素数) の場合の実装で特に素数 $p$ について
 $p = k * 2^l + 1 (k > 0, n + 1 \le 2^l)$ を満たすこと(数論変換に乗ること)を仮定している.<br>
+こちらの<a href="https://www.csa.iisc.ac.in/~chandan/courses/CNT/notes/lec6.pdf">参考資料</a>が分かりやすく, それを基に実装を行った. <br>
 まずラグランジュの補間多項式より $f(x) = \sum_{i = 0}^{n-1} v_i \cdot \Pi_{j = 0, j \neq i}^{n-1} \frac{x - u_j}{u_i - u_j}$
 が成り立つ. ここで $s_i \overset{\mathrm{def}}{=} \Pi_{j=0, j \neq i}^{n-1} \frac{1}{u_i - u_j}$ とすると
 $f(x) = \sum_{i=0}^{n-1} v_i s_i \cdot \Pi_{j=0, j \neq i}^{n-1} (x - u_j)$ と書き直せる. <br>

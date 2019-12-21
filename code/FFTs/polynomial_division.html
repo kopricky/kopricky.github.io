@@ -66,6 +66,7 @@ $\newcommand{\O}{\mathrm{O}}$
 可換環上の多項式についても同様の division を考えることができるがその場合は $g$ がモニック多項式である場合に well-defined となる.<br>
 以下の実装は $K = \mathbb{Z} / p \mathbb{Z}$ ($p$ は素数) の場合の実装で特に素数 $p$ について
 $p = k * 2^l + 1 (k > 0, n + 1 \le 2^l)$ を満たすこと(数論変換に乗ること)を仮定している.<br>
+こちらの<a href="https://www.csa.iisc.ac.in/~chandan/courses/CNT/notes/lec5.pdf">参考資料</a>が分かりやすく, それを基に実装を行った. <br>
 以下では $n < m$ の場合は明らかなので $n \ge m$ の場合について示す. <br>
 $f(x) = q(x) \cdot g(x) + r(x)$ を満たす $q(x), r(x)$ を求めたいのだが, 同値変形すると
 $x^n f(1/x) = \left( x^{n-m} q(1/x) \right) \cdot \left(x^m g(1 / x) \right) + x^{n-m+1} \cdot \left( x^{m-1} r(1/x) \right)$ となる. <br>
