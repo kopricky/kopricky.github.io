@@ -71,7 +71,7 @@ $p = k * 2^l + 1 (k > 0, n + 1 \le 2^l)$ を満たすこと(数論変換に乗�
 $f(x) = \sum_{i=0}^{n-1} v_i s_i \cdot \Pi_{j=0, j \neq i}^{n-1} (x - u_j)$ と書き直せる. <br>
 まず前処理として $s_i (0 \le i < n)$ を高速に求める手法について説明する. <br>
 今 $g(x) \overset{\mathrm{def}}{=} \Pi_{j=0}^{n-1} (x - u_j)$ とすると $s_i$ の値は $g(x)$ の導関数 $g'(x)$ を用いて $s_i = g'(u_i)^{-1}$
-のように計算できるため結局 $g'(u_0), \dots, g'(u_{n-1})$ の値を <a href="./Computation_Advanced/multipoint_evaluation.html">multipoint_evaluation</a> を用いて $\O(n \log^2 n)$
+のように計算できるため結局 $g'(u_0), \dots, g'(u_{n-1})$ の値を <a href="./multipoint_evaluation.html">multipoint_evaluation</a> を用いて $\O(n \log^2 n)$
 で求めれば $s_i (0 \le i < n)$ の値は求まる. <br>
 よって問題は $f(x) = \sum_{i=0}^{n-1} v_i s_i \cdot \Pi_{j=0, j \neq i}^{n-1} (x - u_j)$ の形で表される多項式 $f$ と
 $n$ 個の組 $(u_0, v_0 s_0), \dots, (u_{n-1}, v_{n-1} s_{n-1})$ が分かっているときに多項式 $f$ の各項の係数を求めることと言える.
