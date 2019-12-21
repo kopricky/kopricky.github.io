@@ -60,13 +60,13 @@ $\newcommand{\O}{\mathrm{O}}$
 <h2>Polynomial Division</h2>
 <h3>コードについての説明</h3>
 <p>
-体 $K$ 上の多項式 $f, g$ ($\mathrm{deg}(f) = n$, $\mathrm{deg}(g) = m$, $g \neq 0$, $n \ge m$) を考える. <br>
+体 $K$ 上の多項式 $f, g$ ($\mathrm{deg}(f) = n$, $\mathrm{deg}(g) = m$, ($g$ の最高次の係数) $\neq 0$) を考える. <br>
 このとき $f = q \cdot g + r$ を満たす多項式 $q, r$ で $\mathrm{deg}(r) < m$ となるものを求めるアルゴリズムである. <br>
 体上の多項式環はユークリッド整域であることからそのような $q, r$ はかならず存在する.
 可換環上の多項式についても同様の division を考えることができるがその場合は $g$ がモニック多項式である場合に well-defined となる.<br>
 以下の実装は $K = \mathbb{Z} / p \mathbb{Z}$ ($p$ は素数) の場合の実装で特に素数 $p$ について
 $p = k * 2^l + 1 (k > 0, n + 1 \le 2^l)$ を満たすこと(数論変換に乗ること)を仮定している.<br>
-以下説明. <br>
+以下では $n < m$ の場合は明らかなので $n \ge m$ の場合について示す. <br>
 $f(x) = q(x) \cdot g(x) + r(x)$ を満たす $q(x), r(x)$ を求めたいのだが, 同値変形すると
 $x^n f(1/x) = \left( x^{n-m} q(1/x) \right) \cdot \left(x^m g(1 / x) \right) + x^{n-m+1} \cdot \left( x^{m-1} r(1/x) \right)$ となる. <br>
 今多項式 $h(x)$ について $h'_k(x)$ を $h'_k(x) = x^k h(1/x) (k \ge \mathrm{deg}(h))$ と定義すると, 上式は
@@ -74,52 +74,152 @@ $f'_n(x) = q'_{n-m}(x) \cdot g'_m(x) + x^{n-m+1} \cdot r'_{m-1}(x)$ と書き直
 $\Rightarrow f'_n(x) = q'_{n-m}(x) \cdot g'_m(x)\ \mathrm{mod}\ x^{n-m+1}$
 $\Rightarrow q'_{n-m}(x) = f'_{n}(x) \cdot \left( g'_m(x) \right)^{-1}\ \mathrm{mod}\ x^{n-m+1}$ と変形することができる. <br>
 ここで $\left( g'_m(x) \right)^{-1}$ は $K[x] / (x^{n-m+1})$ 上の $g'_m(x)$ の乗法逆元を意味する.
-つまり $\left( g'_m(x) \right)^{-1} \cdot g'_m (x) = 1\ \mathrm{mod}\ x^{n-m+1}$ を満たすような多項式とする. <br>
-ただ, そもそもそのような $\left( g'_m(x) \right)^{-1}$ が存在するかどうかが怪しいので,
-$\left( g'_m(x) \right)^{-1}$ の存在を構成的に示すために以下の定理を紹介する. 定理の証明は簡単なので最後に書く.<br>
-<br>
-<b>Lemma</b>: 多項式 $h_i$ が $g'_m \cdot h_i = 1\ \mathrm{mod}\ x^{2^i}$ を満たすなら
-$g'_m \cdot h_{i+1} = 1\ \mathrm{mod}\ x^{2^{i+1}}$ を満たす多項式 $h_{i+1}$ は
-$h_{i+1} \overset{\mathrm{def}}{=} \left( \left(2 h_i - g'_m h_i^2\right) \ \mathrm{mod}\ x^{2^{i+1}} \right)$ と定めることで得られる. <br>
-<br>
-今初期値 $h_0$ は $h_0 = \left( g'_m(0) \right)^{-1}$ とすると $g'_m \cdot h_0 = 1\ \mathrm{mod}\ x$ が成り立つので取れる(可換環上でも
-$g$ がモニックであれば $g'_m(0) = 1$ であるので取れる). <br>
-最後に $l \overset{\mathrm{def}}{=} \lceil \log (n - m + 1) \rceil$ と定めると上記の定理を用いて
-$g'_m \cdot h_l = 1\ \mathrm{mod}\ x^{2^l}$ を満たす $h_l$ が計算でき,
-$\left( g'_m(x) \right)^{-1}$ として $h_l$ を取ると $\left( g'_m(x) \right)^{-1} \cdot g'_m (x) = 1\ \mathrm{mod}\ x^{n-m+1}$ を満たす.
-よって $\left( g'_m(x) \right)^{-1}$ の存在およびその構成方法については示せた. <br>
-$\mathrm{deg} (q'_{n-m}) \le n - m$ であることからゆえに
+つまり $ g'_m (x) \cdot \left( g'_m(x) \right)^{-1} = 1\ \mathrm{mod}\ x^{n-m+1}$ を満たすような多項式とする. <br>
+これは<a href="./polynomial_inverse.html">こちらのアルゴリズム</a>を用いることで $\O (n \log n)$ 時間で求めることができる. <br>
+最後に $\mathrm{deg} (q'_{n-m}) \le n - m$ であることからゆえに
 $q'_{n-m}(x) = ( \left( f'_n(x) \cdot h_l(x) \right) \ \mathrm{mod}\ x^{n-m+1})$ となり, $q$ を求めることができる.
 加えて $r$ も $r = f - q \cdot g$ より計算することができる. <br>
-時間計算量だが $h_l$ を計算する部分にかかる計算量は各 $h_i$ を求めるために次数 $2^i$ 未満の多項式の乗算を定数回行うので
-$\O \left( \sum_{i=1}^l 2^i \log 2^i \right) = \O( n \log n)$ となる.
-その他の部分の計算も $\O( n \log n)$ で行うことができるので全体で $\O( n \log n)$ となる. <br>
+時間計算量だが 逆元を求める部分にかかる計算量が $\O( n \log n)$ で, その他の部分の計算も $\O( n \log n)$ で行うことができるので全体で $\O( n \log n)$ となる. <br>
 <br>
-(<b>Lemma</b> の証明) <br>
-$g'_m \cdot h_{i+1} = 2 g'_m h_i - {g'_m}^2 h_i^2 = 1 - (g'_m h_i - 1)^2 \ \mathrm{mod}\ x^{2^{i+1}}$ と式変形でき,
-仮定より $g'_m \cdot h_i - 1 = 0\ \mathrm{mod}\ x^{2^i}$ なので $g'_m \cdot h_{i+1} = 1\ \mathrm{mod}\ x^{2^{i+1}}$ が成り立つ. <br>
+(注) 便宜上長さ $n - m + 1$ の配列を解となる商の多項式として返しているが必ずしも $n - m$ 次多項式とは限らないことに注意する(最高次の係数が $\mathbb{Z} / p \mathbb{Z}$ 上で $0$ となる可能性があるので).
+剰余の多項式の方は $0$ でない限り最高次係数が非ゼロとなるようになっている.
+<br>
 </p>
 <p>
 (関数)<br>
-add_edge(): 辺を追加する <br>
+polynomial_division$(a, b)$: それぞれ $a, b$ を係数に持つ多項式 $f, g$ について $f = q \cdot g + r$ を満たす多項式 $q, r$ で $\mathrm{deg}(r) < m$
+を満たす多項式 $q, r$ の係数を ($q$ の係数, $r$ の係数) のように配列のペアとして返す.<br>
 </p>
 <p>
-時間計算量: O(n log n)
+時間計算量: $\O (n \log n)$
 </p>
 <h3>コード</h3>
 <div class="codebox">
 <input type="checkbox" id="label" class="csscode" />
 <label for="label"></label>
 <pre class="prettyprint linenums">
-あ
+#define MOD 998244353
+#define root 3
+
+unsigned int add(const unsigned int x, const unsigned int y)
+{
+    return (x + y &lt; MOD) ? x + y : x + y - MOD;
+}
+
+unsigned int sub(const unsigned int x, const unsigned int y)
+{
+    return (x &gt;= y) ? (x - y) : (MOD - y + x);
+}
+
+unsigned int mul(const unsigned int x, const unsigned int y)
+{
+    return (unsigned long long)x * y % MOD;
+}
+
+unsigned int mod_pow(unsigned int x, unsigned int n)
+{
+    unsigned int res = 1;
+    while(n &gt; 0){
+        if(n &amp; 1){ res = mul(res, x); }
+        x = mul(x, x);
+        n &gt;&gt;= 1;
+    }
+    return res;
+}
+
+unsigned int inverse(const unsigned int x)
+{
+    return mod_pow(x, MOD - 2);
+}
+
+void ntt(vector&lt;int&gt;&amp; a, const bool rev = false)
+{
+    unsigned int i, j, k, l, p, q, r, s;
+    const unsigned int size = a.size();
+    if(size == 1) return;
+    vector&lt;int&gt; b(size);
+    r = rev ? (MOD - 1 - (MOD - 1) / size) : (MOD - 1) / size;
+    s = mod_pow(root, r);
+    vector&lt;unsigned int&gt; kp(size / 2 + 1, 1);
+    for(i = 0; i &lt; size / 2; ++i) kp[i + 1] = mul(kp[i], s);
+    for(i = 1, l = size / 2; i &lt; size; i &lt;&lt;= 1, l &gt;&gt;= 1){
+        for(j = 0, r = 0; j &lt; l; ++j, r += i){
+            for(k = 0, s = kp[i * j]; k &lt; i; ++k){
+                p = a[k + r], q = a[k + r + size / 2];
+                b[k + 2 * r] = add(p, q);
+                b[k + 2 * r + i] = mul(sub(p, q), s);
+            }
+        }
+        swap(a, b);
+    }
+    if(rev){
+        s = inverse(size);
+        for(i = 0; i &lt; size; i++){ a[i] = mul(a[i], s); }
+    }
+}
+
+vector&lt;int&gt; convolute(const vector&lt;int&gt;&amp; a, const vector&lt;int&gt;&amp; b, int asize, int bsize, int _size)
+{
+    const int size = asize + bsize - 1;
+    int t = 1;
+    while (t &lt; size){ t &lt;&lt;= 1; }
+    vector&lt;int&gt; A(t, 0), B(t, 0);
+    for(int i = 0; i &lt; asize; i++){ A[i] = a[i]; }
+    for(int i = 0; i &lt; bsize; i++){ B[i] = b[i]; }
+    ntt(A), ntt(B);
+    for(int i = 0; i &lt; t; i++){ A[i] = mul(A[i], B[i]); }
+    ntt(A, true);
+    A.resize(_size);
+    return A;
+}
+
+vector&lt;int&gt; polynomial_inverse(const vector&lt;int&gt;&amp; a, int r)
+{
+    vector&lt;int&gt; h = {(int)inverse(a[0])};
+    int t = 1;
+    for(int i = 0; t &lt; r; ++i){
+        t &lt;&lt;= 1;
+        vector&lt;int&gt; res = convolute(a, convolute(h, h, t / 2, t / 2, t), min((int)a.size(), t), t, t);
+        for(int j = 0; j &lt; t; ++j){
+            res[j] = sub(0, res[j]);
+            if(j &lt; t / 2) res[j] = add(res[j], mul(2, h[j]));
+        }
+        swap(h, res);
+    }
+    h.resize(r);
+    return h;
+}
+
+pair&lt;vector&lt;int&gt;, vector&lt;int&gt; &gt; polynomial_division(const vector&lt;int&gt;&amp; a, const vector&lt;int&gt;&amp; b)
+{
+    const int n = a.size() - 1, m = b.size() - 1;
+    assert(b[m] != 0);
+    if(n &lt; m) return {vector&lt;int&gt;(n - m + 1, 0), a};
+    vector&lt;int&gt; reva(n + 1), revb(m + 1);
+    for(int i = 0; i &lt;= n; ++i) reva[n - i] = a[i];
+    for(int i = 0; i &lt;= m; ++i) revb[m - i] = b[i];
+    vector&lt;int&gt; inv_revb = polynomial_inverse(revb, n - m + 1);
+    vector&lt;int&gt; res = convolute(reva, inv_revb, n - m + 1, n - m + 1, n - m + 1);
+    vector&lt;int&gt; q(n - m + 1), r;
+    for(int i = 0; i &lt; n - m + 1; ++i) q[i] = res[n - m - i];
+    vector&lt;int&gt; qb = convolute(q, b, n - m + 1, m + 1, n + 1);
+    bool first = false;
+    for(int i = n; i &gt;= 0; --i){
+        const int val = sub(a[i], qb[i]);
+        if(!first &amp;&amp; val &gt; 0){
+            first = true, r.resize(i + 1);
+        }
+        if(first) r[i] = val;
+    }
+    return {q, r};
+}
 </pre>
 </div>
 <h3>verify 用の問題</h3>
 <p>
-verify していません(verify 問題を知らない)
+(参考) <a href="../Computation_Advanced/multipoint_evaluation.html">verify 1</a>,
+<a href="../Computation_Advanced/polynomial_interpolation.html">verify 2</a>
 </p>
-<p>Atcoder : <a href=""></a>
-  <a href="">提出コード</a></p>
 </section>
 
 </div>

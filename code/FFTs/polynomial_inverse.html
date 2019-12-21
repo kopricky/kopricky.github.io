@@ -44,6 +44,7 @@ $\newcommand{\O}{\mathrm{O}}$
 <h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
 </header>
 
+
 <nav id="menubar">
 <ul>
 <li><a href="../../index.html">Home</a></li>
@@ -56,39 +57,46 @@ $\newcommand{\O}{\mathrm{O}}$
 <div id="contents">
 
 <section>
-<h2>Fast Number Theoretic Transform</h2>
+<h2>Polynomial Inverse</h2>
 <h3>コードについての説明</h3>
 <p>
-高速数論変換のアルゴリズム. 特殊な素数 $p$ について有限体 $\mathbb{Z} / p \mathbb{Z}$ 上で高速フーリエ変換を行うアルゴリズム. <br>
-$k \times 2^n + 1$ の形の素数が剰余の場合 Cooley-Tukey の FFT アルゴリズムを用いてサイズ $2^n$ 以下の数列について高速に NTT を求めることが可能になる. <Br>
-$1$ の原始 $n$ 乗根が $\mathbb{Z} / p \mathbb{Z}$ の原始根 $g$ に対応し, 一般の離散フーリエ変換と異なり, 計算機上で扱っても誤差が生じないためうれしい.<br>
-<a href="../MultiPrecisionIntegar/multi_precision_integar.html">多倍長整数の実装</a>では乗算にこの NTT を用いた. <br>
-任意の素数 $p$ について有限体 $\mathbb{Z} / p \mathbb{Z}$ 上で高速フーリエ変換を行うこともでき,
-複数の mod について下記のアルゴリズムで数論変換を行い <a href="../Computation_Advanced/garner.html">garner のアルゴリズム</a> を用いて復元する手法が <a href="http://math314.hateblo.jp/entry/2015/05/07/014908">このページ</a> に紹介されている.
+体 $K$ 上の多項式 $f$ ($\mathrm{deg}(f) = n$, $f(0) \neq 0)$ を考える. <br>
+このとき $K[x] / (x^r)$ 上 $f(x)$ の乗法逆元である $f(x)^{-1}$,
+つまり $f (x) \cdot f(x)^{-1} = 1\ \mathrm{mod}\ x^{r}$ を満たす $f(x)^{-1}$ を求めるアルゴリズムである. <br>
+以下の実装は $\mathbb{Z} / p \mathbb{Z}$ ($p$ は素数) の場合の実装で特に素数 $p$ について
+$p = k * 2^l + 1 (k > 0, \lceil \log r \rceil \le 2^l)$ を満たすこと(数論変換に乗ること)を仮定している.<br>
+$f(x)^{-1}$ の存在は以下のように構成的に示すことができ, この構成方法がそのまま $\O(n + r \log r)$ のアルゴリズムとなっている. <br>
+以下の Lemma を用いて構成する. <br>
+<br>
+<b>Lemma</b>: 多項式 $g_i$ が $f \cdot g_i = 1\ \mathrm{mod}\ x^{2^i}$ を満たすなら
+$f \cdot g_{i+1} = 1\ \mathrm{mod}\ x^{2^{i+1}}$ を満たす多項式 $g_{i+1}$ は
+$g_{i+1} \overset{\mathrm{def}}{=} \left( \left(2 g_i - f g_i^2\right) \ \mathrm{mod}\ x^{2^{i+1}} \right)$ と定めることで得られる. <br><br>
+今初期値 $g_0$ は $g_0 = f(0)^{-1}$ とすると $f \cdot g = 1\ \mathrm{mod}\ x$ が成り立つので取れる(ちなみに可換環上でも
+$f$ がモニックであれば $f(0)^{-1} = 1$ であるので取れる). <br>
+$l \overset{\mathrm{def}}{=} \lceil \log r \rceil$ と定めると上記の定理を用いて
+$f \cdot g_l = 1\ \mathrm{mod}\ x^{2^l}$ を満たす $g_l$ が計算でき,
+$f^{-1}$ として $g_l$ を取ると $f \cdot f^{-1} = 1\ \mathrm{mod}\ x^{r}$ を満たす. ゆえに構成することができた(最後に Lemma の証明を示す). <br>
+時間計算量は $i$ 回目のイテレーションで $2^{i+1}$ サイズの多項式乗算を計算するので $\sum_{i=0}^{l - 1} 2^i \log 2^i = \O( r \log r)$ (正確には $\O(n + r \log r)$) となる. <br>
+<br>
+(<b>Lemma</b> の証明) <br>
+$f \cdot g_{i+1} = 2 f g_i - f^2 g_i^2 = 1 - (f g_i - 1)^2 \ \mathrm{mod}\ x^{2^{i+1}}$ と式変形でき,
+仮定より $f \cdot g_i - 1 = 0\ \mathrm{mod}\ x^{2^i}$ なので $f \cdot g_{i+1} = 1\ \mathrm{mod}\ x^{2^{i+1}}$ が成り立つ.<br>
+<br>
+(注) 便宜上長さ $r$ の配列を解となる多項式として返しているが必ずしも $r - 1$ 次多項式とは限らないことに注意する(最高次の係数が $\mathbb{Z} / p \mathbb{Z}$ 上で $0$ となる可能性があるので).
 </p>
 <p>
-<p>
-(関数) <br>
-mul$(a, b)$ : 配列 $a, b$ の畳み込みを行う
-<p>
+(関数)<br>
+polynomial_inverse$(a, r)$: 長さ $n$ の配列 $a$ を係数とする $n-1$ 次多項式 $f$ を与える. $f \cdot f^{-1} = 1\ \mathrm{mod}\ x^{r}$ を満たす多項式 $f^{-1}$ の係数を長さ $r$ の配列として返す.<br>
 </p>
 <p>
-時間計算量: $\O (n \log n)$
+時間計算量: $\O( n + r \log r)$
 </p>
 <h3>コード</h3>
 <div class="codebox">
 <input type="checkbox" id="label" class="csscode" />
 <label for="label"></label>
 <pre class="prettyprint linenums">
-// 特殊な剰余と原始根
-// (924844033, 5)
-// (998244353, 3)
-// (1012924417, 5)
-// (167772161, 3)
-// (469762049, 3)
-// (1224736769, 3)
-
-##define MOD 998244353
+#define MOD 998244353
 #define root 3
 
 unsigned int add(const unsigned int x, const unsigned int y)
@@ -148,25 +156,43 @@ void ntt(vector&lt;int&gt;&amp; a, const bool rev = false)
     }
 }
 
-vector&lt;int&gt; convolute(const vector&lt;int&gt;&amp; a, const vector&lt;int&gt;&amp; b)
+vector&lt;int&gt; convolute(const vector&lt;int&gt;&amp; a, const vector&lt;int&gt;&amp; b, int asize, int bsize, int _size)
 {
-    const int size = (int)a.size() + (int)b.size() - 1;
+    const int size = asize + bsize - 1;
     int t = 1;
-    while(t &lt; size){ t &lt;&lt;= 1; }
+    while (t &lt; size){ t &lt;&lt;= 1; }
     vector&lt;int&gt; A(t, 0), B(t, 0);
-    for(int i = 0; i &lt; (int)a.size(); i++){ A[i] = a[i]; }
-    for(int i = 0; i &lt; (int)b.size(); i++){ B[i] = b[i]; }
+    for(int i = 0; i &lt; asize; i++){ A[i] = a[i]; }
+    for(int i = 0; i &lt; bsize; i++){ B[i] = b[i]; }
     ntt(A), ntt(B);
-    for (int i = 0; i &lt; t; i++){ A[i] = mul(A[i], B[i]); }
+    for(int i = 0; i &lt; t; i++){ A[i] = mul(A[i], B[i]); }
     ntt(A, true);
-    A.resize(size);
+    A.resize(_size);
     return A;
+}
+
+vector&lt;int&gt; polynomial_inverse(const vector&lt;int&gt;&amp; a, int r)
+{
+    assert(a[0] != 0);
+    vector&lt;int&gt; h = {(int)inverse(a[0])};
+    int t = 1;
+    for(int i = 0; t &lt; r; ++i){
+        t &lt;&lt;= 1;
+        vector&lt;int&gt; res = convolute(a, convolute(h, h, t / 2, t / 2, t), min((int)a.size(), t), t, t);
+        for(int j = 0; j &lt; t; ++j){
+            res[j] = sub(0, res[j]);
+            if(j &lt; t / 2) res[j] = add(res[j], mul(2, h[j]));
+        }
+        swap(h, res);
+    }
+    h.resize(r);
+    return h;
 }
 </pre>
 </div>
 <h3>verify 用の問題</h3>
-<p>Atcoder : <a href="https://beta.atcoder.jp/contests/ukuku09/tasks/ukuku09_e">Couple</a>
-  <a href="https://atcoder.jp/contests/ukuku09/submissions/9022470">提出コード</a></p>
+<p>yosupo さんの library checker : <a href="https://judge.yosupo.jp/problem/inv_of_formal_power_series">Inv of Formal Power Series</a>
+  <a href="https://judge.yosupo.jp/submission/2068">提出コード</a></p>
 </section>
 
 </div>

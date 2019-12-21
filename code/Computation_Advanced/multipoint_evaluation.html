@@ -67,7 +67,8 @@ $p = k * 2^l + 1 (k > 0, n + 1 \le 2^l)$ を満たすこと(数論変換に乗�
 と定めると, $f(u_0), \dots, f(u_{m-1})$ の値は $f(u_i) (0 \le i < m / 2)$ については $f(u_i) = r_0(u_i)$ より $r_0$ を用いて,
 $f(u_i) (m / 2 \le i < m)$ については $f(u_i) = r_1(u_i)$ より $r_1$ を用いて計算することができる. $\Pi_{i = l}^{r} (x - u_i)$ の部分については事前に計算を行なっておく.<br>
 つまりサイズが $m / 2$ の問題 2 つに分割することができたことになり, 分割統治法によって $m$ 個のクエリに答えることができる.
-割られる側の多項式の長さが $n$ の場合の多項式の除算は $\O (n \log n)$ で行うことができ, 少し工夫すると時間計算量は $\O (\max(n, m) \log^2 n)$ でできることが分かる.<br>
+割られる側の多項式の長さが $n$ の場合の<a href="../FFTs/polynomial_division.html">多項式の除算</a>は
+$\O (n \log n)$ で行うことができ, 少し工夫すると時間計算量は $\O (\max(n, m) \log^2 n)$ でできることが分かる.<br>
 再帰の最後の方(実装では $m \le 32$ となったとき)ではそれ以上再帰をたどらず愚直に計算してしまうことで高速化を行なっている.
 </p>
 <p>
@@ -88,7 +89,7 @@ multipoint_evaluation$(f, u)$: 関数 $f$ の係数として $f$ を, クエリ�
 
 unsigned int add(const unsigned int x, const unsigned int y)
 {
-	return (x + y &lt; MOD) ? x + y : x + y - MOD;
+    return (x + y &lt; MOD) ? x + y : x + y - MOD;
 }
 
 unsigned int sub(const unsigned int x, const unsigned int y)
@@ -98,7 +99,7 @@ unsigned int sub(const unsigned int x, const unsigned int y)
 
 unsigned int mul(const unsigned int x, const unsigned int y)
 {
-	return (unsigned long long)x * y % MOD;
+    return (unsigned long long)x * y % MOD;
 }
 
 unsigned int mod_pow(unsigned int x, unsigned int n)
@@ -114,29 +115,29 @@ unsigned int mod_pow(unsigned int x, unsigned int n)
 
 unsigned int inverse(const unsigned int x)
 {
-	return mod_pow(x, MOD - 2);
+    return mod_pow(x, MOD - 2);
 }
 
 void ntt(vector&lt;int&gt;&amp; a, const bool rev = false)
 {
     unsigned int i, j, k, l, p, q, r, s;
     const unsigned int size = a.size();
-	if(size == 1) return;
-	vector&lt;int&gt; b(size);
-	r = rev ? (MOD - 1 - (MOD - 1) / size) : (MOD - 1) / size;
-	s = mod_pow(root, r);
-	vector&lt;unsigned int&gt; kp(size / 2 + 1, 1);
-	for(i = 0; i &lt; size / 2; ++i) kp[i + 1] = mul(kp[i], s);
-	for(i = 1, l = size / 2; i &lt; size; i &lt;&lt;= 1, l &gt;&gt;= 1){
-		for(j = 0, r = 0; j &lt; l; ++j, r += i){
-			for(k = 0, s = kp[i * j]; k &lt; i; ++k){
-				p = a[k + r], q = a[k + r + size / 2];
-				b[k + 2 * r] = add(p, q);
-				b[k + 2 * r + i] = mul(sub(p, q), s);
-			}
-		}
-		swap(a, b);
-	}
+    if(size == 1) return;
+    vector&lt;int&gt; b(size);
+    r = rev ? (MOD - 1 - (MOD - 1) / size) : (MOD - 1) / size;
+    s = mod_pow(root, r);
+    vector&lt;unsigned int&gt; kp(size / 2 + 1, 1);
+    for(i = 0; i &lt; size / 2; ++i) kp[i + 1] = mul(kp[i], s);
+    for(i = 1, l = size / 2; i &lt; size; i &lt;&lt;= 1, l &gt;&gt;= 1){
+        for(j = 0, r = 0; j &lt; l; ++j, r += i){
+            for(k = 0, s = kp[i * j]; k &lt; i; ++k){
+                p = a[k + r], q = a[k + r + size / 2];
+                b[k + 2 * r] = add(p, q);
+                b[k + 2 * r + i] = mul(sub(p, q), s);
+            }
+        }
+        swap(a, b);
+    }
     if(rev){
         s = inverse(size);
         for(i = 0; i &lt; size; i++){ a[i] = mul(a[i], s); }
@@ -160,41 +161,41 @@ vector&lt;int&gt; convolute(const vector&lt;int&gt;&amp; a, const vector&lt;int&
 
 vector&lt;int&gt; polynomial_inverse(const vector&lt;int&gt;&amp; a, int r)
 {
-	vector&lt;int&gt; h = {(int)inverse(a[0])};
-	int t = 1;
-	for(int i = 0; t &lt; r; ++i){
-		t &lt;&lt;= 1;
-		vector&lt;int&gt; res = convolute(a, convolute(h, h, t / 2, t / 2, t), min((int)a.size(), t), t, t);
-		for(int j = 0; j &lt; t; ++j){
-			res[j] = sub(0, res[j]);
-			if(j &lt; t / 2) res[j] = add(res[j], mul(2, h[j]));
-		}
-		swap(h, res);
-	}
-	h.resize(r);
-	return h;
+    vector&lt;int&gt; h = {(int)inverse(a[0])};
+    int t = 1;
+    for(int i = 0; t &lt; r; ++i){
+        t &lt;&lt;= 1;
+        vector&lt;int&gt; res = convolute(a, convolute(h, h, t / 2, t / 2, t), min((int)a.size(), t), t, t);
+        for(int j = 0; j &lt; t; ++j){
+            res[j] = sub(0, res[j]);
+            if(j &lt; t / 2) res[j] = add(res[j], mul(2, h[j]));
+        }
+        swap(h, res);
+    }
+    h.resize(r);
+    return h;
 }
 
 pair&lt;vector&lt;int&gt;, vector&lt;int&gt; &gt; polynomial_division(const vector&lt;int&gt;&amp; a, const vector&lt;int&gt;&amp; b)
 {
-	const int n = a.size() - 1, m = b.size() - 1;
-	vector&lt;int&gt; reva(n + 1), revb(m + 1);
-	for(int i = 0; i &lt;= n; ++i) reva[n - i] = a[i];
-	for(int i = 0; i &lt;= m; ++i) revb[m - i] = b[i];
+    const int n = a.size() - 1, m = b.size() - 1;
+    vector&lt;int&gt; reva(n + 1), revb(m + 1);
+    for(int i = 0; i &lt;= n; ++i) reva[n - i] = a[i];
+    for(int i = 0; i &lt;= m; ++i) revb[m - i] = b[i];
     vector&lt;int&gt; inv_revb = polynomial_inverse(revb, n - m + 1);
-	vector&lt;int&gt; res = convolute(reva, inv_revb, n - m + 1, n - m + 1, n - m + 1);
-	vector&lt;int&gt; q(n - m + 1), r;
-	for(int i = 0; i &lt; n - m + 1; ++i) q[i] = res[n - m - i];
-	vector&lt;int&gt; qb = convolute(q, b, n - m + 1, m + 1, n + 1);
-	bool first = false;
-	for(int i = n; i &gt;= 0; --i){
-		const int val = sub(a[i], qb[i]);
-		if(!first &amp;&amp; val &gt; 0){
-			first = true, r.resize(i + 1);
-		}
-		if(first) r[i] = val;
-	}
-	return {q, r};
+    vector&lt;int&gt; res = convolute(reva, inv_revb, n - m + 1, n - m + 1, n - m + 1);
+    vector&lt;int&gt; q(n - m + 1), r;
+    for(int i = 0; i &lt; n - m + 1; ++i) q[i] = res[n - m - i];
+    vector&lt;int&gt; qb = convolute(q, b, n - m + 1, m + 1, n + 1);
+    bool first = false;
+    for(int i = n; i &gt;= 0; --i){
+        const int val = sub(a[i], qb[i]);
+        if(!first &amp;&amp; val &gt; 0){
+            first = true, r.resize(i + 1);
+        }
+        if(first) r[i] = val;
+    }
+    return {q, r};
 }
 
 int func(const vector&lt;int&gt;&amp; f, const int u)
@@ -213,7 +214,7 @@ int pre_computation(const vector&lt;int&gt;&amp; u, vector&lt;vector&lt;vector&l
     int sz = 0, t = 1;
     while(t &lt; m) ++sz, t &lt;&lt;= 1;
     const int res = t;
-	if(sz == 0) return res;
+    if(sz == 0) return res;
     p.resize(sz), p[sz - 1].resize(t);
     for(int j = 0; j &lt; m; ++j){
         p[sz - 1][j] = {(int)sub(0, u[j]), 1};
@@ -240,10 +241,10 @@ void recursive_multipoint_evaluation(const vector&lt;int&gt;&amp; f, const vecto
         const int depth, const int num)
 {
     if(usize &lt;= 32){
-		for(int i = 0; i &lt; usize; ++i){
-			const int ad = func(f, u[ans.size()]);
-			ans.push_back(ad);
-		}
+        for(int i = 0; i &lt; usize; ++i){
+            const int ad = func(f, u[ans.size()]);
+            ans.push_back(ad);
+        }
         return;
     }
     const int n = (int)f.size() - 1;
@@ -274,7 +275,7 @@ vector&lt;int&gt; multipoint_evaluation(const vector&lt;int&gt;&amp; f, const ve
 </div>
 <h3>verify 用の問題</h3>
 <p>yosupo さんの library checker : <a href="https://judge.yosupo.jp/problem/multipoint_evaluation">Multipoint Evaluation</a>
-  <a href="https://judge.yosupo.jp/submission/2020">提出コード</a></p>
+  <a href="https://judge.yosupo.jp/submission/2035">提出コード</a></p>
 </section>
 
 </div>
