@@ -83,11 +83,13 @@ $r_1(x) \overset{\mathrm{def}}{=} \sum_{i=n/2}^{n-1} v_i s_i \cdot \Pi_{j=n/2, j
 ここで $r_0(x)$ は $(u_0, v_0 s_0), \dots, (u_{n/2-1}, v_{n/2-1}s_{n/2-1})$ の $n / 2$ 個の値の組から復元するというサイズ
 $n / 2$ の問題を再帰的に解くことで求めることができる. $r_1(x)$ についても同様である. <br>
 よって分割統治法を用いてこの問題を解くことができ, 計算時間 $T(n)$ は $T(n) = 2 T(n / 2) + \O( n \log n) \Rightarrow T(n) = \O( n \log^2 n)$ となる.
-前処理などと合わせても合計 $\O( n \log^2 n)$ 時間でこの問題を解くことができる.
+前処理などと合わせても合計 $\O( n \log^2 n)$ 時間でこの問題を解くことができる($\Pi_{j=l}^{r} (x - u_j)$ の部分も $\O (n \log^2 n)$ 時間かけて前計算しておく).
 </p>
 <p>
 (関数)<br>
-add_edge(): 辺を追加する <br>
+polynomial_interpolation$(u, v)$: 未知の $n-1$ 次多項式 $f$ の $n$ 点の値 $v_0 = f(u_0), \dots, v_{n-1} = f(u_{n-1})$
+を与える($u$ は全て異なるものとする). 多項式 $f(x) = \sum_{i=0}^{n-1} c_i x^i$ の係数 $c$ を配列として返す.
+<br>
 </p>
 <p>
 時間計算量: $\O (n \log^2 n)$
@@ -97,7 +99,248 @@ add_edge(): 辺を追加する <br>
 <input type="checkbox" id="label" class="csscode" />
 <label for="label"></label>
 <pre class="prettyprint linenums">
-あ
+#define MOD 998244353
+#define root 3
+
+unsigned int add(const unsigned int x, const unsigned int y)
+{
+	return (x + y &lt; MOD) ? x + y : x + y - MOD;
+}
+
+unsigned int sub(const unsigned int x, const unsigned int y)
+{
+	return (x &gt;= y) ? (x - y) : (MOD - y + x);
+}
+
+unsigned int mul(const unsigned int x, const unsigned int y)
+{
+	return (unsigned long long)x * y % MOD;
+}
+
+unsigned int mod_pow(unsigned int x, unsigned int n)
+{
+    unsigned int res = 1;
+    while(n &gt; 0) {
+        if(n &amp; 1) { res = mul(res, x); }
+        x = mul(x, x);
+        n &gt;&gt;= 1;
+    }
+    return res;
+}
+
+unsigned int inverse(const unsigned int x)
+{
+	return mod_pow(x, MOD - 2);
+}
+
+void ntt(vector&lt;int&gt;&amp; a, const bool rev = false)
+{
+    unsigned int i, j, k, l, p, q, r, s;
+    const unsigned int size = a.size();
+	if(size == 1) return;
+	vector&lt;int&gt; b(size);
+	r = rev ? (MOD - 1 - (MOD - 1) / size) : (MOD - 1) / size;
+	s = mod_pow(root, r);
+	vector&lt;unsigned int&gt; kp(size / 2 + 1, 1);
+	for(i = 0; i &lt; size / 2; ++i) kp[i + 1] = mul(kp[i], s);
+	for(i = 1, l = size / 2; i &lt; size; i &lt;&lt;= 1, l &gt;&gt;= 1){
+		for(j = 0, r = 0; j &lt; l; ++j, r += i){
+			for(k = 0, s = kp[i * j]; k &lt; i; ++k){
+				p = a[k + r], q = a[k + r + size / 2];
+				b[k + 2 * r] = add(p, q);
+				b[k + 2 * r + i] = mul(sub(p, q), s);
+			}
+		}
+		swap(a, b);
+	}
+    if(rev){
+        s = inverse(size);
+        for(i = 0; i &lt; size; i++){ a[i] = mul(a[i], s); }
+    }
+}
+
+vector&lt;int&gt; convolute(const vector&lt;int&gt;&amp; a, const vector&lt;int&gt;&amp; b, int asize, int bsize, int _size)
+{
+	if((long long)asize * min(bsize, _size) &lt; 128LL){
+		vector&lt;int&gt; A(_size, 0);
+		for(int i = 0; i &lt; asize; ++i){
+			for(int j = 0; j &lt; min(bsize, _size - i); ++j){
+				A[i+j] = add(A[i+j], mul(a[i], b[j]));
+			}
+		}
+		return A;
+	}
+    const int size = asize + bsize - 1;
+    int t = 1;
+    while(t &lt; size){ t &lt;&lt;= 1; }
+    vector&lt;int&gt; A(t, 0), B(t, 0);
+    for(int i = 0; i &lt; asize; i++){ A[i] = a[i]; }
+    for(int i = 0; i &lt; bsize; i++){ B[i] = b[i]; }
+    ntt(A), ntt(B);
+    for(int i = 0; i &lt; t; i++) { A[i] = mul(A[i], B[i]); }
+    ntt(A, true);
+    A.resize(_size);
+    return A;
+}
+
+vector&lt;int&gt; polynomial_inverse(const vector&lt;int&gt;&amp; a, int r){
+	vector&lt;int&gt; h = {(int)inverse(a[0])};
+	int t = 1;
+	for(int i = 0; t &lt; r; ++i){
+		t &lt;&lt;= 1;
+		vector&lt;int&gt; res = convolute(a, convolute(h, h, t / 2, t / 2, t), min((int)a.size(), t), t, t);
+		for(int j = 0; j &lt; t; ++j){
+			res[j] = MOD - res[j];
+			if(j &lt; t / 2) res[j] = add(res[j], mul(2, h[j]));
+		}
+		swap(h, res);
+	}
+	h.resize(r);
+	return h;
+}
+
+pair&lt;vector&lt;int&gt;, vector&lt;int&gt; &gt; polynomial_division(const vector&lt;int&gt;&amp; a, const vector&lt;int&gt;&amp; b)
+{
+	const int n = a.size() - 1, m = b.size() - 1;
+	assert(b[m] != 0);
+	if(n &lt; m) return {vector&lt;int&gt;(n - m + 1, 0), a};
+	vector&lt;int&gt; reva(n + 1), revb(m + 1);
+	for(int i = 0; i &lt;= n; ++i) reva[n - i] = a[i];
+	for(int i = 0; i &lt;= m; ++i) revb[m - i] = b[i];
+    vector&lt;int&gt; inv_revb = polynomial_inverse(revb, n - m + 1);
+	vector&lt;int&gt; res = convolute(reva, inv_revb, n - m + 1, n - m + 1, n - m + 1);
+	vector&lt;int&gt; q(n - m + 1), r;
+	for(int i = 0; i &lt; n - m + 1; ++i) q[i] = res[n - m - i];
+	vector&lt;int&gt; qb = convolute(q, b, n - m + 1, m + 1, n + 1);
+	bool first = false;
+	for(int i = n; i &gt;= 0; --i){
+		const int val = sub(a[i], qb[i]);
+		if(!first &amp;&amp; val &gt; 0){
+			first = true, r.resize(i + 1);
+		}
+		if(first) r[i] = val;
+	}
+	return {q, r};
+}
+
+int func(const vector&lt;int&gt;&amp; f, const int u){
+    int res = 0, mult = 1;
+    for(int i = 0; i &lt; (int)f.size(); ++i){
+        res = add(res, mul(f[i], mult));
+        mult = mul(mult, u);
+    }
+    return res;
+}
+
+int pre_computation(const vector&lt;int&gt;&amp; u, vector&lt;vector&lt;vector&lt;int&gt; &gt; &gt;&amp; p)
+{
+    const int m = (int)u.size();
+    int sz = 1, t = 1;
+    while(t &lt; m) ++sz, t &lt;&lt;= 1;
+    const int res = t;
+    p.resize(sz), p[sz - 1].resize(t);
+    for(int j = 0; j &lt; m; ++j){
+        p[sz - 1][j] = {(int)sub(0, u[j]), 1};
+    }
+    for(int j = m; j &lt; t; ++j){
+        p[sz - 1][j] = {1};
+    }
+    t /= 2;
+    for(int i = sz - 2; i &gt;= 0; --i){
+        p[i].resize(t);
+        for(int j = 0; j &lt; t; ++j){
+            const int x = (int)p[i+1][2*j].size(), y = (int)p[i+1][2*j+1].size();
+			if(y &gt; 1) p[i][j] = convolute(p[i+1][2*j], p[i+1][2*j+1], x, y, x + y - 1);
+			else p[i][j] = p[i+1][2*j];
+        }
+        t /= 2;
+    }
+    return res;
+}
+
+void recursive_multipoint_evaluation(const vector&lt;int&gt;&amp; f, const vector&lt;int&gt;&amp; u,
+    const vector&lt;vector&lt;vector&lt;int&gt; &gt; &gt;&amp; p, vector&lt;int&gt;&amp; ans, const int usize, const int size,
+        const int depth, const int num)
+{
+    if(usize &lt;= 32){
+		for(int i = 0; i &lt; usize; ++i){
+			const int ad = func(f, u[ans.size()]);
+			ans.push_back(ad);
+		}
+        return;
+    }
+    const int lsize = min(usize, size / 2), rsize = max(usize - size / 2, 0);
+    auto r0 = polynomial_division(f, p[depth + 1][2 * num]);
+    recursive_multipoint_evaluation(r0.second, u, p, ans, lsize, size / 2, depth + 1, 2 * num);
+    if(rsize == 0) return;
+    auto r1 = polynomial_division(f, p[depth + 1][2 * num + 1]);
+    recursive_multipoint_evaluation(r1.second, u, p, ans, rsize, size / 2, depth + 1, 2 * num + 1);
+}
+
+vector&lt;int&gt; multipoint_evaluation
+	(const vector&lt;int&gt;&amp; f, const vector&lt;int&gt;&amp; u, const vector&lt;vector&lt;vector&lt;int&gt; &gt; &gt;&amp; p, const int al)
+{
+    vector&lt;int&gt; ans;
+    return recursive_multipoint_evaluation(f, u, p, ans, (int)u.size(), al, 0, 0), ans;
+}
+
+vector&lt;int&gt; differentiate(const vector&lt;int&gt;&amp; a)
+{
+    const int n = (int)a.size();
+    vector&lt;int&gt; res(n - 1);
+    for(int i = 0; i &lt; n - 1; ++i){
+        res[i] = mul(a[i + 1], i + 1);
+    }
+    return res;
+}
+
+vector&lt;int&gt; _pre_computation
+    (const vector&lt;int&gt;&amp; u, const vector&lt;int&gt;&amp; v, vector&lt;vector&lt;vector&lt;int&gt; &gt; &gt;&amp; p)
+{
+    const int al = pre_computation(u, p);
+    const vector&lt;int&gt; g = differentiate(p[0][0]);
+    return multipoint_evaluation(g, u, p, al);
+}
+
+void recursive_polynomial_interpolation
+    (const vector&lt;int&gt;&amp; u, const vector&lt;int&gt;&amp; v, vector&lt;int&gt;&amp; res,
+        const vector&lt;vector&lt;vector&lt;int&gt; &gt; &gt;&amp; p, const int usize, const int size,
+            const int depth, const int num, const int id)
+{
+    if(usize == 1){
+		res = {v[id]};
+		return;
+	}
+    const int lsize = min(usize, size / 2), rsize = max(usize - size / 2, 0);
+	if(rsize == 0){
+		vector&lt;int&gt; r0;
+		recursive_polynomial_interpolation(u, v, r0, p, lsize, size / 2, depth + 1, 2 * num, id);
+		res.resize(lsize);
+		for(int i = 0; i &lt; lsize; ++i) res[i] = r0[i];
+	}else{
+		vector&lt;int&gt; r0, r1;
+		recursive_polynomial_interpolation(u, v, r0, p, lsize, size / 2, depth + 1, 2 * num, id);
+		recursive_polynomial_interpolation(u, v, r1, p, rsize, size / 2, depth + 1, 2 * num + 1, id + size / 2);
+		const vector&lt;int&gt; res1 = convolute(r0, p[depth + 1][2 * num + 1], lsize, rsize + 1, lsize + rsize);
+		const vector&lt;int&gt; res2 = convolute(r1, p[depth + 1][2 * num], rsize, lsize + 1, lsize + rsize);
+		res.resize(lsize + rsize);
+		for(int i = 0; i &lt; lsize + rsize; ++i) res[i] = add(res1[i], res2[i]);
+	}
+}
+
+vector&lt;int&gt; polynomial_interpolation(const vector&lt;int&gt;&amp; u, const vector&lt;int&gt;&amp; v)
+{
+    const int n = (int)u.size();
+    int t = 1;
+    while(t &lt; n) t &lt;&lt;= 1;
+    vector&lt;vector&lt;vector&lt;int&gt; &gt; &gt; p;
+    const vector&lt;int&gt; inv_s = _pre_computation(u, v, p);
+    vector&lt;int&gt; vs(n);
+    for(int i = 0; i &lt; n; ++i) vs[i] = mul(v[i], inverse(inv_s[i]));
+    vector&lt;int&gt; res;
+	recursive_polynomial_interpolation(u, vs, res, p, n, t, 0, 0, 0);
+    return res;
+}
 </pre>
 </div>
 <h3>verify 用の問題</h3>
