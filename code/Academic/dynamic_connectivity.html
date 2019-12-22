@@ -62,7 +62,7 @@ $\newcommand{\O}{\mathrm{O}}$
 <p>
 一般のグラフを対象に辺の追加, 削除, 頂点間の連結性判定を効率よく行うことのできるアルゴリズム. <a href="../DataStructure_OnGraph/link_cut_tree.html">Link Cut Tree</a>, <a href="../DataStructure_OnGraph/euler_tour_tree.html">Euler Tour Tree</a> などは森を対象にしていたためそれの一般化にあたる.<br>
 元論文は "Poly-logarithmic deterministic fully-dynamic algorithms for connectivity, minimum spannning tree, 2-edge, and biconnectivity" [Holm, Lichtenberg, Thorup 1998]<br>
-グラフ $G$ の全域森を管理する. このとき $\log n$ 個の Euler Tour Tree を用いて Scaling(Layering) することで辺を削除した際の restore 操作の高速化を(ならしの意味で)可能にしている. 具体的に (i) 第 $i$ 層では森 $F_i$ を管理し, $F_i$ 内の連結成分の最大サイズは $2^i$ 以下 (ii) $F_0 ⊇ F_1 ... ⊇ F_{\log n}$ (iii) $F_0$ は $G$ の全域森 の $3$ つの条件を常に満たすように更新をします. <br>
+グラフ $G$ の全域森を管理する. このとき $\log n$ 個の Euler Tour Tree を用いて Scaling(Layering) することで辺を削除した際の restore 操作の高速化を(ならしの意味で)可能にしている. 具体的に (i) 第 $i$ 層では森 $F_i$ を管理し, $F_i$ 内の連結成分の最大サイズは $2^i$ 以下 (ii) $F_0 ⊇ F_1 ... ⊇ F_{\log n}$ (iii) $F_0$ は $G$ の全域森 の $3$ つの条件を常に満たすように更新をする. <br>
 $F_i$ に含まれない辺 $e$ (off tree edge) については端点に対応する EulerTourTree のノードに情報を格納して, 例えば $F_i$ 内の辺が cut され新たに連結成分が増えてしまうという場合に off tree edge の中から非連結となった頂点集合どうしを再び連結させるような辺がないかを探索する(restore 操作) ときに参照される.
 このときに効率よく探索する必要があり, そのために Euler Tour Tree の各ノードに "そのノードを根とする部分木内に off tree edge があるか" などの情報を平衡二分探索木上で適切に遅延伝播させたりなどする.
 何を言っているかわからないと思うので詳しく知りたい方は元論文を参照してもらいたい.<br>
