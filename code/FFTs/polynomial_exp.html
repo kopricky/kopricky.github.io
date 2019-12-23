@@ -65,8 +65,8 @@ $\newcommand{\O}{\mathrm{O}}$
 形式的べき級数の $\exp$ の求め方がよく分からなかったので
 あまり良くないが verify 問題の latte0199 さんのコードを参照させていただいた.<br>
 その上で逆手流に証明(っぽいもの)をしてみる.
-正直形式的べき級数をあまり良く理解しておらず, 雰囲気で書いているため不正確な記述になっているとは思う($\mathrm{mod}$ とか書くのもマズい気もするが$\ \mathrm{mod}\ x^i$
-と書いたときは $x^j (j \ge i)$ の項を $0$ にしたような形式的べき級数と考えてほしい).<br>
+正直形式的べき級数をあまり良く理解しておらず, 雰囲気で書いているため不正確な記述になっているとは思う($\mathrm{mod}$
+とか書くのも正確なのか知らないが $\mathrm{mod}\ x^n$ と書いた場合は多項式環のそれと同様に ($x^n$) で割ったものというノリで書いている).<br>
 <br>
 <b>Lemma</b>: $x_j (j \ge 2^i)$ の係数が $0$ であるような形式的べき級数 $g_i$ が $\exp(f) = g_i\ \mathrm{mod}\ x^{2^i}$ かつ ($g_i$ の定数項) $= 1$ を満たすなら
 $\exp(f) = g_{i+1}\ \mathrm{mod}\ x^{2^{i+1}}$ かつ ($g_i$ の定数項) $= 1$ を満たす形式的べき級数 $g_{i+1}$ は
@@ -104,22 +104,22 @@ polynomial_exp$(a, r)$: 多項式 $f$ の係数 $a$($a[0] = 0$) を与えたと�
 <pre class="prettyprint linenums">
 #define MOD 998244353
 #define root 3
- 
+
 unsigned int add(const unsigned int x, const unsigned int y)
 {
     return (x + y &lt; MOD) ? x + y : x + y - MOD;
 }
- 
+
 unsigned int sub(const unsigned int x, const unsigned int y)
 {
     return (x &gt;= y) ? (x - y) : (MOD - y + x);
 }
- 
+
 unsigned int mul(const unsigned int x, const unsigned int y)
 {
     return (unsigned long long)x * y % MOD;
 }
- 
+
 unsigned int mod_pow(unsigned int x, unsigned int n)
 {
     unsigned int res = 1;
@@ -130,12 +130,12 @@ unsigned int mod_pow(unsigned int x, unsigned int n)
     }
     return res;
 }
- 
+
 unsigned int inverse(const unsigned int x)
 {
     return mod_pow(x, MOD - 2);
 }
- 
+
 void ntt(vector&lt;int&gt;&amp; a, const bool rev = false)
 {
     unsigned int i, j, k, l, p, q, r, s;
@@ -161,7 +161,7 @@ void ntt(vector&lt;int&gt;&amp; a, const bool rev = false)
         for(i = 0; i &lt; size; i++){ a[i] = mul(a[i], s); }
     }
 }
- 
+
 vector&lt;int&gt; convolute(const vector&lt;int&gt;&amp; a, const vector&lt;int&gt;&amp; b, int asize, int bsize, int _size)
 {
     const int size = asize + bsize - 1;
@@ -176,7 +176,7 @@ vector&lt;int&gt; convolute(const vector&lt;int&gt;&amp; a, const vector&lt;int&
     A.resize(_size);
     return A;
 }
- 
+
 vector&lt;int&gt; polynomial_inverse(const vector&lt;int&gt;&amp; a, int r)
 {
     assert(a[0] != 0);
