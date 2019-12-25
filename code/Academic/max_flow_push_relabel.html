@@ -86,10 +86,13 @@ Push Relabel はアルゴリズムの途中でフローの量や辺の容量な�
 最大流の値を高速に求めるために高さが $n$ 以上の頂点については excess を解消していないので最終的な preflow が依然として flow の条件を満たしていない可能性がある. なので valid な flow を求めたい場合は valiate() のコメントアウトを外す. <br>
 <br>
 (追記 2) <br>
-容量が整数である場合に超過量を 2 べきでスケーリングしていく excess scaling 版をおいた. 時間計算量は初期超過量の最大値 $\left( \max_{e \in \delta^+ (s)} e.cap \right)$ を $U$ としたとき
-$\mathrm{O} (nm + n^2 \log U)$ であるが, 手元のケースとかだと速くならなかった...(速くなったという話もあるのでケースによりそう) <br>
-各頂点の超過量が $\Delta$ 未満である残余グラフ $G$ が与えられたときにそれを各頂点の超過量が $\Delta / 2$ 未満のグラフに更新する操作を行う関数を Update$(G, \Delta)$ とする.
-この Update$(G, \Delta)$ にかかる計算量が $\O \left( n^2 \right)$ であることをポテンシャル関数 $\Phi$ として $\sum_{i \in V} p_i e_i / \Delta$ ($e(\cdot )$ は超過量とする) を用いることで示すことができる.
+容量が整数である場合に超過量を 2 べきでスケーリングしていく excess scaling 版の PushRelabel も存在する. 時間計算量は初期超過量の最大値 $\left( \max_{e \in \delta^+ (s)} e.cap \right)$ を $U$ としたとき
+$\mathrm{O} (nm + n^2 \log U)$ となる.<br>
+sink $t$ 以外の各頂点の超過量が $\Delta$ 未満である残余グラフ $G$ が与えられたときにそれを $t$ 以外の各頂点の超過量が $\Delta / 2$ 未満のグラフに更新する操作を行う関数を Update$(G, \Delta)$ とする.
+Update$(G, \Delta)$ は超過量が $\Delta / 2$ 以上である頂点のうち最も高さの低い頂点から順に超過量が $\Delta / 2$ 未満となるように超過分を解消していく.
+流した先の頂点の超過量は $t$ 以外なら常に $\Delta$ 未満になるようにしてポテンシャル評価が壊れないようにする.
+最も高いものから順に超過分を解消しようとすると $t$ 以外の頂点については超過量を常に $\Delta$ 未満にするという条件から push を上手くやればもっと流せるのに流せなくなるという事象が発生する可能性がありアルゴリズムが正当でなくなってしまうのでダメ.<br>
+こうすることで Update$(G, \Delta)$ にかかる計算量は $\O \left( n^2 \right)$ であることがポテンシャル関数 $\Phi$ として $\sum_{i \in V} p_i e_i / \Delta$ ($e(\cdot )$ は超過量とする) を用いて示すことができる. よって全体の計算量は上記のようになる.
 ちなみにこのように超過量 $e_i$ が bound されているときはラベル値 $p_i$ と超過量 $e_i$ の積の和をポテンシャル関数として設定することでプッシュの回数をよく評価することができるようになり, local flow algorithm の計算量解析にも用いられている.<br>
 <br>
 (個人的復習) <br>
@@ -104,7 +107,7 @@ add_edge$(from, to, cap)$ : 容量 $cap$ の辺 $(from, to)$ を追加する <br
 solve$(s, t)$ : $s$, $t$ 間の最大フローを計算する
 </p>
 <p>
-時間計算量: $\O (n^2 m^{1/2})$ (ただしこれは $m = \Omega (n)$ かつ $m = \O (n^2)$ の場合の計算量), $\mathrm{O} (nm + n^2 \log U)$ (excess scaling 版)
+時間計算量: $\O (n^2 m^{1/2})$ (ただしこれは $m = \Omega (n)$ かつ $m = \O (n^2)$ の場合の計算量)
 </p>
 <h3>コード</h3>
 <div class="codebox">
@@ -328,197 +331,10 @@ public:
     }
 };
 </pre>
-<h3>コード(excess scaling 版)</h3>
-<input type="checkbox" id="label2" class="csscode" />
-<label for="label2"></label>
-<pre class="prettyprint linenums">
-class Stack {
-private:
-    const int N, H;
-    int sz;
-    vector&lt;int&gt; node;
-public:
-    Stack(const int _N, const int _H) : N(_N), H(_H), node(N+H){ clear(); }
-    inline bool empty() const { return (sz == 0); }
-    inline bool empty(const int h) const { return node[N+h] == N+h; }
-    inline int top(const int h) const { return node[N+h]; }
-    inline void pop(const int h){ --sz, node[N+h] = node[node[N+h]]; }
-    inline void push(const int h, const int u){ ++sz, node[u] = node[N+h], node[N+h] = u; }
-    inline void clear(){ sz = 0, iota(node.begin() + N, node.end(), N); }
-};
-
-class List {
-public:
-    struct node {
-        int prev, next;
-    };
-    const int N, H;
-    vector&lt;node&gt; dat;
-    List(const int _N, const int _H) : N(_N), H(_H), dat(N+H){ clear(); }
-    inline bool empty(const int h) const { return (dat[N+h].next == N+h); }
-    inline bool more_one(const int h) const { return dat[N+h].prev != dat[N+h].next; }
-    inline void insert(const int h, const int u){
-        if(dat[u].prev != u) return;
-        dat[u].prev = dat[N+h].prev, dat[u].next = N+h;
-        dat[dat[N+h].prev].next = u, dat[N+h].prev = u;
-    }
-    inline void erase(const int u){
-        dat[dat[u].prev].next = dat[u].next, dat[dat[u].next].prev = dat[u].prev;
-        dat[u].prev = dat[u].next = u;
-    }
-    inline void clear(){
-        for(int i = 0; i &lt; N+H; ++i) dat[i].prev = dat[i].next = i;
-    }
-};
-
-template &lt;typename T&gt; class PushRelabel {
-public:
-    struct edge {
-        const int to, rev;
-        T cap;
-        edge(const int _to, const int _rev, const T _cap)
-            : to(_to), rev(_rev), cap(_cap){}
-    };
-private:
-    const int V;
-    int s, t, logU, pot_max, level, checker;
-    T U;
-    vector&lt;T&gt; excess;
-    vector&lt;int&gt; potential, cur_edge, que;
-    List all_ver;
-    Stack act_ver;
-    int calc_active(const T K){
-        pot_max = -1;
-        int act_min = V;
-        for(int i = 0; i &lt; V; ++i){
-            if(potential[i] &lt; V){
-                cur_edge[i] = 0;
-                pot_max = max(potential[i], pot_max);
-                all_ver.insert(potential[i], i);
-                if(excess[i] &gt;= K &amp;&amp; i != t){
-                    act_ver.push(potential[i], i);
-                    act_min = min(act_min, potential[i]);
-                }
-            }else{
-                potential[i] = V + 1;
-            }
-        }
-        return act_min;
-    }
-    void bfs(){
-        for(int i = 0; i &lt; V; ++i) potential[i] = max(potential[i], V);
-        potential[t] = 0;
-        int qh = 0, qt = 0;
-        for(que[qt++] = t; qh++ &lt; qt;){
-            int u = que[qh-1];
-            for(const edge&amp; e : G[u]){
-                if(potential[e.to] == V &amp;&amp; G[e.to][e.rev].cap &gt; 0){
-                    potential[e.to] = potential[u] + 1, que[qt++] = e.to;
-                }
-            }
-        }
-    }
-    void init(){
-        potential[s] = V + 1;
-        for(edge&amp; e : G[s]){
-            if(potential[e.to] &lt; V &amp;&amp; e.cap &gt; 0){
-                U = max(U, e.cap), logU = max(logU, (int)ceil(log2(e.cap)));
-                G[e.to][e.rev].cap = e.cap, excess[s] -= e.cap, excess[e.to] += e.cap;
-                e.cap = 0;
-            }
-        }
-    }
-    int global_relabel(const T K){
-        bfs();
-        all_ver.clear(), act_ver.clear();
-        return calc_active(K);
-    }
-    void gap_relabel(const int u){
-        for(int i = potential[u]; i &lt;= pot_max; ++i){
-            for(int id = all_ver.dat[V+i].next; id &lt; V; id = all_ver.dat[id].next){
-                potential[id] = V + 1;
-            }
-            all_ver.dat[V+i].prev = all_ver.dat[V+i].next = V + i;
-        }
-    }
-    void discharge(const int u, const T K){
-        for(int&amp; i = cur_edge[u]; i &lt; (int)G[u].size(); ++i){
-            edge&amp; e = G[u][i];
-            if(potential[u] == potential[e.to] + 1 &amp;&amp; e.cap &gt; 0){
-                if(push(u, e, K)) return;
-            }
-        }
-        relabel(u);
-    }
-    bool push(const int u, edge&amp; e, const T K){
-        T f = min(e.cap, K);
-        const int v = e.to;
-        e.cap -= f, excess[u] -= f;
-        G[v][e.rev].cap += f, excess[v] += f;
-        if(excess[v] &gt;= K &amp;&amp; excess[v] &lt; K + f &amp;&amp; v != t){
-            act_ver.push(potential[v], v), level = min(level, potential[v]);
-        }
-        return (excess[u] &lt; K);
-    }
-    void relabel(const int u){
-        ++checker;
-        int prv = potential[u], cur = V;
-        for(int i = 0; i &lt; (int)G[u].size(); ++i){
-            const edge&amp; e = G[u][i];
-            if(cur &gt; potential[e.to] + 1 &amp;&amp; e.cap &gt; 0){
-                cur_edge[u] = i;
-                cur = potential[e.to] + 1;
-            }
-        }
-        if(all_ver.more_one(prv)){
-            all_ver.erase(u);
-            if((potential[u] = cur) == V) return;
-            act_ver.push(cur, u);
-            all_ver.insert(cur, u);
-            pot_max = max(pot_max, cur);
-        }else{
-            gap_relabel(u);
-        }
-    }
-public:
-    vector&lt;vector&lt;edge&gt; &gt; G;
-    PushRelabel(const int node_size)
-        : V(node_size), logU(0), pot_max(-1), checker(0), excess(V, (T)0),
-            potential(V, 0), cur_edge(V), que(V), all_ver(V, V), act_ver(V, V), G(V){}
-    void add_edge(const int _from, const int _to, const T _cap){
-        G[_from].emplace_back(_to, (int)G[_to].size(), _cap);
-        G[_to].emplace_back(_from, (int)G[_from].size() - 1, 0);
-    }
-    T solve(const int source, const int sink){
-        s = source, t = sink;
-        init();
-        for(int i = logU - (U &lt; ((T)1 &lt;&lt; logU)); i &gt;= 0; --i){
-            T K = (T)1 &lt;&lt; i;
-            level = calc_active(K);
-            while(!act_ver.empty() &amp;&amp; level &lt;= pot_max){
-                if(act_ver.empty(level)){
-                    ++level;
-                    continue;
-                }
-                int u = act_ver.top(level);
-                act_ver.pop(level);
-                if(potential[u] &gt;= V) continue;
-                discharge(u, K);
-                if(checker &gt;= V / 2){
-                    level = global_relabel(K);
-                    checker = 0;
-                }
-            }
-        }
-        return excess[t];
-    }
-};
-</pre>
 </div>
 <h3>verify 用の問題</h3>
 <p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_6_A">Maximum Flow</a>
-  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3941770#1">提出コード</a>
-<a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3941852#1">提出コード(excess scaling 版)</a></p>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3941770#1">提出コード</a></p>
 </section>
 
 </div>
