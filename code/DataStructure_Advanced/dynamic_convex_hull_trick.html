@@ -77,30 +77,28 @@ private:
     struct node {
         node *left, *right;
         T a, b;
-        node() : left(nullptr), right(nullptr) {}
+        node() : left(nullptr), right(nullptr){}
         node(T arg1, T arg2)
-            : left(nullptr), right(nullptr), a(arg1), b(arg2) {}
-        T f(T x, T a, T b) {
-            return a * x + b;
-        }
-        void add(T l, T r, T a_, T b_) {
-            if(f(l,a_,b_) &lt; f(l,a,b)) {
-                swap(a,a_), swap(b,b_);
+            : left(nullptr), right(nullptr), a(arg1), b(arg2){}
+        T f(T x, T a, T b){ return a * x + b; }
+        void add(T l, T r, T _a, T _b) {
+            if(f(l, _a, _b) &lt; f(l, a, b)) {
+                swap(a, _a), swap(b, _b);
             }
-            if(f(r,a,b) &lt;= f(r,a_,b_)) return;
+            if(f(r, a, b) &lt;= f(r, _a, _b)) return;
             T mid = (l + r) / 2;
-            if(f(mid,a,b) &lt; f(mid,a_,b_)){
+            if(f(mid, a, b) &lt; f(mid, _a, _b)){
                 if(!right){
-                    right = new node(a_,b_);
+                    right = new node(_a, _b);
                 }else{
-                    right-&gt;add(mid+1,r,a_,b_);
+                    right-&gt;add(mid + 1, r, _a, _b);
                 }
             }else{
-                swap(a, a_), swap(b, b_);
+                swap(a, _a), swap(b, _b);
                 if(!left){
-                    left = new node(a_,b_);
+                    left = new node(_a,_b);
                 }else{
-                    left-&gt;add(l,mid,a_,b_);
+                    left-&gt;add(l, mid, _a, _b);
                 }
             }
         }
@@ -112,13 +110,13 @@ private:
                 ans = min(ans, left-&gt;query(l, mid, k));
             }
             if(k &gt; mid &amp;&amp; right){
-                ans = min(ans, right-&gt;query(mid+1, r, k));
+                ans = min(ans, right-&gt;query(mid + 1, r, k));
             }
             return ans;
         }
-        void rm() {
-            if(left) left-&gt;rm();
-            if(right) right-&gt;rm();
+        void clear() {
+            if(left) left-&gt;clear();
+            if(right) right-&gt;clear();
             delete this;
         }
     };
@@ -127,18 +125,16 @@ private:
 public:
     // arg1:クエリになげる最小の値, arg2:クエリになげる最大の値
     CHT(T arg1, T arg2)
-        : min_val(arg1), max_val(arg2) { root = new node(0,numeric_limits&lt;T&gt;::max()/10); }
-    // f(x) = a*x+b を挿入
+        : min_val(arg1), max_val(arg2){ root = new node(0, numeric_limits&lt;T&gt;::max() / 10); }
+    // f(x) = a * x + b を挿入
     void add(T a, T b) {
         return root-&gt;add(min_val, max_val, a, b);
     }
-    // x=kでの最小値
+    // x = kでの最小値
     T query(T k) {
         return root-&gt;query(min_val, max_val, k);
     }
-    ~CHT(){
-        root-&gt;rm();
-    }
+    ~CHT(){ root-&gt;clear(); }
 };
 </pre>
 </div>

@@ -81,9 +81,9 @@ $\det (T) = \sum_{j=1}^n (-1)^{i+j} T_{1, j} \det (T_{\langle 1 \rangle, \langle
 以下では交代行列の性質を用いて導かれる本文中の自明でない結果 (補足 1), (補足 2) について証明を雑に記す. <br>
 証明は (補足 1) の方は随分前に何かの資料で見て知ったのだが、出典を覚えていない. (補足 2) の方は参考資料に基づく. <br>
 (補足 1) <br>
-$\mathrm{rank}$ が $r$ の交代行列 $A \in \mathbb{R}^{n \times n}$ が $r \times r$ の正則な主小行列を持つことを示す(小行列ではなく主小行列であるところが本質).
+$\mathrm{rank}$ が $r$ の交代行列 $A \in \mathbb{R}^{n \times n}$ が $r \times r$ の正則な"主"小行列を持つことを示す.
 $A$ の固有多項式を考える. すると $\det (xI - A) = \underset{\sigma}{\sum} \mathrm{sign} (\sigma) (xI - A)_{i, \sigma(i)} = \sum_{0 \le k \le n} \underset{X \subseteq [n], |X| = n - k}{\sum} \det (A_{X, X}) x^k$ が言える.
-$2$ つ目の等式は $k = | \{ i \mid \sigma(i) = i \} |$ について足し合わせる + $A$ の対角成分は交代行列なので $0$ である ことに注意すると成り立つことが分かる. <br>
+$2$ つ目の等式は $k = | \{ i \mid \sigma(i) = i \} |$ について足し合わせる &amp; $A$ の対角成分は交代行列なので $0$ である ことに注意すると成り立つことが分かる. <br>
 交代行列は正規行列であることから対角化可能であり, 固有値の幾何的重複度と代数的重複度が一致するため, 今 $r = \mathrm{rank} A$ から固有多項式の最小の非ゼロ係数項の指数は $n - r$ となる.
 つまり $\exists X \subseteq [n], |X| = r$ について $\det (A_{X, X}) \neq 0$ が成り立つ.
 <br>
@@ -97,7 +97,7 @@ $A \in \mathbb{R}^{n \times n}$ を交代行列とし, $\alpha, \beta \subseteq 
 $n$ が奇数のとき交代行列の行列式は $0$ となるので $T_{\langle 1 \rangle, \langle 1 \rangle } = 0$ であるが, 仮定より $T_{\langle 1 \rangle, \langle 2 \rangle } \neq 0$ なので
 $T_{\langle 1 \rangle, \langle 1, 2 \rangle }$ は列フルランクである. よって $\mathrm{rank} \left( T_{\langle 1 \rangle, \langle 1 \rangle } \right)$ は $n-2$ となる. さらに $\beta = \{ 3, \cdots, n \}$ としたとき, $\exists \alpha \subseteq \{ 2, \cdots, n \}, |\alpha | = n - 2$
 で $A_{\alpha, \beta}$ が正則となるようなものが存在することも分かる.
-最後にフロベニウスの定理より, $\det (A_{\alpha, \beta}) \neq 0 \Rightarrow \det (A_{\beta, \beta}) \neq 0$ が導けるので確かに $\det \left( T_{\langle 1, 2 \rangle, \langle 1, 2 \rangle } \right) \neq 0$ が言える.
+最後にフロベニウスの定理より, $\det (A_{\alpha, \beta}) \neq 0 \Rightarrow \det (A_{\beta, \beta}) \neq 0$ が導けるので確かに $\det \left( T_{\langle 1, 2 \rangle, \langle 1, 2 \rangle } \right) \neq 0$ が言える.<br>
 </p>
 <p>
 (関数)<br>
