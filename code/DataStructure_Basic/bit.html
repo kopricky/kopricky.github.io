@@ -60,9 +60,13 @@ $\newcommand{\O}{\mathrm{O}}$
 <h2>Binary Indexed Tree (Fenwick Tree)</h2>
 <h3>コードについての説明</h3>
 <p>
-BIT(binary indexed tree) は1点加算と区間和のクエリを高速に処理することのできるデータ構造. Fenwick Tree とも呼ばれる. Segment Tree を用いても実装できるが BIT の方が基本的に速い. <br>
+BIT(binary indexed tree) は1点加算と区間和のクエリを高速に処理することのできるデータ構造. Fenwick Tree とも呼ばれる.
+Segment Tree を用いても実装できるが BIT の方が基本的に速い.<br>
+理由としてはメモリを 2 冪にそろえる必要がないこと(もちろん完全平衡二分木でないようなものに対しても Segment Tree を考えることはできるけど実装的にサイズは 2 冪で取ることが多い),
+計算が非再帰かつビット演算を用いて遷移が可能であること,
+例えば $i$ 番目の要素に加算する場合にかかる計算量が数 $i$ の立っているビットの数に比例することなどがある(Segment Tree では必ず $\Omega(\log n)$ 回かかる).<br>
 説明はおそらく検索すればわかりやすいものがいくつも出てくると思うので他のかたにゆずることにする... <br>
-ブロックの持ち方をフィボナッチ数にすることでlogの底が変わり計算量的には速くなるという話もある(<a href="https://arxiv.org/pdf/1612.09083.pdf">参考</a>). (実測はたぶん速くならない)
+ブロックの持ち方をフィボナッチ数にすることで $\log$ の底が変わり計算量的には速くなるという話もある(<a href="https://arxiv.org/pdf/1612.09083.pdf">参考</a>). (実測はたぶん速くならない)
 </p>
 <p>
 時間計算量: 構築 $\O (n)$, 各クエリ $\O (\log n)$
@@ -74,46 +78,46 @@ BIT(binary indexed tree) は1点加算と区間和のクエリを高速に処理
 <pre class="prettyprint linenums">
 template&lt;typename T&gt; class BIT {
 private:
-	int n;
-	vector&lt;T&gt; bit;
+    int n;
+    vector&lt;T&gt; bit;
 public:
-	// 0_indexed で i 番目の要素に x を加える
-	void add(int i, T x){
-		i++;
-		while(i &lt; n){
-			bit[i] += x, i += i &amp; -i;
-		}
-	}
-	// 0_indexed で [0,i] の要素の和(両閉区間！！)
-	T sum(int i){
-		i++;
-		T s = 0;
-		while(i &gt; 0){
-			s += bit[i], i -= i &amp; -i;
-		}
-		return s;
-	}
-	BIT(){}
-	//初期値がすべて0の場合
-	BIT(int sz) : n(sz+1), bit(n, 0){}
-	BIT(vector&lt;T&gt;&amp; v) : n((int)v.size()+1), bit(n, 0){
-		for(int i = 0; i &lt; n-1; i++){
-			add(i,v[i]);
-		}
-	}
-	void print(){
-		for(int i = 0; i &lt; n-1; i++){
-			cout&lt;&lt;sum(i)-sum(i-1)&lt;&lt; &quot; &quot;;
-		}
-		cout&lt;&lt;endl;
-	}
-	//-1スタート
-	void print_sum(){
-		for(int i = 0; i &lt; n; i++){
-			cout&lt;&lt;sum(i-1)&lt;&lt;&quot; &quot;;
-		}
-		cout&lt;&lt;endl;
-	}
+    // 0_indexed で i 番目の要素に x を加える
+    void add(int i, T x){
+        i++;
+        while(i &lt; n){
+            bit[i] += x, i += i &amp; -i;
+        }
+    }
+    // 0_indexed で [0,i] の要素の和(両閉区間！！)
+    T sum(int i){
+        i++;
+        T s = 0;
+        while(i &gt; 0){
+            s += bit[i], i -= i &amp; -i;
+        }
+        return s;
+    }
+    BIT(){}
+    //初期値がすべて0の場合
+    BIT(int sz) : n(sz+1), bit(n, 0){}
+    BIT(vector&lt;T&gt;&amp; v) : n((int)v.size()+1), bit(n, 0){
+        for(int i = 0; i &lt; n-1; i++){
+            add(i,v[i]);
+        }
+    }
+    void print(){
+        for(int i = 0; i &lt; n-1; i++){
+            cout&lt;&lt;sum(i)-sum(i-1)&lt;&lt; &quot; &quot;;
+        }
+        cout&lt;&lt;endl;
+    }
+    //-1スタート
+    void print_sum(){
+        for(int i = 0; i &lt; n; i++){
+            cout&lt;&lt;sum(i-1)&lt;&lt;&quot; &quot;;
+        }
+        cout&lt;&lt;endl;
+    }
 };
 </pre>
 </div>
