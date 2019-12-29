@@ -308,37 +308,37 @@ public:
     vector&lt;int&gt; ans_set;
     UndirectedMinCut(const int node_size) : V(node_size), ms(V), G(V){}
     void add_edge(int u, int v, T cost){
-		G[u].emplace_back(v, cost, (int)G[v].size());
+        G[u].emplace_back(v, cost, (int)G[v].size());
         G[v].emplace_back(u, cost, (int)G[u].size() - 1);
     }
     T solve(){
         T ans = numeric_limits&lt;T&gt;::max();
-		vector&lt;typename FibonacciHeap&lt;T, int&gt;::node*&gt; kp(V, nullptr);
-		vector&lt;int&gt; ord(V);
-		bool *visited = new bool[V]();
-		iota(ord.begin(), ord.end(), 0);
+        vector&lt;typename FibonacciHeap&lt;T, int&gt;::node*&gt; kp(V, nullptr);
+        vector&lt;int&gt; ord(V);
+        bool *visited = new bool[V]();
+        iota(ord.begin(), ord.end(), 0);
         for(int i = V; i &gt; 1; --i){
             FibonacciHeap&lt;T, int&gt; fh;
-			vector&lt;int&gt; new_ord(i-1);
+            vector&lt;int&gt; new_ord(i-1);
             for(int id : ord){
-				kp[id] = fh.push(0, id);
-			}
+                kp[id] = fh.push(0, id);
+            }
             for(int j = 0; j &lt; i-1; ++j){
                 int cur = fh.top().second;
                 fh.pop();
                 visited[cur] = true, new_ord[j] = cur;
-				for(edge&amp; e : G[cur]){
-					if(!visited[e.to]) fh.decrease_key(kp[e.to], e.cost);
-				}
+                for(edge&amp; e : G[cur]){
+                    if(!visited[e.to]) fh.decrease_key(kp[e.to], e.cost);
+                }
             }
             int last_ver = fh.top().second, nx_last = new_ord[i-2];
-			for(edge&amp; e : G[last_ver]){
+            for(edge&amp; e : G[last_ver]){
                 if(e.to == nx_last) continue;
-				G[nx_last].emplace_back(e.to, e.cost, e.rev);
+                G[nx_last].emplace_back(e.to, e.cost, e.rev);
                 edge&amp; reve = G[e.to][e.rev];
-				reve.to = nx_last, reve.rev = (int)G[nx_last].size() - 1;
-			}
-			for(int ver : new_ord){
+                reve.to = nx_last, reve.rev = (int)G[nx_last].size() - 1;
+            }
+            for(int ver : new_ord){
                 visited[ver] = false;
             }
             visited[last_ver] = true;
