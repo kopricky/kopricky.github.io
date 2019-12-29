@@ -67,7 +67,8 @@ Edmonds-Karp, Dinic などは (1) の条件(フローの条件) を常に満た�
 このとき $s$, $t$ 以外の頂点についてタンクに水が入っている(活性点と呼ぶ) ならそれを自分より高さの低い隣り合う頂点に $\min$(水の量, 辺の容量) だけ流すという操作(Push 操作)を最終的に (1) の条件を満たすまで続ける. <br>
 もし自分より高さの低い隣り合う頂点がない場合は自分の高さを $\min$(隣り合う頂点の高さ) $+ 1$ に更新する操作(Relabel 操作) を行う. ここで頂点 $u$ の高さを $h(u)$ としたとき,
 残余ネットワーク上の辺 $e = (u, v)$ について $h(u) - h(v) \le 1$ が成り立つことに注意する. ここで $h(u) - h(v) < 1$ の場合は $f(e) = e.cap$ が成り立ち, $h(u) - h(v) = 1$ の場合のみ $0 < f(e) \le e.cap$ となりうる. これは相補性条件に対応する. <br>
-これはかなり大事なポイントで結局残余ネットワークが valid であるための必要十分条件は "すべての頂点について (in flow - out flow) $\ge 0$ であること" および "すべての残余ネットワーク上の辺 $e = (u, v)$ について $h(u) - h(v)$ が成り立つこと" となる.
+これはかなり大事なポイントで結局残余ネットワークが valid であるための必要十分条件は "すべての頂点について (in flow - out flow) $\ge 0$ であること" および "すべての残余ネットワーク上の辺 $e = (u, v)$ について
+$h(u) - h(v) \le 1$ かつ $h(u) - h(v) < 1 \Rightarrow f(e) = e.cap$ が成り立つこと" となる.
 Push Relabel はアルゴリズムの途中でフローの量や辺の容量などが変化するような状況でもラベルの単調性と上記の validity を保つように更新すれば全体でかかる計算量をよく見積もることができる(Parametric Flow や Local Flow(ラベルの高さに threshold を設けた PushRelabel) などがメジャーなものとしてある).<br>
 話がそれたが, ここで残余ネットワーク上で $s$ から $t$ にもしたどり着けるなら、パスに沿って不等式をあてはめると $h(s) - h(t) \le n-1$ が成り立つはずだが $h(s) = n$, $h(t) = 0$ より $s$ から $t$ には常にたどり着けないことが分かる. つまり (2) の条件は常に満たされる. よって (1) が満たされたとき, max flow が得られる.<br>
 残りはこの操作が $\O (n^2 m^{1/2})$ の計算量で終了することであるが参考書や資料等に詳しく載っていると思う.
@@ -86,14 +87,18 @@ Push Relabel はアルゴリズムの途中でフローの量や辺の容量な�
 最大流の値を高速に求めるために高さが $n$ 以上の頂点については excess を解消していないので最終的な preflow が依然として flow の条件を満たしていない可能性がある. なので valid な flow を求めたい場合は valiate() のコメントアウトを外す. <br>
 <br>
 (追記 2) <br>
-容量が整数である場合に超過量を 2 べきでスケーリングしていく excess scaling 版の PushRelabel も存在する. 時間計算量は初期超過量の最大値 $\left( \max_{e \in \delta^+ (s)} e.cap \right)$ を $U$ としたとき
-$\mathrm{O} (nm + n^2 \log U)$ となる.<br>
+容量が整数である場合に超過量を 2 べきでスケーリングしていく excess scaling 版の PushRelabel も 2 つ目の実装として置いた.
+時間計算量は初期超過量の最大値 $\left( \max_{e \in \delta^+ (s)} e.cap \right)$ を $U$ としたとき
+$\mathrm{O} (nm + n^2 \lceil \log (U + 1) \rceil )$ となる.
+ケースによってはこちらの方が速くなることもある.<br>
 sink $t$ 以外の各頂点の超過量が $\Delta$ 未満である残余グラフ $G$ が与えられたときにそれを $t$ 以外の各頂点の超過量が $\Delta / 2$ 未満のグラフに更新する操作を行う関数を Update$(G, \Delta)$ とする.
 Update$(G, \Delta)$ は超過量が $\Delta / 2$ 以上である頂点のうち最も高さの低い頂点から順に超過量が $\Delta / 2$ 未満となるように超過分を解消していく.
 流した先の頂点の超過量は $t$ 以外なら常に $\Delta$ 未満になるようにしてポテンシャル評価が壊れないようにする.
 最も高いものから順に超過分を解消しようとすると $t$ 以外の頂点については超過量を常に $\Delta$ 未満にするという条件から push を上手くやればもっと流せるのに流せなくなるという事象が発生する可能性がありアルゴリズムが正当でなくなってしまうのでダメ.<br>
 こうすることで Update$(G, \Delta)$ にかかる計算量は $\O \left( n^2 \right)$ であることがポテンシャル関数 $\Phi$ として $\sum_{i \in V} p_i e_i / \Delta$ ($e(\cdot )$ は超過量とする) を用いて示すことができる. よって全体の計算量は上記のようになる.
 ちなみにこのように超過量 $e_i$ が bound されているときはラベル値 $p_i$ と超過量 $e_i$ の積の和をポテンシャル関数として設定することでプッシュの回数をよく評価することができるようになり, local flow algorithm の計算量解析にも用いられている.<br>
+(注) Update$(G, \Delta)$ が終了し, Update$(G, \Delta / 2)$ に移る際に必要な操作は超過量が $\Delta / 2$ 以上の頂点を新たに活性点とすることだけ(計算量 $\O (n)$)で各頂点について今見ている辺の位置(cur_edge)
+を変更する必要はないことに注意する. なぜなら結局ラベル自体は変化しておらず, また残余ネットワークが $\Delta$ の変化によって invalid となることはないからである. よって多重辺を許した場合にも確かに上記の計算量になる.<br>
 <br>
 (個人的復習) <br>
 ラベルは高々 $2 n -1$ 以下, 飽和プッシュの回数は $\O (nm)$ なので <br>
@@ -286,10 +291,11 @@ private:
     void validate(){
         for(int i = 0; i &lt; V; ++i){
             if(potential[i] &gt;= V){
-                cur_edge[i] = 0, potential[i] = V;
-                if(excess[i] &gt; 0) act_ver.push(0, i);
+                cur_edge[i] = 0, potential[i] = V + 1;
+                if(excess[i] &gt; 0) act_ver.push(1, i);
             }
         }
+        potential[s] = V;
         int level = 0;
         while(level &gt;= 0){
             if(act_ver.empty(level)){
@@ -332,9 +338,236 @@ public:
 };
 </pre>
 </div>
+<div class="codebox">
+<h3>コード(excess scaling 版)</h3>
+<input type="checkbox" id="label2" class="csscode" />
+<label for="label2"></label>
+<pre class="prettyprint linenums">
+class Stack {
+private:
+    const int N, H;
+    int sz;
+    vector&lt;int&gt; node;
+public:
+    Stack(const int _N, const int _H) : N(_N), H(_H), node(N+H){ clear(); }
+    inline bool empty() const { return sz == 0; }
+    inline bool empty(const int h) const { return node[N+h] == N+h; }
+    inline int top(const int h) const { return node[N+h]; }
+    inline void pop(const int h){ --sz, node[N+h] = node[node[N+h]]; }
+    inline void push(const int h, const int u){ ++sz, node[u] = node[N+h], node[N+h] = u; }
+    inline void clear(){ sz = 0, iota(node.begin() + N, node.end(), N); }
+};
+
+template &lt;typename T&gt; class PushRelabel {
+public:
+    static_assert(std::is_integral&lt;T&gt;::value, &quot;Integral required.&quot;);
+    struct edge {
+        const int to, rev;
+        T cap;
+        edge(const int _to, const int _rev, const T _cap) : to(_to), rev(_rev), cap(_cap){}
+    };
+private:
+    const int V;
+    int s, t, checker;
+    vector&lt;T&gt; excess;
+    vector&lt;int&gt; potential, cur_edge, que;
+    Stack act_ver;
+    static unsigned long long ceil2(unsigned long long v){
+        --v;
+        v = v | (v &gt;&gt; 1), v = v | (v &gt;&gt; 2);
+        v = v | (v &gt;&gt; 4), v = v | (v &gt;&gt; 8);
+        v = v | (v &gt;&gt; 16), v = v | (v &gt;&gt; 32);
+        return ++v;
+    }
+    int calc_active(const T delta){
+        int pot_min = V;
+        for(int i = 0; i &lt; V; ++i){
+            if(potential[i] &lt; V){
+                if(excess[i] &gt;= delta &amp;&amp; i != t){
+                    act_ver.push(potential[i], i);
+                    pot_min = min(pot_min, potential[i]);
+                }
+            }else{
+                potential[i] = V + 1;
+            }
+        }
+        return pot_min;
+    }
+    void bfs(){
+        for(int i = 0; i &lt; V; ++i) potential[i] = max(potential[i], V);
+        potential[t] = 0;
+        int qh = 0, qt = 0;
+        for(que[qt++] = t; qh++ &lt; qt;){
+            int u = que[qh - 1];
+            for(const edge&amp; e : G[u]){
+                if(potential[e.to] == V &amp;&amp; G[e.to][e.rev].cap &gt; 0){
+                    potential[e.to] = potential[u] + 1, que[qt++] = e.to;
+                }
+            }
+        }
+    }
+    T init(){
+        T mx = 0;
+        potential[s] = V + 1;
+        bfs();
+        for(edge&amp; e : G[s]){
+            if(potential[e.to] &lt; V){
+                G[e.to][e.rev].cap = e.cap, excess[s] -= e.cap, excess[e.to] += e.cap;
+                mx = max(mx, e.cap), e.cap = 0;
+            }
+        }
+        return mx;
+    }
+    int global_relabel(const T delta){
+        bfs();
+        act_ver.clear();
+        return calc_active(delta);
+    }
+    int discharge(const int u, const T delta){
+        for(int&amp; i = cur_edge[u]; i &lt; (int)G[u].size(); ++i){
+            edge&amp; e = G[u][i];
+            if(potential[u] == potential[e.to] + 1 &amp;&amp; e.cap &gt; 0){
+                return push(u, e, delta) ? potential[e.to] : potential[u];
+            }
+        }
+        return relabel(u);
+    }
+    bool push(const int u, edge&amp; e, const T delta){
+        const int v = e.to;
+        T f = min(e.cap, excess[u]);
+        if(v != t) f = min(f, 2 * delta - 1 - excess[v]);
+        e.cap -= f, excess[u] -= f;
+        G[v][e.rev].cap += f, excess[v] += f;
+        if(excess[u] &gt;= delta) act_ver.push(potential[u], u);
+        if(excess[v] &gt;= delta &amp;&amp; v != t){
+            act_ver.push(potential[v], v);
+            return true;
+        }else{
+            return false;
+        }
+    }
+    int relabel(const int u){
+        ++checker;
+        int prv = potential[u], cur = V;
+        for(int i = 0; i &lt; (int)G[u].size(); ++i){
+            const edge&amp; e = G[u][i];
+            if(cur &gt; potential[e.to] + 1 &amp;&amp; e.cap &gt; 0){
+                cur_edge[u] = i, cur = potential[e.to] + 1;
+            }
+        }
+        if((potential[u] = cur) == V) return potential[u] = V + 1, prv;
+        act_ver.push(cur, u);
+        return prv;
+    }
+    int validate_calc_active(const T delta){
+        int pot_min = 2 * V;
+        for(int i = 0; i &lt; V; ++i){
+            if(excess[i] &gt;= delta &amp;&amp; i != t){
+                act_ver.push(potential[i] - V, i);
+                pot_min = min(pot_min, potential[i]);
+            }
+        }
+        return pot_min;
+    }
+    int validate_discharge(const int u, const T delta){
+        for(int&amp; i = cur_edge[u]; i &lt; (int)G[u].size(); ++i){
+            edge&amp; e = G[u][i];
+            if(potential[u] == potential[e.to] + 1 &amp;&amp; e.cap &gt; 0){
+                return validate_push(u, e, delta) ? potential[e.to] : potential[u];
+            }
+        }
+        return validate_relabel(u);
+    }
+    bool validate_push(const int u, edge&amp; e, const T delta){
+        const int v = e.to;
+        T f = min({e.cap, excess[u], 2 * delta - 1 - excess[v]});
+        e.cap -= f, excess[u] -= f;
+        G[v][e.rev].cap += f, excess[v] += f;
+        if(excess[u] &gt;= delta) act_ver.push(potential[u] - V, u);
+        if(excess[v] &gt;= delta){
+            act_ver.push(potential[v] - V, v);
+            return true;
+        }else{
+            return false;
+        }
+    }
+    int validate_relabel(const int u){
+        int prv = potential[u], cur = 2 * V;
+        for(int i = 0; i &lt; (int)G[u].size(); ++i){
+            const edge&amp; e = G[u][i];
+            if(cur &gt; potential[e.to] + 1 &amp;&amp; e.cap &gt; 0){
+                cur_edge[u] = i, cur = potential[e.to] + 1;
+            }
+        }
+        potential[u] = cur, act_ver.push(cur - V, u);
+        return prv;
+    }
+    void validate(){
+        T mx = 0;
+        for(int i = 0; i &lt; V; ++i){
+            if(potential[i] &gt;= V){
+                cur_edge[i] = 0, potential[i] = V + 1;
+                mx = max(mx, excess[i]);
+            }
+        }
+        potential[s] = V;
+        T delta = (ceil2(mx + 1) &gt;&gt; 1);
+        int level = validate_calc_active(delta) - V;
+        while(delta &gt; 0){
+            while(!act_ver.empty()){
+                if(act_ver.empty(level)){
+                    ++level;
+                    continue;
+                }
+                const int u = act_ver.top(level);
+                act_ver.pop(level);
+                level = validate_discharge(u, delta) - V;
+            }
+            if(delta == 1) break;
+            delta &gt;&gt;= 1, level = validate_calc_active(delta) - V;
+        }
+    }
+public:
+    vector&lt;vector&lt;edge&gt; &gt; G;
+    PushRelabel(const int node_size)
+        : V(node_size), checker(0), excess(V, (T)0),
+            potential(V, 0), cur_edge(V), que(V), act_ver(V, V), G(V){}
+    void add_edge(const int _from, const int _to, const T _cap){
+        G[_from].emplace_back(_to, (int)G[_to].size(), _cap);
+        G[_to].emplace_back(_from, (int)G[_from].size() - 1, 0);
+    }
+    T solve(const int source, const int sink){
+        s = source, t = sink;
+        T delta = (ceil2(init() + 1) &gt;&gt; 1);
+        int level = calc_active(delta);
+        while(delta &gt; 0){
+            while(!act_ver.empty()){
+                if(act_ver.empty(level)){
+                    ++level;
+                    continue;
+                }
+                const int u = act_ver.top(level);
+                act_ver.pop(level);
+                level = discharge(u, delta);
+                if(checker &gt;= V / 2){
+                    level = global_relabel(delta);
+                    checker = 0;
+                }
+            }
+            if(delta == 1) break;
+            delta &gt;&gt;= 1, level = calc_active(delta);
+        }
+        // validate();
+        return excess[t];
+    }
+};
+</pre>
+</div>
 <h3>verify 用の問題</h3>
 <p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_6_A">Maximum Flow</a>
-  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3941770#1">提出コード</a></p>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3941770#1">提出コード</a>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=4081801#1">提出コード(excess scaling 版)</a>
+</p>
 </section>
 
 </div>
