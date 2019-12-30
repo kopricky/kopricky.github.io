@@ -66,8 +66,8 @@ LinkCutTree とは異なり, 部分木もしくは連結成分全体に対する
 実装は平衡二分木の split, merge を用いてでき, 説明は<a href="http://web.stanford.edu/class/archive/cs/cs166/cs166.1166/lectures/17/Small17.pdf">このスライド</a>がわかりやすい. <br>
 以下の実装では平衡二分木として splay 木を用いているためならし $\O (\log n)$ となっている. (正直 merge-split ベースの赤黒木で実装するより実測はこっちの方が速い気がしているし, merge-split ベースの赤黒木はメモリ効率が悪くなるから自分は永続以外では使わない.)
 また頂点数を $n$, 辺数を $m$ とすると $n + 2m$ 個のノードからなる平衡二分探索木を保持するため定数倍が少々重い. 平衡二分探索木ではなく $\O (\log n)$-分木で保持することで計算量上では $\O (\log \log n)$ factor の改善が可能になる<br>
-部分木内の頂点集合に対する演算は op(node v, function f) みたいな形で呼べたらうれしいが, reroot の影響でそれが難しい.<br>
-そのため部分木内の頂点集合に対する演算は op(node v, node p, function f) の形($v$ が根なら $p$ は $-1$ とする) で与えることにしている(どうしても op(node v, function f) にしたいなら並行して <a href="./link_cut_tree.html">LinkCutTree</a> を持つとできる). <br>
+そのため部分木内の頂点集合に対する演算は op(node v, node p, function f) の形($v$ が根なら $p$ は $-1$ とする) で与えることにしている.
+ここで必ず $p$ は $v$ の親である必要があることに注意する(今, 森は根つき森として管理している). もし $p$ が $v$ の親であることが保証されない場合はその前に reroot$(p)$ を行うと良い.<br>
 ヘルパー関数は例えば最初辺数 $0$ からスタートではなくある木や森からスタートというときにそのグラフに対応する完全平衡二分木を効率よく構築し, それを初めの splay 木としてやることでそれ以降の操作の高速化が望めそう(？)なので置いてある. <br>
 元論文は "Randomized Dynamic Graph Algorithms with Polylogarithmic Time per Operation" [Henzinger, King 1995] <br>
 (追記) <br>
@@ -226,6 +226,10 @@ private:
         return ver1-&gt;par;
     }
     T&amp; get(BSTNode&lt;T&gt; *ver) noexcept { return splay(ver)-&gt;value; }
+    void point_update(BSTNode&lt;T&gt; *ver, const T&amp; val){
+        BSTNode&lt;T&gt;::opr1(splay(ver)-&gt;value, val);
+        ver-&gt;al = BSTNode&lt;T&gt;::opr2(ver-&gt;al, val);
+    }
     void range(BSTNode&lt;T&gt; *edge1, BSTNode&lt;T&gt; *edge2, const T&amp; val) noexcept {
         auto res1 = split_lower_bond(edge1);
         auto res2 = split_upper_bond(edge2);
@@ -277,7 +281,7 @@ private:
                 bst_build(nodes);
             }
         }
-        delete[] visit;
+        // delete[] visit;
     }
     void build_tree(const int root, const vector&lt;vector&lt;int&gt; &gt;&amp; tree) noexcept {
         bool *visit = new bool[V]();
@@ -285,7 +289,7 @@ private:
         BSTNode&lt;T&gt; *cur = nullptr;
         dfs(root, -1, cur, visit, nodes, tree);
         bst_build(nodes);
-        delete[] visit;
+        // delete[] visit;
     }
 
 public:
@@ -328,7 +332,11 @@ public:
         return IsConnected(vertex_set[node1_id], vertex_set[node2_id]);
     }
     // 頂点 ver_id の値を取得
-    T&amp; get(int ver_id) noexcept { return get(vertex_set[ver_id]); }
+    T&amp; get(const int ver_id) noexcept { return get(vertex_set[ver_id]); }
+    // 頂点 ver_id に val を加える
+    void point_update(const int ver_id, const T&amp; val) noexcept {
+        return point_update(vertex_set[ver_id], val);
+    }
     // 頂点 ver_id の存在する連結成分内の頂点全体に val を加える
     void component_range(const int ver_id, const T&amp; val){ range(ver_id, -1, val); }
     // 親が par_id であるような頂点 ver_id の部分木内に存在する頂点全体に val を加える
@@ -818,6 +826,10 @@ private:
         return ver1-&gt;par;
     }
     T&amp; get(BSTNode&lt;T&gt; *ver) noexcept { return splay(ver)-&gt;value; }
+    void point_update(BSTNode&lt;T&gt; *ver, const T&amp; val){
+        BSTNode&lt;T&gt;::opr1(splay(ver)-&gt;value, val);
+        ver-&gt;al = BSTNode&lt;T&gt;::opr2(ver-&gt;al, val);
+    }
     void range(BSTNode&lt;T&gt; *edge1, BSTNode&lt;T&gt; *edge2, const T&amp; val) noexcept {
         auto res1 = split_lower_bond(edge1);
         auto res2 = split_upper_bond(edge2);
@@ -869,7 +881,7 @@ private:
                 bst_build(nodes);
             }
         }
-        delete[] visit;
+        // delete[] visit;
     }
     void build_tree(const int root, const vector&lt;vector&lt;int&gt; &gt;&amp; tree) noexcept {
         bool *visit = new bool[V]();
@@ -877,7 +889,7 @@ private:
         BSTNode&lt;T&gt; *cur = nullptr;
         dfs(root, -1, cur, visit, nodes, tree);
         bst_build(nodes);
-        delete[] visit;
+        // delete[] visit;
     }
 
 public:
@@ -931,6 +943,10 @@ public:
     }
     // 頂点 ver_id の値を取得
     T&amp; get(int ver_id) noexcept { return get(vertex_set[ver_id]); }
+    // 頂点 ver_id に val を加える
+    void point_update(const int ver_id, const T&amp; val) noexcept {
+        return point_update(vertex_set[ver_id], val);
+    }
     // 頂点 ver_id の存在する連結成分内の頂点全体に val を加える
     void component_range(const int ver_id, const T&amp; val){ range(ver_id, -1, val); }
     // 親が par_id であるような頂点 ver_id の部分木内に存在する頂点全体に val を加える
@@ -952,13 +968,13 @@ public:
     T query(const int ver_id, const int par_id){
         if(par_id &lt; 0) return splay(vertex_set[ver_id])-&gt;al;
         if(ver_id &lt; par_id){
-            auto it = edge_set.find({ver_id, par_id});
+            auto it = edge_set.find(pair_to_ll(ver_id, par_id));
             assert(it != edge_set.end());
-            return query((it-&gt;second).second, (it-&gt;second).first);
+            return query(((*it).second).second, ((*it).second).first);
         }else{
-            auto it = edge_set.find({par_id, ver_id});
+            auto it = edge_set.find(pair_to_ll(par_id, ver_id));
             assert(it != edge_set.end());
-            return query((it-&gt;second).first, (it-&gt;second).second);
+            return query(((*it).second).first, ((*it).second).second);
         }
     }
 
@@ -975,7 +991,11 @@ private:
 <h3>verify 用の問題</h3>
 <p>yukicoder : <a href="https://yukicoder.me/problems/no/828">全方位神童数</a>
   <a href="https://yukicoder.me/submissions/345770">提出コード</a>
-  <a href="https://yukicoder.me/submissions/372168">提出コード(高速版)</a></p>
+  <a href="https://yukicoder.me/submissions/372168">提出コード(高速版)</a><br>
+yosupo さんの library checker : <a href="https://judge.yosupo.jp/problem/dynamic_tree_vertex_add_subtree_sum">Dynamic Tree Vertex Add Subtree Sum</a>
+  <a href="https://judge.yosupo.jp/submission/2331"><提出コード</a>
+  <a href="https://judge.yosupo.jp/submission/2333">提出コード(高速版)</a>
+</p>
 </section>
 
 </div>
