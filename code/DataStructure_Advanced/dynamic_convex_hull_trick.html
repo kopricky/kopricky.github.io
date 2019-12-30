@@ -73,7 +73,7 @@ add_line$(a, b, c, d)$ : 線分 $y=ax+b\ (x \in [c, d))$ を追加する <br>
 query$(k)$ : $x=k$ での最小値を返す
 </p>
 <p>
-時間計算量: add_line, query $\O (\log (\_ rpos - \_ lpos))$
+時間計算量: add_line, query $\O (\log (\_ rpos - \_ lpos))$, add_segment $\O (\log^2 (\_ rpos - \_ lpos))$
 </p>
 <h3>コード</h3>
 <div class="codebox">
@@ -84,44 +84,97 @@ template&lt;typename T&gt; class CHT {
 private:
     struct node {
         node *left, *right;
-        T a, b;
-        node(const T arg1, const T arg2)
-            : left(nullptr), right(nullptr), a(arg1), b(arg2){}
-        T f(const T x) const { return a * x + b; }
+        const T inf;
+        T a, b, l, r;
+        node(const T _a, const T _b, const T _l, const T _r)
+            : left(nullptr), right(nullptr), inf(numeric_limits&lt;T&gt;::max()),
+                a(_a), b(_b), l(_l), r(_r){}
+        T f(const T x) const {
+            return (l &lt;= x &amp;&amp; x &lt; r) ? (a * x + b) : inf;
+        }
+        T tf(const T x) const {
+            return a * x + b;
+        }
     };
     void swap(node *x, node *y){
-        std::swap(x-&gt;a, y-&gt;a), std::swap(x-&gt;b, y-&gt;b);
+        std::swap(x-&gt;a, y-&gt;a), std::swap(x-&gt;b, y-&gt;b), std::swap(x-&gt;l, y-&gt;l), std::swap(x-&gt;r, y-&gt;r);
     }
-    void add(node *cur, node *nw, const T l, const T r){
-        if(nw-&gt;f(l) &lt; cur-&gt;f(l)) swap(cur, nw);
-        if(cur-&gt;f(r - 1) &lt;= nw-&gt;f(r - 1)) return;
-        const T mid = (l + r) / 2;
-        if(cur-&gt;f(mid) &lt;= nw-&gt;f(mid)){
-            if(!cur-&gt;right){
-                cur-&gt;right = new node(nw-&gt;a, nw-&gt;b);
+    void _add_line(node *cur, node *nw, T l, T r){
+        while(true){
+            if(nw-&gt;f(l) &lt; cur-&gt;f(l)) swap(cur, nw);
+            if(cur-&gt;f(r - 1) &lt;= nw-&gt;f(r - 1)) break;
+            const T mid = (l + r) / 2;
+            if(cur-&gt;f(mid) &lt;= nw-&gt;f(mid)){
+                if(!cur-&gt;right){
+                    cur-&gt;right = new node(nw-&gt;a, nw-&gt;b, mid, r);
+                    break;
+                }else{
+                    cur = cur-&gt;right, l = mid, nw-&gt;l = mid;
+                }
             }else{
-                add(cur-&gt;right, nw, mid, r);
-            }
-        }else{
-            swap(cur, nw);
-            if(!cur-&gt;left){
-                cur-&gt;left = new node(nw-&gt;a, nw-&gt;b);
-            }else{
-                add(cur-&gt;left, nw, l, mid);
+                swap(cur, nw);
+                if(!cur-&gt;left){
+                    cur-&gt;left = new node(nw-&gt;a, nw-&gt;b, l, mid);
+                    break;
+                }else{
+                    cur = cur-&gt;left, r = mid, nw-&gt;r = mid;
+                }
             }
         }
     }
-    T query(node *cur, T k, T l, T r){
-        if(r - l == 1) return cur-&gt;f(k);
-        T ans = cur-&gt;f(k);
-        const T mid = (l + r) / 2;
-        if(k &lt; mid){
-            if(cur-&gt;left){
-                ans = min(ans, query(cur-&gt;left, k, l, mid));
+    void _add_segment(node *cur, node *nw, T l, T r){
+        while(true){
+            const T mid = (l + r) / 2;
+            if(cur-&gt;f(nw-&gt;l) &lt;= nw-&gt;tf(nw-&gt;l) &amp;&amp; cur-&gt;f(nw-&gt;r - 1) &lt;= nw-&gt;tf(nw-&gt;r - 1)){
+                break;
             }
-        }else{
-            if(cur-&gt;right){
-                ans = min(ans, query(cur-&gt;right, k, mid, r));
+            if(cur-&gt;tf(cur-&gt;l) &gt;= nw-&gt;f(cur-&gt;l) &amp;&amp; cur-&gt;tf(cur-&gt;r - 1) &gt;= nw-&gt;f(cur-&gt;r - 1)){
+                swap(cur, nw);
+                break;
+            }
+            if(nw-&gt;r &lt;= mid){
+                if(!cur-&gt;left){
+                    cur-&gt;left = new node(nw-&gt;a, nw-&gt;b, nw-&gt;l, nw-&gt;r);
+                    break;
+                }else{
+                    cur = cur-&gt;left, r = mid;
+                }
+            }else if(mid &lt;= nw-&gt;l){
+                if(!cur-&gt;right){
+                    cur-&gt;right = new node(nw-&gt;a, nw-&gt;b, nw-&gt;l, nw-&gt;r);
+                    break;
+                }else{
+                    cur = cur-&gt;right, l = mid;
+                }
+            }else{
+                bool use = false;
+                node kp(nw-&gt;a, nw-&gt;b, nw-&gt;l, nw-&gt;r);
+                if(!cur-&gt;left){
+                    cur-&gt;left = new node(nw-&gt;a, nw-&gt;b, nw-&gt;l, mid);
+                }else{
+                    use = true, nw-&gt;r = mid;
+                    _add_segment(cur-&gt;left, nw, l, mid);
+                }
+                if(!cur-&gt;right){
+                    cur-&gt;right = new node(kp.a, kp.b, mid, kp.r);
+                }else{
+                    if(use) nw = new node(kp);
+                    nw-&gt;l = mid;
+                    _add_segment(cur-&gt;right, nw, mid, r);
+                }
+                break;
+            }
+        }
+    }
+    T query(node *cur, const T k, T l, T r) const {
+        T ans = numeric_limits&lt;T&gt;::max();
+        while(cur){
+            ans = min(ans, cur-&gt;f(k));
+            const T mid = (l + r) / 2;
+            if(k &lt; mid){
+                cur = cur-&gt;left, r = mid;
+            }else{
+                cur = cur-&gt;right, l = mid;
             }
         }
         return ans;
@@ -135,23 +188,24 @@ private:
     node *root;
 public:
     CHT(const T _lpos, const T _rpos)
-        : lpos(_lpos), rpos(_rpos), root(new node(0, numeric_limits&lt;T&gt;::max() / 2)){
+        : lpos(_lpos), rpos(_rpos),
+            root(new node(0, numeric_limits&lt;T&gt;::max(), lpos, rpos)){
         assert(lpos &lt; rpos);
     }
     // ~CHT(){ clear(root); }
-    // f(x) = a * x + b を追加
+    // 直線 f(x) = a * x + b を挿入
     void add_line(const T a, const T b){
-        node *nw = new node(a, b);
-        return add(root, nw, lpos, rpos);
+        node *nw = new node(a, b, lpos, rpos);
+        return _add_line(root, nw, lpos, rpos);
     }
-    // f(x) = a * x + b を [c, d) の範囲に追加
-    void add_line(const T a, const T b, const T c, const T d){
-        assert(c &lt; d);
-        node *nw = new node(a, b);
-        return add(root, nw, c, d);
+    // 線分 f(x) = a * x + b (x ∈ [l, r)) を挿入
+    void add_segment(const T a, const T b, const T l, const T r){
+        assert(l &lt; r);
+        node *nw = new node(a, b, l, r);
+        return _add_segment(root, nw, lpos, rpos);
     }
     // x = k での最小値
-    T query(T k){
+    T query(const T k) const {
         return query(root, k, lpos, rpos);
     }
 };
@@ -159,7 +213,10 @@ public:
 </div>
 <h3>verify 用の問題</h3>
 <p>yosupo さんの library checker : <a href="https://judge.yosupo.jp/problem/line_add_get_min">Line Add Get Min</a>
-  <a href="https://judge.yosupo.jp/submission/2337">提出コード</a></p>
+  <a href="https://judge.yosupo.jp/submission/2362">提出コード</a>(直線追加の verify)<br>
+  yosupo さんの library checker : <a href="https://judge.yosupo.jp/problem/segment_add_get_min">Segment Add Get Min</a>
+    <a href="https://judge.yosupo.jp/submission/2359">提出コード</a>(線分追加の verify)
+</p>
 </section>
 
 </div>
