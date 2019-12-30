@@ -62,7 +62,8 @@ $\newcommand{\O}{\mathrm{O}}$
 <p>
 <a href="convex_hull_trick.html">Convex Hull Trick</a>の傾きが単調でなくなった場合に対応する.
 各直線が最小値を取る範囲を <a href="../SegmentTrees/dynamic_segtree.html">動的セグ木</a>
-と同じ要領で必要な部分にのみノードを用意することで値の大きな範囲を管理することができる. <br>
+と同じ要領で必要な部分にのみノードを用意することで値の大きな範囲を管理することができる.<br>
+枝刈りを入れているので見た目の計算量に比べてかなり高速に動作する.
 </p>
 <p>
 (コンストラクタ)<br>
@@ -94,6 +95,9 @@ private:
         }
         T tf(const T x) const {
             return a * x + b;
+        }
+        bool isLine(const T _l, const T _r) const {
+            return (l == _l) &amp;&amp; (r == _r);
         }
     };
     void swap(node *x, node *y){
@@ -132,7 +136,25 @@ private:
                 swap(cur, nw);
                 break;
             }
-            if(nw-&gt;r &lt;= mid){
+            if(cur-&gt;isLine(l, r) &amp;&amp; nw-&gt;isLine(l, r)){
+                if(nw-&gt;tf(l) &lt; cur-&gt;tf(l)) swap(cur, nw);
+                if(cur-&gt;tf(mid) &lt;= nw-&gt;tf(mid)){
+                    if(!cur-&gt;right){
+                        cur-&gt;right = new node(nw-&gt;a, nw-&gt;b, mid, r);
+                        break;
+                    }else{
+                        cur = cur-&gt;right, l = mid, nw-&gt;l = mid;
+                    }
+                }else{
+                    swap(cur, nw);
+                    if(!cur-&gt;left){
+                        cur-&gt;left = new node(nw-&gt;a, nw-&gt;b, l, mid);
+                        break;
+                    }else{
+                        cur = cur-&gt;left, r = mid, nw-&gt;r = mid;
+                    }
+                }
+            }else if(nw-&gt;r &lt;= mid){
                 if(!cur-&gt;left){
                     cur-&gt;left = new node(nw-&gt;a, nw-&gt;b, nw-&gt;l, nw-&gt;r);
                     break;
@@ -193,12 +215,12 @@ public:
         assert(lpos &lt; rpos);
     }
     // ~CHT(){ clear(root); }
-    // 直線 f(x) = a * x + b を挿入
+    // f(x) = a * x + b を挿入
     void add_line(const T a, const T b){
         node *nw = new node(a, b, lpos, rpos);
         return _add_line(root, nw, lpos, rpos);
     }
-    // 線分 f(x) = a * x + b (x ∈ [l, r)) を挿入
+    // f(x) = a * x + b (x ∈ [l, r)) を挿入
     void add_segment(const T a, const T b, const T l, const T r){
         assert(l &lt; r);
         node *nw = new node(a, b, l, r);
@@ -215,7 +237,7 @@ public:
 <p>yosupo さんの library checker : <a href="https://judge.yosupo.jp/problem/line_add_get_min">Line Add Get Min</a>
   <a href="https://judge.yosupo.jp/submission/2362">提出コード</a>(直線追加の verify)<br>
   yosupo さんの library checker : <a href="https://judge.yosupo.jp/problem/segment_add_get_min">Segment Add Get Min</a>
-    <a href="https://judge.yosupo.jp/submission/2359">提出コード</a>(線分追加の verify)
+    <a href="https://judge.yosupo.jp/submission/2364">提出コード</a>(線分追加の verify)
 </p>
 </section>
 
