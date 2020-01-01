@@ -71,7 +71,7 @@ yosupo さんの library-checker で $\mathrm{gcd}(a, p)$ が $1$ とは限ら�
 まず $g = \mathrm{gcd}(a, p)$ をとり, $a = cg$, $p = dg$ とする.
 このとき $b \% g \neq 0$ なら解は存在しないので $b = eg$ が成り立つとする.
 すると $c^x g^{x-1} = e\ (\mathrm{mod} \ d) \Leftrightarrow a^{x-1} = c^{-1} e\ (\mathrm{mod}\ d)$ のように同値変形できる.
-$baby \_ step \_ giant \_ step$ 関数は最小の非負整数 $x$ を返すので例外として元の問題において $x = 0$ が解となるかどうかを確認しておく. <br>
+baby_step_giant_step 関数は最小の非負整数 $x$ を返すので例外として元の問題において $x = 0$ が解となるかどうかを確認しておく. <br>
 $\mathrm{gcd}(a, d) \neq 1$ ならまた同様の操作を繰り返す. この操作によって $mod$ が半分以下になり高々 $\mathrm{ceil}(\log p)$ 回で終わるので問題ない. <br>
 $\O (1)$ で変形できる方法があるのか分からないが, 悪くない方法な気はしている.
 </p>
