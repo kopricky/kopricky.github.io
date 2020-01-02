@@ -67,10 +67,10 @@ $G(n, p)$ は愚直にやると $\O (n^2)$ かかるが次にどの辺を取る�
 他によく見る random tree の構築は一様ランダムというわけではないので, 一様ランダムな木の生成として prufer code から復元する実装を載せている. ランダムグラフの理論でよく目にする Galton-Watson 過程に基づいて木を構築する方法もあるらしいので勉強する時間が取れたら書きたい(そんな時間はないもよう).
 他の関数については基本的に書くだけ. <br>
 (2 つ目のコードについて) <br>
-後半のアルゴリズムは次数列が与えられたときにそれを満たすような(連結な)グラフを一様ランダムで生成するアルゴリズムになっていてその中で出力されるグラフが連結である必要がある場合(こちらのほうが難しい)について説明する(以下の $3$ つのステップからなる). <br>
-(I) 与えられた次数列を満たすグラフを構築する(<a href="../Graph/havel_hakimi.html">Havel-Hakimi</a> アルゴリズム). (II) 得られたグラフが連結でないなら swap 操作(グラフ $G_1$ 内の辺 $(a, b)$, $G_2$ 内の辺 $(c, d)$ を ⇒ 辺 $(a, c)$, 辺 $(b, d)$ に付け替える操作)を繰り返すことで連結にする. swap 操作は各頂点の次数を変化させないことに注意する.<br>
-(I), (II) は線形時間で行うことができる. 最後に (III) 連結なグラフの異なる $2$ 辺をランダムに選んで swap するという操作を繰り返す. を行う. (III) の操作によってグラフが非連結になる場合は invalid ととして自分自身に移るとする. このとき swap 操作を繰り返すことで与えられた次数列を満たす異なる $2$ つのグラフ間を移りあえることから既約であることが言え,
-また自分自身に移る遷移が存在することから非周期的であるのでこの(有限)マルコフ連鎖は極限分布を持ちまたその分布はよく知られた事実から一様分布となる. そのため swap 操作を十分な回数繰り返すことで一様ランダムなグラフが得られる(収束速度はグラフ依存. スペクトラルギャップによる評価が有名). <br>
+後半のアルゴリズムは次数列が与えられたときにそれを満たすような(連結な)グラフを一様ランダムで生成するアルゴリズムになっていてその中で出力されるグラフが連結である必要がある場合(こちらのほうが難しい)について説明する(以下の 2 つのステップからなる). <br>
+(I) 与えられた次数列を満たす単純連結なグラフを構築する(<a href="../Graph/havel_hakimi.html">Havel-Hakimi</a> アルゴリズム).
+これは線形時間で行うことができる. 次に (II) 連結なグラフの異なる $2$ 辺をランダムに選んで swap するという操作を繰り返す. を行う. (II) の操作によってグラフが非連結になる場合は invalid ととして自分自身に移るとする. このとき swap 操作を繰り返すことで与えられた次数列を満たす異なる $2$ つのグラフ間を移りあえることから既約であることが言え,
+また自分自身に移る遷移が存在することから非周期的であるのでこの(有限)マルコフ連鎖は極限分布を持ち, またその分布はよく知られた事実から一様分布となる. そのため swap 操作を十分な回数繰り返すことで一様ランダムなグラフが得られる(収束速度はグラフ依存. スペクトラルギャップによる評価が有名). <br>
 ここで swap 操作を行った影響でグラフが非連結になる可能性があり, またそれを特定するのには<a href="./dynamic_connectivity.html">複雑なアルゴリズム</a>を使わないとすると $\O (m)$ 時間を要する. そのため元論文では window size $T$ を定め, $T$ 回 swap を繰り返した後に非連結なら $T$ 回の swap 操作をなしにして $T \ast= 0.923...$, 連結なら $T \ast= 1.131...$ と更新して操作を続けることにする.
 定数は著者たちがヒューリスティックに決めたものである. 実際に動かしてみると結構速く動作する(TIME を適宜設定しその間回し続けるという実装にしている). ちなみに非連結を許すならただ回すだけでいい. <br>
 (注) verify してないのでちゃんとやらないと... <br>
@@ -270,33 +270,39 @@ private:
         add_edge(p.first, q.first), add_edge(p.second, q.second);
     }
     bool construct_init_graph() noexcept {
-        int cur, ver, num, pos = *max_element(degree.begin(), degree.end());
-        vector&lt;stack&lt;int&gt; &gt; bucket(V);
-        for(int i = 0; i &lt; V; i++) bucket[degree[i]].push(i);
-        queue&lt;pair&lt;int, int&gt; &gt; memo;
-        while(pos &gt;= 1){
-            if(bucket[pos].empty()){
-                pos--;
-                continue;
+        const int node_size = (int)degree.size();
+        const int max_degree = *max_element(degree.begin(), degree.end());
+        if(max_degree &gt; node_size - 1) return false;
+        if(accumulate(degree.begin(), degree.end(), 0LL) % 2 == 1) return false;
+        vector&lt;stack&lt;int&gt; &gt; bucket(max_degree + 1);
+        vector&lt;int&gt; deg_cnt(max_degree + 1, 0);
+        for(int i = 0; i &lt; node_size; ++i) bucket[degree[i]].push(i);
+        vector&lt;pair&lt;int, int&gt; &gt; deg_seq;
+        for(int i = max_degree; i &gt;= 1; --i){
+            deg_cnt[i] = (int)bucket[i].size();
+            while(!bucket[i].empty()){
+                deg_seq.emplace_back(i, bucket[i].top()), bucket[i].pop();
             }
-            ver = bucket[pos].top(), num = pos;
-            bucket[pos].pop();
-            for(cur = pos; cur &gt;= 1; cur--){
-                while(num &gt; 0 &amp;&amp; !bucket[cur].empty()){
-                    int tmp = bucket[cur].top();
-                    bucket[cur].pop();
-                    add_edge(ver, tmp);
-                    memo.push({cur-1, tmp});
-                    num--;
+        }
+        while(!deg_seq.empty()){
+            int pos = 0, rem = deg_seq.back().first, cur_degree;
+            const int ver = deg_seq.back().second;
+            --deg_cnt[rem], deg_seq.pop_back();
+            stack&lt;int&gt; update;
+            while(rem &gt; 0){
+                if(pos &gt;= (int)deg_seq.size()) return false;
+                cur_degree = deg_seq[pos].first;
+                const int start = max(pos, pos + deg_cnt[cur_degree] - rem);
+                for(int i = start; i &lt; pos + deg_cnt[cur_degree]; ++i){
+                    add_edge(ver, deg_seq[i].second);
+                    --deg_seq[i].first, update.push(cur_degree);
                 }
-                if(num == 0) break;
+                pos += deg_cnt[cur_degree], rem -= deg_cnt[cur_degree];
             }
-            if(cur == 0) return false;
-            while(!memo.empty()){
-                pair&lt;int, int&gt; p = memo.front();
-                memo.pop();
-                if(p.first &gt;= 1) bucket[p.first].push(p.second);
+            while(!update.empty()){
+                --deg_cnt[update.top()], ++deg_cnt[update.top() - 1], update.pop();
             }
+            while(!deg_seq.empty() &amp;&amp; deg_seq.back().first == 0) deg_seq.pop_back();
         }
         return true;
     }
@@ -398,6 +404,7 @@ private:
         iota(index.begin(), index.end(), 0);
         shuffle(index.begin(), index.end(), mt);
         for(int i : index) for(int to : G[i]) graph[i].push_back(index[to]);
+        for(int i = 0; i &lt; V; i++) for(int to : G[i]) graph[i].push_back(to);
     }
 
 public:
@@ -409,7 +416,7 @@ public:
             start(chrono::high_resolution_clock::now()), mt(rnd()), loop_count(0), graph{g}, degree{d}{
         assert(check());
         assert(construct_init_graph());
-        if(connected) transform_to_connected_graph();
+        if(connected) assert(IsConnected());
         shuffle_graph();
         construct_graph();
     }

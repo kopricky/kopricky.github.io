@@ -79,12 +79,26 @@ $G (V(G) = {v_1,\ldots,v_n})$ を $\mathrm{deg}(v_i) = d_i, d_1 \ge d_2, \dots, 
 よって示せた. <br>
 計算量は並び替えをバケットソートの要領で行ってやると, 線形時間で構築可能. <br>
 <br>
-非ゼロの最小次数の頂点
-<a href="http://szhorvat.net/pelican/hh-connected-graphs.html#connected"></a>
+(修正)<br>
+グラフの次数列が与えられたときにできることならそれに対応する単純"連結"グラフを構成したいというモチベーションがあり,
+<a href="http://szhorvat.net/pelican/hh-connected-graphs.html#connected">こちらの資料</a>を参考にグラフの次数列が与えられたときにそれに対応する単純グラフの中でも連結なものが存在するならば常にそのようなものを出力するアルゴリズムに変更した.<br>
+具体的な方法は, 上記の説明では最大次数の頂点から辺を張っていたが, 非ゼロ最小次数の頂点 $v$(次数を $d$ とする) に注目しそれ以外の頂点について次数の大きい上位 $d$ 個の頂点と $v$ の間に辺を張るということをする.<br>
+単純グラフの構成に重要な部分はどの頂点から辺を張るかということではなく, ある頂点(次数を $d$ とする) に注目したときにそれ以外の頂点で次数の大きい上位 $d$ 個の頂点との間に 1 つずつ辺を張ることだということは上記の証明から分かる.
+つまりこの変更によって単純グラフを構成するという意味でのアルゴリズムの正当性は変わらない.<br>
+次に連結なグラフが存在する場合に必ず連結なグラフを返すかということを考える.<br>
+まず graphical な次数列 $D = \{ d_1, \ldots ,d_n \}$(便宜上降順に並んでいるとする) に対して,
+単純連結なグラフが存在するかどうかの必要十分条件は $d_i \ge 1 (1 \le i \le n)$ かつ $\sum_{1 \le i \le n} d_i \ge 2 (n - 1)$ である.
+必要性は明らかだし, 十分性は条件を満たした上で連結でない単純グラフがあったとすると必ず橋でないような辺を持つ連結成分が存在するのでその辺
+$(a, b)$ と異なる連結成分に属するある辺 $(c, d)$ について swap 操作($(a, b)$, $(c, d)$ $\Rightarrow$ $(a, c)$, $(b, d)$) を繰り返し行えば連結にすることが可能であることから分かる.<br>
+次数列 $D = \{ d_1, \ldots ,d_n \}$ を満たす単純連結グラフが存在すると仮定して,
+$D' = \{ d_1 - 1, \ldots, d_{d_n} - 1, d_{d_n+1}, \ldots ,d_{n-1} \}$ を満たす単純連結グラフなグラフが存在しないと仮定すると
+$D = \{ 1, 1 \}$ のとき以外矛盾が生じることが上記の必要十分条件に注目すると簡単に分かる.
+また $(d_1, d_n), \dots, (d_{n-1}, d_n)$ と辺を張る操作はもちろん単純かつ連結の性質を損なわないので上記の手法で存在するならば必ず連結なグラフを返すことが分かる.<br>
+ちなみにより厳密に, 与えられた次数列を満たす単純グラフの中での最小連結成分数が $C$ であるとき, アルゴリズムは連結成分数が $C$ となる単純グラフを返す.
 </p>
 <p>
 (関数)<br>
-given_degree_simple_graph$(degree, graph)$: 次数列 $degree$ を満たす単純グラフが構成可能かどうか (true / false) を返し, 可能な場合 $graph$ に結果を格納.
+given_degree_simple_graph$(degree, graph)$: 頂点 $i$ の次数が $degree[i]$ であるような単純グラフが構成可能かどうか (true / false) を返し, 可能な場合 $graph$ に結果を格納.
 </p>
 <p>
 時間計算量: $\O (n+m)$ (ここで $m = \sum_{1 \le i \le n} d_i$ とする).
@@ -95,36 +109,40 @@ given_degree_simple_graph$(degree, graph)$: 次数列 $degree$ を満たす単�
 <label for="label"></label>
 <pre class="prettyprint linenums">
 bool given_degree_simple_graph(const vector&lt;int&gt;&amp; degree, vector&lt;vector&lt;int&gt; &gt;&amp; graph){
-    int node_size = (int)degree.size(), cur, ver, num;
-    int pos = *max_element(degree.begin(), degree.end());
-    if(pos &gt;= node_size) return false;
-    if(accumulate(degree.begin(), degree.end(), 0LL) % 2) return false;
-    vector&lt;stack&lt;int&gt; &gt; bucket(node_size);
-    for(int i = 0; i &lt; node_size; i++) bucket[degree[i]].push(i);
-    queue&lt;pair&lt;int, int&gt; &gt; memo;
-    while(pos &gt;= 1){
-        if(bucket[pos].empty()){
-            pos--;
-            continue;
+    const int node_size = (int)degree.size();
+    const int max_degree = *max_element(degree.begin(), degree.end());
+    if(max_degree &gt; node_size - 1) return false;
+    if(accumulate(degree.begin(), degree.end(), 0LL) % 2 == 1) return false;
+    graph.resize(node_size);
+    vector&lt;stack&lt;int&gt; &gt; bucket(max_degree + 1);
+    vector&lt;int&gt; deg_cnt(max_degree + 1, 0);
+    for(int i = 0; i &lt; node_size; ++i) bucket[degree[i]].push(i);
+    vector&lt;pair&lt;int, int&gt; &gt; deg_seq;
+    for(int i = max_degree; i &gt;= 1; --i){
+        deg_cnt[i] = (int)bucket[i].size();
+        while(!bucket[i].empty()){
+            deg_seq.emplace_back(i, bucket[i].top()), bucket[i].pop();
         }
-        ver = bucket[pos].top(), num = pos;
-        bucket[pos].pop();
-        for(cur = pos; cur &gt;= 1; cur--){
-            while(num &gt; 0 &amp;&amp; !bucket[cur].empty()){
-                int tmp = bucket[cur].top();
-                bucket[cur].pop();
-                graph[ver].push_back(tmp), graph[tmp].push_back(ver);
-                memo.push({cur-1, tmp});
-                num--;
+    }
+    while(!deg_seq.empty()){
+        int pos = 0, rem = deg_seq.back().first, cur_degree;
+        const int ver = deg_seq.back().second;
+        --deg_cnt[rem], deg_seq.pop_back();
+        stack&lt;int&gt; update;
+        while(rem &gt; 0){
+            if(pos &gt;= (int)deg_seq.size()) return false;
+            cur_degree = deg_seq[pos].first;
+            const int start = max(pos, pos + deg_cnt[cur_degree] - rem);
+            for(int i = start; i &lt; pos + deg_cnt[cur_degree]; ++i){
+                graph[ver].push_back(deg_seq[i].second), graph[deg_seq[i].second].push_back(ver);
+                --deg_seq[i].first, update.push(cur_degree);
             }
-            if(num == 0) break;
+            pos += deg_cnt[cur_degree], rem -= deg_cnt[cur_degree];
         }
-        if(cur == 0) return false;
-        while(!memo.empty()){
-            pair&lt;int, int&gt; p = memo.front();
-            memo.pop();
-            if(p.first &gt;= 1) bucket[p.first].push(p.second);
+        while(!update.empty()){
+            --deg_cnt[update.top()], ++deg_cnt[update.top() - 1], update.pop();
         }
+        while(!deg_seq.empty() &amp;&amp; deg_seq.back().first == 0) deg_seq.pop_back();
     }
     return true;
 }
