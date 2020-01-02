@@ -67,14 +67,14 @@ $\newcommand{\O}{\mathrm{O}}$
 </p>
 <p>
 (コンストラクタ)<br>
-CHT(_lpos, _rpos) : 扱う $x$ 座標の範囲を $[\_ lpos, \_ rpos)$ とする <br>
+CHT$(lpos, rpos)$ : 扱う $x$ 座標の範囲を $[lpos, rpos)$ とする <br>
 (関数)<br>
 add_line$(a, b)$ : 直線 $y=ax+b$ を追加する <br>
 add_line$(a, b, c, d)$ : 線分 $y=ax+b\ (x \in [c, d))$ を追加する <br>
 query$(k)$ : $x=k$ での最小値を返す
 </p>
 <p>
-時間計算量: add_line, query $\O (\log (\_ rpos - \_ lpos))$, add_segment $\O (\log^2 (\_ rpos - \_ lpos))$
+時間計算量: add_line, query $\O (\log (rpos - lpos))$, add_segment $\O (\log^2 (rpos - lpos))$
 </p>
 <h3>コード</h3>
 <div class="codebox">
