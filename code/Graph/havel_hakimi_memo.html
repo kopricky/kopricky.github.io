@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-131511873-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-131511873-1');
+</script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
+
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<link rel="shortcut icon" type="image/x-icon" href="../../favicon.ico">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>Havel-Hakimi</h2>
+<h3>個人的メモ</h3>
+<p>
+次数列を降順に $D = \{ d_1, \ldots ,d_n \}$ のように並べたときに $(d_1, d_2), \ldots ,(d_1, d_{d_1+1})$ の辺を張り, 残りの次数列 $d_2-1,\ldots,d_{d_1+1}-1,d_{d_1+2},\ldots,d_n$ を降順に並べたもの($D'$ とする)に再帰的に同様の操作を繰り返す. <br>
+次数列に対応する単純グラフが存在することを graphical であると言うことにする. このとき $D$ が graphical なら $D'$ も graphical となることを背理法で示す.
+実際にこれが示せたとする. するともし上記の手法で再帰的に頂点を削除していく途中で $(d_1, d_2), \ldots ,(d_1, d_{d_1+1})$ のように辺を張れなくなったとき,
+つまり $D'$ が graphical でないと分かったときにその対偶を繰り返し適用することで元の次数列を満たす単純グラフが存在しないことが分かる.
+逆にもし上記の手法で再帰的に頂点を削除していくことができたとする.
+次数列が $D'$ となる単純グラフに $(d_1, d_2), \ldots ,(d_1, d_{d_1+1})$ の辺を張ってできるグラフは明らかに次数列 $D$ を満たす単純グラフとなっているため結局元の次数列を満たす単純グラフの構成ができたことになる.<br>
+ゆえに $D$ が graphical なら $D'$ も graphical となることが示せれば Havel Hakimi アルゴリズムはグラフの次数列が与えられたときにそれを満たす単純グラフが存在する場合にのみ, そしてそのような場合は常に正しい解を返すアルゴリズムとなる.<br>
+以下 <a href="http://www.maths.unp.ac.za/coursework/Math236/2012/Lecture%20Slides/Math236%20Lecture%2031.pdf">こちらの資料</a> を基にその証明を記す.<br>
+$G (V(G) = {v_1,\ldots,v_n})$ を $\mathrm{deg}(v_i) = d_i, d_1 \ge d_2, \dots, \ge d_n (1 \le i \le n)$ である単純グラフのうち $v_1$ と隣接している頂点の次数の総和が最大となるようなものとする.
+このときこのようなグラフ $G$ において $v_1$ に隣接している頂点の次数の集合は必ず $\{ d_2,\ldots,d_{d_1+1} \}$ となることを示す.
+別の言葉で言い換えると次数列 $D$ を満たす単純グラフが存在するならば, 必ずそのようなグラフの中で次数最大の頂点 $v_1$ に隣接している頂点の次数の集合が $\{ d_2,\ldots,d_{d_1+1} \}$ となるようなものが存在することを示す.
+これが示せれば上記の手法によって再帰的に頂点を削っていくことで graphical 性が損われることはないことが分かる. <br>
+これが成り立たないとすると $d_j > d_k$ となるような異なる $2$ 頂点 $v_j, v_k$ で辺 $(v_1, v_k)$ は存在するが, 辺 $(v_1, v_j)$ は存在しないというようなものが取れる.
+また $d_j > d_k$ よりある頂点 $v_l$ で辺 $(v_j, v_l)$ は存在するが, 辺 $(v_j, v_k)$ は存在しないというようなものが取れる. <br>
+ここで辺 $(v_1, v_k)$, 辺 $(v_j, v_l)$ を辺 $(v_1, v_j)$, 辺 $(v_k, v_l)$ に付け替える操作を行っても次数は変化せず, また単純性も保たれる. このような操作を行うと, 頂点 $v_1$ に隣接している頂点の次数の総和が変更前よりも大きなグラフが得られることになり矛盾.
+よって示せた. <br>
+計算量は並び替えをバケットソートの要領で行ってやると, 線形時間で構築可能. <br>
+<br>
+(修正)<br>
+<a href="../Academic/random_graph_generator.html">ランダムグラフの生成</a> の際にグラフの次数列が与えられて, できることならそれに対応する単純"連結"グラフを構成したいというモチベーションがあり,
+<a href="http://szhorvat.net/pelican/hh-connected-graphs.html#connected">こちらの資料</a>を参考にグラフの次数列が与えられたときにそれに対応する単純グラフの中でも連結なものが存在するならば常にそのようなものを出力するアルゴリズムに変更した.<br>
+具体的な方法は, 上記の説明では最大次数の頂点から辺を張っていたが, 非ゼロ最小次数の頂点 $v$(次数を $d$ とする) に注目しそれ以外の頂点について次数の大きい上位 $d$ 個の頂点と $v$ の間に辺を張るということをする.<br>
+単純グラフの構成可能性に重要な部分はどの頂点から辺を張るかということではなく, ある頂点(次数を $d$ とする) に注目したときにそれ以外の頂点で次数の大きい上位 $d$ 個の頂点との間に 1 つずつ辺を張ることだということは上記の証明から分かる.
+つまり最大次数の頂点である必要は特になく, この変更によって単純グラフを構成するという意味でのアルゴリズムの正当性は変わらない.<br>
+次に連結なグラフが存在する場合に必ず連結なグラフを返すかということを考える.<br>
+まず graphical な次数列 $D = \{ d_1, \ldots ,d_n \}$(便宜上降順に並んでいるとする) に対して,
+単純連結なグラフが存在するかどうかの必要十分条件は $d_i \ge 1 (1 \le i \le n)$ かつ $\sum_{1 \le i \le n} d_i \ge 2 (n - 1)$ であることが分かる.
+必要性は明らかだし, 十分性は条件を満たした上で連結でない単純グラフがあったとすると必ず橋でないような辺を持つ連結成分が存在するのでその辺
+$(a, b)$ と異なる連結成分に属するある辺 $(c, d)$ について swap 操作($(a, b)$, $(c, d)$ $\Rightarrow$ $(a, c)$, $(b, d)$) を繰り返し行えば連結にすることが可能であることから分かる.<br>
+次数列 $D = \{ d_1, \ldots ,d_n \}$ を満たす単純連結グラフが存在するとする.
+$D'$ を次数列 $\{ d_1 - 1, \ldots, d_{d_n} - 1, d_{d_n+1}, \ldots ,d_{n-1} \}$ から次数 $0$ の要素を除いた次数列とする.
+このとき $D'$ を満たす単純連結グラフが存在しないと仮定すると矛盾が生じることが上記の必要十分条件に注目すると簡単に分かる.<br>
+また $(d_1, d_n), \dots, (d_{n-1}, d_n)$ と辺を張る操作はもちろん単純かつ連結の性質を損なわないので上記の手法で, 存在するならば必ず連結なグラフを返すことが分かる.
+厳密には $d_1 = d_n = 1$ となる場合に問題が生じそうであるが, 次数列 $D$ を満たす連結グラフが存在するという条件から $\{1, 1\}$ の場合に限定されるため特に問題はない.<br>
+ちなみにより正確に, 与えられた次数列を満たす単純グラフの中での最小連結成分数が $C$ であるとき, アルゴリズムは連結成分数が $C$ となる単純グラフを返す.
+</p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>

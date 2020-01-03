@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-131511873-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-131511873-1');
+</script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
+
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<link rel="shortcut icon" type="image/x-icon" href="../../favicon.ico">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>Morrison Pratt</h2>
+<h3>個人的メモ</h3>
+<p>
+アルゴリズム自体は単純だがその正当性はまったく自明ではない. 何となく以下で証明を考えてみる(遠回りになっているかもしれない). $res[i] = j$ として $res[i+1]$ がどうなるか考える. <br>
+(i) $S[j] = S[i+1]$ のとき <br>
+$res[i+1]$ は明らかに $j+1$ 以上である. 結論を言うと $res[i+1] = j+1$ となる. 例えば $res[i+1] = j+k+1 (k > 0)$ と仮定すると, 図などを書くと分かるが $S[0:j](=S[i-j+1:i+1])$ は周期が $K$ の約数である文字列になることが分かる.
+また $S[0:j]$ の長さはちょうどその周期の整数倍になっていることも分かる. これは長さ $n$ の文字列 $T$ について 「$T$ が周期が $K$ の約数の文字列」 と 「$T[0:n-K] = T[K:n]$」 の同値性などからも分かる. よって $S[j] = S[i-j]$ が言え, $i > j$ の場合 $res[i] = j$ に矛盾する. よって $res[i+1] = j+1$ となる. また $i = j$ の場合は定義より $res[i+1] \le i+1$ なのでやはり $res[i+1] = j+1$ となる. <br>
+(ii) $S[j] \neq S[i+1]$ のとき <br>
+$res[i+1] = j+k+1 (k>0)$ とするとすぐに $S[j] = S[i+1]$ が導かれ矛盾. よって $res[i+1] < j+1$ となる($S[j] \neq S[i+1]$ なので $res[i+1] = j+1$ とはならない). <br>
+ここで $res[i+1] = k$ とすると $k$ は $[0:j]$ の範囲内にある. 今 $res[i+1] = k$, $res[i] = j$ から $S[0:k-2] = S[j-k+1:j-1]$ が成り立つので, $k-1 \le res[j-1]$ となる. <br>
+(a) ここで $S[res[j-1]] = S[i+1]$ のとき <br>
+$S[0:res[j-1]] = S[i-res[j-1]+1:i+1]$ より $k \ge res[j-1]+1$. ゆえに $k = res[j-1]+1$ <br>
+(b) $S[res[j-1]] \neq S[i+1]$ のとき <br>
+$k-1 \neq res[j-1]$ より $k-1 < res[j-1]$. ここで $S[0:res[j-1]-1] = S[j-res[j-1]:j-1]$ より $S[0:k-2] = S[res[j-1]-k+1:res[j-1]-1]$ が成り立つので $k-1 \le res[res[j-1]-1]$ となる.<br>
+結局 $S[0:i]$ に $S[i+1]$ が加わったとき $res[i+1]$ を求めるために $S[i+1]$ と等しい文字を見つけるまで有向辺 $(j, res[j-1])$ を辿っていく操作と見ることができる. (ちなみにこの辿る操作は次に述べるようにならし $\O (n)$ であるがこの操作について最悪 $\O (\log n)$ ステップの計算量を実現したのが <a href="kmp.html">Knuth Morrison Pratt 法</a> である).<br>
+以降 $res[res[res[j-1]-1]-1]...$ のように (a) の場合に入るまで再帰的に続くが, この再帰は $j-1 \rightarrow res[j-1]-1(< j-2) \rightarrow res[res[j-1]-1]-1(< res[j-1]-1)$ のように狭義単調減少しているため, いつか止まる. そして(止まったときの値) +1 が求めたい $k$ の値となる. <br>
+アルゴリズムでは while ループを回るごとに $j$ は strict に小さくなるが, $j$ の増加分は全体でちょうど $n-1$ 回なので結局これは線形時間で終了する. <br>
+ちなみに先に述べた 「$T$ が周期が $K$ の約数の文字列」 と 「$T[0:n-K] = T[K:n]$」 の同値性から $S[0:i]$ の最小周期長は $i+1-res[i]$ で求めることができる. <br>
+$j-1 \rightarrow res[j-1]-1(< j-2) \rightarrow res[res[j-1]-1]-1 \ldots$ と辿る操作には無駄があり例えば, $S[i+2] == S[j]$ の場合 $i+1 \rightarrow j-1 \rightarrow res[j-1]-1(< j-2) \rightarrow res[res[j-1]-1]-1 \ldots$ の遷移はまったく同じ遷移となる. よってこの場合遷移先の配列を $next$ として $next[i+1] = next[j-1]$ とすることで以降の遷移を省略することができる.
+これにより MP 法では遷移に最悪 $\O (n)$ 回かかる場合があったが, 最悪でも $\O (\log n)$ 回に抑えることができる(これは<a href="./kmp.html">KMP 法</a>と呼ばれ, 文字列検索に用いられている）.
+</p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>

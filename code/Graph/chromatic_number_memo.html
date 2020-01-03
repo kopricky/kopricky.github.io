@@ -57,40 +57,18 @@ $\newcommand{\O}{\mathrm{O}}$
 <div id="contents">
 
 <section>
-<h2>Morrison Pratt</h2>
-<h3>コードについての説明(<a href="./mp_memo.html">個人的メモ</a>)</h3>
+<h2>Chromatic Number Algorithm</h2>
+<h3>個人的メモ</h3>
 <p>
-文字列 $S$ が与えられたときに $0 \le i < n$ について $S[0:i]$ の接頭辞と接尾辞が最大何文字一致しているかを表す配列 $res[i]$ を線形時間で構築するアルゴリズム(ただし $res[i] \le i$ とする).
+(スライドの説明) <br>
+分かりやすく, "グラフ $G = (V, E)$ が $k$ 彩色可能 ⇔ $V$ を $k$ 個の独立集合で被覆可能" と言い換える. ここで各独立集合は disjoint とは限らないと定義しておく(こう定義しても同値性は変わらない). <br>
+このとき頂点集合 $S (\subseteq V)$ について $f_k(S)$ を S に含まれる独立集合を $k$ 個選ぶ場合の数、 $g_k(S)$ を $k$ 個の独立集合を選んでその和集合が $S$ となるような場合の数とする. <br>
+包除原理から次の式が成り立つ. <img src="./texclip20190716094432.png" height="80" width="240"> <br>
+直接成り立つと考えてもいいし、 <img src="./texclip20190716094429.png" height="50" width="150"> は明らかに成り立つのでその逆変換(Mobius 変換) と考えても良い. <br>
+$I(S)$ を $S$ に含まれる独立集合の個数とすると, $f_k(S) = I(S)^k$ であり, $I(S)$ は $I(S) = I(S \setminus \{ v \} ) + I(S \setminus adj[v])$ の漸化式を用いて $\O (n 2^n)$ 時間で求めることができる.
+漸化式は $v$ を含まない独立集合 と $v$ を含む独立集合を分けて数え上げている(注 $adj[v]$ は $v$ および $v$ に隣接する頂点集合とする). <br>
+最終的には $g_k(V)$ が非ゼロとなるような最小の $k$ が彩色数となる. 実装を行う際はオーバーフローを避けるため大きい素数 $p$ を用いた $\mathbb{Z}_p$ 上で計算を行う.
 </p>
-<p>
-時間計算量: $\O (|S|)$
-</p>
-<h3>コード</h3>
-<div class="codebox">
-<input type="checkbox" id="label" class="csscode" />
-<label for="label"></label>
-<pre class="prettyprint linenums">
-void MP(const string&amp; S, vector&lt;int&gt;&amp; res){
-    int n = (int)S.size(), j = 0;
-    res.resize(n, 0);
-    for(int i = 0; i &lt; n-1; i++){
-        while(S[i+1] != S[j] &amp;&amp; --j &gt;= 0) j = res[j];
-        res[i+1] = ++j;
-    }
-    // KMP 法
-    // vi next(n, 0);
-    // for(int i = 0; i &lt; n-1; i++){
-    //     while(S[i+1] != S[j] &amp;&amp; --j &gt;= 0) j = next[j];
-    //     res[i+1] = ++j;
-    //     if(S[i+2] == S[j]) next[i+1] = (j &gt; 0) ? next[j-1] : 0;
-    //     else next[i+1] = j;
-    // }
-}
-</pre>
-</div>
-<h3>verify 用の問題</h3>
-<p>Atcoder : <a href="https://atcoder.jp/contests/iroha2019-day2/tasks/iroha2019_day2_h">根室の巫女</a>
-  <a href="https://atcoder.jp/contests/iroha2019-day2/submissions/5391899">提出コード</a></p>
 </section>
 
 </div>

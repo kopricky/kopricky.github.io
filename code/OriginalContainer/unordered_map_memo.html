@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-131511873-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-131511873-1');
+</script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
+
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<link rel="shortcut icon" type="image/x-icon" href="../../favicon.ico">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>Unordered Map</h2>
+<h3>個人的メモ</h3>
+<p>
+robin hood hashing のアルゴリズムはとても単純でこの <a href="http://web.stanford.edu/class/archive/cs/cs166/cs166.1166/lectures/13/Small13.pdf">Lecture pdf</a> の説明が分かりやすかった(他にも
+<a href="https://www.sebastiansylvan.com/post/robin-hood-hashing-should-be-your-default-hash-table-implementation/">(参考 3)</a>, <a href="https://www.sebastiansylvan.com/post/more-on-robin-hood-hashing-2/">(参考 4)</a> を参照した).
+データの挿入時すでにバケットが埋まっていた場合, 愚直に空いているバケットを探索する linear probing と異なり, 今挿入しようとしているデータとすでにバケットに存在するデータとを比べて今挿入しようとしているデータのほうが本来のバケット位置との距離が大きかったら swap する, そうでなければそのまま探索を続ける.
+という操作を空いているバケットが見つかるまで繰り返す. イメージで言うと富の再分配的な感じで本来のバケット位置に近いデータが遠いデータにバケットを譲ってあげるというトリックが用いられている.
+こうすることで linear probing と各データの本来のバケット位置からの距離, つまり探索距離の総和は変化しないもののその分散が小さくなっている.
+robin hood hashing はキャッシュに乗りやすいのが高速になる $1$ つの要因で, 同じ資料に Cuckoo Hashing が紹介されていて理論計算量は良いものの, 明らかに $2$ つのテーブル間の移動においてキャシュミスが起きていてあまり速くならなさそうな気はする(ただ計算量解析はおもしろかった). <br>
+robin hood hashing の期待計算量はハッシュ関数が真にランダムの場合, $\O( \log \log n)$ となりより詳しい計算量解析(concentration など) については <a href="http://luc.devroye.org/robinhood.pdf">この論文</a> が参考になりそう(まだ読んでいない &amp; 読む時間がない). <br>
+また delete の際に<a href="http://codecapsule.com/2013/11/17/robin-hood-hashing-backward-shift-deletion/">このページ</a>にあるような backward shift を行うと実測が速くなるようなので採用させていただいた.
+具体的には要素を削除した際に, その後に続くバケットを見てバケットが空もしくは本来のバケット位置にいるデータを見つけるまでの要素をすべて後ろに $1$ つシフトするということをする. <br>
+(細かい実装の話) <br>
+キャッシュミスを防ぐために違和感はあるが dist や hash を data ではなく bucket に紐付けるようにしている. <br>
+コード内の delete(メモリ解放) をコメントアウトすると速くなる場合も多いが, unordered_map の場合終了時だけでなく rehash 時にもデストラクタを呼び出すので, delete しないと 2 倍近く空間計算量が大きくなるのでそのまま残している.
+高速版の方はキャッシュに乗りやすいようなデータの持ち方をした結果イテレーターが普通の std::unordered_map などと異なりイテレーターの参照(*it)の型が pair&lt;const _Key&amp;, _Tp&amp;&gt; になっている. 普通は pair&lt;const _Key, _Tp&gt;&amp;.
+あとイテレーターの pointer は使えないようにしているので高速版の場合は常に *it の形で用いる. for_each 文も使えない. <br>
+alignment 等を気にした結果 dist が short int だったり aligned_storage を用いたりなどしてあがいている.
+本実装では頻繁に new が呼ばれるので, 領域確保にかかる時間を短縮するために通常の new ではなくあらかじめ領域確保をした配置 new を用いて実装している.
+あとバケットのサイズは $2$ べきにしています. $2$ べきだと % ではなく & でバケットの位置を計算できて高速になるので.<br>
+関数 maximum_distance() は現在のハッシュテーブルにおいて find の際の linear probing にかかる時間の最大値を求めていて, 速度がなぜか遅くなるみたいな場合はこれを用いることでハッシュの衝突がその原因になっているかどうかを確かめることができる.
+先述のように真にランダムなハッシュ関数を用いた場合期待値 $\O (\log \log n)$ でまたばらつきも小さくなるので maximum_distance() はちゃんとしたハッシュ関数を用いていればとても小さくなる. <br>
+</p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>
