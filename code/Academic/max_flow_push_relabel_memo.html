@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-131511873-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-131511873-1');
+</script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
+
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<link rel="shortcut icon" type="image/x-icon" href="../../favicon.ico">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>Push Relabel</h2>
+<h3>個人的メモ</h3>
+<p>
+プリフロー $f$ が $s$, $t$ 間の最大フローであるとは (1) ($v$ から出る量) = ($v$ に入る量) ($\forall v \in V \setminus \{ s, t \}$), (2) 残余ネットワークに augment path(増加道) が存在しない の $2$ つが成り立つことが必要十分条件である. <br>
+Edmonds-Karp, Dinic などは (1) の条件(フローの条件) を常に満たしながら (2) の条件を成立させようとしていたのに対し, Push Relabel は (2) の条件を常に満たしながら (1) の条件を成立させようとするアルゴリズムになっている. <br>
+よく言われるイメージは各頂点に (in flow - out flow) の量の水がタンクに入っており, また各頂点に高さが割り振られている(初期値は始点が $n$, それ以外は $0$).
+このとき $s$, $t$ 以外の頂点についてタンクに水が入っている(活性点と呼ぶ) ならそれを自分より高さの低い隣り合う頂点に $\min$(水の量, 辺の容量) だけ流すという操作(Push 操作)を最終的に (1) の条件を満たすまで続ける. <br>
+もし自分より高さの低い隣り合う頂点がない場合は自分の高さを $\min$(隣り合う頂点の高さ) $+ 1$ に更新する操作(Relabel 操作) を行う. ここで頂点 $u$ の高さを $h(u)$ としたとき,
+残余ネットワーク上の辺 $e = (u, v)$ について $h(u) - h(v) \le 1$ が成り立つことに注意する. ここで $h(u) - h(v) < 1$ の場合は $f(e) = e.cap$ が成り立ち, $h(u) - h(v) = 1$ の場合のみ $0 < f(e) \le e.cap$ となりうる. これは相補性条件に対応する. <br>
+これはかなり大事なポイントで結局残余ネットワークが valid であるための必要十分条件は "すべての頂点について (in flow - out flow) $\ge 0$ であること" および "すべての残余ネットワーク上の辺 $e = (u, v)$ について
+$h(u) - h(v) \le 1$ かつ $h(u) - h(v) < 1 \Rightarrow f(e) = e.cap$ が成り立つこと" となる.
+Push Relabel はアルゴリズムの途中でフローの量や辺の容量などが変化するような状況でもラベルの単調性と上記の validity を保つように更新すれば全体でかかる計算量をよく見積もることができる(以下に示す excess scaling 版の Push Relabel, Parametric Flow, Local Flow(ラベルの高さに threshold を設けた PushRelabel) などがメジャーなものとしてある).<br>
+話がそれたが, ここで残余ネットワーク上で $s$ から $t$ にもしたどり着けるなら、パスに沿って不等式をあてはめると $h(s) - h(t) \le n-1$ が成り立つはずだが $h(s) = n$, $h(t) = 0$ より $s$ から $t$ には常にたどり着けないことが分かる. つまり (2) の条件は常に満たされる. よって (1) が満たされたとき, max flow が得られる.<br>
+残りはこの操作が $\O (n^2 m^{1/2})$ の計算量で終了することであるが参考書や資料等に詳しく載っていると思う.
+愚直にやると $\O (n^2 m)$ かかり, push 操作の順番を常に活性点の中から高さの $１$ 番高いものから始めるということをすると計算量が $\O( n^2 m^{1/2})$ に落ちる(これが非自明).
+証明は不飽和プッシュ(nonsaturating push) の回数を bound するのが本質で自分の読んだ証明ではポテンシャル関数 $\Phi = \sum_{{\text 活性点} v \in V} \left| \{ w \in V \mid h(w) \le h(v) \} \right|$ を用いて導いていた. <br>
+<strike>以下の実装では h(u) - h(v) = 1 かつ cap > 0 の辺を常に管理しているが</strike>(⇒ 追記(実装変更した)), 毎回 push 操作時に流せる辺を探索してもちゃんとやると計算量 $\O (n^2 m^{1/2})$ が保証できる(⇒ 補足).<br>
+元論文は "A New Approach to the Maximum-Flow Problem" [Goldberg and Tarjan 1988] で動的木を用いて計算量の改善が可能(元論文では活性点の中から高さの $１$ 番高いものから始めるという手法ではなく活性点を queue で管理して FIFO で更新を行っているので計算量は $\O (n^3)$ となっている). <br>
+<br>
+(補足) <br>
+各頂点 $v$ について今見ている辺の index をちゃんと持っておいて、 もし途中で saturating push を行って終了してまたそのあともう一度活性点となった場合は続きの index から始めるとすると良い. $v$ の隣接リストを $1$ 周したら必ず Relabel 操作が呼ばれ,
+この Relabel 操作は各頂点で高々 $\O (n)$ 回なので探索の for 文をなめる回数は全体で $\O (nm)$ 回になる.<br>
+<br>
+(追記 1) <br>
+"On Implementing Push-Relabel Method For The Maximum Flow Problem" [Cherkassky, Goldberg 1994] をもとに実装を変更した. 上記の gap_relabel(ある高さの頂点がなくなったらそれ以上の高さの頂点は sink $t$ に辿れないので以降 inactive にする) および global_relabel(ときどき全部を再ラベリング) を行った実装にしたことで高速になり,
+多くのケースでは <a href="../NetworkFlow/dinic.html">Dinic</a> より速くなった.<br>
+(追記 2) <br>
+sink $t$ 以外の各頂点の超過量が $\Delta$ 未満である残余グラフ $G$ が与えられたときにそれを $t$ 以外の各頂点の超過量が $\Delta / 2$ 未満のグラフに更新する操作を行う関数を Update$(G, \Delta)$ とする.
+Update$(G, \Delta)$ は超過量が $\Delta / 2$ 以上である頂点のうち最も高さの低い頂点から順に超過量が $\Delta / 2$ 未満となるように超過分を解消していく.
+流した先の頂点の超過量は $t$ 以外なら常に $\Delta$ 未満になるようにしてポテンシャル評価が壊れないようにする.
+最も高いものから順に超過分を解消しようとすると $t$ 以外の頂点については超過量を常に $\Delta$ 未満にするという条件の影響で push を上手くやればもっと流せるのに流せなくなるという事象が発生する可能性がありアルゴリズムが正当でなくなってしまうのでダメ.<br>
+こうすることで Update$(G, \Delta)$ にかかる計算量は $\O \left( n^2 \right)$ であることがポテンシャル関数 $\Phi$ として $\sum_{i \in V} p_i e_i / \Delta$ ($e(\cdot )$ は超過量とする) を用いて示すことができる. よって全体の計算量は上記のようになる.
+ちなみにこのように超過量 $e_i$ が bound されているときはラベル値 $p_i$ と超過量 $e_i$ の積の和をポテンシャル関数として設定することでプッシュの回数をよく評価することができるようになり, 例えば local flow algorithm[SODA '17] の計算量解析にも用いられている.<br>
+(注) Update$(G, \Delta)$ が終了し, Update$(G, \Delta / 2)$ に移る際に必要な操作は超過量が $\Delta / 2$ 以上の頂点を新たに活性点とすることだけ(計算量 $\O (n)$)で各頂点について今見ている辺の位置(cur_edge)
+を変更する必要はないことに注意する. なぜなら結局ラベル自体は変化しておらず, また残余ネットワークが $\Delta$ の変化によって invalid となることはないからである. よって多重辺を許した場合にも確かに上記の計算量になる.<br>
+<br>
+(個人的復習) <br>
+ラベルは高々 $2 n -1$ 以下, 飽和プッシュの回数は $\O (nm)$ なので <br>
+$\O (n^2 m)$ time であること $\Rightarrow$ ポテンシャル $\Phi = \sum_{{\text 活性点} v \in V} h(v)$ と取ると総増加回数が $\O( n^2 m)$ より不飽和プッシュの回数が $\O(n^2 m)$ <br>
+($m = \O(n^2)$ の場合に) FIFO 更新が $\O (n^3)$ time であること $\Rightarrow$ FIFO における各サイクル(フェーズ)のうち relabel を含むものは明らかに $\O (n^2)$ 個で relabel を含まないものの数が $\O( n^2 )$ になればよくて,
+ポテンシャルを $\max_{{\text 活性点} v \in V} h(v)$ と取ると毎回そのようなフェーズの終了時には少なくとも $1$ 減少している(or 活性点がなくなって終了する)から OK.
+<br>
+</p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>

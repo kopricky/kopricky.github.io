@@ -57,69 +57,17 @@ $\newcommand{\O}{\mathrm{O}}$
 <div id="contents">
 
 <section>
-<h2>Gale Sharpley</h2>
-<h3>コードについての説明(<a href="gale_sharpley_memo.html">個人的メモ</a>)</h3>
+<h2>van Emde Boas Tree</h2>
+<h3>個人的メモ</h3>
 <p>
-$2$ 種類のグループ(男女など)の間での安定マッチングを求めるアルゴリズム. このような問題を安定結婚問題とも言う. <br>
-男女それぞれが相手のグループのメンバーに対しての優先順位を持っているとする. ここである男 $i$, 女 $j$ について $i$ が $j$ よりも優先順位の低いメンバーとマッチングしていて, $j$ も $i$ より優先順の低いメンバーとマッチングしているとき、このようなペアを blocking pair とする. <br>
-このような blocking pair の存在しないマッチングを安定マッチングと呼ぶ. このようなマッチングは常に存在することが GaleSharpley のアルゴリズムから構成的に分かる. <br>
-元論文は "College Admissions and the Stability of Marriage" [Gale Sharpley 1962]
-</p>
-<p>
-(関数)<br>
-solve$(mpref, wpref)$ : 優先度の高い順に相手の ID を格納した行列を $2$ つ渡す(男性が申し込む場合の実装である). <br>
-</p>
-<p>
-時間計算量: $\O (n^2)$
-</p>
-<h3>コード</h3>
-<div class="codebox">
-<input type="checkbox" id="label" class="csscode" />
-<label for="label"></label>
-<pre class="prettyprint linenums">
-class GaleSharpley
-{
-public:
-    GaleSharpley(){}
-    vector&lt;int&gt; solve(const vector&lt;vector&lt;int&gt; &gt;&amp; mpref, const vector&lt;vector&lt;int&gt; &gt;&amp; wpref)
-    {
-        int n = mpref.size();
-        vector&lt;vector&lt;int&gt; &gt; worder(n, vector&lt;int&gt;(n));
-        stack&lt;int&gt; single;
-        for(int i = 0; i &lt; n; ++i){
-            single.push(i);
-            for(int j = 0; j &lt; n; ++j){
-                worder[i][wpref[i][j]] = j;
-            }
-        }
-        vector&lt;int&gt; id_pos(n, 0);
-        vector&lt;int&gt; wtom(n, -1);
-        while(!single.empty()){
-            int man = single.top();
-            single.pop();
-            while(true){
-                int woman = mpref[man][id_pos[man]++];
-                if(wtom[woman] &lt; 0){
-                    wtom[woman] = man;
-                    break;
-                }else if(worder[woman][wtom[woman]] &gt; worder[woman][man]){
-                    single.push(wtom[woman]);
-                    wtom[woman] = man;
-                    break;
-                }
-            }
-        }
-        vector&lt;int&gt; mtow(n);
-        for(int i = 0; i &lt; n; ++i)
-            mtow[wtom[i]] = i;
-        return mtow;
-    }
-};
-</pre>
-</div>
-<h3>verify 用の問題</h3>
-<p>
-verify していません(verify 問題を知らない)
+y fast trie と比べて実装が楽かつ最悪計算量を保証している点が優れている. おそらく実測もこちらのほうが速いが, 空間計算量が要素数ではなく, 値域分だけ必要である点が劣っている. <br>
+実装は再帰的に書けるので比較的容易だが, 愚直に実装すると時間的にもメモリ的にも効率が悪くなってしまう.<br>
+$1$ 層目は $2^{24}$ 個のブロックに分割し, 各ブロックは uint64_t で管理して長さ $2^{24}$ の summary を次の層でまたブロック分割する. メモリ削減のため $1$ 層目の各ブロックは
+$\max, \min$ の変数を持たないようにしている. <br>
+$2$ 層目は $2^{12}$ 個のブロックに分割し, 各ブロック, summary ともに長さ $2^{12}$ となりそれをまた次の層でブロック分割する. <br>
+$3$ 層目は $2^6$ 個のブロックに分割し, 各ブロック, summary ともに長さ $2^6$ となりこれらを uint64_t で管理している.
+こちらも uint64_t で表されるデータブロックについてはメモリを削減するために $\max, \min$ は保持していない.<br>
+$2$ べきにすることで各層で除算, 乗算を行わずにビット演算で済ませることができ, またある程度要素が増えてくるとクエリの処理が $1$ 層目で終了することも多くなり, そういった場合はとても高速に動作する.
 </p>
 </section>
 

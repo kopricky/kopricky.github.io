@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-131511873-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-131511873-1');
+</script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
+
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<link rel="shortcut icon" type="image/x-icon" href="../../favicon.ico">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>Dijkstra with Radix Heap</h2>
+<h3>個人的メモ</h3>
+<p>
+Radix Heap は push を $\O (1)$, pop を ならし $\log (n \cdot MAX \_ VAL)$ ($MAX \_ VAL$ は辺コストの最大値)
+で実現し定数倍も軽いが, push の際に最後に pop した値より小さな値を入れることができないという制限がある.
+この制限は Dijkstra 法のアルゴリズムとコンフリクトしないので Dijkstra 法の高速化に用いることができる.<br>
+<br>
+(Radix Heap(簡単版) の説明) <br>
+radix heap から最後に pop した値を $last$ とする. このときヒープ内の各要素 $x$ は vec[($x \oplus last$ の最上位ビットの位置) $+ 1$] に格納されている(ただし $0$ の最上位ビットの位置は $-1$ とする).
+push($x$) は要素 $x$ を vec[($x \oplus last$ の最上位ビット) $+ 1$] に入れるだけなので最上位ビットを求めるのにかかる計算を
+$\O (1)$ と考えると $\O (1)$ でできる(愚直に上のビットからチェックしていって $x \oplus last$ のビットが初めて 1 となるところという風に求めても全体の計算量のオーダーは変わらない). 以下 pop の説明をする.<br>
+まず最後に pop した値より大きな値を push できないという制約からヒープ内のすべての数は $last$ 以上である.
+これより ($x \oplus last$ の最上位ビット) はビットを大きい方から見ていき $last$ が $0$ で, $x$ が $1$ であるような最も左のビットと言える.
+つまり vec[$i$] 内のすべての要素は vec[$i+1$] 内のどの要素よりも小さいということが言える.
+よって pop する際は v[$0$], v[$1$],... と順番に見ていき非空の vector vec[$i$] が見つかったらその中の最小値を pop するとしてよい. <br>
+このとき vec[$i$] 内の最小値を見つけるために要素をすべて見る必要があることや pop 後に last が変わるので構造を変化させなければいけないことが問題に見えるが, この操作にかかる計算量は以下で説明するようにならし $\O (n \cdot MAX \_ VAL)$ になる. <br>
+実は pop して $last$ が変わった後に "ヒープ内の各要素 $x$ は vec[($x \oplus last$ の最上位ビット) + 1] に格納されている" という条件を保つためにするべきことは最初の非空の vector である vec[$i$] 内の各要素を新しい
+$last$ について考えた vec[($x \oplus last$ の最上位ビット) $+ 1$] に再格納するだけで十分である.
+なぜなら vec[$0$],...vec[$i-1$] には要素がないし, vec[$i+1$] 以降の要素については $last$ が変わっても ($x \oplus last$ の最上位ビット) の最上位ビットが変化しないからである. <br>
+さらに再格納先は vec[$i$] 内の各要素 $x$ について "($x \oplus$ (元の $last$) の最上位ビット) > ($x \oplus$ (新しい $last$) の最上位ビット)" が成り立つことから $i$ より小さくなる.
+ゆえに各要素について再格納される回数および最小値を見つける際に参照される回数は全体で高々 $\O (\log (n \cdot MAX \_ VAL))$ 回であることが言える. <br>
+<br>
+(補足 1) <br>
+実は元論文ではより良い計算量のアルゴリズムを紹介している. <br>
+コスト更新の際に新たに要素を push するのではなく decrease_key で移動させることで $\O (m + n \log(n \cdot MAX \_ VAL))$ で行える.
+また Dijkstra 法の性質よりヒープ内のすべての要素は $last$ 以上 $last + MAX \_ VAL$ 以下であることからヒープで保持すべき値の範囲は $MAX \_ VAL$ である.
+pop の際に各バケットの管理する要素の範囲を適切に更新することで $\O (m + n \log(MAX \_ VAL))$ を達成することができる. <br>
+さらに "各バケットの管理する値の範囲" と "各要素が異なるバケットに再格納される回数" のトレードオフを考えて, いい感じに各バケットの管理する範囲を設定し, 加えて
+非空のバケットを効率よく見つけるために Fibonacci heap (の改良版)を用いることで $\O (m + n \sqrt{\log (MAX \_ VAL)})$ まで計算量が落ちる(とかいうことがその後に書いているがちゃんと読んでいない). <br>
+<br>
+(補足 2) <br>
+"Integer priority queues with decrease key in constant time and the single source shortest paths problem" [Thorup 2004] でキー値が整数の場合に
+delete を $\O (\log \log n)$ で達成する優先度付きキューが発表されたため非負整数重みの有向グラフに対して Dijkstra 法は $\O (m + n \log \log n)$
+の計算量で動作するように実装できる(非負整数重みの "無向" グラフの場合は同じく Thorup の論文で線形時間で解けることが知られている[Thorup 1997].) <br>
+この論文, 結果自体は非常にすごいのだがかなり力技というところがあって結局読んでいない.
+ちなみにこのヒープを <a href="./make_heap_meldable.html">ヒープを併合可能ヒープにする手法</a> を用いて meldable heap にして最小全域有向木の Chu-Liu-Edmonds のアルゴリズムに用いることで
+計算量を $\O (m \log \log n)$ に落とすことができる.
+</p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>

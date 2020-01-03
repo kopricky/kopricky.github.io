@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-131511873-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-131511873-1');
+</script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
+
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<link rel="shortcut icon" type="image/x-icon" href="../../favicon.ico">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>Parallel Quick Sort</h2>
+<h3>個人的メモ</h3>
+<p>
+クイックソートはピボットの値以上の要素、 未満の要素と分割したときにそれぞれの部分問題は独立しているためそれらを並列に計算するという効率的なアルゴリズムをまず考えることができる. $1$ つ目の実装としてこちらを載せている.
+ある程度の THRESHOLD でそれ以下になった場合は分割せず通常の std::sort を用いてソートをすることにしている.<br>
+これでもある程度高速になるのだが、 std::partition を愚直に行っている部分が配列が大きくなったときにボトルネックになってしまう. 加えて, (ピボット以上の要素) と (ピボット未満の要素) の要素数に差が生じた場合に一方のスレッドの実行をもう一方が待つ時間が長くなってしまうというようなことも起こりうる. <br>
+partion アルゴリズムを parallel に行うのは考えてみると結構難しいことが分かり、 実際に研究されていることも調べてわかった(<a href="https://www.cs.upc.edu/~lfrias/research/parpar/wea08.pdf">参考スライド</a>, <a href="https://www.cs.upc.edu/~lfrias/research/parpar/parpar.pdf">その論文</a>). <br>
+詳しくは論文を見てもらえるとわかりやすいが, 論文で言うところの F & A algorithm を実装しており, 論文の主手法は実装していないことに注意(後に述べる). 配列を多数のブロックに分割し、 各スレッドは分割されたブロックを左端と右端から順に外から内に向かって (左, 右) のペアで取っていく(各スレッドには static ではなく dynamic にプロックを割り当てる). そして各スレッドで取ったブロック内の要素を外から内に見ていき,
+左のブロックで pivot 以上のもの, 右のプロックで pivot 未満のものに到達したらそれらを swap するという操作を繰り返す. そして右もしくは左のブロックの終点に達したら新たに次の右および左のブロックをそのスレッドに割り当てる. 以上を繰り返すと最終的に高々 m(スレッドの数) 個のブロックが正しく配置されていない状況となるので, それを
+std::partition を用いて並び替える(Cleanup 操作). <br>
+論文ではこの Cleanup 操作における比較回数をより小さくするような手法を提案している. ただ比較回数は少なくなるものの少なくとも数列のソートでは単純な F & A アルゴリズムでも十分な速度が出ていることが論文内の実験から分かる(比較の演算の計算コストが重い場合などは論文の手法の方が良いように見える). 実際に論文のアルゴリズムが C++17 の parallel_quick_sort の実装に使われているようだ.
+著者のホームページにその実装が上がっている(<a href="https://www.cs.upc.edu/~lfrias/publications.html">参考</a>). また F & A algorithm については<a href="https://blogs.msdn.microsoft.com/dhuba/2012/03/04/parallel-partition-phase-for-quick-sort/">こちらのブログ</a>も参考になった. <br>
+以下の実装では(ピボット以上の要素) と (ピボット未満の要素) の要素数に差が生じるような場合が気になったので std::future で待つのではなく task を queue に突っ込む実装にしている.<br>
+</p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>

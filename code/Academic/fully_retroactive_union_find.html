@@ -58,21 +58,13 @@ $\newcommand{\O}{\mathrm{O}}$
 
 <section>
 <h2>Fully Retroactive Union Find</h2>
-<h3>コードについての説明</h3>
+<h3>コードについての説明(<a href="fully_retroactive_union_find_memo.html">個人的メモ</a>)</h3>
 <p>
 fully retroactive union find の実装である. fully retroactive とは過去のすべてのバージョンについて参照および更新ができるデータ構造である.
 完全永続のように聞こえるが, 完全永続は過去のバージョンを更新した際にその更新を行わなかった世界と更新を行う世界を同時に保持するが,
 fully retroactive の方は更新を行った場合の $1$ つの世界のみを保持するという違いがある.
 完全永続において更新は枝の分岐で表されるのに対して, fully retroactive において更新は過去の時刻での枝の挿入で表されれ, 常にバージョンは $1$ 本のパスをなす. <br>
-ちなみに partial retroactive は過去のすべてのバージョンの更新及び現在のバージョンの参照ができるデータ構造のことを言う. <br>
-<a href="https://courses.csail.mit.edu/6.851/fall17/scribe/lec2.pdf">Demaine 先生の資料</a> に fully retroactive union find は $\O (\log m)$ ($m$ は更新の回数)
-でできると書いてあり, 考えてみると Link Cut Tree を用いるとならし $\O (\log n)$ でできることが分かった
-(資料自体には priority_queue の partial retroactive の説明が分かりやすく書いてある). <br>
-結局 fully retroactive union find は unite 関数では頂点どうしを link でつなぎ,
-same 関数では "頂点どうしが現在のバージョンにおいて同じ連結成分に入っているか",
-"もしそうなら頂点間のパス上の辺の時刻の最大値が $\_ time$ 以下であるか" を見ることで時刻 $\_ time$ の直後において $2$ つの頂点が同じ連結成分に入っているかどうかを判定することが可能. <br>
-注意として unite 関数で頂点どうしをつなぐときにすでに $2$ つの頂点が同じ連結成分に属する場合はそのパス上の辺の時刻の最大値をみて $\_ time$ より大きければその辺を cut して付け替える. <br>
-実装を容易にするために頂点だけでなく辺もノードとして保持している.
+ちなみに partial retroactive は過去のすべてのバージョンの更新及び現在のバージョンの参照ができるデータ構造のことを言う.
 </p>
 <p>
 (関数)<br>

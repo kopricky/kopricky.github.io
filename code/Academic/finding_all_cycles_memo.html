@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-131511873-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-131511873-1');
+</script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
+
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<link rel="shortcut icon" type="image/x-icon" href="../../favicon.ico">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>Finding All Cycles</h2>
+<h3>個人的メモ</h3>
+<p>
+まず強連結成分分解を行い, 各強連結成分に分けて探索を行う. 次に各強連結成分で, ある 1 点 $s$ を含む単純サイクルをすべて列挙する.
+列挙し終わったらその頂点を削除してまたある 1 点を含む単純サイクルをすべて列挙するということを繰り返す(強連結成分分解は最初の 1 回しか行わない).<br>
+始点 $s$ から DFS を行い, 現在いる頂点までのパス $P$ 上の頂点 $v$ は blocked[$v$] = true にして, 2 度たどらないようにする.
+そして現在いる頂点 $u$ からまた再帰的に DFS の操作を続行し, パス $P$ を含む単純サイクルをすべて列挙する.
+最後に $u$ から呼び出された再帰が終了すると blocked[$u$] = false にして, return する(パス $P$ を含む単純サイクルの列挙操作を終了する)のが普通だがこれだと効率が悪くなる. <br>
+そこでこのアルゴリズムではパス $P$ を含む単純サイクルがなかった場合にのみ blocked[$u$] を true のままにして return する.
+これはもしパス $P$ を含む単純サイクルがなかった場合パス $P - u$ を含む単純サイクルに $u$ が含まれることはないことが鍵になっている.
+つまり $P - u$ を含む単純サイクルを列挙する際に $u$ はたどる必要がないので blocked[$u$] を true にしたままにする. こうすることで効率の良い探索が可能になる(オーダーの意味での改善が可能になる). <br>
+言い換えると block されている頂点というのは現在いる頂点までのパス $P$ を含む単純サイクルにこれ以降必ず含まれることのない頂点となっている.
+ただ効率を良くしたことで例えば $P$ を含む単純サイクルが存在し, return する前に blocked[$u$] = false にする場合, これだけでは不十分になる.
+$u$ が unblock されたことに伴い unblock にするべき頂点が存在するからである.
+言い換えると $P$ を含む単純サイクルを探索する際にはたどる必要がないが, $P - u$ を含む単純サイクルを探索する際にはたどる(考慮する)必要のある頂点というものが存在する.
+これは block_stack[$u$] = ($u$ を unblock した場合に unblock にすべき頂点集合) を記録しておくことで行うことができる. この unblock の操作は再帰的に起こることに注意する. <br>
+厳密に証明しようとすると少しややこしいが, 以上の操作で数え上げられるサイクルは単純サイクルで各単純サイクルはちょうど 1 回ずつ数え上げられることがわかる.
+また計算量は新たに単純サイクルが見つかるまでに各頂点は高々 1 度しか unblock されないことから $\O ((V + E) (c + 1))$ time となる. <br>
+</p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>

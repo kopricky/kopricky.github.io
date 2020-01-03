@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-131511873-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-131511873-1');
+</script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
+
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<link rel="shortcut icon" type="image/x-icon" href="../../favicon.ico">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>$\O(m \log \log n)$-time MST</h2>
+<h3>個人的メモ</h3>
+<p>
+(補足 1) <br>
+他にも Yao 先生の $\O (m \log \log n)$ time アルゴリズムもある. <br>
+というのも, もしグラフの各辺がコストについてソートされていたなら Boruvka 法は $\O (n \log n + m)$ 時間で解ける.
+各頂点についてそれに隣接する最小コストの辺はその頂点に縮約された全頂点についてそれに隣接する最小コストの辺を見れば良い.
+もちろん縮約によって自己ループとなってしまう辺についてはできたタイミングで削除しておくという状況のもとでの話でかつ適宜操作をリストの結合やリストからの削除として実現し
+$1$ 回あたり $\O (1)$ の計算量で行う. <br>
+ここで完全なソート列ではなく次のような部分的なソート列を考える. 各頂点に隣接する辺を $k$ 個のグループ $g_1$, $g_2$, $\ldots$, $g_k$ に分け,
+このとき $g_i$ 内の任意の辺のコストは $g_{i+1}$ 内のどの辺のコストよりも大きくならないとする.
+このような分割は median of medians を用いた最悪 $\O (n)$ の k-th element アルゴリズムを用いるなどして最悪 $\O (n \log k)$ 時間でできる. <br>
+上記の $2$ つの事実を組み合わせて最初に各頂点について部分的にソートしておくとそのあとの Boruvka 法で各頂点に隣接する最小コストの辺を探索するのにかかる時間はその頂点に縮約された全頂点についてそれに隣接する辺の最小のグループのみを見ればよいので
+$\O (m / k)$. よって最小全域木を $\O (m + (m / k) \log n + n \log n)$ 時間で求めることができる. <br>
+最初に $\lceil \log \log n \rceil$ 回通常の Boruvka 法を行い, 頂点数を $n / \log n$ に落としたうえで上記の修正した Boruvka 法を動かすことで
+$\O (m \log \log n)$ 時間で最小全域木を求めることが可能になる. <br>
+この内容については CMU の Advanced Algoirthms の授業の Homework を実際に解いてみると分かる. (<a href="http://www.cs.cmu.edu/~15850/hws/h1.pdf">参考</a>) <br>
+<br>
+(補足 2) <br>
+これより速いアルゴリズムとして Fredman-Tarjan の $\O (m \log^* n)$ アルゴリズムがある. "Fibonacci Heaps and Their Uses in Improved Network
+Optimization Algorithms" [Fredman, Tarjan 1987]<br>
+Prim 法は Fibonacci Heap を用いることで $\O (n \log n + m)$ 時間で行えるがこれを改良する.
+Fibonacci Heap は要素の削除にヒープのサイズを $U$ としたとき $\O (\log U)$ のならしコストがかかってしまう.
+Prim 法の場合 Fibonacci Heap に入っている要素の数は今保持している木に隣接している頂点の数に等しい.
+そこで保持している木に隣接する頂点の数があるしきい値を超えたら一旦そこで探索を終了してまだたどっていない新しい頂点から新たに木を構築していくみたいなことをする.
+そして全頂点がたどられたあと今まで構築してきた森を縮約し, サイズの小さくなったグラフの最小全域木をまた同様の操作を繰り返すことで求める.
+このとき森を構築し, 縮約した後のグラフについて最小全域木を求めるみたいな手順で全体の最小全域木が得られることの正当性は Boruvka 法と同様にして示すことができる.
+各回でしきい値を適切に設定することで $\O (m \log^* n)$ を達成できる. <br>
+ちなみに現在の最速の最小全域木アルゴリズムの計算量は
+$\O (m \alpha (m, n))$ で Boruvka ベースの構成 + soft heap(キー値を恣意的に変更することで情報量を落としたヒープ的なもの)
+で何かをするということしか知らない. "A Minimum Spanning Tree Algorithm with Inverse-Ackermann Type Complexity" [Chazelle 2000]
+<br>
+決定的アルゴリズムとは別に期待線形時間乱択アルゴリズム(Las Vegas) も存在する "A randomized linear-time algorithm to find minimum spanning trees" [Karger, Klein, Tarjan 1995]
+</p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>

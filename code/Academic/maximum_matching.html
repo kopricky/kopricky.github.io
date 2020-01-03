@@ -58,47 +58,13 @@ $\newcommand{\O}{\mathrm{O}}$
 
 <section>
 <h2>Maximum Unweighted Matching Algorithm</h2>
-<h3>コードについての説明</h3>
+<h3>コードについての説明(<a href="maximum_matching_memo.html">個人的メモ</a>)</h3>
 <p>
-一般グラフの重みなし最大マッチングを求める乱択アルゴリズム. 最大マッチングを求めるアルゴリズムとしては Edmonds の花分解アルゴリズムが有名であるが, 同時に $\O (n^3)$ の乱択アルゴリズムも知られており, 以下はその実装となっている(<a href="http://theory.stanford.edu/~virgi/cs367/oldlecs/lecture9.pdf">参考1</a>, <a href="http://theory.stanford.edu/~virgi/cs367/oldlecs/lecture10.pdf">参考2</a> を参照しました). 実測はそんなに良くないが numeric に解けるので個人的に好き.<br>
-グラフ $G$ が完全マッチングを持つことと $G$ の Tutte 行列の行列式が恒等的に非ゼロであることの同値性を用いる. $\det$ 計算における置換に注目すると奇閉路(奇数位数の軌道)の存在する項は逆向きの項と打ち消し合って消え, 偶閉路のみからなる項のみ残りうる. もし偶閉路のみからなる非ゼロの項が残った場合はグラフ $G$ 上で対応する完マを取ることができるので "Tutte 行列の行列式が非ゼロ $\rightarrow$ $G$ は完マを持つ" が成り立つ.<br>
-また逆にグラフ $G$ に完マが存在するならそれに対応して Tutte 行列の行列式に偶閉路のみからなる非ゼロ項が存在し, その項は他の項と打ち消し合って消えることはない. よって "$G$ は完マを持つ $\rightarrow$ Tutte 行列の行列式が非ゼロ" も成り立つ. <br>
-よって $n$ 次の多変数多項式($\det T$) が恒等的に $0$ であることが判定できれば良いのだが deterministic に行おうとすると効率的に解けないため各変数に乱数を代入し, その結果が $0$ に等しいかどうかで判定する($\mathbb{Z}_p$ 上で行う). <br>
-Shwartz-Zippel Lemma より $\det T$ が恒等的に $0$ でないのに上記の計算結果が $0$ になってしまう(完全マッチングを持つのに持たないと判定する)確率は $\O (n / p)$ となり, 例えば $n = 10^2$, $p = 10^9 + 7$ のときは $1$ 度の試行で十分である(不安なら $LOOP$ の値を大きくする). <br>
-(注) $G$ の最大マッチングの数は $\mathrm{rank} (T) / 2$ に等しい($\mathrm{rank}$ が $r$ の交代行列は $r \times r$ の正則な主小行列を持つことから言える $\Rightarrow$ 補足 1). <br>
-<br>
-(構築の話) <br>
-構築だがグラフが完全マッチングを持つという条件を保ったまま縮小していくことをする. ただし $G$ が完全マッチングを持たない場合は Gaussian elimination を用いて Tutte 行列の中に含まれる $\mathrm{rank} (T) \times \mathrm{rank} (T)$ の正則な主小行列を事前に求めておく.
-愚直に全辺についてそれを除いたグラフが完全マッチングを持つかどうかを調べていくと $\O (n^5)$ かかる. <br>
-行列 $T$ から $\{ u_1, \ldots, u_k \} \subseteq [n]$ に含まれる添字の行および $\{ v_1, \ldots, v_l \} \subseteq [n]$ に含まれる添字の列を削除したものを $T_{ \langle u_1 \ldots, u_k \rangle , \langle v_1 \ldots, v_l \rangle }$ と書くことにする. $\det T$ を $1$ 行目で余因子展開したものを
-$\det (T) = \sum_{j=1}^n (-1)^{i+j} T_{1, j} \det (T_{\langle 1 \rangle, \langle j \rangle})$ と表せ, $\det T \neq 0$ なら $T_{1,j} \neq 0$(辺 $(1, j)$ が存在する) で $\det (T_{ \langle 1 \rangle ,\langle j \rangle }) \neq 0$ となるものが存在する. <br>
-また $\det (T_{\langle 1 \rangle ,\langle j\rangle }) \neq 0 \Rightarrow \det (T_{ \langle 1,j \rangle ,\langle 1,j \rangle }) \neq 0$ より辺 $(1, j)$ を取り除いた後のグラフは完全マッチングを持つ($\Rightarrow$ 補足 2). <br>
-あとは $\det (T_{ \langle 1 \rangle ,\langle j \rangle }) \neq 0$ となるような $j$ をどうやって見つけてくるかだが $(T^{-1})_{i, j} = (-1)^{i+j} \cdot \frac{\det \left( {T_{\langle i \rangle, \langle j \rangle}} \right)}{\det \left( T \right) }$ より, $\det (T_ { \langle 1 \rangle ,\langle j \rangle }) \neq 0 \Leftrightarrow \left( T^{-1} \right) _{1,j} \neq 0$ が得られるので $T$ の逆行列を計算することで $j$ を求めることができる. <br>
-これを再帰的に繰り返すことで $\O (n^4)$ で構築することが可能になった(正確には $\O (n^{ω+1})$ time). <br>
-ここで逆行列計算を毎回する必要はなく $T^{-1}$ をブロック行列と見てその Schur 補行列が $\left( T_ { \langle i,j \rangle ,\langle i,j \rangle } \right) ^ {-1}$ と一致するので辺を取り除いた後の Tutte 行列の逆行列は $T^{-1}$ が求まっていると $\O (n^2)$ 時間で構築することができる.
-つまり全体で $\O (n^3)$ time で計算可能. ちなみにもっと頑張ると $\O (n^ω)$ まで落ちるらしい<br>
-<br>
-以下では交代行列の性質を用いて導かれる本文中の自明でない結果 (補足 1), (補足 2) について証明を雑に記す. <br>
-証明は (補足 1) の方は随分前に何かの資料で見て知ったのだが、出典を覚えていない. (補足 2) の方は参考資料に基づく. <br>
-(補足 1) <br>
-$\mathrm{rank}$ が $r$ の交代行列 $A \in \mathbb{R}^{n \times n}$ が $r \times r$ の正則な主小行列を持つことを示す.
-$A$ の固有多項式を考える. すると $\det (xI - A) = \underset{\sigma}{\sum} \mathrm{sign} (\sigma) (xI - A)_{i, \sigma(i)} = \sum_{0 \le k \le n} \underset{X \subseteq [n], |X| = n - k}{\sum} \det (A_{X, X}) x^k$ が言える.
-$2$ つ目の等式は $k = | \{ i \mid \sigma(i) = i \} |$ について足し合わせる &amp; $A$ の対角成分は交代行列なので $0$ である ことに注意すると成り立つことが分かる. <br>
-交代行列は正規行列であることから対角化可能であり, 固有値の幾何的重複度と代数的重複度が一致するため, 今 $r = \mathrm{rank} A$ から固有多項式の最小の非ゼロ係数項の指数は $n - r$ となる.
-つまり $\exists X \subseteq [n], |X| = r$ について $\det (A_{X, X}) \neq 0$ が成り立つ.
-<br>
-(補足 2) <br>
-$\det (T_{\langle 1 \rangle ,\langle j\rangle }) \neq 0 \Rightarrow \det (T_{ \langle 1,j \rangle ,\langle 1,j \rangle }) \neq 0$ を示す. <br>
-初めに以下に証明に用いる交代行列に関するフロベニウスの定理を記す. <br>
-$A \in \mathbb{R}^{n \times n}$ を交代行列とし, $\alpha, \beta \subseteq [n]$ を $|\alpha| = |\beta| = \mathrm{rank}(A)$ を満たすインデックスの集合とする.
-このとき $\det (A_{\alpha, \alpha}) \det (A_{\beta, \beta}) = (-1)^{|\alpha|} \det (A_{\alpha, \beta})^2$ が成り立つ. <br>
-これを用いて定理を示す. <br>
-まず $j = 2$ として一般性を失わない.
-$n$ が奇数のとき交代行列の行列式は $0$ となるので $T_{\langle 1 \rangle, \langle 1 \rangle } = 0$ であるが, 仮定より $T_{\langle 1 \rangle, \langle 2 \rangle } \neq 0$ なので
-$T_{\langle 1 \rangle, \langle 1, 2 \rangle }$ は列フルランクである. よって $\mathrm{rank} \left( T_{\langle 1 \rangle, \langle 1 \rangle } \right)$ は $n-2$ となる. さらに $\beta = \{ 3, \cdots, n \}$ としたとき, $\exists \alpha \subseteq \{ 2, \cdots, n \}, |\alpha | = n - 2$
-で $A_{\alpha, \beta}$ が正則となるようなものが存在することも分かる.
-最後にフロベニウスの定理より, $\det (A_{\alpha, \beta}) \neq 0 \Rightarrow \det (A_{\beta, \beta}) \neq 0$ が導けるので確かに $\det \left( T_{\langle 1, 2 \rangle, \langle 1, 2 \rangle } \right) \neq 0$ が言える.<br>
-(追記) (補足 2) については後輩が bimatroid の基の交換定理を用いたきれいな証明法を考えてくれました(感動).
+一般グラフの重みなし最大マッチングを求める乱択アルゴリズム(構築有).
+最大マッチングを求めるアルゴリズムとしては Edmonds の花分解アルゴリズムが有名であるが,
+同時に $\O (n^3)$ の乱択アルゴリズムも知られており,
+以下はその実装となっている(<a href="http://theory.stanford.edu/~virgi/cs367/oldlecs/lecture9.pdf">参考1</a>, <a href="http://theory.stanford.edu/~virgi/cs367/oldlecs/lecture10.pdf">参考2</a> を参照しました).
+実測はそんなに良くないが numeric に解けるので個人的に好き.
 </p>
 <p>
 (関数)<br>

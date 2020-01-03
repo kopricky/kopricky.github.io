@@ -58,11 +58,10 @@ $\newcommand{\O}{\mathrm{O}}$
 
 <section>
 <h2>Dijkstra with Fibonacci Heap</h2>
-<h3>コードについての説明</h3>
+<h3>コードについての説明(<a href="./dijkstra_fheap_memo.html">個人的メモ</a>)</h3>
 <p>
-Dijkstra 法を <a href="./fibonacci_heap.html">Fibonacci Heap</a> を用いて高速化したアルゴリズム. 時間計算量が $\O ((n + m) \log n)$ から $\O (n \log n + m)$ に落ちる. <br>
-すでにフィボナッチヒープ内にある頂点についての最短距離の更新はキー値減算を用いることで $1$ 回あたりならし $\O (1)$ で行えるため, 新たに要素を insert する必要はない.
-結果 insert および delete は $n$ 回となるので計算量は $\O (n \log n + m)$ となる. <br>
+Dijkstra 法を <a href="./fibonacci_heap.html">Fibonacci Heap</a> を用いて高速化したアルゴリズム.
+時間計算量が $\O ((n + m) \log n)$ から $\O (n \log n + m)$ に落ちる. <br>
 元論文は "Fibonacci Heaps and Their Uses in Improved Network
 Optimization Algorithms" [Fredman, Tarjan 1984]
 </p>

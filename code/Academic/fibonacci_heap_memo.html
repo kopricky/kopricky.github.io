@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-131511873-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-131511873-1');
+</script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
+
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<link rel="shortcut icon" type="image/x-icon" href="../../favicon.ico">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>Fibonacci Heap</h2>
+<h3>個人的メモ</h3>
+<p>
+具体的には binomial heap(二項ヒープ) の改良版で binomial heap では push, union 時に厳密に二項ヒープの条件 "次数 $k$ の二項木は次数 $0 \sim k-1$ の二項木を子として持つ", "同じ次数の二項木は高々 $1$ つ" という条件を常に満たしていたため,
+各クエリの最悪計算量が $\O (\log n)$ であったが, fibonacci heap では厳密に条件を満たしたヒープの構築を delete_min クエリに遅延処理をすることで delete_min のみならし $\O (\log n)$ 時間で push, union, decrease key などをならし $\O (1)$ 時間で行うことができる. <br>
+push, delete_min クエリのみの場合は単に push クエリ時の処理が delete_min 時に遅延処理されるだけなので delete_min 操作の終了時には二項ヒープになるが,
+decrease_key クエリによってヒープ木内の任意の頂点についてその頂点を根とする部分木が脱離する可能性がでてくるため二項ヒープの条件は崩れる.
+ここでむやみやたらに部分木の脱離を許すのではなく, 根を除く頂点について子が脱離する回数を高々 $1$ 回と制限すると木の根の次数が頂点数の $\log$ で抑えることができる.
+このときに根の次数が $k$ となるような木でありうる最小の頂点数が $k$ についてフィボナッチ数列(二項ヒープの場合は $2$ べき)を成し, これが名前の由来だと思う. <br>
+(上記の参考スライドの補足) <br>
+ポテンシャルを $tree(H) + 2 \times marks(H)$ と取っているイメージは木の根の頂点については後にマージされる際にかかる計算量の分の $1$,
+マークされている頂点については後に部分木として離脱し, 新たに木の根になるのにかかる計算量の分に $1$, そして木の根になった後に同じくマージされる際にかかる計算量の分に $1$ の合計 $2$ がかかっていると見ることができる. <br>
+一般的なならし計算量の解析と同様にならしコストは (実際にかかるコスト) + (ポテンシャルの差分) で計算され, ポテンシャルが増えることは後の計算のために貯金すること, 減ることは貯金していた分を使うことに対応している. <br>
+<br>
+(fibonacci heap 以降のヒープの(雑な)話) <br>
+fibonacci heap における push, delete_min, decrease_key にかかる各ならし計算量を最悪計算量で実現するヒープとして relaxed heap がある([Driscoll, Gabow, Sharairman, Tarjan 1988]).
+このヒープはその名の通りヒープの条件を緩めたもので子の要素は親の要素より小さくないという条件を満たさないノードを $\log n$ 個くらい許すことにして更新をする. ただ find_min には $\O (\log n)$ 時間がかかるのと merge もならし $\O (\log n)$ かかる.
+一応 [Brodal 1996] で削除以外の操作がすべて最悪定数時間, 削除は最悪 $\O (\log n)$ 時間を達成する comparison based のヒープが紹介されていて漸近的に最適である(ただかなりややこしそう).
+<!-- 一応 Hollow heap(Hansen, Kaplan, Tarjan, Zwick 2015) も同じことができる. こちらは仕組みは簡単だけど計算量の解析が難解なヒープ. -->
+<br>
+他にもヒープ操作にかかる計算量の情報理論的下界を下回る計算量を実現したものとして soft heap がある([chazelle 2000]).
+こちらはヒープ内の key の値を途中で変化させることで保持する要素の情報量を落としさらなる高速化を測るもので, 厳密にはヒープではないし, もっというと relaxed heap と違い insert や delete_min クエリを正しく処理することはできない.
+ただ key の値をある程度恣意的に変化させて良いという条件の下で delete, findmin などのクエリを $\O (1)$ で処理でき, さらに insert された要素の個数を $n$ としたときパラメーター $\epsilon$ について, insert にかかる計算量が $\O (\log (1 / \epsilon) )$, かつヒープ内の変更された key の値は高々 $\epsilon n$ 個のようにパラメタライズされる. <br>
+ここで comparison based model において sort にかかる時間計算量は決定木を用いた証明から $\Omega(n \log n)$ であることを思い出すと, $n$ 回のヒープ操作にかかる計算量は $\Omega (n \log n)$ である.
+つまり soft heap はヒープの操作にかかる計算量の情報理論的下界を下回る計算量を達成していることが分かる(繰り返しになるが soft heap は厳密にはヒープではないし, insert や delete_min クエリを正しく処理することはできない.). <br>
+この soft heap は種々のアルゴリズムに応用されていて例えば最小全域木を最悪計算量 $\O(m \alpha(m, n))$ で求めるアルゴリズムなどに使われている(fibonacci heap では prim 法を用いて $\O (n \log n + m)$ time とか $\O (m \log^* n)$ time とかが限界だった).
+論文を読んでいないのでどういう風に用いるかは知らない...(一応 <a href="https://en.wikipedia.org/wiki/Soft_heap">wikipedia の記事</a> の Application には soft heap を selection algorithm に応用する例が載っている.)
+</p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>
