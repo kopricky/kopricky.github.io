@@ -260,7 +260,7 @@ private:
         }
         // delete edge1; delete edge2;
     }
-    bool IsConnected(BSTNode *ver1, BSTNode *ver2) noexcept {
+    bool connected(BSTNode *ver1, BSTNode *ver2) noexcept {
         splay(ver1), splay(ver2);
         return ver1-&gt;par;
     }
@@ -293,9 +293,9 @@ public:
         edge_set.erase(it);
         cut(edge1, edge2);
     }
-    bool IsConnected(const int node1_id, const int node2_id) noexcept {
+    bool connected(const int node1_id, const int node2_id) noexcept {
         if(node1_id == node2_id) return true;
-        return IsConnected(vertex_set[node1_id], vertex_set[node2_id]);
+        return connected(vertex_set[node1_id], vertex_set[node2_id]);
     }
     int component_size(int node_id) noexcept { return component_size(vertex_set[node_id]); }
     void check_dfs(const BSTNode* cur) const noexcept {
@@ -324,7 +324,7 @@ private:
             for(auto it = cur-&gt;adjacent.begin(); it != cur-&gt;adjacent.end();){
                 pair&lt;int, int&gt; e = {min(cur-&gt;from, *it), max(cur-&gt;from, *it)};
                 BSTNode *correspond = et[layer].vertex_set[*it];
-                if(et[layer].IsConnected(another, *it)){
+                if(et[layer].connected(another, *it)){
                     flag = true, rep_edge = e;
                     cur-&gt;adjacent.erase(it), correspond-&gt;adjacent.erase(cur-&gt;from);
                     if(!correspond-&gt;subofftree_check()){
@@ -391,7 +391,7 @@ public:
     bool link(int node1_id, int node2_id) noexcept {
         if(node1_id &gt; node2_id) swap(node1_id, node2_id);
         detect_layer[{node1_id, node2_id}] = 0;
-        if(et[0].IsConnected(node1_id, node2_id)){
+        if(et[0].connected(node1_id, node2_id)){
             BSTNode *ver1 = et[0].vertex_set[node1_id], *ver2 = et[0].vertex_set[node2_id];
             splay(ver1)-&gt;subofftree_edge = true, ver1-&gt;adjacent.insert(node2_id);
             splay(ver2)-&gt;subofftree_edge = true, ver2-&gt;adjacent.insert(node1_id);
@@ -423,8 +423,8 @@ public:
             return false;
         }
     }
-    bool IsConnected(const int node1_id, const int node2_id) noexcept {
-        return et[0].IsConnected(node1_id, node2_id);
+    bool connected(const int node1_id, const int node2_id) noexcept {
+        return et[0].connected(node1_id, node2_id);
     }
 };
 </pre>
@@ -1104,7 +1104,7 @@ private:
         }
         // delete edge1; delete edge2;
     }
-    bool IsConnected(BSTNode *ver1, BSTNode *ver2) noexcept {
+    bool connected(BSTNode *ver1, BSTNode *ver2) noexcept {
         splay(ver1), splay(ver2);
         return ver1-&gt;par;
     }
@@ -1137,9 +1137,9 @@ public:
         edge_set.simple_erase(it);
         cut(edge1, edge2);
     }
-    bool IsConnected(const int node1_id, const int node2_id) noexcept {
+    bool connected(const int node1_id, const int node2_id) noexcept {
         if(node1_id == node2_id) return true;
-        return IsConnected(vertex_set[node1_id], vertex_set[node2_id]);
+        return connected(vertex_set[node1_id], vertex_set[node2_id]);
     }
     int component_size(int node_id) noexcept { return component_size(vertex_set[node_id]); }
     void check_dfs(const BSTNode* cur) const noexcept {
@@ -1169,7 +1169,7 @@ private:
             for(auto it = cur-&gt;adjacent.begin(); it != cur-&gt;adjacent.end();){
                 pair&lt;int, int&gt; e = {min(cur-&gt;from, *it), max(cur-&gt;from, *it)};
                 BSTNode *correspond = et[layer].vertex_set[*it];
-                if(et[layer].IsConnected(another, *it)){
+                if(et[layer].connected(another, *it)){
                     flag = true, rep_edge = e;
                     cur-&gt;adjacent.simple_erase(it), correspond-&gt;adjacent.simple_erase(cur-&gt;from);
                     if(!correspond-&gt;subofftree_check()){
@@ -1237,7 +1237,7 @@ public:
     bool link(int node1_id, int node2_id) noexcept {
         if(node1_id &gt; node2_id) swap(node1_id, node2_id);
         detect_layer[EulerTourTree::pair_to_ll(node1_id, node2_id)] = 0;
-        if(et[0].IsConnected(node1_id, node2_id)){
+        if(et[0].connected(node1_id, node2_id)){
             BSTNode *ver1 = et[0].vertex_set[node1_id], *ver2 = et[0].vertex_set[node2_id];
             splay(ver1)-&gt;subofftree_edge = true, ver1-&gt;adjacent.insert(node2_id);
             splay(ver2)-&gt;subofftree_edge = true, ver2-&gt;adjacent.insert(node1_id);
@@ -1269,8 +1269,8 @@ public:
             return false;
         }
     }
-    bool IsConnected(const int node1_id, const int node2_id) noexcept {
-        return et[0].IsConnected(node1_id, node2_id);
+    bool connected(const int node1_id, const int node2_id) noexcept {
+        return et[0].connected(node1_id, node2_id);
     }
 };
 </pre>
