@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-131511873-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-131511873-1');
+</script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
+
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<link rel="shortcut icon" type="image/x-icon" href="../../favicon.ico">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>link cut tree</h2>
+<h3>個人的メモ</h3>
+<p>
+(注1) link の実装はどちらの頂点も木の根でない場合に対応するために access ではなく evert にしている. 親子関係を意識しないような動的森の管理に適していて, またそのようなときに cut を行う場合は cut(u, v) を用いると良い. <br>
+(注2) 以下はパス上の加算・総和のクエリだが適宜他の演算に変更可. ただし演算が非可換である場合は少し気をつけて実装する必要がある. <br>
+(雑なメモ) <a href="./splay.pdf">Splay Tree について</a><br>
+(追記) <br>
+<a href="https://courses.csail.mit.edu/6.851/spring12/lectures/L19.html">この講義</a> およびその <a href="https://courses.csail.mit.edu/6.851/spring12/scribe/L19.pdf">Lecture note</a> を参考にしました. <br>
+結局 access$(v)$ がならし $\O (\log n)$ であることを示せば十分である. つまり splay 木を回転する回数が各 access$(v)$ でならし $\O (\log n)$ となることを示す. <br>
+まず splay 木がならし $\O (\log n)$ になる理由(Access Lemma) を用います. 具体的には "頂点 $u$ を根とする splay 木に含まれる頂点 $v$ に対して splay$(v)$ を行なったときのならしコストが
+$3( \mathrm{rank} (u) - \mathrm{rank} (v)) + 1$ で抑えられる" である. <br>
+link cut tree においてはこの $\mathrm{rank} (x)$ を次のように定める. $x$ の属する splay 木を $T(x)$, その splay 木内において $x$ を根とする部分木を $T'(x)$ とする.
+このとき $\mathrm{rank}(x) = \log ( |T'(x)| + $($y \in T'(x)$, $y$ の non-preferred child $z$ について $\mathrm{rank} (z)$ の和) ) とする.
+つまり $x$ を含む splay 木に限らず, $x$ 以下にあるすべての頂点の数の合計の $\log$ とする.
+そしてポテンシャルはもちろん $\sum_{x} r(x)$ である.<br>
+すると access$(v)$ で splay 操作にかかる総ならしコストは $3(\mathrm{rank}(root) - \mathrm{rank}(v)) + $(preferred child の変化する回数) で抑えられることがわかる.
+splay 操作をする回数は preferred child の変化する回数で抑えられることに注意する.
+また preferred child の変化に伴って, 頂点の $\mathrm{rank}$ が変化することがないことも確認する.<br>
+全 $m(\ge n)$ 回の access$(v)$ の操作について $3(\mathrm{rank}(root) - \mathrm{rank}(v))$ の和は $0 \le \mathrm{rank}(v) \le \log n$ より $\O (m \log n)$ となり,
+この部分はならし $\O (\log n)$ である.
+よって後は (preferred child の変化する回数), つまり (non-preferred である辺が preferred になる回数) がならし $\O (\log n)$ であることを示せばよい. <br>
+ここで元の木について edge を heavy edge, light edge の $2$ 種類に分類する.
+$e = (u, v)$ が heavy とは $u$ が $v$ の親であるとした場合 ($u$ を根とする部分木のサイズ) $\le 2 \times$($v$ を根とする部分木のサイズ) となるもののことをいうとする.
+結果的に今 edge は heavy / light, preferred / non-preferred の $2 \times 2 = 4$ 種類あることになり, また heavy, light については常に変化しないことに注意する. <br>
+$1$ 回の access$(v)$ で light かつ non-preferred な辺が preferred になる回数は根からのパス上に light edge は高々 $\lceil \log n \rceil$ 個以下しかないことから $\lceil \log n\rceil$ 個で抑えられるので,
+heavy かつ non-preferred な辺が preferred になる回数を考える.
+そこで $1$ 回の access$(v)$ で heavy かつ preferred な辺が preferred から non-preferred になる回数を考えると,
+これは同じタイミングで light edge が non-preferred から preferred になるので $\lceil \log n\rceil$ 回で抑えられる.
+ゆえに (heavy かつ non-preferred な辺が preferred になる回数) $\le$ (初めの段階で heavy かつ non-preferred な辺の個数) + (heavy かつ preferred な辺が preferred から non-preferred になる回数) であることを考えると
+全 $m(\ge n)$ 回の access$(v)$ の操作で (heavy かつ non-preferred な辺が preferred になる回数) は $\O (m \log n)$ 回となり, $1$ 回の access$(v)$ ではならし $\O (\log n)$ 回であることが分かる. ゆえにすべて示せた. <br>
+<br>
+結論: link cut tree はマジで天才.
+</p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>
