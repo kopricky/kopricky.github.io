@@ -121,7 +121,7 @@ cut$(a, b)$ : 辺$(a, b)$ を削除(連結成分が増えるかどうか(true / 
 connected$(a, b)$ : 頂点 $a$, $b$ が同じ連結成分内に属するかどうかを判定する(true / false)
 </p>
 <p>
-時間計算量: link, cut ならし $\O (\log^2 n)$, connected $\O (\log n)$
+時間計算量: link, cut ならし $\O (\log^2 n)$, connected $\O (\log n)$ (厳密に以下の実装では "ならし" $\O (\log n)$)
 </p>
 <h3>コード</h3>
 <div class="codebox">
