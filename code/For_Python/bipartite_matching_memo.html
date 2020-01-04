@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-131511873-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-131511873-1');
+</script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
+
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<link rel="shortcut icon" type="image/x-icon" href="../../favicon.ico">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>Bipartite Matching Algorithm</h2>
+<h3>個人的メモ</h3>
+<p>
+以下<a href="https://www.imsc.res.in/~meena/matching/hopcroft-karp.pdf">こちら</a>の説明を参考に計算量を説明する(元資料は Dinic ではなく Hopcroft-Karp アルゴリズムの説明である). <br>
+まず重要な定理として 「現在得られているマッチングを $M$ とする. また最大マッチングのうちの $1$ つを $M^{\ast}$ とする. このとき残余ネットワークには(超頂点 $s, t$ を除いて)点素な増加道が $|M^{\ast}| - |M|$ 個含まれる.」 が成り立つことを示す. $G_M = M \Delta M^{\ast}$ ($M$ と $M^{\ast}$ の対称差) とする.
+$G_M$ は各点の次数が高々 $2$ 以下なので単純閉路, 単純パス, 孤立点の $3$ 要素からなる(それぞれの頂点集合は disjoint). ここで閉路, パスについては $M$ と $M^{\ast}$ に含まれる辺が交互に現れることに注意.
+閉路, 孤立点については $M, M^{\ast}$ の辺を同数含むもしくは全く含まないので結局 $M$ と $M^{\ast}$ が交互に現れる点素なパスで $M^{\ast}$ 内の辺から始まり, $M^{\ast}$ 内の辺で終了するものが少なくとも $|M^{\ast}| - |M|$ 個存在する. そして $s$ → (そのようなパス) → $t$ と進むパスは明らかに増加道となっているので示せた.<br>
+Dinic で一度幅優先探索をしてからもう一度幅優先探索をするまでをフェーズと呼ぶことにする. まず辺の容量がすべて $1$ であるため $s$ -> $t$ 増加道を見つけたらそのパス上の辺が全て invalid になる(正確には今後見なくてよい)ので $1$ 回のフェーズ は $\O (m)$ で終了する. <br>
+次にフェーズの総回数について説明する. $\sqrt{n}$ 回のフェーズを終えた時点での増加道の長さは $\sqrt{n}$ 以上である(これは 二部グラフのマッチングに限らず, 一般のグラフに Dinic アルゴリズムを適用させたときに満たす性質なのでここでは証明を省く). 現在のマッチング $M$ と任意の最大マッチング $M^{\ast}$ を考える.
+上に示した定理より, 残余グラフには $|M^{\ast}| - |M|$ 個の点素な増加道が含まれる.
+「点素な増加道の数 $\le$ 頂点数/増加道の長さ」 が成り立つことからこの点素な増加道の数は $\sqrt{n}$ で抑えられ、 結局のところ $|M^{\ast}|$ と $|M|$ の差が $\sqrt{n}$ で抑えられることが分かる. 残りのフェーズ数は各フェーズで少なくとも $1$ つはマッチングのサイズが増加することから $\O (\sqrt{n})$ 回であることが言え, 合計のフェーズ数は $\O (\sqrt{n})$ 回となる.
+ゆえに計算量は上述の通り $\O (m \sqrt{n})$ となる. <br>
+二部グラフに $2$ つの超頂点を足した形のグラフがすべて $\O (m \sqrt{n})$ の計算量で解けるわけではなく, 二部グラフ型だが計算量が $\O (m \sqrt{n})$ とならない例を次のコードで構成してみた(<a href="https://ideone.com/JUyXmL">コード 1</a>, <a href="https://ideone.com/3KSile">コード 2</a>).
+どちらも頂点数 $n$, 辺数 $m$ としたとき計算量が $\O (n m)$ になってしまう例である. $\O (n^2 m)$ の worst case は構成できなかった(構成するの結構きつい).<br>
+ちなみに source, sink 以外のすべての頂点について "入ってくる辺は容量 1 の辺 1 本だけ" もしくは "出ていく辺は容量 1 の辺 1 本だけ" のどちらかを満たしている場合,
+そのようなグラフ(unit network と呼ばれる) 上で Dinic アルゴリズムは $\O (m \sqrt{n})$ 時間で動作することが知られている.<br>
+また uniformly at random に辺を $m$ 個張った二部グラフについては Dinic アルゴリズムが平均計算量 $\O (m \log n)$ となることも知られている.<br>
+<br>
+(補足) <br>
+最大流最小カット定理のように二部グラフの最大マッチング問題を整数計画問題に書き下し、その緩和問題である線形計画問題の双対を取って解に整数制約を加えると最小頂点被覆問題になる. ここで現れる行列が完全単摸性を持つ(無向二部グラフの接続行列なので) ことが確認できるので強双対性と合わせて最適値は等しくかつ解として整数ベクトルとなるものが存在する. <br>
+つまり最大マッチングのサイズは最小頂点被覆のサイズに等しいことが言える. これは Kőnig の定理と呼ばれ、 Hall の結婚定理と等価の定理である. <br>
+<br>
+(個人的な復習を兼ねた証明) <br>
+二部グラフの左側, 右側を $A, B$ とし、マッチングの済んだ($A$-$B$ 間の)残余グラフ上で $A$ のマッチングされていない頂点からたどれる頂点の集合を $L$ とする. このとき $(A \setminus L) \cup (B \cap L)$ が最小頂点被覆に対応する.<br>
+まずは頂点被覆であることを示す. <br>
+被覆されてない, つまり $e=(a,b)$($a \in A \cap L$, $b \in B \setminus L$) があったとする.
+$(a, b)$ がマッチングに含まれないとすると $a$ から $b$ がたどれてしまい $b \in L$ でダメ, 含まれるとすると $a \in L$ から $b$ から $a$ にたどったことになり $b \in L$ が成り立ちこれもダメ. <br>
+次に最小性を示す. <br>
+先ほどの証明から ($A \cap L$, $B \setminus L$) 間には辺がなく, また ($A \setminus L$, $B \cap L$) 間にある辺はすべて $A \setminus L$ 内の頂点から $B \cap L$ 内の頂点へ向かう向きである(逆向きが存在するとすると矛盾する).
+よって最大マッチングに含まれる任意の頂点の組は ($A \setminus L$, $B \setminus L$) 間もしくは ($A \cap L$, $B \cap L$) 間にあることが分かる(事実 1).<br>
+今 $A \setminus L$ 内の頂点は $L$ に含まれないことからすべてマッチングされている.
+また $B \cap L$ 内の任意の頂点について $L$ に含まれることから $A$ のマッチングされていない頂点からたどることができる.
+もし $B \cap L$ の中にマッチングされていない頂点が存在した場合新たに増加道が取れてしまうので仮定に矛盾する.
+つまり $B \cap L$ 内の頂点もすべてマッチングされている.<br>
+事実 1 と合わせると $A \setminus L$ 内の頂点が含まれるマッチングのペアと $B \cap L$ 内の頂点が含まれるマッチングのペアはすべて異なるので最大マッチングのサイズは $(A \setminus L) \cup (B \cap L)$ のサイズ以上となる.<br>
+よって弱双対性と併せて $(A \setminus L) \cup (B \cap L)$ が確かに最小の頂点被覆となっていることが分かる. 同時にこれは Kőnig の定理の構成的な証明にもなっている.
+</p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>

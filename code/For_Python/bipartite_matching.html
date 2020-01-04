@@ -57,152 +57,104 @@ $\newcommand{\O}{\mathrm{O}}$
 <div id="contents">
 
 <section>
-<h2>Bipartite Matching</h2>
-<h3>コードについての説明</h3>
+<h2>Bipartite Matching Algorithm</h2>
+<h3>コードについての説明(<a href="./bipartite_matching_memo.html">個人的メモ</a>)</h3>
 <p>
 二部グラフの最大マッチングを求めるアルゴリズム. 例えば $n$ 人の人と $m$ 個の仕事があり, それぞれの人について行うことのできる仕事が分かっていて $1$ 人が高々 $1$ つの仕事を行うというような状況を考えます.
 このとき最大いくつの仕事を行うことができるか？ というような問題をこのアルゴリズムを用いて高速に解くことができます. <br>
 人と仕事に対応する $n + m$ 個の頂点と仕事ができるできないに対応する 人 → 仕事 の有向辺からなる二部グラフを考える. ここで超頂点 $s,t$ を source と sink として $s$ → 人, 仕事 → $t$ の辺を先ほどの二部グラフに加えた有向グラフ上で
 $s$ → $t$ の最大流問題を解く. このときの答えが問題の答えと一致している. <br>
-最大流の計算に <a href="../NetworkFlow/dinic.html">Dinic 法</a> を用いると時間計算量は普通に考えると $\O (n^2 m)$ であるがこの問題に対しては $\O(m \sqrt{n})$ と高速に動作することが分かっている. <br>
-以下<a href="https://www.imsc.res.in/~meena/matching/hopcroft-karp.pdf">こちら</a>の説明を参考に計算量を説明する(元資料は Dinic ではなく Hopcroft-Karp アルゴリズムの説明である). <br>
-まず重要な定理として 「現在得られているマッチングを $M$ とする. また最大マッチングのうちの $1$ つを $M^{\ast}$ とする. このとき残余ネットワークには(超頂点 $s, t$ を除いて)点素な増加道が $|M^{\ast}| - |M|$ 個含まれる.」 が成り立つことを示す. $G_M = M \Delta M^{\ast}$ ($M$ と $M^{\ast}$ の対称差) とする.
-$G_M$ は各点の次数が高々 $2$ 以下なので単純閉路, 単純パス, 孤立点の $3$ 要素からなる(それぞれの頂点集合は disjoint). ここで閉路, パスについては $M$ と $M^{\ast}$ に含まれる辺が交互に現れることに注意.
-閉路, 孤立点については $M, M^{\ast}$ の辺を同数含むもしくは全く含まないので結局 $M$ と $M^{\ast}$ が交互に現れる点素なパスで $M^{\ast}$ 内の辺から始まり, $M^{\ast}$ 内の辺で終了するものが少なくとも $|M^{\ast}| - |M|$ 個存在する. そして $s$ → (そのようなパス) → $t$ と進むパスは明らかに増加道となっているので示せた.<br>
-Dinic で一度幅優先探索をしてからもう一度幅優先探索をするまでをフェーズと呼ぶことにする. まず辺の容量がすべて $1$ であるため $s$ -> $t$ 増加道を見つけたらそのパス上の辺が全て invalid になる(正確には今後見なくてよい)ので $1$ 回のフェーズ は $\O (m)$ で終了する. <br>
-次にフェーズの総回数について説明する. $\sqrt{n}$ 回のフェーズを終えた時点での増加道の長さは $\sqrt{n}$ 以上である(これは 二部グラフのマッチングに限らず, 一般のグラフに Dinic アルゴリズムを適用させたときに満たす性質なのでここでは証明を省く). 現在のマッチング $M$ と任意の最大マッチング $M^{\ast}$ を考える.
-上に示した定理より, 残余グラフには $|M^{\ast}| - |M|$ 個の点素な増加道が含まれる.
-「点素な増加道の数 $\le$ 頂点数/増加道の長さ」 が成り立つことからこの点素な増加道の数は $\sqrt{n}$ で抑えられ、 結局のところ $|M^{\ast}|$ と $|M|$ の差が $\sqrt{n}$ で抑えられることが分かる. 残りのフェーズ数は各フェーズで少なくとも $1$ つはマッチングのサイズが増加することから $\O (\sqrt{n})$ 回であることが言え, 合計のフェーズ数は $\O (\sqrt{n}))$ 回となる.
-ゆえに計算量は上述の通り $\O (m \sqrt{n})$ となる. <br>
-二部グラフに $2$ つの超頂点を足した形のグラフがすべて $\O (m \sqrt{n})$ の計算量で解けるわけではなく, 二部グラフ型だが計算量が $\O (m \sqrt{n})$ とならない例を次のコードで構成してみた(<a href="https://ideone.com/JUyXmL">コード 1</a>, <a href="https://ideone.com/3KSile">コード 2</a>).
-どちらも頂点数 $n$, 辺数 $m$ としたとき計算量が $\O (n m)$ になってしまう例である. $\O (n^2 m)$ の worst case は構成できなかった(構成するの結構きつい).<br>
-ちなみに uniformly at random に辺を $m$ 個張った二部グラフについてはこのアルゴリズムが期待計算量 $\O (m \log n)$ となるらしい.<br>
-<br>
-(補足) <br>
-最大流最小カット定理のように二部グラフの最大マッチング問題を整数計画問題に書き下し、その緩和問題である線形計画問題の双対を取って解に整数制約を加えると最小頂点被覆問題になる. ここで現れる行列が完全単摸性を持つ(無向二部グラフの接続行列なので) ことが確認できるので強双対性と合わせて最適値は等しくかつ解として整数ベクトルとなるものが存在する. <br>
-つまり最大マッチングのサイズは最小頂点被覆のサイズに等しいことが言える. これは Kőnig の定理と呼ばれ、 Hall の結婚定理と等価の定理である. <br>
-<br>
-(個人的な復習を兼ねた証明) <br>
-二部グラフの左側, 右側を $A, B$ とし、マッチングの済んだ($A$-$B$ 間の)残余グラフ上で $A$ のマッチングされていない頂点からたどれる頂点の集合を $L$ とする. このとき $(A \setminus L) \cup (B \cap L)$ が最小頂点被覆に対応する.<br>
-まずは頂点被覆であることを示す. <br>
-被覆されてない, つまり $e=(a,b)$($a \in A \cap L$, $b \in B \setminus L$) があったとする.
-$(a, b)$ がマッチングに含まれないとすると $a$ から $b$ がたどれてしまい $b \in L$ でダメ, 含まれるとすると $a \in L$ から $b$ から $a$ にたどったことになり $b \in L$ が成り立ちこれもダメ. <br>
-次に最小性を示す. <br>
-先ほどの証明から ($A \cap L$, $B \setminus L$) 間には辺がなく, また ($A \setminus L$, $B \cap L$) 間にある辺はすべて $A \setminus L$ 内の頂点から $B \cap L$ 内の頂点へ向かう向きである(逆向きが存在するとすると矛盾する).
-よって最大マッチングに含まれる任意の頂点の組は ($A \setminus L$, $B \setminus L$) 間もしくは ($A \cap L$, $B \cap L$) 間にあることが分かる(事実 1).<br>
-今 $A \setminus L$ 内の頂点は $L$ に含まれないことからすべてマッチングされている.
-また $B \cap L$ 内の任意の頂点について $L$ に含まれることから $A$ のマッチングされていない頂点からたどることができる.
-もし $B \cap L$ の中にマッチングされていない頂点が存在した場合新たに増加道が取れてしまうので仮定に矛盾する.
-つまり $B \cap L$ 内の頂点もすべてマッチングされている.<br>
-事実 1 と合わせると $A \setminus L$ 内の頂点が含まれるマッチングのペアと $B \cap L$ 内の頂点が含まれるマッチングのペアはすべて異なるので最大マッチングのサイズは $(A \setminus L) \cup (B \cap L)$ のサイズ以上となる.<br>
-よって弱双対性と併せて $(A \setminus L) \cup (B \cap L)$ が確かに最小の頂点被覆となっていることが分かる. 同時にこれは Kőnig の定理の構成的な証明にもなっている.
+最大流の計算に <a href="../NetworkFlow/dinic.html">Dinic 法</a> を用いると時間計算量は普通に考えると $\O (n^2 m)$ であるがこの問題に対しては $\O(m \sqrt{n})$ と高速に動作することが分かっている.
 </p>
 <p>
 (コンストラクタ) <br>
-BM(u, v): u が人の数, v が仕事の数 <br>
+BM$(u, v)$ : $u$ が人の数, $v$ が仕事の数 <br>
 (関数)<br>
-add_edge(u,v): 人 u と仕事 v の間に辺を追加する <br>
+add_edge$(u,v)$ : 人 $u$ と仕事 $v$ の間に辺を追加する <br>
 solve(): 最大マッチングを求める <br>
-allocate(): solve() の後に行うと人 i に割り当てられた仕事のインデックスを返す(なければ-1)
 </p>
 <p>
-時間計算量: O(m sqrt(n))
+時間計算量: $\O (m \sqrt{n})$
 </p>
 <h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
 <pre class="prettyprint linenums">
-class BM {
-private:
-    struct edge {
-        int to,cap,rev;
-    };
-    int U,V;
-    vector&lt;vector&lt;edge&gt; &gt; G;
-    vector&lt;int&gt; level;
-    vector&lt;int&gt; iter;
+class MaxFlow:
+    class Edge:
+        def __init__(self, to, cap, rev):
+            self.to, self.cap, self.rev = to, cap, rev
 
-public:
-    BM(int u,int v) : U(u), V(v), G(U+V+2){
-        for(int i = 0; i &lt; U; i++){
-            init_edge(0,i+1);
-        }
-        for(int i = 0; i &lt; V; i++){
-            init_edge(U+i+1,U+V+1);
-        }
-    }
-    void init_edge(int from,int to) {
-        G[from].push_back((edge){to,1,(int)G[to].size()});
-    	G[to].push_back((edge){from,0,(int)G[from].size()-1});
-    }
-    void add_edge(int from,int to) {
-        from += 1,to += U+1;
-    	G[from].push_back((edge){to,1,(int)G[to].size()});
-    	G[to].push_back((edge){from,0,(int)G[from].size()-1});
-    }
-    void bfs(int s) {
-        fill(level.begin(),level.end(),-1);
-    	queue&lt;int&gt; que;
-    	level[s] = 0;
-    	que.push(s);
-    	while(!que.empty()){
-            int v = que.front();
-            que.pop();
-            for(auto&amp; e : G[v]){
-                if(e.cap &gt; 0 &amp;&amp; level[e.to] &lt; 0){
-                    level[e.to] = level[v] + 1;
-                    que.push(e.to);
-                }
-            }
-        }
-    }
-    int dfs(int v,int t,int f) {
-        if(v==t){
-            return f;
-        }
-        for(int &amp;i = iter[v];i&lt;(int)G[v].size();i++){
-            edge &amp;e = G[v][i];
-            if(e.cap &gt; 0 &amp;&amp; level[v] &lt; level[e.to]){
-                int d = dfs(e.to,t,min(f,e.cap));
-                if(d&gt;0){
-                    e.cap -= d;
-                    G[e.to][e.rev].cap += d;
-                    return d;
-                }
-            }
-        }
-        return 0;
-    }
-    int solve() {
-        level.resize(U+V+2), iter.resize(U+V+2);
-        int flow = 0;
-        int s=0,t=U+V+1;
-        for(;;){
-            bfs(s);
-            if(level[t] &lt; 0) return flow;
-            fill(iter.begin(),iter.end(),0);
-            int f;
-            while((f=dfs(s,t,numeric_limits&lt;int&gt;::max())) &gt; 0){
-                flow += f;
-            }
-        }
-    }
-    vector&lt;int&gt; allocate() {
-        vector&lt;int&gt; res(U, -1);
-        for(int i = 0; i &lt; U; i++){
-            for(auto&amp; e : G[i+1]){
-                if(e.cap == 0 &amp;&amp; e.to != 0){
-                    res[i] = e.to-U-1;
-                    break;
-                }
-            }
-        }
-        return res;
-    }
-};
+    def __init__(self, node_size, inf):
+        self._node = node_size
+        self._inf = inf
+        self._level = [-1]*self._node
+        self._iter = [0]*self._node
+        self._graph = [[] for _ in range(self._node)]
+
+    def add_edge(self, from_, to, cap):
+        self._graph[from_].append(self.Edge(to, cap, len(self._graph[to])))
+        self._graph[to].append(self.Edge(from_, 0, len(self._graph[from_])-1))
+
+    def bfs(self, start):
+        self._level = [-1]*self._node
+        que = deque()
+        self._level[start] = 0
+        que.append(start)
+        while que:
+            cur_vertex = que.popleft()
+            for e in self._graph[cur_vertex]:
+                if self._level[e.to] &lt; 0 &lt; e.cap:
+                    self._level[e.to] = self._level[cur_vertex] + 1
+                    que.append(e.to)
+
+    def dfs(self, cur_vertex, end_vertex, flow):
+        if cur_vertex == end_vertex:
+            return flow
+        while self._iter[cur_vertex] &lt; len(self._graph[cur_vertex]):
+            e = self._graph[cur_vertex][self._iter[cur_vertex]]
+            if e.cap &gt; 0 and self._level[cur_vertex] &lt; self._level[e.to]:
+                flowed = self.dfs(e.to, end_vertex, min(flow, e.cap))
+                if flowed &gt; 0:
+                    e.cap -= flowed
+                    self._graph[e.to][e.rev].cap += flowed
+                    return flowed
+            self._iter[cur_vertex] += 1
+        return 0
+
+    def solve(self, source, sink):
+        flow = 0
+        while True:
+            self.bfs(source)
+            if self._level[sink] &lt; 0:
+                return flow
+            self._iter = [0]*self._node
+            while True:
+                f = self.dfs(source, sink, self._inf)
+                if f == 0:
+                    break
+                flow += f
+
+
+class BipartiteMatching:
+    def __init__(self, size1, size2):
+        self._u_size, self. _v_size = size1, size2
+        self.mf = MaxFlow(self._u_size+self. _v_size+2, min(self._u_size, self._v_size))
+        for i in range(self._u_size):
+            self.mf.add_edge(0, i+1, 1)
+        for i in range(self._v_size):
+            self.mf.add_edge(self._u_size+i+1, self._u_size+self._v_size+1, 1)
+
+    def add_edge(self, from_, to):
+        self.mf.add_edge(from_+1, to+self._u_size+1, 1)
+
+    def solve(self):
+        return self.mf.solve(0, self._u_size+self._v_size+1)
 </pre>
-</div>
 <h3>verify 用の問題</h3>
-<p>CSAcademy : <a href="https://csacademy.com/contest/round-66/task/flipping-matrix/statement/">Flipping Matrix</a>
-  <a href="https://csacademy.com/code/JqAmeWwd/">提出コード</a></p>
+<p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_7_A">Bipartite Matching</a>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3226477#1">提出コード</a></p>
 </section>
 
 </div>
