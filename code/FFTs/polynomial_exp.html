@@ -62,31 +62,33 @@ $\newcommand{\O}{\mathrm{O}}$
 <p>
 体 $K$ 上の多項式 $f$ ($\mathrm{deg}(f) = n$, $f(0) = 0)$ に対応する形式的べき級数 $F$ が与えられたときに
 形式的べき級数 $\exp (F)$ の $x^i (0 \le i < r)$ の係数を返す.<br>
+以下の実装は $K = \mathbb{Z} / p \mathbb{Z}$ ($p$ は素数) の場合の実装で特に素数 $p$ について
+$p = k * 2^l + 1 (k > 0, n + 1 \le 2^l)$ を満たすこと(数論変換に乗ること)を仮定している.<br>
 形式的べき級数の $\exp$ の求め方がよく分からなかったので
-あまり良くないが verify 問題の latte0199 さんのコードを参照させていただいた.<br>
+あまり良くない気もするが verify 問題の latte0199 さんのコードを参照させていただいた.<br>
 その上で逆手流に証明(っぽいもの)をしてみる.
 正直形式的べき級数をあまり良く理解しておらず, 雰囲気で書いているため不正確な記述になっているとは思う($\mathrm{mod}$
 とか書くのも正確なのか知らないが $\mathrm{mod}\ x^n$ と書いた場合は多項式環のそれと同様に ($x^n$) で割ったものというノリで書いている).<br>
 <br>
-<b>Lemma</b>: $x_j (j \ge 2^i)$ の係数が $0$ であるような形式的べき級数 $g_i$ が $\exp(f) = g_i\ \mathrm{mod}\ x^{2^i}$ かつ ($g_i$ の定数項) $= 1$ を満たすなら
-$\exp(f) = g_{i+1}\ \mathrm{mod}\ x^{2^{i+1}}$ かつ ($g_i$ の定数項) $= 1$ を満たす形式的べき級数 $g_{i+1}$ は
+<b>Lemma</b>: $x_j (j \ge 2^i)$ の係数が $0$ であるような形式的べき級数 $g_i$ が $\exp(f) \equiv g_i\ \mathrm{mod}\ x^{2^i}$ かつ ($g_i$ の定数項) $= 1$ を満たすなら
+$\exp(f) \equiv g_{i+1}\ \mathrm{mod}\ x^{2^{i+1}}$ かつ ($g_{i+1}$ の定数項) $= 1$ を満たす形式的べき級数 $g_{i+1}$ は
 $g_{i+1} \overset{\mathrm{def}}{=} \left( \left( g_i \cdot (f + 1 - \log g_i) \right) \ \mathrm{mod}\ x^{2^{i+1}} \right)$ と定めることで得られる. <br><br>
 
 これより初期値を $g_0 = 1$ と取り, $\lceil \log r \rceil$ 回反復を繰り返すことで解が得られる.<br>
 <br>
 (<b>Lemma</b> の証明(っぽい何か)) <br>
-まず $\left( \left( g_i \cdot (f + 1 - \log g_i) \right) \ \mathrm{mod}\ x^{2^{i+1}} \right)$ の定数項に注目すると ($g_i$ の定数項) $= 1$ および ($\log g_i$
+まず $\left( g_i \cdot (f + 1 - \log g_i) \right) \ \mathrm{mod}\ x^{2^{i+1}}$ の定数項に注目すると ($g_i$ の定数項) $= 1$ および ($\log g_i$
 の定数項) $= 0$ より ($g_{i+1}$ の定数項) は $1$ となることが分かる.<br>
 次に $a(x)$ を $g_i(x)$ の $x^i (1 \le i < x^{2^i})$ の項からなる形式的べき級数,
 $b(x)$ を $\exp(x)$ の $x^i (x^{2^i} \le i < x^{2^{i+1}})$ の項からなる形式的べき級数,
 $c(x)$ を $\exp(x)$ の $x^i (i \ge x^{2^{i+1}})$ の項からなる形式的べき級数とする.
-このとき $\exp(f) = g_i\ \mathrm{mod}\ x^{2^i}$ から
+このとき $\exp(f) \equiv g_i\ \mathrm{mod}\ x^{2^i}$ から
 $\exp(f(x)) = 1 + a(x) + b(x) + c(x)$ が成り立つ.<br>
-よって $\exp(f) - g_{i+1} = (1 + a + b) - (1 + a) \cdot (\log(1 + a + b + c) + 1 - \log (1 + a)) = 0\ \mathrm{mod}\ x^{2^{i+1}}$ を示せば良い(式 (1)).<br>
+よって $\exp(f) - g_{i+1} \equiv (1 + a + b) - (1 + a) \cdot (\log(1 + a + b + c) + 1 - \log (1 + a)) \overset{?}{\equiv} 0\ \mathrm{mod}\ x^{2^{i+1}}$ を示せば良い(式 (1)).<br>
 $\log (1 + a + b + c) = \sum_{i \ge 1} \frac{(-1)^{i+1}}{i}(a + b + c)^i$ であり $x^{2^{i+1}}$ 以降の項は考えなくて良いので
 $c$ の寄与は考えなくて良いのと $b$ の寄与についても $b^i (i \ge 2)$ については考える必要がない.<br>
-ゆえに $\log (1 + a + b + c) = \sum_{i \ge 1} \frac{(-1)^{i+1}}{i}a^i + b \sum_{i \ge 0} (-1)^i a^i\ \mathrm{mod}\ x^{2^{i+1}}$ が成り立ち,
-$\log (1 + a + b + c) = \log (1 + a) + \frac{b}{1 + a}\ \mathrm{mod}\ x^{2^{i+1}}$ と書きなおすことができる.<br>
+ゆえに $\log (1 + a + b + c) \equiv \sum_{i \ge 1} \frac{(-1)^{i+1}}{i}a^i + b \sum_{i \ge 0} (-1)^i a^i\ \mathrm{mod}\ x^{2^{i+1}}$ が成り立ち,
+$\log (1 + a + b + c) \equiv \log (1 + a) + \frac{b}{1 + a}\ \mathrm{mod}\ x^{2^{i+1}}$ と書きなおすことができる.<br>
 これを式 (1) に代入することで成り立つことが示せた.
 </p>
 <p>

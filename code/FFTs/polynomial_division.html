@@ -72,10 +72,10 @@ $f(x) = q(x) \cdot g(x) + r(x)$ を満たす $q(x), r(x)$ を求めたいのだ�
 $x^n f(1/x) = \left( x^{n-m} q(1/x) \right) \cdot \left(x^m g(1 / x) \right) + x^{n-m+1} \cdot \left( x^{m-1} r(1/x) \right)$ となる. <br>
 今多項式 $h(x)$ について $h'_k(x)$ を $h'_k(x) = x^k h(1/x) (k \ge \mathrm{deg}(h))$ と定義すると, 上式は
 $f'_n(x) = q'_{n-m}(x) \cdot g'_m(x) + x^{n-m+1} \cdot r'_{m-1}(x)$ と書き直せる. さらに, <br>
-$\Rightarrow f'_n(x) = q'_{n-m}(x) \cdot g'_m(x)\ \mathrm{mod}\ x^{n-m+1}$
-$\Rightarrow q'_{n-m}(x) = f'_{n}(x) \cdot g'_m(x)^{-1}\ \mathrm{mod}\ x^{n-m+1}$ と変形することができる. <br>
+$\Rightarrow f'_n(x) \equiv q'_{n-m}(x) \cdot g'_m(x)\ \mathrm{mod}\ x^{n-m+1}$
+$\Rightarrow q'_{n-m}(x) \equiv f'_{n}(x) \cdot g'_m(x)^{-1}\ \mathrm{mod}\ x^{n-m+1}$ と変形することができる. <br>
 ここで $g'_m(x)^{-1}$ は $K[x] / (x^{n-m+1})$ 上の $g'_m(x)$ の乗法逆元を意味する.
-つまり $ g'_m (x) \cdot g'_m(x)^{-1} = 1\ \mathrm{mod}\ x^{n-m+1}$ を満たすような多項式とする. <br>
+つまり $ g'_m (x) \cdot g'_m(x)^{-1} \equiv 1\ \mathrm{mod}\ x^{n-m+1}$ を満たすような多項式とする. <br>
 これは<a href="./polynomial_inverse.html">こちらのアルゴリズム</a>を用いることで $\O (n \log n)$ 時間で求めることができる. <br>
 最後に $\mathrm{deg} (q'_{n-m}) \le n - m$ であることからゆえに
 $q'_{n-m}(x) = ( \left( f'_n(x) \cdot h_l(x) \right) \ \mathrm{mod}\ x^{n-m+1})$ となり, $q$ を求めることができる.

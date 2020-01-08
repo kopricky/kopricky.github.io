@@ -62,32 +62,32 @@ $\newcommand{\O}{\mathrm{O}}$
 <p>
 体 $K$ 上の多項式 $f$ ($\mathrm{deg}(f) = n$, $f(0) \neq 0)$ を考える. <br>
 このとき $K[x] / (x^r)$ 上 $f(x)$ の乗法逆元である $f(x)^{-1}$,
-つまり $f (x) \cdot f(x)^{-1} = 1\ \mathrm{mod}\ x^{r}$ を満たす $f(x)^{-1}$ を求めるアルゴリズムである. <br>
+つまり $f (x) \cdot f(x)^{-1} \equiv 1\ \mathrm{mod}\ x^{r}$ を満たす $f(x)^{-1}$ を求めるアルゴリズムである. <br>
 以下の実装は $\mathbb{Z} / p \mathbb{Z}$ ($p$ は素数) の場合の実装で特に素数 $p$ について
 $p = k * 2^l + 1 (k > 0, \lceil \log r \rceil \le 2^l)$ を満たすこと(数論変換に乗ること)を仮定している.<br>
 こちらの<a href="https://www.csa.iisc.ac.in/~chandan/courses/CNT/notes/lec5.pdf">参考資料</a>が分かりやすく, それを基に実装を行った. <br>
 $f(x)^{-1}$ の存在は以下のように構成的に示すことができ, この構成方法がそのまま $\O(n + r \log r)$ のアルゴリズムとなっている. <br>
 以下の Lemma を用いて構成する. <br>
 <br>
-<b>Lemma</b>: 多項式 $g_i$ が $f \cdot g_i = 1\ \mathrm{mod}\ x^{2^i}$ を満たすなら
-$f \cdot g_{i+1} = 1\ \mathrm{mod}\ x^{2^{i+1}}$ を満たす多項式 $g_{i+1}$ は
+<b>Lemma</b>: 多項式 $g_i$ が $f \cdot g_i \equiv 1\ \mathrm{mod}\ x^{2^i}$ を満たすなら
+$f \cdot g_{i+1} \equiv 1\ \mathrm{mod}\ x^{2^{i+1}}$ を満たす多項式 $g_{i+1}$ は
 $g_{i+1} \overset{\mathrm{def}}{=} \left( \left(2 g_i - f g_i^2\right) \ \mathrm{mod}\ x^{2^{i+1}} \right)$ と定めることで得られる. <br><br>
-今初期値 $g_0$ は $g_0 = f(0)^{-1}$ とすると $f \cdot g = 1\ \mathrm{mod}\ x$ が成り立つので取れる(ちなみに可換環上でも
+今初期値 $g_0$ は $g_0 = f(0)^{-1}$ とすると $f \cdot g \equiv 1\ \mathrm{mod}\ x$ が成り立つので取れる(ちなみに可換環上でも
 $f$ がモニックであれば $f(0)^{-1} = 1$ であるので取れる). <br>
 $l \overset{\mathrm{def}}{=} \lceil \log r \rceil$ と定めると上記の定理を用いて
-$f \cdot g_l = 1\ \mathrm{mod}\ x^{2^l}$ を満たす $g_l$ が計算でき,
-$f^{-1}$ として $g_l$ を取ると $f \cdot f^{-1} = 1\ \mathrm{mod}\ x^{r}$ を満たす. ゆえに構成することができた(最後に Lemma の証明を示す). <br>
+$f \cdot g_l \equiv 1\ \mathrm{mod}\ x^{2^l}$ を満たす $g_l$ が計算でき,
+$f^{-1}$ として $g_l$ を取ると $f \cdot f^{-1} \equiv 1\ \mathrm{mod}\ x^{r}$ を満たす. ゆえに構成することができた(最後に Lemma の証明を示す). <br>
 時間計算量は $i$ 回目のイテレーションで $2^{i+1}$ サイズの多項式乗算を計算するので $\sum_{i=0}^{l - 1} 2^i \log 2^i = \O( r \log r)$ (正確には $\O(n + r \log r)$) となる. <br>
 <br>
 (<b>Lemma</b> の証明) <br>
-$f \cdot g_{i+1} = 2 f g_i - f^2 g_i^2 = 1 - (f g_i - 1)^2 \ \mathrm{mod}\ x^{2^{i+1}}$ と式変形でき,
-仮定より $f \cdot g_i - 1 = 0\ \mathrm{mod}\ x^{2^i}$ なので $f \cdot g_{i+1} = 1\ \mathrm{mod}\ x^{2^{i+1}}$ が成り立つ.<br>
+$f \cdot g_{i+1} \equiv 2 f g_i - f^2 g_i^2 \equiv 1 - (f g_i - 1)^2 \ \mathrm{mod}\ x^{2^{i+1}}$ と式変形でき,
+仮定より $f \cdot g_i - 1 \equiv 0\ \mathrm{mod}\ x^{2^i}$ なので $f \cdot g_{i+1} \equiv 1\ \mathrm{mod}\ x^{2^{i+1}}$ が成り立つ.<br>
 <br>
 (注) 便宜上長さ $r$ の配列を解となる多項式として返しているが必ずしも $r - 1$ 次多項式とは限らないことに注意する(最高次の係数が $\mathbb{Z} / p \mathbb{Z}$ 上で $0$ となる可能性があるので).
 </p>
 <p>
 (関数)<br>
-polynomial_inverse$(a, r)$: 長さ $n$ の配列 $a$ を係数とする $n-1$ 次多項式 $f$ を与える. $f \cdot f^{-1} = 1\ \mathrm{mod}\ x^{r}$ を満たす多項式 $f^{-1}$ の係数を長さ $r$ の配列として返す.<br>
+polynomial_inverse$(a, r)$: 長さ $n$ の配列 $a$ を係数とする $n-1$ 次多項式 $f$ を与える. $f \cdot f^{-1} \equiv 1\ \mathrm{mod}\ x^{r}$ を満たす多項式 $f^{-1}$ の係数を長さ $r$ の配列として返す.<br>
 </p>
 <p>
 時間計算量: $\O( n + r \log r)$

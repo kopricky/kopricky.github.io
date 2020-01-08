@@ -60,7 +60,8 @@ $\newcommand{\O}{\mathrm{O}}$
 <h2>Multipoint Evaluation</h2>
 <h3>個人的メモ</h3>
 <p>
-多項式 $r_0(x)$, $r_1(x)$ を $r_0(x) \overset{\mathrm{def}}{=} f(x) \ \mathrm{mod}\ \Pi_{i = 0}^{m / 2 - 1} (x - u_i)$, $r_1(x) \overset{\mathrm{def}}{=} f(x) \ \mathrm{mod}\ \Pi_{i = m / 2}^{m - 1} (x - u_i)$
+多項式 $r_0(x)$, $r_1(x)$ を $r_0(x) \overset{\mathrm{def}}{=} \left( f(x) \ \mathrm{mod}\ \Pi_{i = 0}^{m / 2 - 1} (x - u_i) \right)$,
+$r_1(x) \overset{\mathrm{def}}{=} \left( f(x) \ \mathrm{mod}\ \Pi_{i = m / 2}^{m - 1} (x - u_i) \right)$
 と定めると, $f(u_0), \dots, f(u_{m-1})$ の値は $f(u_i) (0 \le i < m / 2)$ については $f(u_i) = r_0(u_i)$ より $r_0$ を用いて,
 $f(u_i) (m / 2 \le i < m)$ については $f(u_i) = r_1(u_i)$ より $r_1$ を用いて計算することができる. $\Pi_{i = l}^{r} (x - u_i)$ の部分については事前に計算を行なっておく.<br>
 つまりサイズが $m / 2$ の問題 2 つに分割することができたことになり, 分割統治法によって $m$ 個のクエリに答えることができる.
