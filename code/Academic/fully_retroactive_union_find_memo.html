@@ -61,7 +61,7 @@ $\newcommand{\O}{\mathrm{O}}$
 <h3>個人的メモ</h3>
 <p>
 <a href="https://courses.csail.mit.edu/6.851/fall17/scribe/lec2.pdf">Demaine 先生の資料</a> に fully retroactive union find は $\O (\log m)$ ($m$ は更新の回数)
-でできると書いてあり, 考えてみると Link Cut Tree を用いるとならし $\O (\log n)$ でできることが分かった(order-maintenance パートを無視した場合)
+でできると書いてあり, 考えてみると Link Cut Tree を用いると(order-maintenance パートを無視した場合)ならし $\O (\log n)$ でできることが分かった
 (資料自体には priority_queue の partial retroactive の説明が分かりやすく書いてある). <br>
 結局 fully retroactive union find は unite 関数では頂点どうしを link でつなぎ,
 same 関数では "頂点どうしが現在のバージョンにおいて同じ連結成分に入っているか",
