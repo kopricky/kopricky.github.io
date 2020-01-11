@@ -84,6 +84,7 @@ excess scaling 版の Push Relabel, Parametric Flow などがメジャーなも�
 (追記 1) <br>
 "On Implementing Push-Relabel Method For The Maximum Flow Problem" [Cherkassky, Goldberg 1994] をもとに実装を変更した. 上記の gap_relabel(ある高さの頂点がなくなったらそれ以上の高さの頂点は sink $t$ に辿れないので以降 inactive にする) および global_relabel(ときどき全部を再ラベリング) を行った実装にしたことで高速になり,
 多くのケースでは <a href="../NetworkFlow/dinic.html">Dinic</a> より速くなった.<br>
+<br>
 (追記 2) <br>
 sink $t$ 以外の各頂点の超過量が $\Delta$ 未満である残余グラフ $G$ が与えられたときにそれを $t$ 以外の各頂点の超過量が $\Delta / 2$ 未満のグラフに更新する操作を行う関数を Update$(G, \Delta)$ とする.
 Update$(G, \Delta)$ は超過量が $\Delta / 2$ 以上である頂点のうち最も高さの低い頂点から順に超過量が $\Delta / 2$ 未満となるように超過分を解消していく.
