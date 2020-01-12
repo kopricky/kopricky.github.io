@@ -61,7 +61,7 @@ $\newcommand{\O}{\mathrm{O}}$
 <h3>コードについての説明(<a href="./max_flow_push_relabel_memo.html">個人的メモ</a>)</h3>
 <p>
 最大流を求めるアルゴリズム. <br>
-最大流の値を高速に求めるために最終的な結果が依然として正しい flow となっていない可能性がある.
+最大流の値を高速に求めるために最終的な結果が依然として正しい flow となっていない可能性がある(excess を全て解消していない).
 なので valid な flow routing を求めたい場合は valiate() のコメントアウトを外す. <br>
 元論文は "A New Approach to the Maximum-Flow Problem" [Goldberg and Tarjan 1988]".<br>
 <br>
