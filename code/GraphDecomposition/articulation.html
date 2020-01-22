@@ -100,7 +100,6 @@ public:
                 ++ct;
                 dfs(v, u, tm);
                 low[u] = min(low[u], low[v]);	//子のノードのlowと比較する
-                if(p &gt;= 0 &amp;&amp; ord[u] &lt;= low[v]) art[u] = true;
             }else{
                 low[u] = min(low[u], ord[v]);
             }
