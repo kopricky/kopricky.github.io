@@ -60,7 +60,7 @@ $\newcommand{\O}{\mathrm{O}}$
 <h2>Articulation Node Find Algorithm</h2>
 <h3>コードについての説明</h3>
 <p>
-関節点を求めるアルゴリズム. また各2(点)連結成分も同じ計算量で構築することができその場合はコメントアウトを外してください.<br>
+関節点を求めるアルゴリズム.<br>
 関節点とはその点を削除した場合にグラフが非連結になるような頂点のことで, lowlink という値を用いて線形時間で計算することができる. <a href="./bridge.html">橋の列挙</a> にも同様の手法が用いられる.<br>
 割ととっつきにくい概念だと思うので<a href="http://kagamiz.hatenablog.com/entry/2013/10/05/005213">この記事</a>や<a href="https://www.slideshare.net/chokudai/arc045">このスライド</a>を見るとわかりやすいかもしれない. <br>
 発展として lowpt1(高々1個の後退辺を通ってたどり着けるノードの行きがけ順の最小値)だけでなく, lowpt2(高々1個の後退辺を通ってたどり着けるノードの行きがけ順の2番目の値) も合わせて計算しておくことで
@@ -69,7 +69,7 @@ $\newcommand{\O}{\mathrm{O}}$
 <p>
 (関数)<br>
 add_edge$(u, v)$ : $u, v$ の間に無向辺を追加する <br>
-solve() : 関節点を求める($art$ に true/false が入る), コメントアウトを外した場合 $edgeset$ に各2(点)連結成分の辺集合が入る.
+solve() : 関節点を求める($art$ に true/false が入る)
 </p>
 <p>
 時間計算量: $\O (n+m)$
@@ -87,8 +87,6 @@ public:
     vector&lt;int&gt; ord;	//訪問時間
     vector&lt;int&gt; low; //low[u]はuから高々1個の後退辺を通ってたどりつけるノードのordの最小値
     vector&lt;bool&gt; art; //関節点かどうかの判定
-    // vector&lt;vector&lt;P&gt; &gt; edgeset;
-    // stack&lt;P&gt; st;
     Articulation(const int node_size)
         : V(node_size), G(V), ord(V, -1), low(V), art(V, false){}
     void add_edge(const int a, const int b){
@@ -98,21 +96,11 @@ public:
         ord[u] = low[u] = tm++;
         int ct = 0;	// ノードvの次数
         for(int v : G[u]){
-            // if(v != p &amp;&amp; ord[v] &lt; ord[u]) st.push(P(u, v));
             if(ord[v] &lt; 0){
                 ++ct;
                 dfs(v, u, tm);
                 low[u] = min(low[u], low[v]);	//子のノードのlowと比較する
                 if(p &gt;= 0 &amp;&amp; ord[u] &lt;= low[v]) art[u] = true;
-                // if(low[v] &gt;= ord[u]){
-                //     edgeset.push_back(vector&lt;P&gt;());
-                //     while(true){
-                //         P p = st.top();
-                //         st.pop();
-                //         edgeset.back().push_back(p);
-                //         if(p == P(u, v)) break;
-                //     }
-                // }
             }else{
                 low[u] = min(low[u], ord[v]);
             }
