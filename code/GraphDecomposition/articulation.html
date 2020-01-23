@@ -60,7 +60,7 @@ $\newcommand{\O}{\mathrm{O}}$
 <h2>Articulation Node Find Algorithm</h2>
 <h3>コードについての説明</h3>
 <p>
-関節点を求めるアルゴリズム.<br>
+関節点を求めるアルゴリズム. 加えて block cut tree の構築も行う.<br>
 関節点とはその点を削除した場合にグラフが非連結になるような頂点のことで, lowlink という値を用いて線形時間で計算することができる. <a href="./bridge.html">橋の列挙</a> にも同様の手法が用いられる.<br>
 割ととっつきにくい概念だと思うので<a href="http://kagamiz.hatenablog.com/entry/2013/10/05/005213">この記事</a>や<a href="https://www.slideshare.net/chokudai/arc045">このスライド</a>を見るとわかりやすいかもしれない. <br>
 発展として lowpt1(高々1個の後退辺を通ってたどり着けるノードの行きがけ順の最小値)だけでなく, lowpt2(高々1個の後退辺を通ってたどり着けるノードの行きがけ順の2番目の値) も合わせて計算しておくことで
@@ -68,8 +68,11 @@ $\newcommand{\O}{\mathrm{O}}$
 </p>
 <p>
 (関数)<br>
-add_edge$(u, v)$ : $u, v$ の間に無向辺を追加する <br>
-solve() : 関節点を求める($art$ に true/false が入る)
+add_edge$(u, v)$: $u, v$ の間に無向辺を追加する <br>
+solve(): 関節点を求める($art$ に true/false が入る) <br>
+make_bctree(): solve() を呼んだ後に呼ぶことで block cut tree の構築を行う(block cut tree の頂点数を返す). <br>
+具体的に bctree が block cut tree の隣接リスト表現, bcnodes が頂点集合で bcnode 型は isBlock(各頂点が block か cut か) と
+component(block なら辺集合, cut ならサイズ 1 で要素は {関節点, 関節点}) から成る.
 </p>
 <p>
 時間計算量: $\O (n+m)$
@@ -81,43 +84,137 @@ solve() : 関節点を求める($art$ に true/false が入る)
 <pre class="prettyprint linenums">
 class Articulation {
 public:
-    using P = pair&lt;int, int&gt;;
-    const int V;
-    vector&lt;vector&lt;int&gt; &gt; G;
-    vector&lt;int&gt; ord;	//訪問時間
-    vector&lt;int&gt; low; //low[u]はuから高々1個の後退辺を通ってたどりつけるノードのordの最小値
-    vector&lt;bool&gt; art; //関節点かどうかの判定
-    Articulation(const int node_size)
-        : V(node_size), G(V), ord(V, -1), low(V), art(V, false){}
-    void add_edge(const int a, const int b){
-        G[a].push_back(b), G[b].push_back(a);
-    }
-    void dfs(const int u, const int p, int &amp;tm){
-        ord[u] = low[u] = tm++;
-        int ct = 0;	// ノードvの次数
-        for(int v : G[u]){
-            if(ord[v] &lt; 0){
-                ++ct;
-                dfs(v, u, tm);
-                low[u] = min(low[u], low[v]);	//子のノードのlowと比較する
-            }else{
+    struct bcnode;
+private:
+	const int V;
+    vector&lt;vector&lt;int&gt; &gt; dfs_tree;
+    vector&lt;int&gt; ord, low, self_loops;
+	void dfs(const int u, const int p, int&amp; tm){
+		ord[u] = low[u] = tm++;
+        bool multi_edge = false;
+		int ct = 0;
+		for(const int v : G[u]){
+			if(ord[v] &lt; 0){
+                dfs_tree[u].push_back(v);
+				++ct, dfs(v, u, tm);
+				low[u] = min(low[u], low[v]);
+				if(p &gt;= 0 &amp;&amp; ord[u] &lt;= low[v]) art[u] = true;
+			}else if(v == p){
+                if(multi_edge){
+                    dfs_tree[u].push_back(v);
+                    low[u] = min(low[u], ord[v]);
+                }else{
+                    multi_edge = true;
+                }
+			}else if(ord[v] &lt; ord[u]){
+                dfs_tree[u].push_back(v);
                 low[u] = min(low[u], ord[v]);
             }
-        }
-        if(p == -1 &amp;&amp; ct &gt; 1) art[u] = true;	//根の次数が2以上なら根は関節点
+		}
+		if(p == -1 &amp;&amp; ct &gt; 1) art[u] = true;
+	}
+    bool check(const int cur, const pair&lt;int, int&gt; e) const {
+        return ((e.first != cur &amp;&amp; ord[cur] &gt; low[e.first])
+                || (e.second != cur &amp;&amp; ord[cur] &gt; low[e.second]));
     }
-    void solve(){
-        int tm = 0;
-        for(int i = 0; i &lt; V; ++i){
-            if(ord[i] &lt; 0) dfs(i, -1, tm);
+    void identify_block(const int u, bool *used, 
+                        stack&lt;pair&lt;int, int&gt; &gt;&amp; st, const vector&lt;int&gt;&amp; bcnode_id){
+        vector&lt;pair&lt;int, int&gt; &gt; block;
+        vector&lt;int&gt; cut_vertex;
+        while(!st.empty()){
+            const pair&lt;int, int&gt; p = st.top();
+            if(check(u, p)) break;
+            st.pop(), block.push_back(p);
+            if(art[p.first] &amp;&amp; !used[p.first]){
+                cut_vertex.push_back(p.first);
+                used[p.first] = true;
+            }
+            if(art[p.second] &amp;&amp; !used[p.second]){
+                cut_vertex.push_back(p.second);
+                used[p.second] = true;
+            }
         }
+        const int block_id = (int)bctree.size();
+        bctree.push_back(vector&lt;int&gt;());
+        bcnodes.emplace_back(true, move(block));
+        for(const int ver : cut_vertex){
+            bctree[block_id].push_back(bcnode_id[ver]);
+            bctree[bcnode_id[ver]].push_back(block_id);
+            used[ver] = false;
+        }
+    }
+    void redfs(const int u, const int p, bool *visit, bool *used,
+                stack&lt;pair&lt;int, int&gt; &gt;&amp; st, vector&lt;int&gt;&amp; bcnode_id){
+        visit[u] = true;
+        if(art[u]){
+            bcnode_id[u] = (int)bctree.size();
+            bctree.push_back(vector&lt;int&gt;());
+            bcnodes.emplace_back(false, vector&lt;pair&lt;int, int&gt; &gt;{{u, u}});
+        }
+        for(int i = 0; i &lt; self_loops[u]; ++i) st.push({u, u});
+        if(art[u] || p == -1){
+            for(const int v : dfs_tree[u]){
+                if(!visit[v] &amp;&amp; low[v] &gt;= ord[u]){
+                    st.push({u, v});
+                    redfs(v, u, visit, used, st, bcnode_id);
+                    // u might not be an articulation point when u is the root
+                    if(art[u]) identify_block(u, used, st, bcnode_id);
+                }
+            }
+        }
+        for(const int v : dfs_tree[u]){
+            if(!visit[v]){
+                st.push({u, v});
+                redfs(v, u, visit, used, st, bcnode_id);
+            }else if(ord[v] &lt; ord[u]){
+                st.push({u, v});
+            }
+        }
+    }
+public:
+    vector&lt;vector&lt;int&gt; &gt; G;
+    vector&lt;bool&gt; art;
+    struct bcnode {
+        bool isBlock; // true: block, false: cut
+        vector&lt;pair&lt;int, int&gt; &gt; component;
+        bcnode(bool _isBlock, vector&lt;pair&lt;int, int&gt; &gt;&amp;&amp; _component)
+            : isBlock(_isBlock), component(move(_component)){}
+    };
+    vector&lt;vector&lt;int&gt; &gt; bctree;
+    vector&lt;bcnode&gt; bcnodes;
+    Articulation(const int node_size)
+        : V(node_size), dfs_tree(V), ord(V, -1), low(V), self_loops(V, 0), G(V), art(V, false){}
+    void add_edge(const int a, const int b){
+        if(a == b) ++self_loops[a];
+        else G[a].push_back(b), G[b].push_back(a);
+    }
+	void solve(){
+		int tm = 0;
+        for(int i = 0; i &lt; V; ++i){
+			if(ord[i] &lt; 0) dfs(i, -1, tm);
+		}
+	}
+    int make_bctree(){
+        bool *visit = new bool[V]();
+        bool *used = new bool[V]();
+        stack&lt;pair&lt;int, int&gt; &gt; st;
+        vector&lt;int&gt; bcnode_id(V, -1); // bcnode_id[original vertex] = cut vertex;
+        for(int i = 0; i &lt; V; ++i){
+            if(!visit[i]){
+                redfs(i, -1, visit, used, st, bcnode_id);
+                if(!st.empty()) identify_block(i, used, st, bcnode_id);
+            }
+        }
+        delete[] visit;
+        delete[] used;
+        return (int)bctree.size();
     }
 };
 </pre>
 </div>
 <h3>verify 用の問題</h3>
 <p>Codeforces : <a href="https://codeforces.com/contest/962/problem/F">Simple Cycles Edges</a>
-  <a href="https://codeforces.com/contest/962/submission/42596118">提出コード</a></p>
+  <a href="https://codeforces.com/contest/962/submission/69393875">提出コード</a>(あまり本質的な verify にはなっていない)</p>
 </section>
 
 </div>
