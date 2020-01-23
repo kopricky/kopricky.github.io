@@ -71,7 +71,7 @@ $\newcommand{\O}{\mathrm{O}}$
 add_edge$(u, v)$: $u, v$ の間に無向辺を追加する <br>
 solve(): 関節点を求める($art$ に true/false が入る) <br>
 make_bctree(): solve() を呼んだ後に呼ぶことで block cut tree の構築を行う(block cut tree の頂点数を返す). <br>
-具体的に bctree が block cut tree の隣接リスト表現, bcnodes が頂点集合で bcnode 型は isBlock(各頂点が block か cut か) と
+具体的に bctree が block cut tree の隣接リスト表現, bcnodes がその頂点集合で bcnode 型は isBlock(各頂点が block か cut か) と
 component(block なら辺集合, cut ならサイズ 1 で要素は {関節点, 関節点}) から成る.
 </p>
 <p>
@@ -86,33 +86,33 @@ class Articulation {
 public:
     struct bcnode;
 private:
-	const int V;
+    const int V;
     vector&lt;vector&lt;int&gt; &gt; dfs_tree;
     vector&lt;int&gt; ord, low, self_loops;
-	void dfs(const int u, const int p, int&amp; tm){
-		ord[u] = low[u] = tm++;
+    void dfs(const int u, const int p, int&amp; tm){
+        ord[u] = low[u] = tm++;
         bool multi_edge = false;
-		int ct = 0;
-		for(const int v : G[u]){
-			if(ord[v] &lt; 0){
+        int ct = 0;
+        for(const int v : G[u]){
+            if(ord[v] &lt; 0){
                 dfs_tree[u].push_back(v);
-				++ct, dfs(v, u, tm);
-				low[u] = min(low[u], low[v]);
-				if(p &gt;= 0 &amp;&amp; ord[u] &lt;= low[v]) art[u] = true;
-			}else if(v == p){
+                ++ct, dfs(v, u, tm);
+                low[u] = min(low[u], low[v]);
+                if(p &gt;= 0 &amp;&amp; ord[u] &lt;= low[v]) art[u] = true;
+            }else if(v == p){
                 if(multi_edge){
                     dfs_tree[u].push_back(v);
                     low[u] = min(low[u], ord[v]);
                 }else{
                     multi_edge = true;
                 }
-			}else if(ord[v] &lt; ord[u]){
+            }else if(ord[v] &lt; ord[u]){
                 dfs_tree[u].push_back(v);
                 low[u] = min(low[u], ord[v]);
             }
-		}
-		if(p == -1 &amp;&amp; ct &gt; 1) art[u] = true;
-	}
+        }
+        if(p == -1 &amp;&amp; ct &gt; 1) art[u] = true;
+    }
     bool check(const int cur, const pair&lt;int, int&gt; e) const {
         return ((e.first != cur &amp;&amp; ord[cur] &gt; low[e.first])
                 || (e.second != cur &amp;&amp; ord[cur] &gt; low[e.second]));
@@ -188,12 +188,12 @@ public:
         if(a == b) ++self_loops[a];
         else G[a].push_back(b), G[b].push_back(a);
     }
-	void solve(){
-		int tm = 0;
+    void solve(){
+        int tm = 0;
         for(int i = 0; i &lt; V; ++i){
-			if(ord[i] &lt; 0) dfs(i, -1, tm);
-		}
-	}
+            if(ord[i] &lt; 0) dfs(i, -1, tm);
+        }
+    }
     int make_bctree(){
         bool *visit = new bool[V]();
         bool *used = new bool[V]();
