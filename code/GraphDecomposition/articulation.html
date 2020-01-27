@@ -60,11 +60,11 @@ $\newcommand{\O}{\mathrm{O}}$
 <h2>Articulation Node Find Algorithm</h2>
 <h3>コードについての説明</h3>
 <p>
-関節点を求めるアルゴリズム. 加えて block cut tree の構築も行う.<br>
+関節点を求めるアルゴリズム. 加えて block cut tree の構築(二重頂点連結成分分解) も行う.<br>
 関節点とはその点を削除した場合にグラフが非連結になるような頂点のことで, lowlink という値を用いて線形時間で計算することができる. <a href="./bridge.html">橋の列挙</a> にも同様の手法が用いられる.<br>
 割ととっつきにくい概念だと思うので<a href="http://kagamiz.hatenablog.com/entry/2013/10/05/005213">この記事</a>や<a href="https://www.slideshare.net/chokudai/arc045">このスライド</a>を見るとわかりやすいかもしれない. <br>
 発展として lowpt1(高々1個の後退辺を通ってたどり着けるノードの行きがけ順の最小値)だけでなく, lowpt2(高々1個の後退辺を通ってたどり着けるノードの行きがけ順の2番目の値) も合わせて計算しておくことで
-3(点)連結成分のようなものを求めることができ, この考えが Hopcroft, Tarjan の線形時間でのグラフの平面性判定アルゴリズム("Efficient Planarity Testing" [Hopcroft, Tarjan 1974]) に用いられている.<br>
+3(点)連結成分のようなものを求めることができ, この考えが Hopcroft, Tarjan の線形時間でのグラフの平面性判定アルゴリズム("Efficient Planarity Testing" [Hopcroft, Tarjan 1974]) に用いられている.
 </p>
 <p>
 (関数)<br>
