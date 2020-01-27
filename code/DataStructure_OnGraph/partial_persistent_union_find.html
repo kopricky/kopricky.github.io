@@ -94,33 +94,25 @@ public:
     int last;
     vector&lt;pair&lt;int, int&gt; &gt; par;
     vector&lt;vector&lt;pair&lt;int, int&gt; &gt; &gt; sz;
-    PartialPersistentUnionFind(int node_size)
+    PartialPersistentUnionFind(const int node_size)
         : V(node_size), last(numeric_limits&lt;int&gt;::min()), par(V), sz(V){
         for(int i = 0; i &lt; V; ++i){
-            par[i] = {1, i};
+            par[i] = {numeric_limits&lt;int&gt;::max(), i};
             sz[i].emplace_back(numeric_limits&lt;int&gt;::min(), 1);
         }
     }
-    int find(const int u, const int _time){
-        if(u == par[u].second || par[u].first &gt; _time){
-            return u;
-        }else{
-            return find(par[u].second, _time);
-        }
+    int find(int u, const int _time){
+        while(par[u].first &lt;= _time) u = par[u].second;
+        return u;
     }
     bool unite(int u, int v, const int _time){
         assert(last &lt;= _time);
-        if(same(u, v, _time)) return false;
         last = _time;
         u = find(u, _time), v = find(v, _time);
-        if(par[u].first &lt; par[v].first){
-            swap(u, v);
-        }
+        if(u == v) return false;
+        if(sz[u].back().first &lt; sz[v].back().first) swap(u, v);
         par[v] = {_time, u};
         sz[u].emplace_back(_time, sz[u].back().second + sz[v].back().second);
-        if(par[u].first == par[v].first){
-            ++par[u].first;
-        }
         return true;
     }
     bool same(const int u, const int v, const int _time){
@@ -129,14 +121,16 @@ public:
     int size(int u, const int _time){
         u = find(u, _time);
         return sz[u][static_cast&lt;int&gt;(upper_bound(sz[u].begin(), sz[u].end(),
-            make_pair(_time, V+1)) - sz[u].begin()) - 1].second;
+            make_pair(_time, V + 1)) - sz[u].begin()) - 1].second;
     }
 };
 </pre>
 </div>
 <h3>verify 用の問題</h3>
 <p>Atcoder : <a href="https://code-thanks-festival-2017.contest.atcoder.jp/tasks/code_thanks_festival_2017_h">Union Sets</a>
-  <a href="https://code-thanks-festival-2017.contest.atcoder.jp/submissions/7068142">提出コード</a>(size 以外の verify)</p>
+  <a href="https://code-thanks-festival-2017.contest.atcoder.jp/submissions/7068142">提出コード</a>(size 以外の verify)<br>
+Atcoder : <a href="https://atcoder.jp/contests/agc002/tasks/agc002_d">Stamp Rally</a>
+<a href="https://atcoder.jp/contests/agc002/submissions/9791224">提出コード</a></p>
 </section>
 
 </div>
