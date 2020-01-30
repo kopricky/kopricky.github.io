@@ -70,8 +70,8 @@ $p = k * 2^l + 1 (k > 0, n + 1 \le 2^l)$ を満たすこと(数論変換に乗�
 正直形式的べき級数をあまり良く理解しておらず, 雰囲気で書いているため不正確な記述になっているとは思う($\mathrm{mod}$
 とか書くのも正確なのか知らないが $\mathrm{mod}\ x^n$ と書いた場合は多項式環のそれと同様に ($x^n$) で割ったものというノリで書いている).<br>
 <br>
-<b>Lemma</b>: $x_j (j \ge 2^i)$ の係数が $0$ であるような形式的べき級数 $g_i$ が $\exp(f) \equiv g_i\ \mathrm{mod}\ x^{2^i}$ かつ ($g_i$ の定数項) $= 1$ を満たすなら
-$\exp(f) \equiv g_{i+1}\ \mathrm{mod}\ x^{2^{i+1}}$ かつ ($g_{i+1}$ の定数項) $= 1$ を満たす形式的べき級数 $g_{i+1}$ は
+<b>Lemma</b>: $x_j (j \ge 2^i)$ の係数が $0$ であるような形式的べき級数 $g_i$ が $g_i \equiv \exp(f)\ \mathrm{mod}\ x^{2^i}$ かつ ($g_i$ の定数項) $= 1$ を満たすなら
+$g_{i+1} \equiv \exp(f)\ \mathrm{mod}\ x^{2^{i+1}}$ かつ ($g_{i+1}$ の定数項) $= 1$ を満たす形式的べき級数 $g_{i+1}$ は
 $g_{i+1} \overset{\mathrm{def}}{=} \left( \left( g_i \cdot (f + 1 - \log g_i) \right) \ \mathrm{mod}\ x^{2^{i+1}} \right)$ と定めることで得られる. <br><br>
 
 これより初期値を $g_0 = 1$ と取り, $\lceil \log r \rceil$ 回反復を繰り返すことで解が得られる.<br>
