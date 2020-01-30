@@ -79,9 +79,9 @@ $g_{i+1} \overset{\mathrm{def}}{=} \left( \left( g_i \cdot (f + 1 - \log g_i) \r
 (<b>Lemma</b> の証明(っぽい何か)) <br>
 まず $\left( g_i \cdot (f + 1 - \log g_i) \right) \ \mathrm{mod}\ x^{2^{i+1}}$ の定数項に注目すると ($g_i$ の定数項) $= 1$ および ($\log g_i$
 の定数項) $= 0$ より ($g_{i+1}$ の定数項) は $1$ となることが分かる.<br>
-次に $a(x)$ を $g_i(x)$ の $x^i (1 \le i < x^{2^i})$ の項からなる形式的べき級数,
-$b(x)$ を $\exp(x)$ の $x^i (x^{2^i} \le i < x^{2^{i+1}})$ の項からなる形式的べき級数,
-$c(x)$ を $\exp(x)$ の $x^i (i \ge x^{2^{i+1}})$ の項からなる形式的べき級数とする.
+次に $a(x)$ を $g_i(x)$ の $x^j (1 \le j < 2^i)$ の項からなる形式的べき級数,
+$b(x)$ を $\exp(x)$ の $x^j (2^i \le j < 2^{i+1})$ の項からなる形式的べき級数,
+$c(x)$ を $\exp(x)$ の $x^j (j \ge 2^{i+1})$ の項からなる形式的べき級数とする.
 このとき $\exp(f) \equiv g_i\ \mathrm{mod}\ x^{2^i}$ から
 $\exp(f(x)) = 1 + a(x) + b(x) + c(x)$ が成り立つ.<br>
 よって $\exp(f) - g_{i+1} \equiv (1 + a + b) - (1 + a) \cdot (\log(1 + a + b + c) + 1 - \log (1 + a)) \overset{?}{\equiv} 0\ \mathrm{mod}\ x^{2^{i+1}}$ を示せば良い(式 (1)).<br>
