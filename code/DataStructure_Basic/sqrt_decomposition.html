@@ -57,7 +57,7 @@ $\newcommand{\O}{\mathrm{O}}$
 <div id="contents">
 
 <section>
-<h2>Quadratic Decomposition</h2>
+<h2>Sqrt Decomposition</h2>
 <h3>コードについての説明</h3>
 <p>
 Segment Tree ではうまく処理できないような区間に対するクエリ、例えば区間 $[l,r)$ に値 $val$ がいくつ含まれているか
@@ -79,12 +79,12 @@ backet_size が上記の $B$ に等しい. クエリの処理などは問題に�
 <input type="checkbox" id="label" class="csscode" />
 <label for="label"></label>
 <pre class="prettyprint linenums">
-template&lt;typename T&gt; class QuadraticDecomposition{
+template&lt;typename T&gt; class SqrtDecomposition{
 public:
     vector&lt;T&gt; data;
     int sz,backet_size,backet_cnt;
     vector&lt;T&gt; backet;
-    QuadraticDecomposition(vector&lt;T&gt;&amp; v) : data(v), sz((int)data.size()),
+    SqrtDecomposition(vector&lt;T&gt;&amp; v) : data(v), sz((int)data.size()),
         backet_size((int)sqrt(sz)), backet_cnt(sz / backet_size + 1), backet(backet_cnt, 0){
         for(int i = 0; i &lt; sz; i++){
             backet[i / backet_size] += data[i];  //例えば和を持たせる処理
