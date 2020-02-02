@@ -157,8 +157,8 @@ vector&lt;int&gt; convolute(const vector&lt;int&gt;&amp; a, const vector&lt;int&
     int t = 1;
     while(t &lt; size){ t &lt;&lt;= 1; }
     vector&lt;int&gt; A(t, 0), B(t, 0);
-    for(int i = 0; i &lt; asize; i++){ A[i] = a[i]; }
-    for(int i = 0; i &lt; bsize; i++){ B[i] = b[i]; }
+    for(int i = 0; i &lt; asize; i++){ A[i] = (a[i] &lt; MOD) ? a[i] : (a[i] % MOD); }
+    for(int i = 0; i &lt; bsize; i++){ B[i] = (b[i] &lt; MOD) ? b[i] : (b[i] % MOD); }
     ntt(A), ntt(B);
     for(int i = 0; i &lt; t; i++) { A[i] = mul(A[i], B[i]); }
     ntt(A, true);
