@@ -69,7 +69,7 @@ partion アルゴリズムを parallel に行うのは考えてみると結構�
 std::partition を用いて並び替える(Cleanup 操作). <br>
 論文ではこの Cleanup 操作における比較回数をより小さくするような手法を提案している. ただ比較回数は少なくなるものの少なくとも数列のソートでは単純な F & A アルゴリズムでも十分な速度が出ていることが論文内の実験から分かる(比較の演算の計算コストが重い場合などは論文の手法の方が良いように見える). 実際に論文のアルゴリズムが C++17 の parallel_quick_sort の実装に使われているようだ.
 著者のホームページにその実装が上がっている(<a href="https://www.cs.upc.edu/~lfrias/publications.html">参考</a>). また F & A algorithm については<a href="https://blogs.msdn.microsoft.com/dhuba/2012/03/04/parallel-partition-phase-for-quick-sort/">こちらのブログ</a>も参考になった. <br>
-以下の実装では(ピボット以上の要素) と (ピボット未満の要素) の要素数に差が生じるような場合が気になったので std::future で待つのではなく task を queue に突っ込む実装にしている.<br>
+実装では(ピボット以上の要素) と (ピボット未満の要素) の要素数に差が生じるような場合が気になったので std::future で待つのではなく task を queue に突っ込む実装にしている.<br>
 </p>
 </section>
 

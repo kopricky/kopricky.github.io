@@ -119,7 +119,7 @@ public:
         Cot res = 0;
         for(;;){
             bfs(s);
-            if(level[t] &lt; 0) return numeric_limits&lt;Cot&gt;::min();
+            if(level[t] &lt; 0) return numeric_limits&lt;Cot&gt;::max();
             fill(iter.begin(), iter.end(), 0);
             while(true){
                 Cat df = dfs(s, t, f, res);
@@ -224,7 +224,7 @@ public:
     Cot solve(const int s, const int t, Cat f){
         Dinic&lt;edge&gt; dn(G);
         Cot res = dn.solve(s, t, f);
-        if(res == numeric_limits&lt;Cot&gt;::min()) return res;
+        if(res == numeric_limits&lt;Cot&gt;::max()) return res;
         while(update(res));
         return res;
     }
