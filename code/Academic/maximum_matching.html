@@ -86,7 +86,7 @@ class ModInt {
 private:
     unsigned int v;
     static unsigned int norm(const unsigned int&amp; x){ return x &lt; mod ? x : x - mod; }
-	static ModInt make(const unsigned int&amp; x){ ModInt m; return m.v = x, m; }
+    static ModInt make(const unsigned int&amp; x){ ModInt m; return m.v = x, m; }
     static ModInt inv(const ModInt&amp; x){ return make(inverse(x.v, mod)); }
     static unsigned int inverse(int a, int m){
         int u[] = {a, 1, 0}, v[] = {m, 0, 1}, t;
@@ -101,7 +101,7 @@ public:
     ModInt() : v{0}{}
     ModInt(const long long val) : v{norm(val % mod + mod)} {}
     ModInt(const ModInt&lt;mod&gt;&amp; n) : v{n()} {}
-	explicit operator bool() const noexcept { return v != 0; }
+    explicit operator bool() const noexcept { return v != 0; }
     bool operator!() const noexcept { return !static_cast&lt;bool&gt;(*this); }
     ModInt&amp; operator=(const ModInt&amp; n){ return v = n(), (*this); }
     ModInt&amp; operator=(const long long val){ return v = norm(val % mod + mod), (*this); }
