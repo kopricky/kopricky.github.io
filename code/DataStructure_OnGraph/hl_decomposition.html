@@ -132,6 +132,8 @@ public:
     void subtree_query(int a, const function&lt; void(int, int) &gt; &amp;func){
         func(in[a], out[a]);
     }
+    // 例: hl.path_query(q, r, [&amp;](int l, int r){ seg.range(l, r, s); })
+    // 例: hl.query(q, r, [&amp;](int l, int r){ ans += seg.query(l, r); })
     void path_query(int a, int b, const function&lt; void(int, int) &gt; &amp;func){
         int pa = pathtop[a], pb = pathtop[b];
         while(pathtop[a] != pathtop[b]){
