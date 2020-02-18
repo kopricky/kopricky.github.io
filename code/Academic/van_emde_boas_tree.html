@@ -61,7 +61,9 @@ $\newcommand{\O}{\mathrm{O}}$
 <h3>コードについての説明(<a href="./van_emde_boas_tree_memo.html">個人的メモ</a>)</h3>
 <p>
 van Emde Boas Tree (vEB 木)の実装. van Emde Boas Tree は $[0, U)$ 内の要素について
-insert, delete, prdecessor, successor クエリに最悪計算量 $\O (\log \log U)$ で答えるデータ構造で, その空間計算量 $\O (U)$ である.<br>
+insert, delete, prdecessor, successor クエリに最悪計算量 $\O (\log \log U)$ で答えるデータ構造で, その空間計算量 $\O (U)$ である.
+ここで predecessor クエリとは vEB 木に含まれる入力の値より小さい要素の中で最大の値を返すクエリで
+successor クエリとは vEB 木に含まれる入力の値より大きい要素の中で最小の値を返すクエリである.<br>
 実装は <a href="http://web.stanford.edu/class/archive/cs/cs166/cs166.1166/lectures/14/Slides14.pdf">こちらの資料</a> を参考にした. <br>
 $2$ つコードを用意して $1$ つ目は愚直の実装で特に速度やメモリを気にしていないので余り使い物にならないが, 実装の参考にはなると思う(最終層は uint64_t を用いている.). <br>
 $2$ つ目のコードは競プロなどでよくある $10^9$ 以下の非負整数(実装では正確には $2^{30}$ 未満の非負整数) について管理する割と高速な van Emde Boas Tree を実装してみた. <br>
@@ -72,10 +74,11 @@ $2$ つ目のコードは競プロなどでよくある $10^9$ 以下の非負�
 </p>
 <p>
 (愚直版のコンストラクタ)<br>
-vanEmdeBoasTree(const uint32_t  $length$) : $[0, length)$ の数を管理する順序付き集合を構築
+vanEmdeBoasTree(const uint32_t $U$) : $[0, U)$ の数を管理する順序付き集合を構築
 </p>
 <p>
-時間計算量: insert, erase, predecessor, successor $\O (\log \log U)$ ($U$ は値の上限)
+時間計算量: insert, erase, predecessor, successor $\O (\log \log U)$ ($U$ は値の上限)<br>
+predecessor / successor クエリについては返すべき要素が存在しない場合はそれぞれ -1 および $U$ を返す.
 </p>
 <h3>コード(愚直版)</h3>
 <div class="codebox">

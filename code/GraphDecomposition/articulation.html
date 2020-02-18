@@ -69,8 +69,7 @@ $\newcommand{\O}{\mathrm{O}}$
 <p>
 (関数)<br>
 add_edge$(u, v)$: $u, v$ の間に無向辺を追加する <br>
-solve(): 関節点を求める($art$ に true/false が入る) <br>
-make_bctree(): solve() を呼んだ後に呼ぶことで block cut tree の構築を行う(block cut tree の頂点数を返す). <br>
+solve(): 関節点を求めて($art$ に true/false が入る), さらに block cut tree の構築を行う <br>
 具体的に bctree が block cut tree の隣接リスト表現, bcnodes がその頂点集合で bcnode 型は isBlock(各頂点が block か cut か) と
 component(block なら辺集合, cut ならサイズ 1 で要素は {関節点の id, 関節点の id}) から成る.<br>
 ここでは 1 頂点 0 辺からなる連結成分は block node でも cut node でもないと考えています.
