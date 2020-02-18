@@ -88,43 +88,19 @@ public:
     struct bcnode;
 private:
     const int V;
-    vector&lt;vector&lt;int&gt; &gt; dfs_tree;
-    vector&lt;int&gt; ord, low, self_loops;
-    void dfs(const int u, const int p, int&amp; tm){
-        ord[u] = low[u] = tm++;
-        bool multi_edge = false;
-        int ct = 0;
+    vector&lt;int&gt; ord, low;
+    bool check(const int u){
         for(const int v : G[u]){
-            if(ord[v] &lt; 0){
-                dfs_tree[u].push_back(v);
-                ++ct, dfs(v, u, tm);
-                low[u] = min(low[u], low[v]);
-                if(p &gt;= 0 &amp;&amp; ord[u] &lt;= low[v]) art[u] = true;
-            }else if(v == p){
-                if(multi_edge){
-                    dfs_tree[u].push_back(v);
-                    low[u] = min(low[u], ord[v]);
-                }else{
-                    multi_edge = true;
-                }
-            }else if(ord[v] &lt; ord[u]){
-                dfs_tree[u].push_back(v);
-                low[u] = min(low[u], ord[v]);
-            }
+            if(ord[v] &lt; 0) return true;
         }
-        if(p == -1 &amp;&amp; ct &gt; 1) art[u] = true;
+        return false;
     }
-    bool check(const int cur, const pair&lt;int, int&gt; e) const {
-        return ((e.first != cur &amp;&amp; ord[cur] &gt; low[e.first])
-                || (e.second != cur &amp;&amp; ord[cur] &gt; low[e.second]));
-    }
-    void identify_block(const int u, bool *used, 
-                        stack&lt;pair&lt;int, int&gt; &gt;&amp; st, const vector&lt;int&gt;&amp; bcnode_id){
+    void identify_block(const int u, const int v, bool *used, 
+                            stack&lt;pair&lt;int, int&gt; &gt;&amp; st, const vector&lt;int&gt;&amp; bcnode_id){
         vector&lt;pair&lt;int, int&gt; &gt; block;
         vector&lt;int&gt; cut_vertex;
         while(!st.empty()){
             const pair&lt;int, int&gt; p = st.top();
-            if(check(u, p)) break;
             st.pop(), block.push_back(p);
             if(art[p.first] &amp;&amp; !used[p.first]){
                 cut_vertex.push_back(p.first);
@@ -134,6 +110,7 @@ private:
                 cut_vertex.push_back(p.second);
                 used[p.second] = true;
             }
+            if(p == (pair&lt;int, int&gt;){u, v}) break;
         }
         const int block_id = (int)bctree.size();
         bctree.push_back(vector&lt;int&gt;());
@@ -144,31 +121,34 @@ private:
             used[ver] = false;
         }
     }
-    void redfs(const int u, const int p, bool *visit, bool *used,
+    void dfs(const int u, const int p, int&amp; tm, bool *used,
                 stack&lt;pair&lt;int, int&gt; &gt;&amp; st, vector&lt;int&gt;&amp; bcnode_id){
-        visit[u] = true;
-        if(art[u]){
-            bcnode_id[u] = (int)bctree.size();
-            bctree.push_back(vector&lt;int&gt;());
-            bcnodes.emplace_back(false, vector&lt;pair&lt;int, int&gt; &gt;{{u, u}});
-        }
-        for(int i = 0; i &lt; self_loops[u]; ++i) st.push({u, u});
-        if(art[u] || p == -1){
-            for(const int v : dfs_tree[u]){
-                if(!visit[v] &amp;&amp; low[v] &gt;= ord[u]){
-                    st.push({u, v});
-                    redfs(v, u, visit, used, st, bcnode_id);
-                    // u might not be an articulation point when u is the root
-                    if(art[u]) identify_block(u, used, st, bcnode_id);
-                }
-            }
-        }
-        for(const int v : dfs_tree[u]){
-            if(!visit[v]){
+        ord[u] = low[u] = tm++;
+        bool multi_edge = false;
+        for(const int v : G[u]){
+            if(ord[v] &lt; 0){
                 st.push({u, v});
-                redfs(v, u, visit, used, st, bcnode_id);
+                dfs(v, u, tm, used, st, bcnode_id);
+                low[u] = min(low[u], low[v]);
+                if(ord[u] &lt;= low[v]){
+                    if(!art[u] &amp;&amp; (p &gt;= 0 || check(u))){
+                        art[u] = true;
+                        bcnode_id[u] = (int)bctree.size();
+                        bctree.push_back(vector&lt;int&gt;());
+                        bcnodes.emplace_back(false, vector&lt;pair&lt;int, int&gt; &gt;{{u, u}});
+                    }
+                    identify_block(u, v, used, st, bcnode_id);
+                }
+            }else if(v == p){
+                if(multi_edge){
+                    st.push({u, v});
+                    low[u] = min(low[u], ord[v]);
+                }else{
+                    multi_edge = true;
+                }
             }else if(ord[v] &lt; ord[u]){
                 st.push({u, v});
+                low[u] = min(low[u], ord[v]);
             }
         }
     }
@@ -184,29 +164,18 @@ public:
     vector&lt;vector&lt;int&gt; &gt; bctree;
     vector&lt;bcnode&gt; bcnodes;
     Articulation(const int node_size)
-        : V(node_size), dfs_tree(V), ord(V, -1), low(V), self_loops(V, 0), G(V), art(V, false){}
+        : V(node_size), ord(V, -1), low(V), G(V), art(V, false){}
     void add_edge(const int a, const int b){
-        if(a == b) ++self_loops[a];
-        else G[a].push_back(b), G[b].push_back(a);
+        G[a].push_back(b), G[b].push_back(a);
     }
-    void solve(){
+    int solve(){
         int tm = 0;
-        for(int i = 0; i &lt; V; ++i){
-            if(ord[i] &lt; 0) dfs(i, -1, tm);
-        }
-    }
-    int make_bctree(){
-        bool *visit = new bool[V]();
         bool *used = new bool[V]();
         stack&lt;pair&lt;int, int&gt; &gt; st;
         vector&lt;int&gt; bcnode_id(V, -1); // bcnode_id[original vertex] = cut vertex;
         for(int i = 0; i &lt; V; ++i){
-            if(!visit[i]){
-                redfs(i, -1, visit, used, st, bcnode_id);
-                if(!st.empty()) identify_block(i, used, st, bcnode_id);
-            }
+            if(ord[i] &lt; 0) dfs(i, -1, tm, used, st, bcnode_id);
         }
-        delete[] visit;
         delete[] used;
         return (int)bctree.size();
     }
@@ -215,7 +184,7 @@ public:
 </div>
 <h3>verify 用の問題</h3>
 <p>Codeforces : <a href="https://codeforces.com/contest/962/problem/F">Simple Cycles Edges</a>
-  <a href="https://codeforces.com/contest/962/submission/69393875">提出コード</a>(あまり本質的な verify にはなっていない)</p>
+  <a href="https://codeforces.com/contest/962/submission/71371701">提出コード</a>(あまり本質的な verify にはなっていない気もする)</p>
 </section>
 
 </div>
