@@ -60,6 +60,11 @@ $\newcommand{\O}{\mathrm{O}}$
 <h2>Finding Potential</h2>
 <h3>コードについての説明</h3>
 <p>
+整数コストの有向グラフ $G$ のポテンシャル $p$ を求めるアルゴリズム. ない場合は false を返す.<br>
+$p$ がポテンシャルであることの定義はグラフ $G$ のすべての辺 $e = (u, v)$ について $p(u) + cost(u, v) >= p(v)$ が成り立つことである.
+注意としてポテンシャルが存在することはグラフに負の有向閉路が存在しないことと同値である.<br>
+応用例としてこのアルゴリズムを用いることで負辺を含むグラフが負の有向閉路を持つかどうかの判定や全点対間最短距離が少なくとも計算量の意味では
+bellman ford 法や warshall floyd 法を用いるよりも高速に求めることができる.<br>
 元論文は "Scaling algorithms for the shortest paths problem" [Goldberg 1995].
 </p>
 <p>

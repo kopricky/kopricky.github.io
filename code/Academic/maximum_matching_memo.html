@@ -75,7 +75,7 @@ $\det (T) = \sum_{j=1}^n (-1)^{i+j} T_{1, j} \det (T_{\langle 1 \rangle, \langle
 また $\det (T_{\langle 1 \rangle ,\langle j\rangle }) \neq 0 \Rightarrow \det (T_{ \langle 1,j \rangle ,\langle 1,j \rangle }) \neq 0$ より辺 $(1, j)$ を取り除いた後のグラフは完全マッチングを持つ($\Rightarrow$ 補足 2). <br>
 あとは $\det (T_{ \langle 1 \rangle ,\langle j \rangle }) \neq 0$ となるような $j$ をどうやって見つけてくるかだが $(T^{-1})_{i, j} = (-1)^{i+j} \cdot \frac{\det \left( {T_{\langle i \rangle, \langle j \rangle}} \right)}{\det \left( T \right) }$ より, $\det (T_ { \langle 1 \rangle ,\langle j \rangle }) \neq 0 \Leftrightarrow \left( T^{-1} \right) _{1,j} \neq 0$ が得られるので $T$ の逆行列を計算することで $j$ を求めることができる. <br>
 これを再帰的に繰り返すことで $\O (n^4)$ で構築することが可能になった(正確には $\O (n^{ω+1})$ time). <br>
-ここで逆行列計算を毎回する必要はなく $T^{-1}$ をブロック行列と見てその Schur 補行列が $\left( T_ { \langle i,j \rangle ,\langle i,j \rangle } \right) ^ {-1}$ と一致するので辺を取り除いた後の Tutte 行列の逆行列は $T^{-1}$ が求まっていると $\O (n^2)$ 時間で構築することができる.
+ここで逆行列計算を毎回する必要はなく $T^{-1}$ をブロック行列と見たときその Schur 補行列が $\left( T_ { \langle i,j \rangle ,\langle i,j \rangle } \right) ^ {-1}$ と一致するので辺を取り除いた後の Tutte 行列の逆行列は $T^{-1}$ が求まっていると $\O (n^2)$ 時間で構築することができる.
 つまり全体で $\O (n^3)$ time で計算可能. ちなみにもっと頑張ると $\O (n^ω)$ まで落ちるらしい<br>
 <br>
 以下では交代行列の性質を用いて導かれる本文中の自明でない結果 (補足 1), (補足 2) について証明を雑に記す.
