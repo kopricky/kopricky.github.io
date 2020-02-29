@@ -65,7 +65,7 @@ $\newcommand{\O}{\mathrm{O}}$
 このとき $n$ 人の人をちょうど $1$ つずつ別々の仕事に割り当てることで仕事にかかるのべ時間を最小にしたいという問題のことを言う. <br>
 二部グラフのマッチングの重みつきの場合のアルゴリズムである. 最小費用流のアルゴリズムでも解くことができるが,
 計算量としては $\O (n m \log n)$ かかる
-(正確には二分ヒープによる Dijkstra 法を用いて最短経路に沿ってフローを増加させるアルゴリズムの場合の話で <a href="../Academic/dijkstra_fheap.html">Fibonacci heap を用いた Dijkstra 法</a> を用いると
+(正確には二分ヒープによる Dijkstra 法を用いて最短経路に沿ってフローを増加させるアルゴリズムの場合の話で <a href="../Academic/dijkstra_fheap.html">フィボナッチヒープによる Dijkstra 法</a> を用いると
 $\O (n m + n^2 \log n)$ で可能になる).
 一方ハンガリアン法では $\O (n^3)$ の計算量で解くことが可能である. また学問的に割当問題は重み付き(線形)マトロイド交差問題の枠組みで解かれることが多く, 重みが小さい場合には効率よく動作するアルゴリズムも知られている. <br>
 Hungarian 法の説明は有名な Goemans 先生の <a href="http://math.mit.edu/~goemans/18453S17/matching-notes.pdf">Lecture note</a> が分かりやすかった. こちらにのっているのは $\O (n^4)$ までの話だが,
