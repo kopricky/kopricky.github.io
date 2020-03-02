@@ -64,7 +64,7 @@ $\newcommand{\O}{\mathrm{O}}$
 <a href="http://snuke.hatenablog.com/entry/2017/02/03/054210">この記事</a>の説明にあるとおり深さ $i$ に対応する乱数 $R_i\ (\in [0, mod)$を取った上で,
 ある頂点 $v$ でその頂点を根とする部分木の深さが $i$ であるようなものについて $v$ を根とする部分木のハッシュを ($R_i +$ ($v$ の子を根とする部分木のハッシュ値)の積) $\% mod$ で計算すると良い. <br>
 根となる頂点には多変数多項式が対応するわけだがここで "$2$ つの木が同型 $\Leftrightarrow$ $2$ つの木の根の多変数多項式が恒等的に等しい" が成り立つ(厳密には一意的に素因数分解が可能であることから従うだろう).　<br>
-よって結局 Shwartz-Zippel Lemma より乱数を入れて恒等的に等しくないのに等しいと判定する確率は $\mathbb{Z}_p$ 上で $n / p$ 以下であることが言える <br>
+よって結局 Shwartz-Zippel Lemma より乱数を入れて恒等的に等しくないのに等しいと判定する確率は $\mathbb{Z}_p$ 上で $n / p$ 以下であることが言える.<br>
 以下の実装では $2$ 種類の mod を用いてハッシュ値を計算している. <br>
 兄弟間の順序を区別する順序木の場合は DFS でたどって行きがけに '(', 帰りがけに ')' を配置した括弧列を考えると単射となるのでその文字列比較によって同形性判定を行える.
 ちなみにこれは valid な括弧列への全射でもあり,
@@ -81,16 +81,34 @@ $\newcommand{\O}{\mathrm{O}}$
 <pre class="prettyprint linenums">
 class tree_hashing {
 private:
-    static vector&lt;unsigned long long&gt; rnum[2];
-    static constexpr unsigned long long mod[2] = {1000000007ULL, 1000000009ULL};
+    static vector&lt;unsigned int&gt; rnum[2];
+    static constexpr unsigned int mod[2] = {1000000007, 1000000009};
     const int V;
     vector&lt;vector&lt;int&gt; &gt; G;
-    vector&lt;int&gt; depth_st;
+    
+    pair&lt;unsigned int, unsigned int&gt; hash_dfs(const int u, const int p, int&amp; depth){
+        unsigned int res[] = {1u, 1u};
+        for(auto v : G[u]){
+            if(v != p){
+                int d = 0;
+                auto val = hash_dfs(v, u, d);
+                depth = max(depth, d);
+                res[0] = (unsigned long long)res[0] * val.first % mod[0];
+                res[1] = (unsigned long long)res[1] * val.second % mod[1];
+            }
+        }
+        ++depth;
+        res[0] = (res[0] + rnum[0][depth] &gt;= mod[0]) ?
+        (res[0] + rnum[0][depth] - mod[0]) : (res[0] + rnum[0][depth]);
+        res[1] = (res[1] + rnum[1][depth] &gt;= mod[1]) ?
+        (res[1] + rnum[1][depth] - mod[1]) : (res[1] + rnum[1][depth]);
+        return make_pair(res[0], res[1]);
+    }
 public:
-    tree_hashing(const int node_size) : V(node_size), G(V), depth_st(V, 0){
+    tree_hashing(const int node_size) : V(node_size), G(V){
         random_device rnd;
         mt19937 mt(rnd());
-        uniform_int_distribution&lt;&gt; rand1(0, mod[0] - 1), rand2(0, mod[1] - 1);
+        uniform_int_distribution&lt;&gt; rand1(1, mod[0] - 1), rand2(1, mod[1] - 1);
         while((int)rnum[0].size() &lt; V){
             rnum[0].push_back(rand1(mt)), rnum[1].push_back(rand2(mt));
         }
@@ -98,32 +116,18 @@ public:
     void add_edge(const int a, const int b){
         G[a].push_back(b), G[b].push_back(a);
     }
-    pair&lt;unsigned long long, unsigned long long&gt; hash_dfs(const int u, const int p)
+    pair&lt;unsigned int, unsigned int&gt; hash(int root=0)
     {
-        unsigned long long res[] = {1ULL, 1ULL};
-        for(auto v : G[u]){
-            if(v != p){
-                auto val = hash_dfs(v, u);
-                depth_st[u] = max(depth_st[u], depth_st[v]);
-                res[0] = (res[0] * val.first) % mod[0];
-                res[1] = (res[1] * val.second) % mod[1];
-            }
-        }
-        res[0] = (res[0] + rnum[0][depth_st[u]]) % mod[0];
-        res[1] = (res[1] + rnum[1][depth_st[u]]) % mod[1];
-        return make_pair(res[0], res[1]);
-    }
-    pair&lt;unsigned long long, unsigned long long&gt; hash(int root=0)
-    {
-        return hash_dfs(root, -1);
+        int d = 0;
+        return hash_dfs(root, -1, d);
     }
 };
-vector&lt;unsigned long long&gt; tree_hashing::rnum[2];
+vector&lt;unsigned int&gt; tree_hashing::rnum[2];
 </pre>
 </div>
 <h3>verify 用の問題</h3>
 <p>CSAcademy : <a href="https://csacademy.com/contest/round-73/task/binary-isomorphism/">Binary Isomorphism</a>
-  <a href="https://csacademy.com/code/NWBr9RZg/">提出コード</a></p>
+  <a href="https://csacademy.com/code/dgcFZf9H/">提出コード</a></p>
 </section>
 
 </div>
