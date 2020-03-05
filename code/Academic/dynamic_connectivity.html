@@ -146,13 +146,13 @@ BSTNode *splay(BSTNode *u) noexcept {
     if(!u) return nullptr;
     while(!(u-&gt;IsRoot())){
         BSTNode *p = u-&gt;par, *gp = p-&gt;par;
-        if(p-&gt;IsRoot()){ // zig
+        if(p-&gt;IsRoot()){
             u-&gt;rotate((u == p-&gt;left));
         }else{
             bool flag = (u == p-&gt;left);
-            if((u == p-&gt;left) == (p == gp-&gt;left)){ // zig-zig
+            if((u == p-&gt;left) == (p == gp-&gt;left)){
                 p-&gt;rotate(flag), u-&gt;rotate(flag);
-            }else{ // zig-zag
+            }else{
                 u-&gt;rotate(flag), u-&gt;rotate(!flag);
             }
         }
@@ -212,7 +212,7 @@ private:
             if(edge2-&gt;right) edge2-&gt;right-&gt;par = nullptr;
             join(edge1-&gt;left, edge2-&gt;right);
         }
-        // delete edge1; delete edge2;
+        delete edge1; delete edge2;
     }
     bool connected(BSTNode *ver1, BSTNode *ver2) noexcept {
         splay(ver1), splay(ver2);
@@ -221,7 +221,6 @@ private:
     int component_size(BSTNode *ver) noexcept { return splay(ver)-&gt;sz; }
 public:
     int V;
-    EulerTourTree(){}
     // ~EulerTourTree(){
     //     for(auto it : edge_set){
     //         delete (it.second).first;
@@ -230,7 +229,7 @@ public:
     //     for(int i = 0; i &lt; V; ++i) delete vertex_set[i];
     //     delete[] vertex_set;
     // }
-    void resize(const int node_size) noexcept {
+    EulerTourTree(const int node_size) noexcept {
         V = node_size, vertex_set = new BSTNode*[V];
         for(int i = 0; i &lt; V; i++) vertex_set[i] = new BSTNode(i);
     }
@@ -332,12 +331,12 @@ private:
         }else return replace(from, to, layer-1);
     }
 public:
-    const int V, layer_count;
-    EulerTourTree* et;
+    const int V;
+    int depth;
+    vector&lt;EulerTourTree&gt; et;
     unordered_map&lt;pair&lt;int, int&gt;, int, EulerTourTree::pair_hash&gt; detect_layer;
-    DynamicConnectivity(int node_size) noexcept : V(node_size), layer_count(ceil(log2(V))+1){
-        et = new EulerTourTree[layer_count];
-        for(int i = 0; i &lt; layer_count; i++) et[i].resize(V);
+    DynamicConnectivity(const int node_size) noexcept : V(node_size), depth(1){
+        et.emplace_back(V);
     }
     // ~DynamicConnectivity(){
     //     delete[] et;
@@ -364,6 +363,7 @@ public:
         auto&amp; st = et[layer].vertex_set[node1_id]-&gt;adjacent;
         if(st.find(node2_id) == st.end()){
             for(int i = 0; i &lt;= layer; i++) et[i].cut(node1_id, node2_id);
+            if(layer + 1 == depth) ++depth, et.emplace_back(V);
             return replace(node1_id, node2_id, layer);
         }else{
             et[layer].vertex_set[node1_id]-&gt;adjacent.erase(node2_id);
@@ -386,7 +386,6 @@ public:
 <input type="checkbox" id="label2" class="csscode" />
 <label for="label2"></label>
 <pre class="prettyprint linenums">
-// 高速ではあるが自作 unordered_set, unordered_map が少し不安なので通常版(こちらもかなり高速)の方がいいかも
 template&lt;class _Key, class _Hash, bool DOWNSIZE&gt; class UnorderedSetIterator;
 
 template&lt;class _Key, class _Hash = hash&lt;_Key&gt;, bool DOWNSIZE = false&gt;
@@ -987,13 +986,13 @@ BSTNode *splay(BSTNode *u) noexcept {
     if(!u) return nullptr;
     while(!(u-&gt;IsRoot())){
         BSTNode *p = u-&gt;par, *gp = p-&gt;par;
-        if(p-&gt;IsRoot()){ // zig
+        if(p-&gt;IsRoot()){
             u-&gt;rotate((u == p-&gt;left));
         }else{
             bool flag = (u == p-&gt;left);
-            if((u == p-&gt;left) == (p == gp-&gt;left)){ // zig-zig
+            if((u == p-&gt;left) == (p == gp-&gt;left)){
                 p-&gt;rotate(flag), u-&gt;rotate(flag);
-            }else{ // zig-zag
+            }else{
                 u-&gt;rotate(flag), u-&gt;rotate(!flag);
             }
         }
@@ -1065,7 +1064,10 @@ private:
     int component_size(BSTNode *ver) noexcept { return splay(ver)-&gt;sz; }
 public:
     int V;
-    EulerTourTree(){}
+    EulerTourTree(const int node_size){
+        V = node_size, vertex_set = new BSTNode*[V];
+        for(int i = 0; i &lt; V; i++) vertex_set[i] = new BSTNode(i);
+    }
     // ~EulerTourTree(){
     //     for(auto it : edge_set){
     //         delete (it.second).first;
@@ -1074,10 +1076,6 @@ public:
     //     for(int i = 0; i &lt; V; ++i) delete vertex_set[i];
     //     delete[] vertex_set;
     // }
-    void resize(const int node_size) noexcept {
-        V = node_size, vertex_set = new BSTNode*[V];
-        for(int i = 0; i &lt; V; i++) vertex_set[i] = new BSTNode(i);
-    }
     void reroot(const int node_id) noexcept { reroot(vertex_set[node_id]); }
     void link(int node1_id, int node2_id, bool flag=true) noexcept {
         if(node1_id &gt; node2_id) swap(node1_id, node2_id);
@@ -1095,7 +1093,7 @@ public:
         if(node1_id == node2_id) return true;
         return connected(vertex_set[node1_id], vertex_set[node2_id]);
     }
-    int component_size(int node_id) noexcept { return component_size(vertex_set[node_id]); }
+    int component_size(const int node_id) noexcept { return component_size(vertex_set[node_id]); }
     void check_dfs(const BSTNode* cur) const noexcept {
         if(cur-&gt;left) check_dfs(cur-&gt;left);
         cout &lt;&lt; &quot;{&quot; &lt;&lt; (cur-&gt;from) &lt;&lt; &quot;,&quot; &lt;&lt; (cur-&gt;to) &lt;&lt; &quot;} &quot;;
@@ -1178,12 +1176,12 @@ private:
         }else return replace(from, to, layer-1);
     }
 public:
-    const int V, layer_count;
-    EulerTourTree* et;
+    const int V;
+    int depth;
+    vector&lt;EulerTourTree&gt; et;
     UnorderedMap&lt;unsigned long long, int, EulerTourTree::murmur_hash64&gt; detect_layer;
-    DynamicConnectivity(int node_size) noexcept : V(node_size), layer_count(ceil(log2(V))+1){
-        et = new EulerTourTree[layer_count];
-        for(int i = 0; i &lt; layer_count; i++) et[i].resize(V);
+    DynamicConnectivity(const int node_size) noexcept : V(node_size), depth(1){
+        et.emplace_back(V);
     }
     // ~DynamicConnectivity(){
     //     delete[] et;
@@ -1210,6 +1208,7 @@ public:
         auto&amp; st = et[layer].vertex_set[node1_id]-&gt;adjacent;
         if(st.find(node2_id) == st.end()){
             for(int i = 0; i &lt;= layer; i++) et[i].cut(node1_id, node2_id);
+            if(layer + 1 == depth) ++depth, et.emplace_back(V);
             return replace(node1_id, node2_id, layer);
         }else{
             et[layer].vertex_set[node1_id]-&gt;adjacent.simple_erase(node2_id);
@@ -1231,7 +1230,7 @@ public:
 </div>
 <h3>verify 用の問題</h3>
 <p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2235&lang=jp">Graph Construction</a>
-  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3813963#1">提出コード</a><br>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=4237126#1">提出コード</a><br>
 (同じ問題で高速版の方は提出コード長制限に引っかかってしまいましたがテストケースをスクレイピングしてきて正答することを確認しました.)
 </p>
 </section>

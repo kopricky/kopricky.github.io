@@ -73,11 +73,12 @@ $\newcommand{\O}{\mathrm{O}}$
 <img src="./texclip20190704193404.png" height="80" width="200">
 </div>
 <p>
-そしてこのメビウス変換は計算量 $\O (n2^n)$ で行うことができ, 実装自体は以下のようにシンプルにかける.
-(1) については $i$ 周目の $f[j]$ は $j$ の下位 $i$ 桁以外一致しているような数 $k$ で $j$ を含むもの($j \subseteq k$) について包除を取っている.
-$j$ の $i$ 桁目が 0 のものについては i 周目に更新する必要があるがそれは前の周までの $f[j | (1 << i)]$ を引いてやれば包除を取ることができる(賢い). <br>
-(2) については $i$ 周目の $f[j]$ は $j$ の下位 $i$ 桁以外一致しているような数 $k$ で $j$ に含まれるもの($k \subseteq j$) について包除を取っている.
-$j$ の $i$ 桁目が $1$ のものについては $i$ 周目に更新する必要があるがそれは前の周までの $f[j \oplus (1 << i)]$ を引いてやれば包除を取ることができる. <br>
+このとき $f$ は $g$ のメビウス変換でありこのような $f$ は計算量 $\O (n2^n)$ で求めることができ, 実装自体は以下のようにシンプルにかける(in-place で実装した).<br>
+(以下コードについて) <br>
+(1) については $i$ 周目の $g[j]$ は $j$ の下位 $i$ 桁以外一致しているような数 $k$ で $j$ を含むもの($j \subseteq k$) について包除を取っている.
+$j$ の $i$ 桁目が 0 のものについては i 周目に更新する必要があるがそれは前の周までの $g[j | (1 << i)]$ を引いてやれば包除を取ることができる(賢い). <br>
+(2) については $i$ 周目の $g[j]$ は $j$ の下位 $i$ 桁以外一致しているような数 $k$ で $j$ に含まれるもの($k \subseteq j$) について包除を取っている.
+$j$ の $i$ 桁目が $1$ のものについては $i$ 周目に更新する必要があるがそれは前の周までの $g[j \oplus (1 << i)]$ を引いてやれば包除を取ることができる. <br>
 <!-- (メビウス変換がゼータ変換の逆変換であることの証明) <br>
 f: 2^V → Z, 任意の集合 Y ⊆ V についてゼータ変換 ζ, メビウス変換 μ を以下のように書き直す. <br>
 <img src="./texclip20190704194252.png" height="60" width="170">　
@@ -97,20 +98,20 @@ f: 2^V → Z, 任意の集合 Y ⊆ V についてゼータ変換 ζ, メビウ�
 <label for="label"></label>
 <pre class="prettyprint linenums">
 // 上位集合(含む集合)の包除(1)
-void fast_mobius_transform(int n, vector&lt;int&gt;&amp; f)
+void fast_mobius_transform(int n, vector&lt;int&gt;&amp; g)
 {
     for(int i = 0; i &lt; n; ++i){
         for(int j = 0; j &lt; (1 &lt;&lt; n); ++j){
-            if(!(j &amp; (1 &lt;&lt; i))) f[j] -= f[j | (1 &lt;&lt; i)];
+            if(!(j &amp; (1 &lt;&lt; i))) g[j] -= g[j | (1 &lt;&lt; i)];
         }
     }
 }
 // 下位集合(含まれる集合)の包除(2)
-void fast_mobius_transform(int n, vector&lt;int&gt;&amp; f)
+void fast_mobius_transform(int n, vector&lt;int&gt;&amp; g)
 {
     for(int i = 0; i &lt; n; ++i){
         for(int j = 0; j &lt; (1 &lt;&lt; n); ++j){
-            if(j &amp; (1 &lt;&lt; i)) f[j] -= f[j ^ (1 &lt;&lt; i)];
+            if(j &amp; (1 &lt;&lt; i)) g[j] -= g[j ^ (1 &lt;&lt; i)];
         }
     }
 }
