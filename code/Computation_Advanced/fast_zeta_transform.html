@@ -73,12 +73,12 @@ $\newcommand{\O}{\mathrm{O}}$
 <img src="./texclip20190704193556.png" height="60" width="140"> <br>
 </div>
 <p>
-このとき $g$ は $f$ のゼータ変換でありこのような $g$ は計算量 $\O (n2^n)$ で求めることができ, 実装自体は以下のようにシンプルにかける(in-place で実装した).<br>
-(以下コードについて) <br>
-(1) については $i$ 周目の $f[j]$ は $j$ の下位 $i$ 桁以外一致しているような数 $k$ で $j$ を含むもの($j \subseteq k$) について和を取っている.
-$j$ の $i$ 桁目が $0$ のものについては $i$ 周目に更新する必要があるがそれは前の周までの $f[j | (1 << i)]$ を足してやると良い. <br>
-(2) については $i$ 周目の $f[j]$ は $j$ の下位 $i$ 桁以外一致しているような数 $k$ で j に含まれるもの($k \subseteq j$) について和を取っている.
-$j$ の $i$ 桁目が $1$ のものについては $i$ 周目に更新する必要があるがそれは前の周までの $f[j ^ (1 << i)]$ を足してやると良い. <br>
+このとき $g$ は $f$ のゼータ変換でありこのような $g$ は計算量 $\O (n2^n)$ で求めることができ, 実装自体は以下のようにシンプルにかける(in-place で実装しているので少し分かりにくい).<br>
+たとえば (1) の場合は $g(s) = \sum_{!(s &gt;&gt; i ＆ 1)} g(s \oplus (1 &lt;&lt; i))$ のように足し上げると同じ添字の $f$ を 2 回カウントしてしまうため,
+bit を上から順に見ていき $s$ を含む集合 $T$ について初めて $s$ と $T$ の bit が異なったタイミングで足しあげることで重複を防ぐ.<br>
+以下の実装の $i$ 番目のループでは上から見たときに下から $i$ bit 目で初めて $s$ と bit が異なるような $s$ を含む集合 $T$ について足しあげていて,
+各ループ $i$ の終了時に $f(s)$ には下から $i$ bit 目以降を見たときにすでに $s$ と異なる bit を持つような上位集合の和が暫定の値として入っている.<br>
+よって各ループで足し合わせるべき値は 1 つ前のループまでの結果の $f$ を用いて更新できることが分かる.
 </p>
 <p>
 時間計算量: $\O (n 2^n)$
@@ -93,25 +93,25 @@ void fast_zeta_transform(int n, vector&lt;int&gt;&amp; f)
 {
     for(int i = 0; i &lt; n; ++i){
         for(int j = 0; j &lt; (1 &lt;&lt; n); ++j){
-            if(!(j &amp; (1 &lt;&lt; i))) f[j] += f[j | (1 &lt;&lt; i)];
+            if(!(j &gt;&gt; i &amp; 1)) f[j] += f[j ^ (1 &lt;&lt; i)];
         }
     }
 }
+
 // 下位集合(含まれる集合)の和
 void fast_zeta_transform(int n, vector&lt;int&gt;&amp; f)
 {
     for(int i = 0; i &lt; n; ++i){
         for(int j = 0; j &lt; (1 &lt;&lt; n); ++j){
-            if(j &amp; (1 &lt;&lt; i)) f[j] += f[j ^ (1 &lt;&lt; i)];
+            if(j &gt;&gt; i &amp; 1) f[j] += f[j ^ (1 &lt;&lt; i)];
         }
     }
 }
 </pre>
 </div>
 <h3>verify 用の問題</h3>
-<p>
-verify していません(verify 問題を知らない)
-</p>
+<p>CSAcademy : <a href="https://csacademy.com/contest/round-53/task/maxor/">Maxor</a>
+  <a href="https://csacademy.com/code/icqT4JfB/">提出コード</a>((1) の場合)</p>
 </section>
 
 </div>
