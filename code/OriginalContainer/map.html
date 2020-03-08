@@ -266,7 +266,7 @@ public:
     _Tp&amp; operator[](_Key&amp;&amp; key){ return _find(move(key), true)-&gt;get_data(); }
     const _Tp&amp; at(const _Key&amp; key){
         node *res = _find(key);
-        if(res == _M_header) __throw_out_of_range(__N(&quot;Map::at&quot;));
+        if(res == _M_header) __throw_out_of_range(&quot;Map::at&quot;);
         return res-&gt;get_data();
     }
     size_t size() const noexcept { return _M_node_count; }

@@ -613,7 +613,7 @@ public:
     _Tp&amp; operator[](_Key&amp;&amp; key){ return _find(move(key), true)-&gt;value(); }
     const _Tp&amp; at(const _Key&amp; key){
         bucket *res = _find(key);
-        if(res == _buckets + _bucket_count) __throw_out_of_range(__N(&quot;Unordered_Map::at&quot;));
+        if(res == _buckets + _bucket_count) __throw_out_of_range(&quot;Unordered_Map::at&quot;);
         return res-&gt;value();
     }
     void clear(){
