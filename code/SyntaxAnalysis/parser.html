@@ -96,9 +96,9 @@ private:
     }
     T factor(const string&amp; s, int&amp; pos){
         if(isdigit(s[pos])) return number(s, pos);
-        pos++; // '('をとばす
+        ++pos; // '('をとばす
         T res = expr(s, pos);
-        pos++; // ')'をとばす
+        ++pos; // ')'をとばす
         return res;
     }
     T number(const string&amp; s, int&amp; pos){
@@ -121,7 +121,7 @@ public:
 </div>
 <h3>verify 用の問題</h3>
 <p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0109">Smart Calculator</a>
-  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=4243974#1">提出コード</a></p>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=4243992#1">提出コード</a></p>
 </section>
 
 </div>
