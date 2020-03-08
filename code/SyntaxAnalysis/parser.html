@@ -70,16 +70,15 @@ $\newcommand{\O}{\mathrm{O}}$
 <input type="checkbox" id="label" class="csscode" />
 <label for="label"></label>
 <pre class="prettyprint linenums">
-template&lt;typename T&gt; class Parser
-{
+template&lt;typename T&gt; class Parser {
 private:
     T expr(const string&amp; s, int&amp; pos){
         T res = term(s, pos);
         while(s[pos] == '+' || s[pos] == '-'){
             if(s[pos] == '+'){
-                res += term(s, pos++);
+                res += term(s, ++pos);
             }else{
-                res -= term(s, pos++);
+                res -= term(s, ++pos);
             }
         }
         return res;
@@ -88,9 +87,9 @@ private:
         T res = factor(s, pos);
         while(s[pos] == '*' || s[pos] == '/'){
             if(s[pos] == '*'){
-                res *= term(s, pos++);
+                res *= factor(s, ++pos);
             }else{
-                res /= term(s, pos++);
+                res /= factor(s, ++pos);
             }
         }
         return res;
@@ -110,7 +109,7 @@ private:
         }while(isdigit(s[pos]));
         return res;
     }
-
+ 
 public:
     Parser(){}
     T solve(const string&amp; s){
@@ -121,8 +120,8 @@ public:
 </pre>
 </div>
 <h3>verify 用の問題</h3>
-<p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2613">Unordered Operators</a>
-  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3130028#1">提出コード</a></p>
+<p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0109">Smart Calculator</a>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=4243974#1">提出コード</a></p>
 </section>
 
 </div>
