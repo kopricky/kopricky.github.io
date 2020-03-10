@@ -82,41 +82,39 @@ WaveletMatrix の入力は $0$ 以上の整数を仮定し, 深さは最大値�
 <input type="checkbox" id="label" class="csscode" />
 <label for="label"></label>
 <pre class="prettyprint linenums">
-#define MAX_BIT 64
-
 struct BitRank {
     // block: bit 列を管理, count: block ごとに立っている 1 の数を管理
     vector&lt;unsigned long long&gt; block;
-    vector&lt;int&gt; count;
+    vector&lt;unsigned int&gt; count;
     BitRank(){}
-    void resize(int num) {
-        block.resize((num + 1) / MAX_BIT + 1, 0);
-        count.resize((int)block.size(), 0);
+    void resize(const unsigned int num){
+        block.resize(((num + 1) &gt;&gt; 6) + 1, 0);
+        count.resize(block.size(), 0);
     }
     // i ビット目を val(0,1) にセット
-    inline void set(int i, unsigned long long val) {
-        block[i / MAX_BIT] |= (val &lt;&lt; (i % MAX_BIT));
+    void set(const unsigned int i, const unsigned long long val){
+        block[i &gt;&gt; 6] |= (val &lt;&lt; (i &amp; 63));
     }
-    void build() {
-        for(int i = 1; i &lt; (int)block.size(); i++){
-            count[i] = count[i-1] + __builtin_popcountll(block[i-1]);
+    void build(){
+        for(unsigned int i = 1; i &lt; block.size(); i++){
+            count[i] = count[i - 1] + __builtin_popcountll(block[i - 1]);
         }
     }
     // [0, i) ビットの 1 の数
-    inline int rank1(int i) {
-        int j = i / MAX_BIT, k = i % MAX_BIT;
-        return count[j] + (k ? __builtin_popcountll(block[j] &lt;&lt; (MAX_BIT - k)) : 0);
+    unsigned int rank1(const unsigned int i) const {
+        return count[i &gt;&gt; 6] +
+                __builtin_popcountll(block[i &gt;&gt; 6] &amp; ((1ULL &lt;&lt; (i &amp; 63)) - 1ULL));
     }
     // [i, j) ビットの 1 の数
-    inline int rank1(int i, int j) {
+    unsigned int rank1(const unsigned int i, const unsigned int j) const {
         return rank1(j) - rank1(i);
     }
     // [0, i) ビットの 0 の数
-    inline int rank0(int i) {
+    unsigned int rank0(const unsigned int i) const {
         return i - rank1(i);
     }
     // [i, j) ビットの 0 の数
-    inline int rank0(int i, int j) {
+    unsigned int rank0(const unsigned int i, const unsigned int j) const {
         return rank0(j) - rank0(i);
     }
 };
@@ -124,55 +122,44 @@ struct BitRank {
 class WaveletMatrix
 {
 private:
-    int height;
+    unsigned int height;
     vector&lt;BitRank&gt; B;
     vector&lt;int&gt; pos;
-    int rangefreq(int i, int j, int a, int b, int l, int r, int x) {
-        if(i == j || r &lt;= a || b &lt;= l) return 0;
-        int mid = (l + r) &gt;&gt; 1;
-        if(a &lt;= l &amp;&amp; r &lt;= b){
-            return j - i;
-        }else{
-            int left = rangefreq(B[x].rank0(i),B[x].rank0(j),a,b,l,mid,x+1);
-            int right = rangefreq(pos[x]+B[x].rank1(i),pos[x]+B[x].rank1(j),a,b,mid,r,x+1);
-            return left + right;
-        }
-    }
 public:
     WaveletMatrix(){}
-    WaveletMatrix(vector&lt;int&gt;&amp; vec) :
-        WaveletMatrix(vec, *max_element(vec.begin(), vec.end()) + 1) {}
+    WaveletMatrix(vector&lt;int&gt; vec) :
+        WaveletMatrix(vec, *max_element(vec.begin(), vec.end()) + 1){}
     // sigma:文字の種類数
-    WaveletMatrix(vector&lt;int&gt;&amp; vec, int sigma){
+    WaveletMatrix(vector&lt;int&gt; vec, const unsigned int sigma){
         init(vec, sigma);
     }
-    void init(vector&lt;int&gt;&amp; vec, int sigma){
-        height = (sigma == 1) ? 1 : (MAX_BIT - __builtin_clzll(sigma-1));
+    void init(vector&lt;int&gt;&amp; vec, const unsigned int sigma){
+        height = (sigma == 1) ? 1 : (64 - __builtin_clzll(sigma - 1));
         B.resize(height), pos.resize(height);
-        for(int i = 0; i &lt; height; i++){
-            B[i].resize((int)vec.size());
-            for(int j = 0; j &lt; (int)vec.size(); j++) {
+        for(unsigned int i = 0; i &lt; height; ++i){
+            B[i].resize(vec.size());
+            for(unsigned int j = 0; j &lt; vec.size(); ++j) {
                 B[i].set(j, get(vec[j], height - i - 1));
             }
             B[i].build();
-            auto it = stable_partition(vec.begin(), vec.end(), [&amp;](int c) {
+            auto it = stable_partition(vec.begin(), vec.end(), [&amp;](int c){
                 return !get(c, height - i - 1);
             });
             pos[i] = it - vec.begin();
         }
     }
     // val の i ビット目の値を返す(0,1)
-    inline int get(int val, int i) {
+    int get(const int val, const int i){
         return val &gt;&gt; i &amp; 1;
     }
     // [l, r) の間に現れる値 val の数
-    int rank(int val, int l, int r) {
+    int rank(const int val, const int l, const int r){
         return rank(val, r) - rank(val, l);
     }
     // [0, i) の間に現れる値 val の数
-    int rank(int val, int i) {
+    int rank(int val, int i){
         int p = 0;
-        for(int j = 0; j &lt; height; j++){
+        for(unsigned int j = 0; j &lt; height; ++j){
             if(get(val, height - j - 1)){
                 p = pos[j] + B[j].rank1(p);
                 i = pos[j] + B[j].rank1(i);
@@ -184,10 +171,10 @@ public:
         return i - p;
     }
     // [l, r) の k(0,1,2...) 番目に小さい値を返す
-    int quantile(int k, int l, int r) {
+    int quantile(int k, int l, int r){
         int res = 0;
-        for(int i = 0; i &lt; height; i++){
-            int j = B[i].rank0(l, r);
+        for(unsigned int i = 0; i &lt; height; ++i){
+            const int j = B[i].rank0(l, r);
             if(j &gt; k){
                 l = B[i].rank0(l);
                 r = B[i].rank0(r);
@@ -200,9 +187,36 @@ public:
         }
         return res;
     }
+    int rangefreq(const int i, const int j, const int a, const int b,
+                    const int l, const int r, const int x){
+        if(i == j || r &lt;= a || b &lt;= l) return 0;
+        const int mid = (l + r) &gt;&gt; 1;
+        if(a &lt;= l &amp;&amp; r &lt;= b){
+            return j - i;
+        }else{
+            const int left = rangefreq(B[x].rank0(i), B[x].rank0(j), a, b, l, mid, x + 1);
+            const int right = rangefreq(pos[x] + B[x].rank1(i), pos[x] + B[x].rank1(j),
+                                a, b, mid, r, x + 1);
+            return left + right;
+        }
+    }
     // [l,r) で値が [a,b) 内に含まれる数を返す
-    int rangefreq(int l, int r, int a, int b) {
+    int rangefreq(const int l, const int r, const int a, const int b){
         return rangefreq(l, r, a, b, 0, 1 &lt;&lt; height, 0);
+    }
+    int rangemin(const int i, const int j, const int a, const int b,
+                    const int l, const int r, const int x, const int val){
+        if(i == j || r &lt;= a || b &lt;= l) return -1;
+        if(r - l == 1) return val;
+        const int mid = (l + r) &gt;&gt; 1;
+        const int res = rangemin(B[x].rank0(i),B[x].rank0(j),a,b,l,mid,x+1,val);
+        if(res &lt; 0) return rangemin(pos[x] + B[x].rank1(i), pos[x] + B[x].rank1(j),
+                            a, b, mid, r, x + 1, val + (1 &lt;&lt; (height - x - 1)));
+        else return res;
+    }
+    // [l,r) で値が [a,b) 内に最小の数を返す(数が存在しない場合は -1 を返す)
+    int rangemin(int l, int r, int a, int b){
+        return rangemin(l, r, a, b, 0, 1 &lt;&lt; height, 0, 0);
     }
 };
 
@@ -210,29 +224,31 @@ template&lt;typename T&gt; class OrthogonalRangeCount
 {
 private:
     using ptt = pair&lt;T, T&gt;;
-    int sz;
+    const int sz;
     vector&lt;T&gt; X, Y;
     WaveletMatrix wm;
+
 public:
-    OrthogonalRangeCount(vector&lt;ptt&gt; candidate) : sz((int)candidate.size()), X(sz), Y(sz){
-        vector&lt;int&gt; vec(sz);
+    OrthogonalRangeCount(vector&lt;ptt&gt; candidate)
+        : sz((int)candidate.size()), X(sz), Y(sz){
         sort(candidate.begin(), candidate.end());
-        for(int i = 0; i &lt; sz; i++){
+        vector&lt;int&gt; vec(sz);
+        for(int i = 0; i &lt; sz; ++i){
             X[i] = candidate[i].first, Y[i] = candidate[i].second;
         }
         sort(Y.begin(), Y.end());
         Y.erase(unique(Y.begin(), Y.end()), Y.end());
-        for(int i = 0; i &lt; sz; i++){
+        for(int i = 0; i &lt; sz; ++i){
             vec[i] = lower_bound(Y.begin(), Y.end(), candidate[i].second) - Y.begin();
         }
-        wm.init(vec, (int)Y.size());
+        wm.init(vec, Y.size());
     }
-    // [lx,rx)×[ly,ry)の長方形領域に含まれる点の数を答える
-    int query(T lx, T rx, T ly, T ry) {
-        int lxid = lower_bound(X.begin(), X.end(), lx) - X.begin();
-        int rxid = lower_bound(X.begin(), X.end(), rx) - X.begin();
-        int lyid = lower_bound(Y.begin(), Y.end(), ly) - Y.begin();
-        int ryid = lower_bound(Y.begin(), Y.end(), ry) - Y.begin();
+    // [lx,rx) × [ly, ry) の長方形領域に含まれる点の数を答える
+    int query(const T lx, const T ly, const T rx, const T ry){
+        const int lxid = lower_bound(X.begin(), X.end(), lx) - X.begin();
+        const int rxid = lower_bound(X.begin(), X.end(), rx) - X.begin();
+        const int lyid = lower_bound(Y.begin(), Y.end(), ly) - Y.begin();
+        const int ryid = lower_bound(Y.begin(), Y.end(), ry) - Y.begin();
         if(lxid &gt;= rxid || lyid &gt;= ryid) return 0;
         return wm.rangefreq(lxid, rxid, lyid, ryid);
     }
@@ -241,7 +257,7 @@ public:
 </div>
 <h3>verify 用の問題</h3>
 <p>yukicoder : <a href="https://yukicoder.me/problems/1937">ギブ and テイク</a>
-  <a href="https://yukicoder.me/submissions/296655">提出コード</a></p>
+  <a href="https://yukicoder.me/submissions/442460">提出コード</a></p>
 </section>
 
 </div>
