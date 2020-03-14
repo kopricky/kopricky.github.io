@@ -192,9 +192,15 @@ private:
         const _Key key = cur-&gt;key();
         return erase_impl(rehash_check() ? _find(key) : cur, next_ret);
     }
-    bucket *erase_key(const _Key&amp; key, bool next_ret = true){
+    size_t erase_key(const _Key&amp; key){
         rehash_check();
-        return erase_impl(_find(key), next_ret);
+        bucket *cur = _find(key);
+        if(static_cast&lt;size_t&gt;(cur - _buckets) == _bucket_count){
+            return 0;
+        }else{
+            erase_impl(cur, false);
+            return 1;
+        }
     }
     bool rehash_check(){
         if(_bucket_count == 0){
@@ -302,9 +308,9 @@ public:
     iterator insert(_Key&amp;&amp; key){ return iterator(find_insert(move(key))); }
     template&lt;typename... Args&gt;
     iterator emplace(Args&amp;&amp;... args){ return iterator(_emplace(forward&lt;Args&gt;(args)...)); }
-    iterator erase(const _Key&amp; key){ return iterator(erase_key(key)); }
+    size_t erase(const _Key&amp; key){ return erase_key(key); }
     iterator erase(const iterator&amp; itr){ return iterator(erase_itr(itr.bucket_ptr)); }
-    void simple_erase(const _Key&amp; key){ erase_key(key, false); }
+    void simple_erase(const _Key&amp; key){ erase_key(key); }
     void simple_erase(const iterator&amp; itr){ erase_itr(itr.bucket_ptr, false); }
 
     // DEBUG 用
@@ -459,9 +465,15 @@ private:
         const _Key key = cur-&gt;_key;
         return erase_impl(rehash_check() ? _find(key) : cur, next_ret);
     }
-    bucket *erase_key(const _Key&amp; key, bool next_ret = true){
+    size_t erase_key(const _Key&amp; key){
         rehash_check();
-        return erase_impl(_find(key), next_ret);
+        bucket *cur = _find(key);
+        if(static_cast&lt;size_t&gt;(cur - _buckets) == _bucket_count){
+            return 0;
+        }else{
+            erase_impl(cur, false);
+            return 1;
+        }
     }
     bool rehash_check(){
         if(_bucket_count == 0){
@@ -553,7 +565,7 @@ public:
         return os;
     }
     void clear(){
-        UnorderedSet new_unordered_set(1u);
+        UnorderedSet new_unordered_set(0u);
         swap(*this, new_unordered_set);
     }
     size_t size() const noexcept { return _data_count; }
@@ -569,9 +581,9 @@ public:
     iterator insert(_Key&amp;&amp; key){ return iterator(find_insert(move(key))); }
     template&lt;typename... Args&gt;
     iterator emplace(Args&amp;&amp;... args){ return iterator(_emplace(forward&lt;Args&gt;(args)...)); }
-    iterator erase(const _Key&amp; key){ return iterator(erase_key(key)); }
+    size_t erase(const _Key&amp; key){ return erase_key(key); }
     iterator erase(const iterator&amp; itr){ return iterator(erase_itr(itr.bucket_ptr)); }
-    void simple_erase(const _Key&amp; key){ erase_key(key, false); }
+    void simple_erase(const _Key&amp; key){ erase_key(key); }
     void simple_erase(const iterator&amp; itr){ erase_itr(itr.bucket_ptr, false); }
 
     // DEBUG 用
