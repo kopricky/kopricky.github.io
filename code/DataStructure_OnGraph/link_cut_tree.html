@@ -76,7 +76,7 @@ link cut tree とは木の動的な変化(辺の挿入, 辺の削除)を効率�
 <input type="checkbox" id="label" class="csscode" />
 <label for="label"></label>
 <pre class="prettyprint linenums">
-// 注: 以下の実装では link, range, query などで reroot が起こる
+// 以下の実装では link, range, query などで reroot が起こるので注意
 template&lt;typename T&gt; class LinkCutTree {
 public:
     struct node {
@@ -84,19 +84,17 @@ public:
         T val, al, lazy;
         node *left, *right, *par;
         bool rev;
-        node() : sz(1), val(id2), al(id2), lazy(id1),
+        node(const T _val) : sz(1), val(_val), al(_val), lazy(e1),
             left(nullptr), right(nullptr), par(nullptr), rev(false){}
-        node(T _val) : sz(1), val(_val), al(_val), lazy(id1),
-            left(nullptr), right(nullptr), par(nullptr), rev(false){}
-        inline bool isRoot() const {
+        bool isRoot() const {
             return (!par) || (par-&gt;left != this &amp;&amp; par-&gt;right != this);
         }
         void push(){
-            if(lazy != id1){
+            if(lazy != e1){
                 opr1(val, lazy), al += lazy * sz;
                 if(left) opr1(left-&gt;lazy, lazy);
                 if(right) opr1(right-&gt;lazy, lazy);
-                lazy = id1;
+                lazy = e1;
             }
             if(!rev) return;
             swap(left, right);
@@ -110,12 +108,11 @@ public:
             if(right) right-&gt;push(), sz += right-&gt;sz, al = opr2(al, right-&gt;al);
         }
     };
-    static const T id1 = (T)0;
-    static const T id2 = (T)0;
-    inline static void opr1(T&amp; arg1, const T arg2){
+    static const T e1 = (T)0;
+    static void opr1(T&amp; arg1, const T arg2){
         arg1 += arg2;
     }
-    inline static T opr2(const T arg1, const T arg2){
+    static T opr2(const T arg1, const T arg2){
         return arg1 + arg2;
     }
 
