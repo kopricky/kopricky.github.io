@@ -71,8 +71,8 @@ $x \ge \lfloor \log_2 p \rfloor$ の整数 $x$ について $a^x \mathrm{mod}\ q
 また $a^i \mathrm{mod}\ r$ の数列はオイラーの定理($a^{\phi(r)} = 1\ \mathrm{mod}\ r$) より周期 $\phi(r)$ となる.
 よって $x \ge \lfloor \log_2 p \rfloor$ の整数 $x$ について $a^x \mathrm{mod}\ q$ が一定, $a^x \mathrm{mod}\ r$ が周期 $\phi(r)$ を持ち,
 また $q$ と $r$ は互いに素であることから中国剰余定理より $i \ge \lfloor \log_2 p \rfloor$ について $a^i \mathrm{mod}\ p$ の数列は周期 $\phi(r)$ を持つ.<br>
-ここで明示的に $p = qr$ の分解を求めなくても上記の結果から
-$x \ge \lfloor \log_2 p \rfloor$ の整数 $x$ について $i \ge \lfloor \log_2 p \rfloor$ について $a^i \mathrm{mod}\ p$ の数列は周期 $\phi(r)$ を持つので $a$ と $p$ が互いに素である場合と同じように
+ここで明示的に $p = qr$ の分解を求めなくても $q$ と $r$ は互いに素であるため $\phi(p) = \phi(q) \phi(r)$ となり上記の結果と合わせて
+$i \ge \lfloor \log_2 p \rfloor$ について $a^i \mathrm{mod}\ p$ の数列は周期 $\phi(p)$ を持つので $a$ と $p$ が互いに素である場合と同じように
 $x\ \mathrm{mod}\ \phi(p)$ を計算することで再帰的に計算ができる.<br>
 実装は剰余が int 型の場合 $\lfloor \log_2 p \rfloor$ は高々 $32$ なので指数部が 32 以上となるかどうかを管理してもいいが,
 任意の自然数 $n$ について $\phi(n) \ge \lfloor \log_2 n \rfloor$ であることから $x$ が $\phi(p)$ 以上となるかどうかで場合分けをすることにした.
