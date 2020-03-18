@@ -72,8 +72,8 @@ $x \ge \lfloor \log_2 p \rfloor$ の整数 $x$ について $a^x \mathrm{mod}\ q
 よって $x \ge \lfloor \log_2 p \rfloor$ の整数 $x$ について $a^x \mathrm{mod}\ q$ が一定, $a^x \mathrm{mod}\ r$ が周期 $\phi(r)$ を持ち,
 また $q$ と $r$ は互いに素であることから中国剰余定理より $i \ge \lfloor \log_2 p \rfloor$ について $a^i \mathrm{mod}\ p$ の数列は周期 $\phi(r)$ を持つ.<br>
 ここで明示的に $p = qr$ の分解を求めなくても $q$ と $r$ は互いに素であるため $\phi(p) = \phi(q) \phi(r)$ となり上記の結果と合わせて
-$i \ge \lfloor \log_2 p \rfloor$ について $a^i \mathrm{mod}\ p$ の数列は周期 $\phi(p)$ を持つので $a$ と $p$ が互いに素である場合と同じように
-$x\ \mathrm{mod}\ \phi(p)$ を計算することで再帰的に計算ができる.<br>
+$i \ge \lfloor \log_2 p \rfloor$ について $a^i \mathrm{mod}\ p$ の数列は周期 $\phi(p)$ を持つので $a$ と $p$ が互いに素である場合と同じように $a^x \mathrm{mod}\ p$ は
+$x\ \mathrm{mod}\ \phi(p)$ を再帰的に計算することで求まる($i < \lfloor \log_2 p \rfloor$ の場合についてはその値を剰余を取らず管理しておく).<br>
 実装は剰余が int 型の場合 $\lfloor \log_2 p \rfloor$ は高々 $32$ なので指数部が 32 以上となるかどうかを管理してもいいが,
 任意の自然数 $n$ について $\phi(n) \ge \lfloor \log_2 n \rfloor$ であることから $x$ が $\phi(p)$ 以上となるかどうかで場合分けをすることにした.
 つまり実装の 1 つ下の再帰パートでは $a ↑↑ (b-1) \ge \phi(p)$ なら $\phi(p) + ((a ↑↑ (b-1))\ \mathrm{mod}\ \phi(p))$ を
