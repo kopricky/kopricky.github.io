@@ -81,10 +81,10 @@ tetration$(a, b, mod)$ : $(a ↑↑ b) \% mod$ を求める. <br>
 <input type="checkbox" id="label" class="csscode" />
 <label for="label"></label>
 <pre class="prettyprint linenums">
-int phi(int n)
+unsigned int phi(unsigned int n)
 {
-    int res = n;
-    for(int i = 2; i * i &lt;= n; ++i){
+    unsigned int res = n;
+    for(unsigned int i = 2; i * i &lt;= n; ++i){
         if(n % i == 0){
             res = res / i * (i - 1);
             while(n % i == 0) n /= i;
@@ -94,39 +94,43 @@ int phi(int n)
     return res;
 }
 
-int mod_pow(int a, int b, int mod)
+unsigned int mod_pow(unsigned long long a, unsigned int b, unsigned int mod, bool flag)
 {
-    int res = 1;
+    unsigned long long res = 1;
     while(b){
         if(b &amp; 1){
-            res = (long long)res * a % mod;
+            if((res *= a) &gt;= mod) res %= mod, flag = true;
         }
-        a = (long long)a * a % mod;
+        if((a *= a) &gt;= mod) a %= mod, flag = true;
         b &gt;&gt;= 1;
     }
-    return res;
+    return res + (flag ? mod : 0);
 }
 
-int rec(int a, int b, int mod)
+unsigned int rec(unsigned int a, unsigned int b, unsigned int mod)
 {
-    if(a == 1 || b == 0) return 1;
-    if(mod == 1) return 0;
-    int ans = rec(a, b-1, phi(mod)), ad = mod;
-    if(ans &lt;= 32 &amp;&amp; a &lt; mod &amp;&amp; pow((double)a, ans) &lt; mod) ad = 0;
-    return mod_pow(a % mod, ans, mod) + ad;
+    if(a == 0) return ~b &amp; 1;
+    if(a == 1 || mod == 1) return 1;
+    if(b == 1) return (a &gt;= mod) ? (a % mod + mod) : a;
+    if(b == 2) return mod_pow(a % mod, a, mod, (a &gt;= mod));
+    const unsigned int phi_val = phi(mod);
+    const unsigned int res = rec(a, b-1, phi_val);
+    return mod_pow(a % mod, res, mod, (res &gt;= phi_val));
 }
 
-inline int tetration(int a, int b, int mod)
+unsigned int tetration(unsigned int a, unsigned int b, unsigned int mod)
 {
-    return rec(a, b, mod) % mod;
+    if(b == 0) return (mod != 1);
+    const unsigned int res = rec(a, b, mod);
+    return (res &gt;= mod) ? (res - mod) : res;
 }
 </pre>
 </div>
 <h3>verify 用の問題</h3>
 <p>Atcoder : <a href="https://atcoder.jp/contests/summerfes2018-div1/tasks/summerfes2018_f">冪冪ゲーム (Powerful Fever!)</a>
-  <a href="https://atcoder.jp/contests/summerfes2018-div1/submissions/3868387">提出コード</a><br>
+  <a href="https://atcoder.jp/contests/summerfes2018-div1/submissions/10978310">提出コード</a><br>
 yosupo さんの library checker : <a href="https://judge.yosupo.jp/problem/tetration_mod">Tetration Mod</a>
-  <a href="https://judge.yosupo.jp/submission/1982">提出コード</a>
+  <a href="https://judge.yosupo.jp/submission/5855">提出コード</a>
 </p>
 </section>
 
