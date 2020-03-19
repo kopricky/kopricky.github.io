@@ -79,17 +79,17 @@ tetration$(a, b, mod)$ : $(a ↑↑ b)\ \% mod$ を求める. <br>
 unsigned int phi(unsigned int n)
 {
     unsigned int res = n;
-    if(n % 2 == 0){ res = res / 2; while(n % 2 == 0) n /= 2; }
-    if(n % 3 == 0){ res = res / 3 * 2; while(n % 3 == 0) n /= 3; }
+    if(n % 2 == 0){ res = res / 2; do{ n /= 2; }while(n % 2 == 0); }
+    if(n % 3 == 0){ res = res / 3 * 2; do{ n /= 3; }while(n % 3 == 0); }
     for(unsigned int i = 5; i * i &lt;= n; i += 4){
         if(n % i == 0){
             res = res / i * (i - 1);
-            while(n % i == 0) n /= i;
+            do{ n /= i; }while(n % i == 0);
         }
         i += 2;
         if(n % i == 0){
             res = res / i * (i - 1);
-            while(n % i == 0) n /= i;
+            do{ n /= i; }while(n % i == 0);
         }
     }
     if(n != 1) res = res / n * (n - 1);
@@ -132,7 +132,7 @@ unsigned int tetration(unsigned int a, unsigned int b, unsigned int mod)
 <p>Atcoder : <a href="https://atcoder.jp/contests/summerfes2018-div1/tasks/summerfes2018_f">冪冪ゲーム (Powerful Fever!)</a>
   <a href="https://atcoder.jp/contests/summerfes2018-div1/submissions/10978310">提出コード</a><br>
 yosupo さんの library checker : <a href="https://judge.yosupo.jp/problem/tetration_mod">Tetration Mod</a>
-  <a href="https://judge.yosupo.jp/submission/5908">提出コード</a>
+  <a href="https://judge.yosupo.jp/submission/5995">提出コード</a>
 </p>
 </section>
 
