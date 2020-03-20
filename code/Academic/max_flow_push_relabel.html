@@ -63,6 +63,7 @@ $\newcommand{\O}{\mathrm{O}}$
 最大流を求めるアルゴリズム. <br>
 最大流の値を高速に求めるために最終的な結果が依然として正しい flow となっていない可能性がある(excess を全て解消していない).
 なので valid な flow routing を求めたい場合は valiate() のコメントアウトを外す. <br>
+Stack(LIFO) を用いるかコメントアウトしている Queue(FIFO) を用いるかでケースによっては多少速度が変わることがある.<br>
 元論文は "A New Approach to the Maximum-Flow Problem" [Goldberg and Tarjan 1988]".<br>
 <br>
 (追記)<br>
@@ -96,6 +97,19 @@ public:
     void push(const int h, const int u){ node[u] = node[N+h], node[N+h] = u; }
     void clear(){ iota(node.begin() + N, node.end(), N); }
 };
+
+// class Queue {
+// private:
+//     const int N, H;
+//     vector&lt;int&gt; node, last;
+// public:
+//     Queue(const int _N, const int _H) : N(_N), H(_H), node(N+H), last(H){ clear(); }
+//     bool empty(const int h) const { return node[N+h] == N+h; }
+//     int top(const int h) const { return node[N+h]; }
+//     void pop(const int h){ node[N+h] = node[node[N+h]]; if(empty(h)) last[h] = N+h; }
+//     void push(const int h, const int u){ node[node[last[h]] = u] = N+h, last[h] = u; }
+//     void clear(){ iota(node.begin() + N, node.end(), N); iota(last.begin(), last.end(), N); }
+// };
 
 class List {
 public:
