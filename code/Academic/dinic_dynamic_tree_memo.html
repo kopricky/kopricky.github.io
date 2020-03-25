@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-131511873-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-131511873-1');
+</script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
+
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<link rel="shortcut icon" type="image/x-icon" href="../../favicon.ico">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>Dinic with Dynamic Tree</h2>
+<h3>個人的メモ</h3>
+<p>
+Dinic 法では各頂点に現在見ている辺の添字 $iter$ を持つことで 1 回のフェーズを
+$\O (mn)$ 時間で計算することが可能であった.
+これはアルゴリズムが $n$ ステップ進めば "増加道が見つかる" もしくは "現在進んでいる方向には増加道が存在しない"
+のどちらか一方が起こることに起因する. 前者の場合はフローを流すことで増加道上の少なくとも 1 つの辺の容量が 0 となりその辺から
+$iter$ が 1 つ進み, 後者の場合も現在たどったパスの最後の辺について $iter$ が 1 つ進む.
+全頂点について $iter$ の総増加回数は合計 $\O (m)$ であるのでこれで $\O (mn)$ が保証できるといった寸法である.<br>
+ここでは動的木を用いることでならし $\O (\log n)$ 時間で $iter$ を 1 ステップ進めている.
+具体的に管理する森は根を $t$ とし, その辺集合は各頂点について現在見ている辺(添字 $iter$ に対応する辺) からなる(自分の実装では逆向きに見ている).
+新たに辺を link したとき, sink $t$ と連結になれば増加道が存在し, $s$ と $t$ を結ぶパス上の辺の最小容量をパス上の辺すべてから減じる(ならし計算量 $\O (\log n)$ で実現可能).
+もし連結とならなければ, パスの $s$ とは異なる方の端の頂点について $iter$ が 1 つ進む(ならし計算量 $\O( \log n)$ で実現可能).<br>
+よって結局 $\O( mn \log n)$ 時間で最大流を求めることが可能になる.
+</p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>
