@@ -65,7 +65,7 @@ $\newcommand{\O}{\mathrm{O}}$
 <a href="https://www.slideshare.net/wata_orz/ss-12131479">岩田さんのスライド</a> を参考にさせていただいた. <br>
 元論文は "The steiner problem in graphs" [Dreyfus Wagner 1971]<br>
 以下の実装では元論文とは異なり, Warshall Floyd を行わず, DP 遷移を Dijkstra 法を用いて更新することでターミナル数 $t$ に関して $\O(n 3^t + (n+m) 2^t \log n )$ の時間計算量で求めている(FPT). グラフは巨大だがターミナル数が小さいという場合にこの改良が効いてくる. <br>
-高速メビウス変換を用いて $O^{\ast}(2^t)$ に計算量が落ちるみたい(<a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.170.7539&rep=rep1&type=pdf">参考</a>).
+重みなし最小シュタイナー木問題の場合高速メビウス変換を用いて $O^{\ast}(2^t)$ に計算量が落ちるみたい(<a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.170.7539&rep=rep1&type=pdf">参考</a>).
 </p>
 <p>
 (関数)<br>
