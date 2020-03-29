@@ -95,78 +95,10 @@ private:
     vector&lt;CT&gt; xs;
     // y座標, インデックス
     vector&lt;vector&lt;pci&gt; &gt; ys;
-    void _query(int lxid, int rxid, const CT ly, const CT ry, vector&lt;int&gt;&amp; report){
-        lxid += n, rxid += n;
-        while(lxid != rxid){
-            if(lxid &amp; 1){
-                const auto st = lower_bound(all(ys[lxid]), pci(ly, -1));
-                const auto ed = lower_bound(all(ys[lxid]), pci(ry, -1));
-                for(auto it = st; it != ed; ++it) report.push_back(it-&gt;second);
-                ++lxid;
-            }
-            if(rxid &amp; 1){
-                --rxid;
-                const auto st = lower_bound(all(ys[rxid]), pci(ly, -1));
-                const auto ed = lower_bound(all(ys[rxid]), pci(ry, -1));
-                for(auto it = st; it != ed; ++it) report.push_back(it-&gt;second);
-            }
-            lxid &gt;&gt;= 1, rxid &gt;&gt;= 1;
-        }
-    }
-public:
-    OrthogonalRangeReport(const vector&lt;pcc&gt;&amp; cand) : n(1), sz((int)cand.size()), xs(sz){
-        while(n &lt; sz){
-            n *= 2;
-        }
-        vector&lt;pci&gt; sorted(sz);
-        for(int i = 0; i &lt; sz; ++i){
-            sorted[i] = {cand[i].first, i};
-        }
-        sort(sorted.begin(), sorted.end());
-        ys.resize(2*n);
-        for(int i = 0; i &lt; sz; ++i){
-            xs[i] = sorted[i].first;
-            ys[i+n] = {make_pair(cand[sorted[i].second].second, sorted[i].second)};
-        }
-        for(int i = n-1; i &gt;= 1; --i){
-            ys[i].resize((int)ys[2*i].size() + (int)ys[2*i+1].size());
-            merge(all(ys[2*i]), all(ys[2*i+1]), ys[i].begin(), [&amp;](const pci&amp; a, const pci&amp; b){
-                return a.first &lt; b.first;
-            });
-        }
-    }
-    void query(const CT lx, const CT ly, const CT rx, const CT ry, vector&lt;int&gt;&amp; report) {
-        const int lxid = lower_bound(all(xs), lx) - xs.begin();
-        const int rxid = lower_bound(all(xs), rx) - xs.begin();
-        if(lxid &gt;= rxid) return;
-        _query(lxid, rxid, ly, ry, report);
-    }
-};
-</pre>
-</div>
-<h3>コード(フラクショナルカスケーディング版)</h3>
-<div class="codebox">
-<input type="checkbox" id="label2" class="csscode" />
-<label for="label2"></label>
-<pre class="prettyprint linenums">
-#define all(v) (v).begin(), (v).end()
-
-template&lt;typename CandidateType&gt; class OrthogonalRangeReport
-{
-private:
-    using CT = CandidateType;
-    using pcc = pair&lt;CT, CT&gt;;
-    using pci = pair&lt;CT, int&gt;;
-    int n, sz;
-    // x座標
-    vector&lt;CT&gt; xs;
-    // y座標, インデックス
-    vector&lt;vector&lt;pci&gt; &gt; ys;
     // 位置
-    vector&lt;vector&lt;vector&lt;int&gt; &gt; &gt; pos;
+    vector&lt;vector&lt;array&lt;int, 2&gt; &gt; &gt; pos;
     static bool less(const pci&amp; a, const pci&amp; b, const vector&lt;pcc&gt;&amp; cand){
-        return (a.first == b.first) ?
-                (cand[a.second].first &lt; cand[b.second].first) : (a.first &lt; b.first);
+        return (a.first == b.first) ? (cand[a.second].first &lt; cand[b.second].first) : (a.first &lt; b.first);
     }
     void query(const int lxid, const int rxid, const int lyid, const int ryid,
                 vector&lt;int&gt;&amp; report, const int k, const int l, const int r){
@@ -196,10 +128,9 @@ public:
         for(int i = n-2; i &gt;= 0; --i){
             ys[i].resize((int)ys[2*i+1].size() + (int)ys[2*i+2].size());
             merge(all(ys[2*i+1]), all(ys[2*i+2]), ys[i].begin(), [&amp;](const pci&amp; a, const pci&amp; b){
-                return (a.first == b.first) ?
-                        (cand[a.second].first &lt; cand[b.second].first) : (a.first &lt; b.first);
+                return (a.first == b.first) ? (cand[a.second].first &lt; cand[b.second].first) : (a.first &lt; b.first);
             });
-            pos[i].resize((int)ys[i].size() + 1, vector&lt;int&gt;(2));
+            pos[i].resize((int)ys[i].size() + 1);
             for(int k = 0; k &lt; 2; ++k){
                 int p = 0;
                 for(int j = 0; j &lt; (int)ys[i].size(); ++j){
