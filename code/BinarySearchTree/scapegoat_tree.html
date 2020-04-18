@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-131511873-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-131511873-1');
+</script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
+
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<link rel="shortcut icon" type="image/x-icon" href="../../favicon.ico">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>Scapegoat Tree</h2>
+<h3>コードについての説明</h3>
+<p>
+元論文は <a href=""></a>
+</p>
+<p>
+(関数)<br>
+add_edge(): 辺を追加する <br>
+</p>
+<p>
+時間計算量: ならし $\O(\log n)$
+</p>
+<h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
+<pre class="prettyprint linenums">
+template&lt;typename _Key&gt; class ScapegoatTree {
+private:
+    struct node {
+        const _Key key;
+        unsigned int size;
+        node *left, *right;
+        node(const _Key&amp; _key) : key(_key), size(1), left(nullptr), right(nullptr){}
+        void eval(){
+            size = 1;
+            if(left) size += left-&gt;size;
+            if(right) size += right-&gt;size;
+        }
+    };
+    bool find(const node *cur, const _Key&amp; key) const {
+        while(cur){
+            if(cur-&gt;key == key) return true;
+            cur = (key &lt; cur-&gt;key ? cur-&gt;left : cur-&gt;right);
+        }
+        return false;
+    }
+    void subtree_dfs(node *cur, vector&lt;node*&gt;&amp; euler_tour) const {
+        if(cur-&gt;left) subtree_dfs(cur-&gt;left, euler_tour);
+        euler_tour.push_back(cur);
+        if(cur-&gt;right) subtree_dfs(cur-&gt;right, euler_tour);
+    }
+    node *build_pbbt_rec(const int l, const int r, const vector&lt;node*&gt;&amp; euler_tour){
+        if(r - l == 0) return nullptr;
+        if(r - l == 1){
+            node * const cur = euler_tour[l];
+            cur-&gt;left = cur-&gt;right = nullptr;
+            return cur-&gt;eval(), cur;
+        }
+        const int mid = (l + r) / 2;
+        node * const cur = euler_tour[mid];
+        cur-&gt;left = build_pbbt_rec(l, mid, euler_tour);
+        cur-&gt;right = build_pbbt_rec(mid + 1, r, euler_tour);
+        return cur-&gt;eval(), cur;
+    }
+    node *build_perfect_balanced_binary_tree(node *cur){
+        if(!cur) return nullptr;
+        vector&lt;node*&gt; euler_tour;
+        subtree_dfs(cur, euler_tour);
+        return build_pbbt_rec(0, (int)euler_tour.size(), euler_tour);
+    }
+    node *insert(node *cur, node *new_node, int depth, bool&amp; balanced){
+        if(!cur){
+            const int sz = size() + 1;
+            balanced = (depth &lt;= floor(log_val * log2(sz)) + 1);
+            return new_node;
+        }
+        if(cur-&gt;key &lt;= new_node-&gt;key){
+            cur-&gt;right = insert(cur-&gt;right, new_node, depth + 1, balanced);
+            cur-&gt;eval();
+            if(balanced || cur-&gt;right-&gt;size &lt;= alpha * cur-&gt;size) return cur;
+        }else{
+            cur-&gt;left = insert(cur-&gt;left, new_node, depth + 1, balanced);
+            cur-&gt;eval();
+            if(balanced || cur-&gt;left-&gt;size &lt;= alpha * cur-&gt;size) return cur;
+        }
+        balanced = true;
+        return build_perfect_balanced_binary_tree(cur);
+    }
+    node *join(node *left, node *right){
+        if(!left || !right) return left ? left : right;
+        if(left-&gt;size &lt; right-&gt;size){
+            right-&gt;left = join(left, right-&gt;left);
+            return right-&gt;eval(), right;
+        }else{
+            left-&gt;right = join(left-&gt;right, right);
+            return left-&gt;eval(), left;
+        }
+    }
+    void check(){
+        if(size() &gt;= alpha * max_element_size) return;
+        root = build_perfect_balanced_binary_tree(root);
+        max_element_size = size();
+    }
+    pair&lt;node*, bool&gt; erase(node *cur, const _Key&amp; key){
+        if(!cur) return {nullptr, false};
+        if(cur-&gt;key == key){
+            node *res = join(cur-&gt;left, cur-&gt;right);
+            delete cur;
+            return {res, true};
+        }else if(key &lt; cur-&gt;key){
+            pair&lt;node*, bool&gt; res = erase(cur-&gt;left, key);
+            cur-&gt;left = res.first;
+            return cur-&gt;eval(), make_pair(cur, res.second);
+        }else{
+            pair&lt;node*, bool&gt; res = erase(cur-&gt;right, key);
+            cur-&gt;right = res.first;
+            return cur-&gt;eval(), make_pair(cur, res.second);
+        }
+    }
+    void clear(node *cur){
+        if(cur-&gt;left) clear(cur-&gt;left);
+        if(cur-&gt;right) clear(cur-&gt;right);
+        delete cur;
+    }
+    node *root;
+public:
+    const double alpha, log_val;
+    size_t max_element_size;
+    ScapegoatTree(const double _alpha=2.0/3.0)
+        : root(nullptr), alpha(_alpha), log_val(-1.0 / log2(alpha)), max_element_size(0){}
+    // ~ScapegoatTree(){ if(root) clear(root); }
+    bool empty() const { return !root; }
+    size_t size() const { return empty() ? 0 : root-&gt;size; }
+    bool find(const _Key&amp; key) const { return find(root, key); }
+    void insert(const _Key&amp; key){
+        bool balanced = true;
+        root = insert(root, new node(key), 0, balanced);
+        max_element_size = max(max_element_size, size());
+        assert(balanced);
+    }
+    bool erase(const _Key&amp; key){
+        pair&lt;node*, bool&gt; res = erase(root, key);
+        root = res.first, check();
+        return res.second;
+    }
+};
+</pre>
+</div>
+<h3>verify 用の問題</h3>
+<p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=ITP2_7_B">Set: Delete</a>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=4372232#1">提出コード</a><br>
+Atcoder : <a href="https://atcoder.jp/contests/arc033/tasks/arc033_3">データ構造</a>
+  <a href="https://atcoder.jp/contests/arc033/submissions/12050664">提出コード</a>
+</p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>
