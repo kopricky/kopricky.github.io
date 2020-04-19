@@ -121,8 +121,7 @@ private:
     }
     node *insert(node *cur, node *new_node, int depth, bool&amp; balanced){
         if(!cur){
-            const int sz = size() + 1;
-            balanced = (depth &lt;= floor(log_val * log2(sz)));
+            balanced = (depth &lt;= floor(log_val * log2(max_element_size)));
             return new_node;
         }else if(cur-&gt;key &lt;= new_node-&gt;key){
             cur-&gt;right = insert(cur-&gt;right, new_node, depth + 1, balanced);
@@ -183,9 +182,9 @@ public:
     size_t size() const { return empty() ? 0 : root-&gt;size; }
     bool find(const _Key&amp; key) const { return find(root, key); }
     void insert(const _Key&amp; key){
+        max_element_size = max(max_element_size, size() + 1);
         bool balanced = true;
         root = insert(root, new node(key), 0, balanced);
-        max_element_size = max(max_element_size, size());
         assert(balanced);
     }
     bool erase(const _Key&amp; key){
@@ -198,9 +197,9 @@ public:
 </div>
 <h3>verify 用の問題</h3>
 <p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=ITP2_7_B">Set: Delete</a>
-  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=4373797#1">提出コード</a><br>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=4374318#1">提出コード</a><br>
 Atcoder : <a href="https://atcoder.jp/contests/arc033/tasks/arc033_3">データ構造</a>
-  <a href="https://atcoder.jp/contests/arc033/submissions/12050664">提出コード</a>
+  <a href="https://atcoder.jp/contests/arc033/submissions/12067977">提出コード</a>
 </p>
 </section>
 
