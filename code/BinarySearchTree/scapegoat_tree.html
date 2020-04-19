@@ -58,16 +58,17 @@ $\newcommand{\O}{\mathrm{O}}$
 
 <section>
 <h2>Scapegoat Tree</h2>
-<h3>コードについての説明</h3>
+<h3>コードについての説明(<a href="./scapegoat_tree_memo.html">個人的メモ</a>)</h3>
 <p>
-元論文は <a href=""></a>
+Scapegoat Tree は平衡二分探索木の一種で insert, erase, find の操作をならし $\O (\log n)$ で行うことのできるデータ構造である.<br>
+構造は非常に簡単であり, ざっくり言うとあるノードの深さがある程度深くなったらその頂点を含む偏った部分木が存在することが言え,
+それを最適な平衡二分探索木になるように構築し直すという方法である.<br>
+再構築にかかる最悪計算量は要素数について線形であるが, そのような再構築が起こる回数はよく抑えることができ, 結局各操作をならし
+$\O(\log n)$ で行えることが言える.<br>
+元論文は "Scapegoat Trees" [Galpcrin, Rivest 1993] <br>
 </p>
 <p>
-(関数)<br>
-add_edge(): 辺を追加する <br>
-</p>
-<p>
-時間計算量: ならし $\O(\log n)$
+時間計算量: 要素数を $n$ としたとき insert, erase ならし $\O(\log n)$, find $\O(\log n)$
 </p>
 <h3>コード</h3>
 <div class="codebox">
@@ -101,7 +102,7 @@ private:
     }
     node *build_pbbt_rec(const int l, const int r, const vector&lt;node*&gt;&amp; euler_tour){
         if(r - l == 0) return nullptr;
-        if(r - l == 1){
+        else if(r - l == 1){
             node * const cur = euler_tour[l];
             cur-&gt;left = cur-&gt;right = nullptr;
             return cur-&gt;eval(), cur;
@@ -121,10 +122,9 @@ private:
     node *insert(node *cur, node *new_node, int depth, bool&amp; balanced){
         if(!cur){
             const int sz = size() + 1;
-            balanced = (depth &lt;= floor(log_val * log2(sz)) + 1);
+            balanced = (depth &lt;= floor(log_val * log2(sz)));
             return new_node;
-        }
-        if(cur-&gt;key &lt;= new_node-&gt;key){
+        }else if(cur-&gt;key &lt;= new_node-&gt;key){
             cur-&gt;right = insert(cur-&gt;right, new_node, depth + 1, balanced);
             cur-&gt;eval();
             if(balanced || cur-&gt;right-&gt;size &lt;= alpha * cur-&gt;size) return cur;
@@ -138,7 +138,7 @@ private:
     }
     node *join(node *left, node *right){
         if(!left || !right) return left ? left : right;
-        if(left-&gt;size &lt; right-&gt;size){
+        else if(left-&gt;size &lt; right-&gt;size){
             right-&gt;left = join(left, right-&gt;left);
             return right-&gt;eval(), right;
         }else{
@@ -153,7 +153,7 @@ private:
     }
     pair&lt;node*, bool&gt; erase(node *cur, const _Key&amp; key){
         if(!cur) return {nullptr, false};
-        if(cur-&gt;key == key){
+        else if(cur-&gt;key == key){
             node *res = join(cur-&gt;left, cur-&gt;right);
             delete cur;
             return {res, true};
@@ -198,7 +198,7 @@ public:
 </div>
 <h3>verify 用の問題</h3>
 <p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=ITP2_7_B">Set: Delete</a>
-  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=4372232#1">提出コード</a><br>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=4373797#1">提出コード</a><br>
 Atcoder : <a href="https://atcoder.jp/contests/arc033/tasks/arc033_3">データ構造</a>
   <a href="https://atcoder.jp/contests/arc033/submissions/12050664">提出コード</a>
 </p>

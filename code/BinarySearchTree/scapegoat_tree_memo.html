@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-131511873-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-131511873-1');
+</script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
+
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<link rel="shortcut icon" type="image/x-icon" href="../../favicon.ico">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>Scapegoat Tree</h2>
+<h3>個人的メモ</h3>
+<p>
+ここで $n$ 頂点の平衡二分探索木 $T$ が最適であるとは任意の $n$ 頂点の平衡二分探索木 $T'$ について $height(T) \le height(T')$ が成り立つことと考えることにする.<br>
+定数 $\alpha$ を $1 / 2 &lt; \alpha &lt; 1$ となるように定め(実装では $2 / 3$ としている), 要素数を $n$ としたとき必ず任意の頂点の深さが
+$\lfloor \log_{1 / \alpha} n \rfloor + 1$ 以下となるように更新を行う.<br>
+まず変数 $M$ を前回の restart 操作以降での最大の要素数と定義する(restart 操作は後に定義するが $M$ は現在の要素数を
+$n$ としたとき常に $n \le M \le n / \alpha$ が成り立つようにする).
+要素を erase する場合は単純に平衡二分木から削除するが, (削除後の要素数) $&lt; \alpha \cdot M$ が成り立つときは restart 操作を行う.
+restart 操作とは現在の存在する要素から成る最適な平衡二分木を再構築することで, これは要素数について線形時間で可能である.
+また restart 操作後 $M =$ (現在の要素数) に更新をする. このとき任意の頂点についてその深さが $\lfloor \log_{1 / \alpha} M \rfloor$ 以下となっていることに注意する.<br>
+次に要素 $x$ を insert する場合は $M = \max(M$, insert 前の要素数$ + 1)$ に更新したあと要素を二分探索木の葉の位置に挿入し,
+その深さを $d$ としたとき $d \le \lfloor \log_{1 / \alpha} M\rfloor$ が成り立つなら
+木は balanced である, 成り立たないなら balanced でないと考える.<br>
+木が balanced で無かった場合は $x$ の先祖のある要素の組 $\{y, z\}$ ($y$ は $z$ の親) について
+($z$ を根とする部分木のサイズ) > $\alpha$ $\cdot$ ($y$ を根とする部分木のサイズ) が成り立つことが背理法から分かる.
+このとき頂点 $y$ のことを scapegoat と呼ぶ.
+scapegoat は複数存在しうるが, 例えば $x$ から根方向に先祖をたどって初めて見つかる scapegoat
+を根とする部分木について線形時間で最適な平衡二分探索木を再構築するということをする. <br>
+今帰納的に考えると $x$ を insert する前は全ての頂点についてその深さが $\lfloor \log_{1 / \alpha} M\rfloor$ 以下であることが言え,
+また ($z$ を根とする部分木のサイズ) > $\alpha$ $\cdot$ ($y$ を根とする部分木のサイズ) $\ge (1 / 2) \cdot$ ($y$ を根とする部分木のサイズ) も成り立つ.
+よって $y$ の左の子を根とする部分木と右の子を根とする部分木の間のサイズの差は $2$ 以上あり, $y$ を根とする部分木は飽和していない.
+つまり $y$ を根とする部分木について最適な平衡二分探索木を再構築すると全ての頂点の深さは $\lfloor \log_{1 / \alpha} M\rfloor$ 以下となる.
+ゆえにうまく更新ができていることが分かる.<br>
+結局アルゴリズム中常に $n \le M \le n / \alpha$ および任意の頂点の深さが $\lfloor \log_{1 / \alpha} M\rfloor$ 以下が成り立っているため,
+たしかに任意の頂点の深さが $\lfloor \log_{1 / \alpha} n \rfloor + 1$ 以下となっている.<br>
+計算量については例えば $y$ を根とするサイズ $m$ の部分木を再構築することになった場合は前回
+$y$ を根とする部分木について再構築したときもしくは $y$ を insert したとき以来 $y$ を根とする部分木内で少なくとも $((2 \alpha - 1) / (2 - 2 \alpha)) \cdot (m - 1)$ 回の挿入
+もしくは $(1 - 1 / (2 \alpha)) \cdot (m - 1)$ 回の削除が起こっているので再構築でかかる計算量 $\O(m)$ はポテンシャル的にペイする(細かい係数は計算ミスってるかもしれないけど).
+また restart 操作についても要素数 $m$ の最適な平衡二分木を構築することになった場合, 前回 restart 操作を行ったときもしくはアルゴリズムが開始したとき以来少なくとも
+$(1 / \alpha - 1) \cdot m$ 回の erase 操作が起きているのでこちらもポテンシャル的にペイする.<br>
+よってポテンシャル増分は scapegoat を根とする部分木について再構築するパートにかかる部分が本質で上記の説明から新たに要素 $x$ を挿入する際に木の根と葉
+$x$ の間の頂点に $\O(1)$ のポテンシャルを乗せることで解析がうまく回ることが分かる.
+ゆえに任意の頂点について深さが $\lfloor \log_{1 / \alpha} n \rfloor + 1$ 以下である事実と合わせてならし計算量は $\O(\log n)$ となることが分かる.
+</p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>

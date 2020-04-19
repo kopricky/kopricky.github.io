@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-131511873-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-131511873-1');
+</script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
+
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<link rel="shortcut icon" type="image/x-icon" href="../../favicon.ico">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>Treap</h2>
+<h3>個人的メモ</h3>
+<p>
+(計算量について) <br>
+以下の説明はたしか Motwani, Raghavan の Randomized Algorithm で見た話だった気がする.<br>
+まず重要な事実として集合内の全ての要素のキーと優先度のペアが決まれば上記の 2 つの性質を満たす Treap は一意に定まるということに注意する.
+つまり Treap の形は要素の insert の順番などに依らない.<br>
+よって $n$ 個の要素({キー, 優先度})  {$a_1, p_1$}, ..., {$a_n, p_n$} ($p_1 >, ..., > p_n$) からなる Treap における各要素の深さを考えるとき, その Treap は
+$n$ 個の要素を $1$ から $n$ の順に insert してできたとして考えても一般性を失わない.
+また $\{a_1, ..., a_n\} = \{1, ..., n\}$ で優先度は全て異なることを便宜上仮定する.<br>
+さて要素 $x = \{a_x, p_x\}$ と Treap の根との間に要素がいくつあるか, つまり要素 $x$ の深さを考えるとする.
+まず $x$ の先祖で $a_x &lt; a_y$ を満たすような要素 $y = \{a_y, p_y\}$ が存在する確率を考える.
+今優先度の大きいものから順番に要素を挿入するので新たな要素は必ず葉として挿入されることに注意すると
+$a_x \le a_z &lt; a_y$ を満たす任意の要素 $z = \{a_z, p_z\}$ は $y$ より後に挿入されたことが分かる.
+各要素の優先度の値は互いに独立な同分布(もちろん分布は各要素のキー値にも依存しない)からのサンプルであるので要素 $x$ の先祖として $y$ が存在する確率は
+$1 / (a_y - a_x + 1)$ となる.
+また逆に $x$ の先祖で $a_x &gt; a_{y'}$ を満たすような要素 $y' = \{a_{y'}, p_{y'}\}$ が存在する確率は $1 / (a_x - a_{y'} + 1)$ となる.
+この話はランダムピボット選択を行った場合のクイックソートの計算量解析にも現れるが, 結局上記の結果からキー値が $i$ である要素の深さの期待値は
+$H_i + H_{n - i + 1} - 1 = \O (\log n)$ となることが容易に分かる($H$ は調和級数とする).<br>
+また Corollary としてキー値が $i$ である要素の深さの期待値は $1$ 〜 $n$ からなる長さ $n$ の数列をランダムピボット選択クイックソートしたときに要素
+$i$ がピボットとして選ばれる再帰の深さの期待値と一致することも分かる.
+</p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>
