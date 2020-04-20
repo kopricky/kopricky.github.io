@@ -62,9 +62,9 @@ $\newcommand{\O}{\mathrm{O}}$
 <p>
 Treap は平衡二分探索木の一種で randomness によってその平衡性を保っている.<br>
 各ノードはキーおよび優先度を保持しており, 管理する木はキーについて二分探索木の性質を、優先度については(最大値)ヒープ木の性質を満たした構造となっている.
-各ノードの優先度については例えば [0, 1] 上の一様分布を独立同分布とすることが多い. <br>
+各ノードの優先度については例えば [0, 1] 上の一様分布を独立同分布とすることが多い(以下の実装は異なる). <br>
 ちなみに名前の由来は "Tree + Heap" のようだ. <br>
-自分の経験的には <a href="./rbst_query.html">RBST</a>, <a href="./splay_tree.html">Splay Tree</a> よりも速く動作することが多い.<br>
+自分の経験的には <a href="./rbst_query.html">RBST</a> や <a href="./splay_tree.html">Splay Tree</a> よりも速く動作することが多い.<br>
 元論文は "Randomized Search Trees" [Aragon, Seidel 1989]<br>
 </p>
 <p>
