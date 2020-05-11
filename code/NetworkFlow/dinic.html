@@ -149,7 +149,7 @@ public:
 <pre class="prettyprint linenums">
 template&lt;typename T&gt; class Dinic {
 public:
-    static_assert(std::is_integral&lt;T&gt;::value, "Integral required.");
+    static_assert(std::is_integral&lt;T&gt;::value, &quot;Integral required.&quot;);
     struct edge{
         int to;
         T cap;
@@ -157,6 +157,7 @@ public:
     };
 private:
     const int V;
+    T max_cap;
     vector&lt;int&gt; level, iter, que;
     static unsigned long long floor2(unsigned long long v){
         v = v | (v &gt;&gt; 1), v = v | (v &gt;&gt; 2);
@@ -199,14 +200,15 @@ private:
 public:
     vector&lt;vector&lt;edge&gt; &gt; G;
 
-    Dinic(const int node_size) : V(node_size), level(V), iter(V), que(V), G(V){}
+    Dinic(const int node_size) : V(node_size), max_cap(0), level(V), iter(V), que(V), G(V){}
     //辺を張る
     void add_edge(const int from, const int to, const T cap) {
         G[from].push_back((edge){to, cap, (int)G[to].size()});
         G[to].push_back((edge){from, (T)0, (int)G[from].size()-1});
+        max_cap = max(max_cap, cap);
     }
     //最大流を計算(max_cap は辺の容量の上限)
-    T solve(const int s, const int t, const T max_cap){
+    T solve(const int s, const int t){
         T flow = 0;
         for(T base = floor2(max_cap); base &gt;= 1;){
             bfs(s, base);
@@ -225,7 +227,7 @@ public:
 <h3>verify 用の問題</h3>
 <p>AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_6_A">Maximum Flow</a>
   <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3175254#1">提出コード</a>
-  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3820602#1">提出コード</a>(容量スケーリング版)</p>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=4455362#1">提出コード</a>(容量スケーリング版)</p>
 </section>
 
 </div>
