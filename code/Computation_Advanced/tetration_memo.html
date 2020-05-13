@@ -75,7 +75,7 @@ $n \ge \lfloor \log_2 p \rfloor$ の整数 $n$ について $a^n \mathrm{mod}\ q
 $i \ge \lfloor \log_2 p \rfloor$ について $a^i \mathrm{mod}\ p$ の数列は周期 $\phi(p)$ を持つので $a$ と $p$ が互いに素である場合と同じように $a^n \mathrm{mod}\ p$ は
 $n\ \mathrm{mod}\ \phi(p)$ を再帰的に計算することで求まる($i < \lfloor \log_2 p \rfloor$ の場合についてはその値を剰余を取らず管理しておく).<br>
 実装は剰余が int 型の場合 $\lfloor \log_2 p \rfloor$ は高々 $32$ なので指数部が $32$ 以上となるかどうかに注意して計算をしてもいいが,
-任意の自然数 $n$ について $\phi(n) \ge \lfloor \log_2 n \rfloor$ であることから $\phi(p)$ 以上となるかどうかで場合分けをすることにした.
+任意の自然数 $n$ について $\phi(n) \ge \lfloor \log_2 n \rfloor$ であることから $\phi(p)$ 以上となるかどうかで場合分けをするとよい.
 つまり実装の 1 つ下の再帰パートでは $a ↑↑ (b-1) \ge \phi(p)$ なら $\phi(p) + ((a ↑↑ (b-1))\ \mathrm{mod}\ \phi(p))$ を
 $a ↑↑ (b-1) < \phi(p)$ なら $a ↑↑ (b-1)$ を返すことにして処理を進めている.<br>
 (注) 剰余 $p$ を $[0, 2 p)$ にマップしているので剰余の値は $2^{30}$ 以下とする. <br>
