@@ -80,12 +80,12 @@ private:
     struct node {
         string *s;
         node **to;
-        // sub: 部分木に含まれる要素の数, adj: 子の bit 表現
-        uint32_t sub, adj;
-        node() : s(nullptr), to(nullptr),  sub(1u), adj(0u){}
-        node(string&amp;&amp; _s, node *v, unsigned int index, uint32_t _sub)
+        // sub: 部分木に含まれる要素の数, adj: 子の bit 表現, cnt: ここで終わる頂点の数
+        uint32_t sub, adj, cnt;
+        node() : s(nullptr), to(nullptr),  sub(1u), adj(0u), cnt(1u){}
+        node(string&amp;&amp; _s, node *v, unsigned int index, uint32_t _sub, uint32_t _cnt)
          : s(new string[CHARACTER_SIZE]()), to(new node*[CHARACTER_SIZE]()),
-            sub(_sub), adj(1u &lt;&lt; index){
+            sub(_sub), adj(1u &lt;&lt; index), cnt(_cnt){
             s[index] = move(_s), to[index] = v;
         }
         // ~node(){ delete[] s, delete[] to; }
@@ -96,7 +96,6 @@ private:
             return cur ? lsb(cur) : CHARACTER_SIZE;
         }
         inline static unsigned int end(){ return CHARACTER_SIZE; }
-        inline bool exist(const unsigned int v) const { return adj &gt;&gt; v &amp; 1u; }
         inline bool isExist(const unsigned int v) const { return adj &gt;&gt; v &amp; 1u; }
         inline bool isFinal() const { return !s; }
         void direct_push(string&amp;&amp; _s, unsigned int index){
@@ -104,10 +103,10 @@ private:
             s[index] = move(_s), to[index] = new node(), ++sub, adj |= (1u &lt;&lt; index);
         }
     };
-    void make_node(string&amp; orgs, unsigned int start, node*&amp; to){
+    void make_node(string&amp; orgs, unsigned int start, node*&amp; to, bool is_end){
         string tmp = orgs.substr(0, start);
         orgs.erase(orgs.begin(), orgs.begin() + start);
-        to = new node(move(orgs), to, orgs[0] - START_CHARACTER, to-&gt;sub);
+        to = new node(move(orgs), to, orgs[0] - START_CHARACTER, to-&gt;sub, is_end);
         orgs = move(tmp);
     }
     void new_push(const string&amp; s, unsigned int index, node *to){
@@ -130,13 +129,16 @@ private:
                 const unsigned int ls = orgs.size();
                 for(prefix = 0u; prefix &lt; ls &amp;&amp; index &lt; _ls; ++prefix, ++index){
                     if(orgs[prefix] == news[index]) continue;
-                    make_node(orgs, prefix, cur-&gt;to[num]);
+                    make_node(orgs, prefix, cur-&gt;to[num], false);
                     new_push(forward&lt;String&gt;(news), index, cur-&gt;to[num]);
                     return;
                 }
                 if(index == _ls){
-                    if(prefix == ls) return;
-                    make_node(orgs, prefix, cur-&gt;to[num]);
+                    if(prefix == ls){
+                        ++cur-&gt;to[num]-&gt;sub, ++cur-&gt;to[num]-&gt;cnt;
+                        return;
+                    }
+                    make_node(orgs, prefix, cur-&gt;to[num], true);
                     return;
                 }else{
                     cur = cur-&gt;to[num];
@@ -160,23 +162,21 @@ public:
     void add(const string&amp; s){ push(root, s); }
     void add(string&amp;&amp; s){ push(root, move(s)); }
     //何らかのクエリ
-    int recur_query(node *cur, unsigned int d, const string&amp; s){
+    int recur_query(node *cur, unsigned int d, int *index, const string&amp; s){
         int res = 0;
         while(true){
-            // 終点ノードなら break
             if(cur-&gt;isFinal()) break;
             const unsigned int next = s[d] - START_CHARACTER;
-            // cur から出る存在する辺のみを以下の for 文でなめることができる.
             for(unsigned int i = cur-&gt;begin(); i != cur-&gt;end(); i = cur-&gt;next(i)){
-                // 例えば cur-&gt;s[i] は cur から出る i 番目の文字から始まる文字列
+                if(index[i] &lt; index[next]) res += cur-&gt;to[i]-&gt;sub;
             }
             d += cur-&gt;s[next].size();
             cur = cur-&gt;to[next];
         }
         return res;
     }
-    int query(const string&amp; s){
-        return recur_query(root, 0u, s);
+    int query(int *index, const string&amp; s){
+        return recur_query(root, 0u, index, s);
     }
 };
 </pre>
