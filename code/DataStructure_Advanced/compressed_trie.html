@@ -80,7 +80,7 @@ private:
     struct node {
         string *s;
         node **to;
-        // sub: 部分木に含まれる要素の数, adj: 子の bit 表現, cnt: ここで終わる頂点の数
+        // sub: 部分木に含まれる要素の数, adj: 子の bit 表現, cnt: この頂点で終わる文字列の数
         uint32_t sub, adj, cnt;
         node() : s(nullptr), to(nullptr),  sub(1u), adj(0u), cnt(1u){}
         node(string&amp;&amp; _s, node *v, unsigned int index, uint32_t _sub, uint32_t _cnt)
