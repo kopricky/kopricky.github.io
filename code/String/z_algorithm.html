@@ -61,12 +61,14 @@ $\newcommand{\O}{\mathrm{O}}$
 <h2>Z algorithm</h2>
 <h3>コードについての説明</h3>
 <p>
-文字列 $S$ が与えられたとき $0 \le i < n$ について $S$ と $S[i:|S|-1]$ の最長共通接頭辞の長さを求める線形時間アルゴリズム(<a href="https://snuke.hatenablog.com/entry/2014/12/03/214243">参考</a>). <br>
+文字列 $S$ が与えられたとき $0 \le i < |S|$ について $S$ と $S[i:]$ の最長共通接頭辞の長さを求める線形時間アルゴリズム(<a href="https://snuke.hatenablog.com/entry/2014/12/03/214243">参考</a>). <br>
 (注) 以下の説明より (参考) の記事を見たほうがわかりやすい. <br>
-$1$ つ目の while 文では愚直に $S$ と $S[i:|S|-1]$ の最長共通接頭辞の長さ $res[i] (=j)$ を求めています. これだけだと線形にならないので $2$ つ目の while 文では文字列 $S[0:k+res[k]-1]$ が $S$ と
-$S[i:|S|-1]$ の最長共通接頭辞に含まれている($k + res[k] < j$) とき $S$ と $S[i+k:|S|-1]$ の最長共通接頭辞はそれと一致するので $res[i+k]$ を更新する.
-完全に含まれていない場合でも部分的に含まれていればその情報は利用できるので while 文を抜けた後は $j \rightarrow j - k$ とし次のループ時に $i+k$ を始点とする最長共通接頭辞を調べるときにキョリ $j - k + 1$ 番目の部分から始めることにする. <br>
-計算量を考える. まず $1$ つ目の while ループは $i + j$ の値に注目することで bound できる. $i + j$ は 1 つ目のループを回るごとに $1$ 増え, $2$ つ目のループでは変化しない. $i + j$ は $|S|$ 以下なので $1$ つ目の while ループを回る回数は高々 $|S|$ 回.
+各ループの初めにおいて $i$ は今 $S$ と $S[i:]$ の最長共通接頭辞を求めていることを意味しており, また $j$ は $S$ と $S[i:]$ のうち先頭 $j$ 文字についてはすでに一致が確定していることを表す.<br>
+$1$ つ目の while 文では愚直に $S$ と $S[i:]$ の最長共通接頭辞を、確定していない $j + 1$ 番目以降の文字について愚直に一致を調べることで求めている. しかしこれだけでは線形にならない. <br>
+ここで $k(\ge 1)$ について $S$ と $S[i+k:]$ の最長共通接頭辞は $S$ と $S[i:]$ の先頭 $j$ 文字が一致することから $S$ と $S[k:]$ の最長共通接頭辞と一致することを用いる.
+ただしこれは $k + $ ($S$ と $S[k:]$ の最長共通接頭辞の長さ) $ < j$ の場合の話である. 最後に重要なこととして $k$ がそのような条件を満たさなくなった場合でも
+$S$ と $S[i + k:]$ の先頭 $j - k$ 文字は一致することが確定するのでループの最後において $j$ を $j - k$ に更新する.<br>
+最後に計算量を考える. まず $1$ つ目の while ループは $i + j$ の値に注目することで bound できる. $i + j$ は 1 つ目のループを回るごとに $1$ 増え, $2$ つ目のループでは変化しない. $i + j$ は $|S|$ 以下なので $1$ つ目の while ループを回る回数は高々 $|S|$ 回.
 $2$ つ目の while ループは $i$ の値に注目することで bound できる. $i$ は $1$ つ目のループでは変化せず $2$ つ目の while ループでは回るごとに $1$ 増える. $i$ は $|S|$ 以下なので $2$ つ目の while ループを回る回数は高々 $|S|$ 回. よって合わせて $\O (|S|)$ となる.
 </p>
 <p>
@@ -80,7 +82,7 @@ $2$ つ目の while ループは $i$ の値に注目することで bound でき
 void z_algorithm(const string&amp; S, vector&lt;int&gt;&amp; res)
 {
     int sz = (int)S.size();
-    res.resize(sz, 0);
+    res.resize(sz, sz);
     int i = 1, j = 0;
     while(i &lt; sz){
         while(i+j &lt; sz &amp;&amp; S[j] == S[i+j]) j++;
@@ -100,7 +102,7 @@ void z_algorithm(const string&amp; S, vector&lt;int&gt;&amp; res)
 </div>
 <h3>verify 用の問題</h3>
 <p>Atcoder : <a href="https://atcoder.jp/contests/jag2018summer-day2/tasks/jag2018summer_day2_h">Prefix Suffix Free</a>
-  <a href="https://atcoder.jp/contests/jag2018summer-day2/submissions/5393075">提出コード</a></p>
+  <a href="https://atcoder.jp/contests/jag2018summer-day2/submissions/13673333">提出コード</a></p>
 </section>
 
 </div>
