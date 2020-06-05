@@ -60,7 +60,8 @@ $\newcommand{\O}{\mathrm{O}}$
 <h2>Erase Outer Interval Inner Interval</h2>
 <h3>コードについての説明</h3>
 <p>
-区間が $n$ 個与えられたときにある別の区間を完全に含んでいるような区間を削除(EraseOuterInterval), ある別の区間に完全に含まれているような区間を削除(EraseInnerInterval) という操作を効率良く行うアルゴリズム. <br>
+区間が $n$ 個与えられたときにある別の区間を完全に含んでいるような区間をすべて削除(EraseOuterInterval), ある別の区間に完全に含まれているような区間をすべて削除(EraseInnerInterval) という操作を効率良く行うアルゴリズム. 
+ただし同じ区間が複数入力に存在する場合はその区間はちょうど 1 つ出力の vector に含まれる. また出力される vector 内の区間は x 座標, y 座標の順に昇順でソートされる.<br>
 前処理として使いたくなるときがたまにある.
 </p>
 <p>
@@ -71,68 +72,48 @@ $\newcommand{\O}{\mathrm{O}}$
 <input type="checkbox" id="label" class="csscode" />
 <label for="label"></label>
 <pre class="prettyprint linenums">
-//外側の区間を削除
+// 外側の区間を削除
 template&lt;typename T&gt;
 vector&lt;pair&lt;T, T&gt; &gt; EraseOuterInterval(vector&lt;pair&lt;T, T&gt; &gt; vec)
 {
-    using ptt = pair&lt;T, T&gt;;
-    vector&lt;ptt&gt; res;
-    sort(all(vec),[](const ptt&amp; a,const ptt&amp; b){
-        return (a.second == b.second)?(a.first &gt; b.first):(a.second &lt; b.second);
+    sort(vec.begin(), vec.end(), [](const pair&lt;T, T&gt;&amp; a,const pair&lt;T, T&gt;&amp; b){
+        return (a.second == b.second) ? (a.first &lt; b.first) : (a.second &gt; b.second);
     });
-    priority_queue&lt;ptt&gt; que;
-    for(int i = (int)vec.size()-1; i &gt;= 0; i--){
-        while(!que.empty()){
-            ptt p = que.top();
-            if(-p.first &gt; vec[i].first){
-                break;
-            }
-            que.pop();
+    vector&lt;pair&lt;T, T&gt; &gt; res;
+    for(const pair&lt;T, T&gt;&amp; p : vec){
+        while(!res.empty()){
+            const pair&lt;T, T&gt;&amp; q = res.back();
+            if(p.first &lt; q.first) break;
+            res.pop_back();
         }
-        que.push(ptt(-vec[i].first,vec[i].second));
+        res.push_back(p);
     }
-    while(!que.empty()){
-        int x,y;
-        tie(x,y) = que.top();
-        que.pop();
-        res.push_back(ptt(-x,y));
-    }
+    reverse(res.begin(), res.end());
     return res;
 }
-//内側の区間を削除
+
+// 内側の区間を削除
 template&lt;typename T&gt;
 vector&lt;pair&lt;T, T&gt; &gt; EraseInnerInterval(vector&lt;pair&lt;T, T&gt; &gt; vec)
 {
-    using ptt = pair&lt;T, T&gt;;
-    vector&lt;ptt&gt; res;
-    sort(all(vec),[](const ptt&amp; a,const ptt&amp; b){
-        return (a.second == b.second)?(a.first &lt; b.first):(a.second &gt; b.second);
+    sort(vec.begin(), vec.end(), [](const pair&lt;T, T&gt;&amp; a,const pair&lt;T, T&gt;&amp; b){
+        return (a.second == b.second) ? (a.first &gt; b.first) : (a.second &lt; b.second);
     });
-    priority_queue&lt;ptt&gt; que;
-    for(int i = (int)vec.size()-1; i &gt;= 0; i--){
-        while(!que.empty()){
-            ptt p = que.top();
-            if(p.first &lt; vec[i].first){
-                break;
-            }
-            que.pop();
+    vector&lt;pair&lt;T, T&gt; &gt; res;
+    for(const pair&lt;T, T&gt;&amp; p : vec){
+        while(!res.empty()){
+            const pair&lt;T, T&gt;&amp; q = res.back();
+            if(q.first &lt; p.first) break;
+            res.pop_back();
         }
-        que.push(ptt(vec[i].first,vec[i].second));
-    }
-    vec.clear();
-    while(!que.empty()){
-        int x,y;
-        tie(x,y) = que.top();
-        que.pop();
-        res.push_back(ptt(x,y));
+        res.push_back(p);
     }
     return res;
 }
-</pre>
 </div>
 <h3>verify 用の問題</h3>
 <p>Atcoder : <a href="https://atcoder.jp/contests/kupc2018/tasks/kupc2018_h">カラフル数列</a>
-  <a href="https://atcoder.jp/contests/kupc2018/submissions/3673631">提出コード</a></p>
+  <a href="https://atcoder.jp/contests/kupc2018/submissions/14021164">提出コード</a></p>
 </section>
 
 </div>
