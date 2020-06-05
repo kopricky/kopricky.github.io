@@ -76,7 +76,7 @@ $\newcommand{\O}{\mathrm{O}}$
 template&lt;typename T&gt;
 vector&lt;pair&lt;T, T&gt; &gt; EraseOuterInterval(vector&lt;pair&lt;T, T&gt; &gt; vec)
 {
-    sort(vec.begin(), vec.end(), [](const pair&lt;T, T&gt;&amp; a,const pair&lt;T, T&gt;&amp; b){
+    sort(vec.begin(), vec.end(), [](const pair&lt;T, T&gt;&amp; a, const pair&lt;T, T&gt;&amp; b){
         return (a.second == b.second) ? (a.first &lt; b.first) : (a.second &gt; b.second);
     });
     vector&lt;pair&lt;T, T&gt; &gt; res;
@@ -96,7 +96,7 @@ vector&lt;pair&lt;T, T&gt; &gt; EraseOuterInterval(vector&lt;pair&lt;T, T&gt; &g
 template&lt;typename T&gt;
 vector&lt;pair&lt;T, T&gt; &gt; EraseInnerInterval(vector&lt;pair&lt;T, T&gt; &gt; vec)
 {
-    sort(vec.begin(), vec.end(), [](const pair&lt;T, T&gt;&amp; a,const pair&lt;T, T&gt;&amp; b){
+    sort(vec.begin(), vec.end(), [](const pair&lt;T, T&gt;&amp; a, const pair&lt;T, T&gt;&amp; b){
         return (a.second == b.second) ? (a.first &gt; b.first) : (a.second &lt; b.second);
     });
     vector&lt;pair&lt;T, T&gt; &gt; res;
