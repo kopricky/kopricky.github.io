@@ -80,6 +80,7 @@ public:
             for(int j_ = j+1; j_ &lt; m; j_ += j_ &amp; -j_)
                 bit[i_][j_] += val;
     }
+    // [0,i]×[0,j]の範囲の和を求める
     T sum(int i, int j){
         T s = 0;
         for(int i_ = i+1; i_ &gt; 0; i_ -= i_ &amp; -i_)
@@ -87,6 +88,7 @@ public:
                 s += bit[i_][j_];
         return s;
     }
+    // [lx, rx)×[ly, ry)の範囲の和を求める
     T sum(int lx, int rx, int ly, int ry){
         return sum(rx-1, ry-1) - sum(lx-1, ry-1) - sum(rx-1, ly-1) + sum(lx-1, ly-1);
     }
@@ -97,8 +99,8 @@ public:
     BIT(vector&lt;vector&lt;T&gt; &gt;&amp; v){
         n = (int)v.size()+1, m = (int)v[0].size()+1;
         bit.resize(n, vector&lt;T&gt;(m, 0));
-        for(int i = 0; i &lt; n; i++)
-            for(int j = 0; j &lt; m; j++)
+        for(int i = 0; i &lt; n - 1; i++)
+            for(int j = 0; j &lt; m - 1; j++)
                 add(i, j, v[i][j]);
     }
     void print(){
