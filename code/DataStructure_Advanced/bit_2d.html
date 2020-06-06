@@ -75,6 +75,7 @@ template&lt;typename T&gt; class BIT {
 private:
     int n,m; vector&lt;vector&lt;T&gt; &gt; bit;
 public:
+    // (i, j) に val を加算する
     void add(int i, int j, T val){
         for(int i_ = i+1; i_ &lt; n; i_ += i_ &amp; -i_)
             for(int j_ = j+1; j_ &lt; m; j_ += j_ &amp; -j_)
