@@ -61,12 +61,12 @@ $\newcommand{\O}{\mathrm{O}}$
 <h3>コードについての説明(<a href="./miller_rabbin_memo.html">個人的メモ</a>)</h3>
 <p>
 ミラーラビン法は素数判定を高速に行うモンテカルロアルゴリズムである. つまり間違える可能性はあるが高い可能性で正解を返すアルゴリズムである.
-$2^{32}$ および $2^{64}$以下などの数については経験的に $3$ 個および $12$ 個の $\mathbb{Z} / n \mathbb{Z}$ のある要素について調べれば十分であることが分かっているためそういう意味では決定的アルゴリズムと考えてもよい.<br>
+$2^{32}$ および $2^{64}$以下などの数については経験的に $3$ 個および $7$ 個のある要素について調べれば十分であることが分かっているためそういう意味では決定的アルゴリズムと考えてもよい.<br>
 素数ならばフェルマーの小定理を満たすという必要条件をチェックしていくフェルマーテストでは素数でないのに必ず素数と判定してしまうようなもの(カーマイケル数)が存在するなどの問題があったためこちらの方がより正確な素数判定アルゴリズムと言えるかもしれない. <br>
 実装上の注意として long long 型の数($2^{32}$ 以上の数) について素数判定を行う場合は __int128 型の剰余算を途中で行う必要があるが, これがびっくりするくらい遅い(たぶん long long 型の剰余算の $10$ 倍近く遅い). <br>
 そのため以下では強引にインラインアセンブラで多少高速化しているが, 本当はモンゴメリ乗算などを用いてちゃんとやったほうが実行時間が格段に速くなると思う. <br>
 ただ計算量的には 1 つの数の判定に $\O (|numset| \ast \log (VAL))$ ($VAL$ は判定する数) time とかなのでたくさんの数の素数判定を行わないなら特に気にする必要のない注意である.<br>
-numset の値については <a href="https://en.wikipedia.org/wiki/Miller%E2%80%93Rabin_primality_test">Wikipedia の記事</a> を参照したので正しいかどうかは分からない.
+numset の値については <a href="http://miller-rabin.appspot.com/">こちらのサイト</a> が参考になる.
 </p>
 <p>
 (関数)<br>
@@ -80,8 +80,8 @@ check$(n)$ : $n$ が素数であるかどうか(true / false)を返す<br>
 <input type="checkbox" id="label" class="csscode" />
 <label for="label"></label>
 <pre class="prettyprint linenums">
-const vector&lt;unsigned int&gt; numset = {2,7,61}; // &lt; 4,759,123,141 ≒ 4×10^9 以下まで
-// const vector&lt;unsigned int&gt; numset = {2,3,5,7,11,13,17,19,23,29,31,37}; // 318665857834031151167461 ≒ 2^78 以下まではいける
+const vector&lt;unsigned int&gt; numset = {2,7,61}; // &lt; 4,759,123,141 ≒ 4×10^9 までは決定的
+// const vector&lt;unsigned long long&gt; numset = {2, 325, 9375, 28178, 450775, 9780504, 1795265022ULL}; // 少なくとも 2^64 までは決定的
 
 // int 型の素数判定の場合
 
@@ -95,7 +95,6 @@ unsigned int mod_pow(unsigned int x, unsigned int k, unsigned int mod){
     return res;
 }
 
-// check if n is prime
 bool check(unsigned int n){
     if(n &lt; 2) return false;
     unsigned int d = n - 1, s = 0;
@@ -149,8 +148,8 @@ bool check(unsigned int n){
 //         d /= 2;
 //         s++;
 //     }
-//     for(unsigned int a : numset){
-//         if(a == n) return true;
+//     for(unsigned long long a : numset){
+//         if(a % n == 0) return true;
 //         unsigned long long res = mod_pow(a, d, n);
 //         if(res == 1) continue;
 //         bool ok = true;
@@ -169,7 +168,7 @@ bool check(unsigned int n){
 </div>
 <h3>verify 用の問題</h3>
 <p>yukicoder : <a href="https://yukicoder.me/problems/no/3030">ミラー・ラビン素数判定法のテスト</a>
-  <a href="https://yukicoder.me/submissions/296507">提出コード</a></p>
+  <a href="https://yukicoder.me/submissions/495299">提出コード</a></p>
 </section>
 
 </div>
