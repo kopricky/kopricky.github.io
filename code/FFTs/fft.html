@@ -89,22 +89,22 @@ void fft(vector&lt;complex&lt;double&gt; &gt;&amp; a,bool rev = false)
     double r;
     complex&lt;double&gt; p, q, s;
     const unsigned int size = a.size();
-	if(size == 1) return;
-	vector&lt;complex&lt;double&gt; &gt; b(size);
-	r = rev ? (- 2 * PI / size) : 2 * PI / size;
-	s = polar(1.0, r);
-	vector&lt;complex&lt;double&gt; &gt; kp(size / 2 + 1, 1);
-	for(i = 0; i &lt; size / 2; ++i) kp[i + 1] = kp[i] * s;
-	for(i = 1, l = size / 2; i &lt; size; i &lt;&lt;= 1, l &gt;&gt;= 1){
-		for(j = 0, r = 0; j &lt; l; ++j, r += i){
+    if(size == 1) return;
+    vector&lt;complex&lt;double&gt; &gt; b(size);
+    r = rev ? (- 2 * PI / size) : 2 * PI / size;
+    s = polar(1.0, r);
+    vector&lt;complex&lt;double&gt; &gt; kp(size / 2 + 1, 1);
+    for(i = 0; i &lt; size / 2; ++i) kp[i + 1] = kp[i] * s;
+    for(i = 1, l = size / 2; i &lt; size; i &lt;&lt;= 1, l &gt;&gt;= 1){
+        for(j = 0, r = 0; j &lt; l; ++j, r += i){
             for(k = 0, s = kp[i * j]; k &lt; i; ++k){
-				p = a[k + r], q = a[k + r + size / 2];
-				b[k + 2 * r] = p + q;
-				b[k + 2 * r + i] = (p - q) * s;
-			}
-		}
-		swap(a, b);
-	}
+                p = a[k + r], q = a[k + r + size / 2];
+                b[k + 2 * r] = p + q;
+                b[k + 2 * r + i] = (p - q) * s;
+            }
+        }
+        swap(a, b);
+    }
     if(rev){
         for(i = 0; i &lt; size; i++){ a[i] /= size; }
     }
