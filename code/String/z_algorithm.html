@@ -72,7 +72,8 @@ $S$ と $S[i + k:]$ の先頭 $j - k$ 文字は一致することが確定する
 $2$ つ目の while ループは $i$ の値に注目することで bound できる. $i$ は $1$ つ目のループでは変化せず $2$ つ目の while ループでは回るごとに $1$ 増える. $i$ は $|S|$ 以下なので $2$ つ目の while ループを回る回数は高々 $|S|$ 回. よって合わせて $\O (|S|)$ となる.
 </p>
 <p>
-時間計算量: $\O (|S|)$
+時間計算量: $\O (|S|)$ <br>
+時間計算量(オンライン版): add ならし $\O (1)$ query $\O(1)$
 </p>
 <h3>コード</h3>
 <div class="codebox">
@@ -98,6 +99,60 @@ void z_algorithm(const string&amp; S, vector&lt;int&gt;&amp; res)
         i += k; j -= k;
     }
 }
+</pre>
+</div>
+<h3>コード(オンライン版)</h3>
+<div class="codebox">
+<input type="checkbox" id="label2" class="csscode" />
+<label for="label2"></label>
+<pre class="prettyprint linenums">
+class OnlineZalgo {
+private:
+    string s;
+    vector&lt;int&gt; arr;
+    list&lt;int&gt; unconfirm;
+    vector&lt;list&lt;int&gt;::iterator&gt; it;
+    vector&lt;vector&lt;int&gt; &gt; info;
+public:
+    OnlineZalgo() : arr(1), it(1), info(1){}
+    void add(char c){
+        s.push_back(c);
+        if((int)s.size() == 1) return;
+        it.push_back(list&lt;int&gt;::iterator()), info.push_back(vector&lt;int&gt;());
+        int nx = -1;
+        while(!unconfirm.empty()){
+            const int id = *unconfirm.begin();
+            if(s[(int)s.size() - 1 - id] != c){
+                arr[id] += (int)s.size() - 1;
+                unconfirm.pop_front();
+                info.back().push_back(id);
+            }else{
+                nx = (int)s.size() - 1 - id;
+                break;
+            }
+        }
+        if(nx &gt;= 0){
+            for(const auto&amp; e : info[nx]){
+                const int id = (int)s.size() - 1 - nx + e;
+                arr[id] += (int)s.size() - 1;
+                unconfirm.erase(it[id]);
+                info.back().push_back(id);
+            }
+        }
+        arr.push_back(0);
+        if(s[0] == c){
+            unconfirm.push_back((int)s.size() - 1);
+            it.back() = (--unconfirm.end());
+            arr.back() = -(int)s.size() + 1;
+        }
+    }
+    // s と s[index:] の最長共通接頭辞の長さを返す
+    int query(int index){
+        assert(index &lt; (int)s.size());
+        if(index == 0) return (int)s.size();
+        return (arr[index] &gt;= 0) ? arr[index] : (arr[index] + (int)s.size());
+    }
+};
 </pre>
 </div>
 <h3>verify 用の問題</h3>
