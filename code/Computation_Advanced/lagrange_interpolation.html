@@ -140,6 +140,7 @@ int mod_inverse(int a,int m)
 // すべて MOD を法として考えていることに注意
 int solve(int deg, long long num, vector&lt;int&gt;&amp; val)
 {
+	if(num &lt;= deg) return val[num];
 	int ue = 1;
 	for(int i = 0; i &lt; deg + 1; i++){
 		ue = mul(ue, sub(num % MOD, i));
