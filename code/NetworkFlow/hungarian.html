@@ -67,14 +67,15 @@ $\newcommand{\O}{\mathrm{O}}$
 計算量としては $\O (n m \log n)$ かかる
 (正確には二分ヒープによる Dijkstra 法を用いて最短経路に沿ってフローを増加させるアルゴリズムの場合の話で <a href="../Academic/dijkstra_fheap.html">フィボナッチヒープによる Dijkstra 法</a> を用いると
 $\O (n m + n^2 \log n)$ で可能になる).
-一方ハンガリアン法では $\O (n^3)$ の計算量で解くことが可能である. また学問的に割当問題は重み付き(線形)マトロイド交差問題というより一般的な枠組みで捉えられることが多い. <br>
+一方 Hungarian 法では $\O (n^3)$ の計算量で解くことが可能である. また学問的に割当問題は重み付き(線形)マトロイド交差問題というより一般的な枠組みで捉えられることが多い. <br>
+ちなみに Hungarian はこの問題に対する重要な貢献をした $2$ 人のハンガリー人数学者 Kőnig, Egerváry にちなんで呼ばれている.<br>
 Hungarian 法の説明は有名な Goemans 先生の <a href="http://math.mit.edu/~goemans/18453S17/matching-notes.pdf">Lecture note</a> が分かりやすかった. こちらにのっているのは $\O (n^4)$ までの話だが,
 ポテンシャルの更新の際にマッチングが増えない場合は集合 $L$ の更新は新しく $w_{ij} = 0$ となった辺による影響のみを追加で考えればよく、
 結局のところマッチングが $1$ 増えるまでに見る辺の本数を $\O (n^2)$ にできる($\delta$ を求める部分も良い感じにやる). よって全体で $\O (n^3)$ のアルゴリズムとなる.<br>
 初めに双対問題の実行可能解から始めて相補性条件から導かれるグラフ上で増加道アルゴリズムを用いてマッチングの更新を行い, 完全マッチングが得られるまで続けるといった Primal-Dual 法を行う
 (この手順で完全マッチングが得られたとき主問題, 双対問題の実行可能解に入っていること, 相補性条件が成り立つことから最適性が保証される).<br>
-以上の操作を辺コストを要素とする行列上で行っている実装が多い気がするが、個人的に理解しづらかったので陽にグラフを構築する形で実装した.<br>
-ちなみに Hungarian はこの問題に対する重要な貢献をした $2$ 人のハンガリー人数学者 Kőnig, Egerváry にちなんで呼ばれている.<br>
+以上の操作を辺コストを要素とする行列上で行っている実装が多い気がするが、個人的に理解しづらかったので陽にグラフを構築する形で実装した.
+速度的には遅くはないが、 高速化したいなら Jonker-Volgenant などを実装すると良い.<br>
 (追記) 人の数 $n$ が仕事の数 $m$ より大きい場合にも気をつけて実装することで $\O(n m^2)$ のアルゴリズムを実装することができたので以下はその実装となっている.
 </p>
 <p>
@@ -258,9 +259,7 @@ AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_7_A"
 AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2429">marukaite</a>
   <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=4697961#1">提出コード</a><br>
 yosupo さんの library checker : <a href="https://judge.yosupo.jp/problem/assignment">Assignment Problem</a>
-  <a href="https://judge.yosupo.jp/submission/16474">提出コード</a><br>
-codeforces : <a href="https://codeforces.com/contest/1107/problem/F">Vasya and Endless Credits</a>($n > m$ の場合)
-  <a href="https://codeforces.com/contest/1107/submission/87947930">提出コード</a>
+  <a href="https://judge.yosupo.jp/submission/16474">提出コード</a>
 </p>
 </section>
 
