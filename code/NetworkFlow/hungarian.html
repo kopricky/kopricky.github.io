@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-131511873-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-131511873-1');
+</script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
+
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<link rel="shortcut icon" type="image/x-icon" href="../../favicon.ico">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>Hungarian</h2>
+<h3>コードについての説明</h3>
+<p>
+割当問題を効率よく解くアルゴリズム. 割当問題とは $n$ 人の人と $n$ 個の仕事があり,
+また各(人 $i$, 仕事 $j$) のペアについて人 $i$ が仕事 $j$ を行うのにかかる時間が与えられているとする.
+このとき $n$ 人の人をちょうど $1$ つずつ別々の仕事に割り当てることで仕事にかかるのべ時間を最小にしたいという問題のことを言う. <br>
+二部グラフのマッチングの重みつきの場合のアルゴリズムである. 最小費用流のアルゴリズムでも解くことができるが,
+計算量としては $\O (n m \log n)$ かかる
+(正確には二分ヒープによる Dijkstra 法を用いて最短経路に沿ってフローを増加させるアルゴリズムの場合の話で <a href="../Academic/dijkstra_fheap.html">フィボナッチヒープによる Dijkstra 法</a> を用いると
+$\O (n m + n^2 \log n)$ で可能になる).
+一方ハンガリアン法では $\O (n^3)$ の計算量で解くことが可能である. また学問的に割当問題は重み付き(線形)マトロイド交差問題というより一般的な枠組みで捉えられることが多い. <br>
+Hungarian 法の説明は有名な Goemans 先生の <a href="http://math.mit.edu/~goemans/18453S17/matching-notes.pdf">Lecture note</a> が分かりやすかった. こちらにのっているのは $\O (n^4)$ までの話だが,
+ポテンシャルの更新の際にマッチングが増えない場合は集合 $L$ の更新は新しく $w_{ij} = 0$ となった辺による影響のみを追加で考えればよく、
+結局のところマッチングが $1$ 増えるまでに見る辺の本数を $\O (n^2)$ にできる($\delta$ を求める部分も良い感じにやる). よって全体で $\O (n^3)$ のアルゴリズムとなる.<br>
+初めに双対問題の実行可能解から始めて相補性条件から導かれるグラフ上で増加道アルゴリズムを用いてマッチングの更新を行い, 完全マッチングが得られるまで続けるといった Primal-Dual 法を行う
+(この手順で完全マッチングが得られたとき主問題, 双対問題の実行可能解に入っていること, 相補性条件が成り立つことから最適性が保証される).<br>
+以上の操作を辺コストを要素とする行列上で行っている実装が多い気がするが、個人的に理解しづらかったので陽にグラフを構築する形で実装した.<br>
+ちなみに Hungarian はこの問題に対する重要な貢献をした $2$ 人のハンガリー人数学者 Kőnig, Egerváry にちなんで呼ばれている.<br>
+(追記) 人の数 $n$ が仕事の数 $m$ より大きい場合にも気をつけて実装することで $\O(n m^2)$ のアルゴリズムを実装することができたので以下はその実装となっている.
+</p>
+<p>
+(関数)<br>
+solve$(cost)$ : $n \times m(n \geq m)$ の辺コストを要素とする配列を渡し, (総コスト, 割当) を返す. <br>
+$n &gt; m$ の場合はちょうど $m$ 組の割り当てを構成し、 どの要素にも割り当てられないものは $-1$ が格納される.
+</p>
+<p>
+時間計算量: $\O (n m^2)$
+</p>
+<h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
+<pre class="prettyprint linenums">
+template&lt;typename T&gt; class Hungarian
+{
+private:
+    const int U, V;
+    vector&lt;vector&lt;int&gt; &gt; graph;
+    vector&lt;T&gt; dual;
+    vector&lt;int&gt; alloc, rev_alloc, prev;
+    const vector&lt;vector&lt;T&gt; &gt;&amp; cost;
+    int matching_size;
+    T diff(const int i, const int j){
+        return cost[i][j] - dual[i] - dual[U + j];
+    }
+    void init_feasible_dual(){
+        for(int i = 0; i &lt; U; ++i){
+            dual[i] = 0;
+            for(int j = 0; j &lt; V; ++j){
+                dual[U + j] = min(dual[U + j], cost[i][j]);
+            }
+        }
+    }
+    void construct_graph(){
+        for(int i = 0; i &lt; U; ++i){
+            for(int j = 0; j &lt; V; ++j){
+                graph[i][j] = (diff(i, j) == 0 &amp;&amp; rev_alloc[j] != i);
+            }
+        }
+    }
+    bool find_augmenting_path(const int cur, const int prv, int&amp; pos){
+        prev[cur] = prv;
+        if(cur &gt;= U){
+            if(rev_alloc[cur - U] &lt; 0) return true;
+            if(find_augmenting_path(rev_alloc[cur - U], cur, pos)){
+                graph[rev_alloc[cur - U]][cur - U] = 1;
+                return true;
+            }
+        }else{
+            const int MX = (alloc[cur] &lt; 0 &amp;&amp; pos == U) ? U : V;
+            for(int i = 0; i &lt; MX; ++i){
+                if(graph[cur][i] &amp;&amp; prev[U + i] &lt; 0 &amp;&amp; find_augmenting_path(U + i, cur, pos)){
+                    graph[cur][i] = 0, alloc[cur] = i, rev_alloc[i] = cur;
+                    return true;
+                }
+            }
+            if(alloc[cur] &lt; 0 &amp;&amp; pos &lt; U){
+                graph[cur][pos] = 0, alloc[cur] = pos, rev_alloc[pos] = cur, prev[U + pos] = cur;
+                return ++pos, true;
+            }
+        }
+        return false;
+    }
+    void update_dual(const T delta){
+        for(int i = 0; i &lt; U; ++i) if(prev[i] &gt;= 0) dual[i] += delta;
+        for(int i = U; i &lt; U + V; ++i) if(prev[i] &gt;= 0) dual[i] -= delta;
+    }
+    void maximum_matching(bool initial=false){
+        int pos = initial ? V : U;
+        for(bool update = false;; update = false){
+            fill(prev.begin(), prev.end(), -1);
+            for(int i = 0; i &lt; U; ++i){
+                if(alloc[i] &lt; 0 &amp;&amp; find_augmenting_path(i, 2 * U, pos)){
+                    update = true, ++matching_size;
+                    break;
+                }
+            }
+            if(!update) break;
+        }
+    }
+    int dfs(const int cur, const int prv, vector&lt;int&gt;&amp; new_ver){
+        prev[cur] = prv;
+        if(cur &gt;= U){
+            if(rev_alloc[cur - U] &lt; 0) return cur;
+            else return dfs(rev_alloc[cur - U], cur, new_ver);
+        }else{
+            new_ver.push_back(cur);
+            for(int i = 0; i &lt; V; ++i){
+                if(graph[cur][i] &amp;&amp; prev[U + i] &lt; 0){
+                    const int res = dfs(U + i, cur, new_ver);
+                    if(res &gt;= U) return res;
+                }
+            }
+        }
+        return -1;
+    }
+    int increase_matching(const vector&lt;pair&lt;int, int&gt; &gt;&amp; vec, vector&lt;int&gt;&amp; new_ver){
+        for(const auto&amp; e : vec){
+            if(prev[e.first] &lt; 0){
+                const int res = dfs(e.first, e.second, new_ver);
+                if(res &gt;= U) return res;
+            }
+        }
+        return -1;
+    }
+    void hint_increment(int cur){
+        while(prev[cur] != 2 * U){
+            if(cur &gt;= U){
+                graph[prev[cur]][cur - U] = 0, alloc[prev[cur]] = cur - U, rev_alloc[cur - U] = prev[cur];
+            }else{
+                graph[cur][prev[cur] - U] = 1;
+            }
+            cur = prev[cur];
+        }
+    }
+public:
+    Hungarian(const vector&lt;vector&lt;T&gt; &gt;&amp; _cost)
+         : U((int)_cost.size()), V((int)_cost[0].size()), graph(U, vector&lt;int&gt;(U, 1)), dual(U + V, numeric_limits&lt;T&gt;::max()),
+            alloc(U, -1), rev_alloc(U, -1), prev(2 * U), cost{_cost}, matching_size(0){
+        assert(U &gt;= V);
+    }
+    pair&lt;T, vector&lt;int&gt; &gt; solve(){
+        init_feasible_dual(), construct_graph();
+        bool end = false;
+        maximum_matching(true);
+        while(matching_size &lt; U){
+            vector&lt;pair&lt;T, int&gt; &gt; cand(V, {numeric_limits&lt;T&gt;::max(), numeric_limits&lt;int&gt;::max()});
+            for(int i = 0; i &lt; U; ++i){
+                if(prev[i] &lt; 0) continue;
+                for(int j = 0; j &lt; V; ++j){
+                    if(prev[U + j] &gt;= 0) continue;
+                    cand[j] = min(cand[j], {diff(i, j), i});
+                }
+            }
+            while(true){
+                T delta = numeric_limits&lt;T&gt;::max();
+                for(int i = 0; i &lt; V; ++i){
+                    if(prev[U + i] &gt;= 0) continue;
+                    delta = min(delta, cand[i].first);
+                }
+                update_dual(delta);
+                vector&lt;pair&lt;int, int&gt; &gt; vec;
+                vector&lt;int&gt; new_ver;
+                for(int i = 0; i &lt; V; ++i){
+                    if(prev[U + i] &gt;= 0) continue;
+                    if((cand[i].first -= delta) == 0) vec.emplace_back(U + i, cand[i].second);
+                }
+                int res = increase_matching(vec, new_ver);
+                if(res &gt;= U){
+                    hint_increment(res);
+                    if(++matching_size == U) end = true;
+                    else construct_graph();
+                    break;
+                }else{
+                    for(const int v : new_ver){
+                        for(int i = 0; i &lt; V; ++i){
+                            if(prev[U + i] &gt;= 0) continue;
+                            cand[i] = min(cand[i], {diff(v, i), v});
+                        }
+                    }
+                }
+            }
+            if(!end) maximum_matching();
+        }
+        T total_cost = 0;
+        for(int i = 0; i &lt; U; ++i){
+            if(alloc[i] &lt; V) total_cost += cost[i][alloc[i]];
+            else alloc[i] = -1;
+        }
+        return make_pair(total_cost, alloc);
+    }
+};
+</pre>
+</div>
+<h3>verify 用の問題</h3>
+<p>
+AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_7_A">Bipartite Matching</a>(重みなし 2 部マッチング)
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=4697964#1">提出コード</a><br>
+AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2429">marukaite</a>
+  <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=4697961#1">提出コード</a><br>
+yosupo さんの library checker : <a href="https://judge.yosupo.jp/problem/assignment">Assignment Problem</a>
+  <a href="https://judge.yosupo.jp/submission/16474">提出コード</a><br>
+codeforces : <a href="https://codeforces.com/contest/1107/problem/F">Vasya and Endless Credits</a>($n > m$ の場合)
+  <a href="https://codeforces.com/contest/1107/submission/87947930">提出コード</a>
+</p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>
