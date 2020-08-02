@@ -66,13 +66,15 @@ $\newcommand{\O}{\mathrm{O}}$
 <a href="./rangetree_pointupdate.html">領域木</a> の場合は各ノードに対応する頂点集合を配列ではなく新たなセグ木で管理する. そのため領域木の特殊版ともいえる.
 </p>
 <p>
-時間計算量: 構築 $\O (n \log n)$, 各クエリ $\O (\log^2 n)$
+時間計算量: 構築 $\O (n \log n)$, 各クエリ $\O (\log^2 n)$ (フラクショナルカスケーディング版は $\O (\log n)$)
 </p>
 <h3>コード</h3>
 <div class="codebox">
 <input type="checkbox" id="label" class="csscode" />
 <label for="label"></label>
 <pre class="prettyprint linenums">
+#define all(v) (v).begin(),(v).end()
+
 template&lt;typename CandidateType, typename ValueType&gt; class segtree
 {
 private:
@@ -84,7 +86,7 @@ private:
     // x座標
     vector&lt;CT&gt; xs;
     // y座標
-    vector&lt;vector&lt;pci&gt; &gt; ys;
+    vector&lt;vector&lt;CT&gt; &gt; ys;
     // 累積和
     vector&lt;vector&lt;VT&gt; &gt; sum;
     VT _query(int a, int b, const CT ly, const CT ry){
@@ -92,15 +94,15 @@ private:
         a += n, b += n;
         while(a != b){
             if(a &amp; 1){
-                const int c = lower_bound(all(ys[a]), pci(ly, -1)) - ys[a].begin();
-                const int d = upper_bound(all(ys[a]), pci(ry, -1)) - ys[a].begin();
+                const int c = lower_bound(all(ys[a]), ly) - ys[a].begin();
+                const int d = lower_bound(all(ys[a]), ry) - ys[a].begin();
                 res1 += sum[a][d] - sum[a][c];
                 ++a;
             }
             if(b &amp; 1){
                 --b;
-                const int c = lower_bound(all(ys[b]), pci(ly, -1)) - ys[b].begin();
-                const int d = upper_bound(all(ys[b]), pci(ry, -1)) - ys[b].begin();
+                const int c = lower_bound(all(ys[b]), ly) - ys[b].begin();
+                const int d = lower_bound(all(ys[b]), ry) - ys[b].begin();
                 res2 += sum[b][d] - sum[b][c];
             }
             a &gt;&gt;= 1, b &gt;&gt;= 1;
@@ -110,23 +112,24 @@ private:
 public:
     segtree(const vector&lt;pcc&gt;&amp; cand, const vector&lt;VT&gt;&amp; val) : n(1), sz((int)cand.size()), xs(sz){
         while(n &lt; sz) n *= 2;
-        vector&lt;pair&lt;pcc, int&gt; &gt; sorted(sz);
-        for(int i = 0; i &lt; sz; ++i) sorted[i] = {cand[i], i};
+        vector&lt;vector&lt;pci&gt; &gt; hoge(2*n);
+        vector&lt;pci&gt; sorted(sz);
+        for(int i = 0; i &lt; sz; ++i) sorted[i] = {cand[i].first, i};
         sort(all(sorted));
         ys.resize(2*n), sum.resize(2*n);
         for(int i = 0; i &lt; sz; ++i){
-            xs[i] = (sorted[i].first).first;
-            ys[i+n] = {pci((sorted[i].first).second, sorted[i].second)};
+            xs[i] = sorted[i].first, ys[i+n] = {cand[sorted[i].second].second};
+            hoge[i+n] = {pci(cand[sorted[i].second].second, sorted[i].second)};
             sum[i+n] = {0, val[sorted[i].second]};
         }
         for(int i = n - 1; i &gt;= 1; --i){
-            ys[i].resize((int)ys[2*i].size() + (int)ys[2*i+1].size());
-            merge(all(ys[2*i]), all(ys[2*i+1]), ys[i].begin(), [&amp;](pci&amp; a, pci&amp; b){
+            hoge[i].resize((int)hoge[2*i].size() + (int)hoge[2*i+1].size());
+            merge(all(hoge[2*i]), all(hoge[2*i+1]), hoge[i].begin(), [&amp;](pci&amp; a, pci&amp; b){
                 return a.first &lt; b.first;
             });
-            sum[i].resize((int)ys[i].size() + 1, 0);
-            for(int j = 0; j &lt; (int)ys[i].size(); ++j){
-                sum[i][j+1] = sum[i][j] + val[ys[i][j].second];
+            ys[i].resize((int)hoge[i].size()), sum[i].resize((int)hoge[i].size() + 1, 0);
+            for(int j = 0; j &lt; (int)hoge[i].size(); ++j){
+                ys[i][j] = hoge[i][j].first, sum[i][j+1] = sum[i][j] + val[hoge[i][j].second];
             }
         }
     }
@@ -140,11 +143,88 @@ public:
 };
 </pre>
 </div>
+<h3>コード(フラクショナルカスケーディング版)</h3>
+<div class="codebox">
+<input type="checkbox" id="label2" class="csscode" />
+<label for="label2"></label>
+<pre class="prettyprint linenums">
+template&lt;typename CandidateType, typename ValueType&gt; class segtree
+{
+private:
+    using CT = CandidateType;
+    using VT = ValueType;
+    struct info {
+        int left, right;
+        VT sum;
+        info(const int _left, const int _right, const VT _sum)
+            : left(_left), right(_right), sum(_sum){}
+    };
+    int m;
+    vector&lt;CT&gt; xs, ys;
+    vector&lt;info&gt; ptr;
+    vector&lt;int&gt; st;
+    int update(const int prv, const int xid, const VT val, const int l, const int r){
+        const int cur = (int)ptr.size();
+        ptr.emplace_back(0, 0, ptr[prv].sum + val);
+        if(r - l == 1) return cur;
+        const int mid = (l + r) / 2;
+        if(xid &lt; mid){
+            const int res = update(ptr[prv].left, xid, val, l, mid);
+            ptr[cur].left = res, ptr[cur].right = ptr[prv].right;
+        }else{
+            const int res = update(ptr[prv].right, xid, val, mid, r);
+            ptr[cur].left = ptr[prv].left, ptr[cur].right = res;
+        }
+        ptr[cur].sum = ptr[ptr[cur].left].sum + ptr[ptr[cur].right].sum;
+        return cur;
+    }
+    void preprocessing(const vector&lt;pair&lt;CT, CT&gt; &gt;&amp; cand, const vector&lt;VT&gt;&amp; val){
+        const int n = (int)cand.size();
+        vector&lt;pair&lt;CT, int&gt; &gt; sorted(n);
+        for(int i = 0; i &lt; n; ++i){
+            xs[i] = cand[i].first, sorted[i] = {cand[i].second, i};
+        }
+        sort(xs.begin(), xs.end());
+        xs.erase(unique(xs.begin(), xs.end()), xs.end());
+        sort(sorted.begin(), sorted.end());
+        m = (int)xs.size();
+        int prv = 0;
+        st.push_back(prv), ptr.emplace_back(0, 0, 0);
+        for(const auto&amp; p : sorted){
+            const int newx = (int)(lower_bound(xs.begin(), xs.end(), cand[p.second].first) - xs.begin());
+            prv = update(prv, newx, val[p.second], 0, m);
+            if(ys.empty() || ys.back() &lt; p.first) st.push_back(prv), ys.push_back(p.first);
+            else st.back() = prv;
+        }
+    }
+    VT query(const int cur, const int a, const int b, const int l, const int r){
+        if(cur == 0 || b &lt;= l || r &lt;= a) return 0;
+        if(a &lt;= l &amp;&amp; r &lt;= b) return ptr[cur].sum;
+        const int mid = (l + r) / 2;
+        return query(ptr[cur].left, a, min(b, mid), l, mid) + query(ptr[cur].right, max(a, mid), b, mid, r);
+    }
+public:
+    segtree(const vector&lt;pair&lt;CT, CT&gt; &gt;&amp; cand, const vector&lt;VT&gt;&amp; val) : xs((int)cand.size()){
+        preprocessing(cand, val);
+    }
+    //[lx,rx)×[ly,ry)の長方形領域に含まれる値の和に答える
+    VT query(const CT lx, const CT ly, const CT rx, const CT ry){
+        const int lxid = lower_bound(xs.begin(), xs.end(), lx) - xs.begin();
+        const int rxid = lower_bound(xs.begin(), xs.end(), rx) - xs.begin();
+        const int lyid = lower_bound(ys.begin(), ys.end(), ly) - ys.begin();
+        const int ryid = lower_bound(ys.begin(), ys.end(), ry) - ys.begin();
+        if(lxid == rxid || lyid == ryid) return 0;
+        else return query(st[ryid], lxid, rxid, 0, m) - query(st[lyid], lxid, rxid, 0, m);
+    }
+};
+</pre>
+</div>
 <h3>verify 用の問題</h3>
 <p>Atcoder : <a href="https://beta.atcoder.jp/contests/kupc2018/tasks/kupc2018_i">League of Kyoto</a>
   <a href="https://beta.atcoder.jp/contests/kupc2018/submissions/3309721">提出コード</a><br>
 yosupo さんの libary checker : <a href="https://judge.yosupo.jp/problem/rectangle_sum">Rectangle Sum</a>
-    <a href="https://judge.yosupo.jp/submission/3780">提出コード</a>
+    <a href="https://judge.yosupo.jp/submission/17390">提出コード</a>
+    <a href="https://judge.yosupo.jp/submission/17465">提出コード(フラクショナルカスケーディング版)</a>
 </p>
 </section>
 

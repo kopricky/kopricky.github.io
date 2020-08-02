@@ -71,8 +71,8 @@ $s$ → $t$ の最大流問題を解く. このときの答えが問題の答え
 BM$(u, v)$ : $u$ が人の数, $v$ が仕事の数 <br>
 (関数)<br>
 add_edge$(u,v)$ : 人 $u$ と仕事 $v$ の間に辺を追加する <br>
-solve(): 最大マッチングを求める <br>
-allocate(): solve() の後に行うと人 $i$ に割り当てられた仕事のインデックスを返す(なければ $-1$)
+solve(): 最大マッチングを求める(メンバ変数 alloc に結果が格納される) <br>
+minimum_vertex_cover(): (solve() を呼び出した後に呼び出すことで)最小頂点被覆を求める
 </p>
 <p>
 時間計算量: $\O (m \sqrt{n})$
@@ -84,97 +84,93 @@ allocate(): solve() の後に行うと人 $i$ に割り当てられた仕事の�
 <pre class="prettyprint linenums">
 class BM {
 private:
-    struct edge {
-        int to,cap,rev;
-    };
-    int U,V;
-    vector&lt;vector&lt;edge&gt; &gt; G;
-    vector&lt;int&gt; level;
-    vector&lt;int&gt; iter;
-
+    const int U, V;
+    vector&lt;vector&lt;int&gt; &gt; G;
+    vector&lt;int&gt; level, que, prv, ralloc;
+    int bfs(){
+        int last = -1;
+        fill(level.begin(), level.end(), -1);
+        int qh = 0, qt = 0;
+        for(int i = 0; i &lt; U; ++i){
+            if(alloc[i] &lt; 0) level[i] = 0, que[qt++] = i, prv[i] = -1;
+        }
+        while(qh &lt; qt){
+            const int u = que[qh++];
+            if(u &gt;= U){
+                const int v = ralloc[u - U];
+                if(v &gt;= 0) level[v] = level[u] + 1, que[qt++] = v, prv[v] = u;
+                else last = u;
+            }else{
+                for(const int v : G[u]){
+                    if(level[v] &lt; 0) level[v] = level[u] + 1, que[qt++] = v, prv[v] = u;
+                }
+            }
+        }
+        return last;
+    }
+    bool dfs(const int u){
+        const int tmp = level[u];
+        level[u] = -1;
+        if(u &gt;= U){
+            if(ralloc[u - U] &lt; 0) return true;
+            else return dfs(ralloc[u - U]);
+        }else{
+            for(const int v : G[u]){
+                if(tmp &lt; level[v]){
+                    if(dfs(v)){
+                        alloc[u] = v - U, ralloc[v - U] = u;
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+    void hin_search(int cur, int&amp; flow){
+        ++flow;
+        while(cur &gt;= 0){
+            level[cur] = -1;
+            if(cur &gt;= U) alloc[prv[cur]] = cur - U, ralloc[cur - U] = prv[cur];
+            cur = prv[cur];
+        }
+    }
 public:
-    BM(int u,int v) : U(u), V(v), G(U+V+2){
-        for(int i = 0; i &lt; U; i++){
-            init_edge(0,i+1);
-        }
-        for(int i = 0; i &lt; V; i++){
-            init_edge(U+i+1,U+V+1);
-        }
+    BM(const int u, const int v)
+         : U(u), V(v), G(U + V), level(U + V), que(U + V), prv(U + V), ralloc(V, -1), alloc(U, -1){}
+    void add_edge(const int from, const int to){
+        G[from].push_back(U + to);
     }
-    void init_edge(int from,int to) {
-        G[from].push_back((edge){to,1,(int)G[to].size()});
-    	G[to].push_back((edge){from,0,(int)G[from].size()-1});
-    }
-    void add_edge(int from,int to) {
-        from += 1,to += U+1;
-    	G[from].push_back((edge){to,1,(int)G[to].size()});
-    	G[to].push_back((edge){from,0,(int)G[from].size()-1});
-    }
-    void bfs(int s) {
-        fill(level.begin(),level.end(),-1);
-    	queue&lt;int&gt; que;
-    	level[s] = 0;
-    	que.push(s);
-    	while(!que.empty()){
-            int v = que.front();
-            que.pop();
-            for(auto&amp; e : G[v]){
-                if(e.cap &gt; 0 &amp;&amp; level[e.to] &lt; 0){
-                    level[e.to] = level[v] + 1;
-                    que.push(e.to);
-                }
-            }
-        }
-    }
-    int dfs(int v,int t,int f) {
-        if(v==t){
-            return f;
-        }
-        for(int &amp;i = iter[v];i&lt;(int)G[v].size();i++){
-            edge &amp;e = G[v][i];
-            if(e.cap &gt; 0 &amp;&amp; level[v] &lt; level[e.to]){
-                int d = dfs(e.to,t,min(f,e.cap));
-                if(d&gt;0){
-                    e.cap -= d;
-                    G[e.to][e.rev].cap += d;
-                    return d;
-                }
-            }
-        }
-        return 0;
-    }
-    int solve() {
-        level.resize(U+V+2), iter.resize(U+V+2);
+    // alloc に左側頂点がどの右側頂点とマッチングされるかが格納される
+    vector&lt;int&gt; alloc;
+    int solve(){
         int flow = 0;
-        int s=0,t=U+V+1;
         for(;;){
-            bfs(s);
-            if(level[t] &lt; 0) return flow;
-            fill(iter.begin(),iter.end(),0);
-            int f;
-            while((f=dfs(s,t,numeric_limits&lt;int&gt;::max())) &gt; 0){
-                flow += f;
+            const int cur = bfs();
+            if(cur &lt; 0) break;
+            hin_search(cur, flow);
+            for(int i = 0; i &lt; U; ++i){
+                if(alloc[i] &lt; 0) flow += dfs(i);
             }
         }
+        return flow;
     }
-    vector&lt;int&gt; allocate() {
-        vector&lt;int&gt; res(U, -1);
-        for(int i = 0; i &lt; U; i++){
-            for(auto&amp; e : G[i+1]){
-                if(e.cap == 0 &amp;&amp; e.to != 0){
-                    res[i] = e.to-U-1;
-                    break;
-                }
-            }
+    // solve() を呼び出した後に呼び出す(左側頂点 i の添字は U(右側頂点数) + i とする)
+    vector&lt;int&gt; minimum_vertex_cover(){
+        vector&lt;int&gt; mvc;
+        for(int i = 0; i &lt; U; ++i){
+            if(level[i] &lt; 0) mvc.push_back(i);
         }
-        return res;
+        for(int i = U; i &lt; U + V; ++i){
+            if(level[i] &gt;= 0) mvc.push_back(i);
+        }
+        return mvc;
     }
 };
 </pre>
 </div>
 <h3>verify 用の問題</h3>
-<p>CSAcademy : <a href="https://csacademy.com/contest/round-66/task/flipping-matrix/statement/">Flipping Matrix</a>
-  <a href="https://csacademy.com/code/JqAmeWwd/">提出コード</a></p>
+<p>yosupo さんの Library-Checker : <a href="https://judge.yosupo.jp/problem/bipartitematching">Matching on Bipartite Graph</a>
+  <a href="https://judge.yosupo.jp/submission/17282">提出コード</a></p>
 </section>
 
 </div>
