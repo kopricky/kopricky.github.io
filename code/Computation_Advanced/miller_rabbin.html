@@ -64,7 +64,6 @@ $\newcommand{\O}{\mathrm{O}}$
 $2^{32}$ および $2^{64}$以下などの数については経験的に $3$ 個および $7$ 個のある要素について調べれば十分であることが分かっているためそういう意味では決定的アルゴリズムと考えてもよい.<br>
 素数ならばフェルマーの小定理を満たすという必要条件をチェックしていくフェルマーテストでは素数でないのに必ず素数と判定してしまうようなもの(カーマイケル数)が存在するなどの問題があったためこちらの方がより正確な素数判定アルゴリズムと言えるかもしれない. <br>
 実装上の注意として long long 型の数($2^{32}$ 以上の数) について素数判定を行う場合は __int128 型の剰余算を途中で行う必要があるが, これがびっくりするくらい遅い(たぶん long long 型の剰余算の $10$ 倍近く遅い). <br>
-そのため以下では強引にインラインアセンブラで多少高速化しているが, 本当はモンゴメリ乗算などを用いてちゃんとやったほうが実行時間が格段に速くなると思う. <br>
 ただ計算量的には 1 つの数の判定に $\O (|numset| \ast \log (VAL))$ ($VAL$ は判定する数) time とかなのでたくさんの数の素数判定を行わないなら特に気にする必要のない注意である.<br>
 numset の値については <a href="http://miller-rabin.appspot.com/">こちらのサイト</a> が参考になる.
 </p>
@@ -80,8 +79,8 @@ check$(n)$ : $n$ が素数であるかどうか(true / false)を返す<br>
 <input type="checkbox" id="label" class="csscode" />
 <label for="label"></label>
 <pre class="prettyprint linenums">
-const vector&lt;unsigned int&gt; numset = {2,7,61}; // &lt; 4,759,123,141 ≒ 4×10^9 までは決定的
-// const vector&lt;unsigned long long&gt; numset = {2, 325, 9375, 28178, 450775, 9780504, 1795265022ULL}; // 少なくとも 2^64 までは決定的
+const unsigned int numset[] = {2,7,61}; // &lt; 4,759,123,141 ≒ 4×10^9 までは決定的
+// const unsigned long long numset[] = {2, 325, 9375, 28178, 450775, 9780504, 1795265022ULL}; // 少なくとも 2^64 までは決定的
 
 // int 型の素数判定の場合
 
@@ -96,7 +95,7 @@ unsigned int mod_pow(unsigned int x, unsigned int k, unsigned int mod){
 }
 
 bool check(unsigned int n){
-    if(n &lt; 2) return false;
+    if(n &lt; 2 || ((n % 6 != 1) &amp;&amp; (n % 6 != 5))) return (n == 2) || (n == 3);
     unsigned int d = n - 1, s = 0;
     while(d % 2 == 0){
         d /= 2;
@@ -121,28 +120,23 @@ bool check(unsigned int n){
 
 // long long型の素数判定の場合
 
-// inline unsigned long long mod_comp(unsigned __int128 a, unsigned long long b) {
-//   unsigned long long q, r;
-//   __asm__ (
-//     &quot;divq\t%4&quot;
-//     : &quot;=a&quot;(q), &quot;=d&quot;(r)
-//     : &quot;0&quot;((unsigned long long)(a)), &quot;1&quot;((unsigned long long)(a &gt;&gt; 64)), &quot;rm&quot;(b)
-//   );
-//   return r;
+// unsigned long long mod_mul(unsigned long long a, unsigned long long b, unsigned long long mod) {
+// 	long long ret = a * b - mod * (unsigned long long)((long double)(a) * (long double)(b) / (long double)(mod));
+// 	return ret + mod * (ret &lt; 0) - mod * (ret &gt;= (ll)mod);
 // }
 
 // unsigned long long mod_pow(unsigned long long x, unsigned long long k, unsigned long long mod){
 //     unsigned long long res = 1;
 //     while(k){
-//         if(k &amp; 1) res = mod_comp((unsigned __int128)res * x, mod);
-//         x = mod_comp((unsigned __int128)x * x, mod);
+//         if(k &amp; 1) res = mod_mul(res, x, mod);
+//         x = mod_mul(x, x, mod);
 //         k &gt;&gt;= 1;
 //     }
 //     return res;
 // }
 
 // bool check(unsigned long long n){
-//     if(n &lt; 2) return false;
+//     if(n &lt; 2 || ((n % 6 != 1) &amp;&amp; (n % 6 != 5))) return (n == 2) || (n == 3);
 //     unsigned long long d = n - 1, s = 0;
 //     while(d % 2 == 0){
 //         d /= 2;
@@ -158,7 +152,7 @@ bool check(unsigned int n){
 //                 ok = false;
 //                 break;
 //             }
-//             res = mod_comp((unsigned __int128)res * res, n);
+//             res = mod_mul(res, res, n);
 //         }
 //         if(ok) return false;
 //     }
@@ -168,7 +162,7 @@ bool check(unsigned int n){
 </div>
 <h3>verify 用の問題</h3>
 <p>yukicoder : <a href="https://yukicoder.me/problems/no/3030">ミラー・ラビン素数判定法のテスト</a>
-  <a href="https://yukicoder.me/submissions/495299">提出コード</a></p>
+  <a href="https://yukicoder.me/submissions/531625">提出コード</a></p>
 </section>
 
 </div>

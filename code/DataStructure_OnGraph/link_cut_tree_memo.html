@@ -73,7 +73,7 @@ $3( \mathrm{rank} (u) - \mathrm{rank} (v)) + 1$ で抑えられる" である. <
 link cut tree においてはこの $\mathrm{rank} (x)$ を次のように定める. $x$ の属する splay 木を $T(x)$, その splay 木内において $x$ を根とする部分木を $T'(x)$ とする.
 このとき $\mathrm{rank}(x) = \log ( |T'(x)| + $($y \in T'(x)$, $y$ の non-preferred child $z$ について $\mathrm{rank} (z)$ の和) ) とする.
 つまり $x$ を含む splay 木に限らず, $x$ 以下にあるすべての頂点の数の合計の $\log$ とする.
-そしてポテンシャルはもちろん $\sum_{x} r(x)$ である.<br>
+そしてポテンシャルはもちろん $\sum_{x} \mathrm{rank}(x)$ である.<br>
 すると access$(v)$ で splay 操作にかかる総ならしコストは $3(\mathrm{rank}(root) - \mathrm{rank}(v)) + $(preferred child の変化する回数) で抑えられることがわかる.
 splay 操作をする回数は preferred child の変化する回数で抑えられることに注意する.
 また preferred child の変化に伴って, 頂点の $\mathrm{rank}$ が変化することがないことも確認する.<br>
