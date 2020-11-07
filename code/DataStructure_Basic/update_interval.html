@@ -72,15 +72,17 @@ Segment Tree で持てないような大きな範囲についての範囲の $0,
 <input type="checkbox" id="label" class="csscode" />
 <label for="label"></label>
 <pre class="prettyprint linenums">
+//セグ木で持てないくらい大きい範囲の(0,1)の区間更新のクエリに答える
 template&lt;typename T&gt; class UpdateInterval
 {
+private:
+    using ptt = pair&lt;T,T&gt;;
 public:
-using ptt = pair&lt;T,T&gt;;
-    // 1の区間をsetで保持
+    //1の区間をsetで保持
     set&lt;ptt&gt; st;
     UpdateInterval(){};
-    // [l,r) を k ({0,1})に更新
-    void update(T l,T r,int k){
+    //[l,r)をk(0,1)に更新
+    void update(T l, T r, int k){
         T lb = l, rb = r;
         while(1){
             auto it = st.lower_bound(ptt(l, numeric_limits&lt;T&gt;::min()));
@@ -88,13 +90,13 @@ using ptt = pair&lt;T,T&gt;;
                 break;
             }
             ptt p = *it;
-            if(p.fi &gt; r){
+            if(p.first &gt; r){
                 break;
             }
             st.erase(it);
-            if(p.se &gt; r){
-                rb = max(rb, p.se);
-                if(!k) st.insert(ptt(r,p.se));
+            if(p.second &gt; r){
+                rb = max(rb, p.second);
+                if(!k) st.insert(ptt(r, p.second));
                 break;
             }
         }
@@ -102,17 +104,17 @@ using ptt = pair&lt;T,T&gt;;
         if(it != st.begin()){
             --it;
             ptt p = *it;
-            if(p.se &gt;= l){
+            if(p.second &gt;= l){
                 st.erase(it);
-                if(!k) st.insert(ptt(p.fi,l));
-                lb = min(lb, p.fi);
+                if(!k) st.insert(ptt(p.first, l));
+                lb = min(lb, p.first);
             }
-            if(p.se &gt; r){
-                if(!k) st.insert(ptt(r,p.se));
-                rb = max(rb, p.se);
+            if(p.second &gt; r){
+                if(!k) st.insert(ptt(r, p.second));
+                rb = max(rb, p.second);
             }
         }
-        if(k) st.insert(ptt(lb,rb));
+        if(k) st.insert(ptt(lb, rb));
     }
 };
 </pre>
