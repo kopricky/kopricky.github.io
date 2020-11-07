@@ -57,7 +57,7 @@ $\newcommand{\O}{\mathrm{O}}$
 <div id="contents">
 
 <section>
-<h2>Undirected Mincut Algorithm</h2>
+<h2>Undirected Minimum Cut Algorithm</h2>
 <h3>個人的メモ</h3>
 <p>
 グラフ $G = (V, E)$ についてある頂点 $v \in V$ から始めて今の頂点集合 S と一番連結度の高い頂点を $S$ に加えていくというように貪欲に取っていく順序を最大隣接順序 (MA ordering) と呼ぶ. <br>
@@ -91,7 +91,7 @@ $C$ のサイズ, つまり大域最小カットの個数は高々 $2 / (n (n - 
 <br>
 (補足 2) <br>
 他にも有名なものとして $\O (n^2 \log^3 n)$ 時間, w.h.p で重みつき大域最小容量カットを求める乱択アルゴリズムもある. 元論文は "A New Approach to the Minimum Cut Problem" (Karger, Stein 1996) <br>
-これは上記のアルゴリズムにおける縮約の際に $i$ 頂点のグラフなら最小カットに含まれる辺が縮約されない確率は $2 / i$ くらいみたいなことから特に縮約の後半において失敗しやすいことが分かる.
+これは上記のアルゴリズムにおける縮約の際に $i$ 頂点のグラフなら最小カットに含まれる辺が縮約されない確率は $2 / i$ くらいということから特に縮約の後半において失敗しやすいことが分かる.
 よって縮約の前半パートと後半パートで試行回数を前者を少なく, 後者を多くするといった頭のいい方法が考えられる.
 具体的に Rec$(G, n)$ を $n$ 頂点のグラフ $G$ の最小カットを求める乱択アルゴリズムとすると, その内容は次の操作を $2$ 回行うというものである. <br>
 "$n$ 頂点のグラフ $G$ を $n / \sqrt{2}$ 頂点のグラフ $G'$ にランダムに縮約し, Rec$(G', n / \sqrt{2})$ を行う." <br>
@@ -103,8 +103,7 @@ $C$ のサイズ, つまり大域最小カットの個数は高々 $2 / (n (n - 
 よってこれを $\log^2 n$ 回ほど繰り返すと計算時間 $\O (n^2 \log^3 n)$ 時間, w.h.p で重みつき大域最小容量カットが求まる.<br>
 <br>
 (補足 3) <br>
-無向グラフの大域最小容量カットを求めるアルゴリズムは近年でもよく研究されていて, 重みなしの場合は λ をグラフの連結度としたときに計算量 $\O (m + λ^2 n)$ (Gabow) の deterministic algorithm や
-他にも deterministic algorithm として $\O (m \log^{12} n)$ (Kawarabayashi, Thorup 2014) (初の nearly linear time), $\O (m \log^2 n \log \log^2 n)$ (Henzinger, Rao, Wang 2017)
+無向グラフの大域最小容量カットを求めるアルゴリズムは近年でもよく研究されていて deterministic algorithm として $\O (m \log^{12} n)$ (Kawarabayashi, Thorup 2014) (初の nearly linear time), $\O (m \log^2 n \log \log^2 n)$ (Henzinger, Rao, Wang 2017)
 (unit flow(push relabel の高さを制限した局所的な flow routing) を用いることで low conductance cut を求める部分を高速化した) などがある. 重みつきの場合は randomized algorithm として
 $\O (m \log^3 n)$ (Karger 2000, announced at STOC '96) がある.<br>
 $k$ "点"連結性判定についても時間計算量 $\O (m + nk^3)$ (SODA '20) のモンテカルロアルゴリズムが発表された.
