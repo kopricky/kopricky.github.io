@@ -84,7 +84,10 @@ private:
     void BuildStsize(int u, int p){
         stsize[u] = 1, parent[u] = p;
         for(int&amp; v : G[u]){
-            if(v == p) continue;
+            if(v == p){
+                if(v == G[u].back()) break;
+                else swap(v, G[u].back());
+            }
             BuildStsize(v, u);
             stsize[u] += stsize[v];
             if(stsize[v] &gt; stsize[G[u][0]]){
@@ -155,7 +158,7 @@ public:
 </div>
 <h3>verify 用の問題</h3>
 <p>Atcoder : <a href="https://atcoder.jp/contests/iroha2019-day2/tasks/iroha2019_day2_k">虫取り</a>
-  <a href="https://atcoder.jp/contests/iroha2019-day2/submissions/7342842">提出コード</a></p>
+  <a href="https://atcoder.jp/contests/iroha2019-day2/submissions/18089684">提出コード</a></p>
 </section>
 
 </div>
