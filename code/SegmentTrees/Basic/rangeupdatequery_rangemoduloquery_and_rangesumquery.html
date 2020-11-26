@@ -63,7 +63,7 @@ $\newcommand{\O}{\mathrm{O}}$
 区間更新 $a_i \leftarrow val (val \ge 0 とする) (i \in [l, r))$, 区間剰余更新 $a_i \leftarrow a_i \% val (val \ge 1 とする) (i \in [l, r))$, 区間和 $\underset{l \le i < r}{\mathrm{sum}} a_i$ のクエリを効率的に処理できる. <br>
 詳しくは <a href="https://codeforces.com/blog/entry/57319">ここの</a> part2 に書いている. 計算量は $\O (\log ^2 n)$ と書いてあるがポテンシャルを考えると $\O(\log n \log \mathrm{MAX \_ VAL})$ だと思う. ならしの解析は <a href="./rangemaxupdatequery_and_rangesumquery.html">これ</a> と同じように行う.<br>
 セグ木が保持するノード($2n$ 個ぐらいある) に対応する区間 $[l, r)$ について $D(l, r)$ を区間 $[l, r)$ に含まれる数のうち異なる数 $a[k]$ の $\mathrm{ceil} (\log (a[k] + 1))$ の和とする. ただしここで区間内に値が $1$ 種類のみの場合は $0$ と定めることにする. またすべてのノードの $D(l, r)$ の和をポテンシャル $C$ とする. ここで $C = \O(n \log n \log \mathrm{MAX \_ VAL})$ であることに注意する. <br>
-区間更新にかかる実際の計算量は $\O (\log n)$ であるが、 区間更新に伴う $C$ の値の増加分を考えると, 中途半端に区間更新される部分($D(l, r)$ の一部だけが更新されるような区間 $[l, r)$) は $\O (\log n)$ 個なのでポテンシャルは全体で高々 $\O (\log n \log \mathrm{MAX \_ VAL})$ だけ増加する. <br>range_memo
+区間更新にかかる実際の計算量は $\O (\log n)$ であるが、 区間更新に伴う $C$ の値の増加分を考えると, 中途半端に区間更新される部分($D(l, r)$ の一部だけが更新されるような区間 $[l, r)$) は $\O (\log n)$ 個なのでポテンシャルは全体で高々 $\O (\log n \log \mathrm{MAX \_ VAL})$ だけ増加する. <br>
 次に剰余更新の場合は $max \_ val[k] \neq min \_ val[k]$ の場合に通常の遅延更新より深く探索することになるが、このような探索を $1$ 度行うとその区間内の $D(l, r)$ の値が少なくとも $1$ 減る. これはある数 $p$ をそれ以下の数 $q$ で剰余をとったときに $p/2$ 未満になること, 区間内には $2$ 種類以上の数があること, $max \_ val[k] \ge x$ が成り立つこと, から言える.<br>
 以上より区間更新, 区間剰余更新のならし計算量は各回の $C$ の増加分および減少分と $C = \O (n \log n \log \mathrm{MAX \_ VAL})$ という事実を考えると $\O( \log n \log \mathrm{MAX \_ VAL})$ であることが分かる. <br>
 剰余更新の場合、 RangeAddQuery は上記のならしが回らないため相性が悪い.
