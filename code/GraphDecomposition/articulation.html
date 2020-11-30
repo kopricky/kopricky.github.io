@@ -71,7 +71,7 @@ $\newcommand{\O}{\mathrm{O}}$
 <p>
 (関数)<br>
 add_edge$(u, v)$: $u, v$ の間に無向辺を追加する <br>
-solve(): 関節点を求めて($art$ に true/false が入る), さらに block cut tree の構築を行う <br>
+solve(): 関節点を求めて($art$ に true/false が入る), さらに block cut tree(forest) の構築を行いそのサイズを返す. <br>
 具体的に bctree が block cut tree の隣接リスト表現, bcnodes がその頂点集合で bcnode 型は isBlock(各頂点が block か cut か) と
 component(block なら辺集合, cut ならサイズ 1 で要素は {関節点のインデックス, 関節点のインデックス}) から成る(いずれも元のグラフ上でのインデックス).<br>
 ここでは 1 頂点 0 辺からなる連結成分は block node でも cut node でもないと考えています.
@@ -84,6 +84,8 @@ component(block なら辺集合, cut ならサイズ 1 で要素は {関節点�
 <input type="checkbox" id="label" class="csscode" />
 <label for="label"></label>
 <pre class="prettyprint linenums">
+// 多重辺に対応している.
+// 自己ループは bc tree を定義する上で便宜上存在しないことを仮定している.
 class Articulation {
 public:
     struct bcnode;
@@ -158,7 +160,7 @@ public:
     vector&lt;bool&gt; art;
     struct bcnode {
         bool isBlock; // true: block, false: cut
-        vector&lt;pair&lt;int, int&gt; &gt; component;
+        vector&lt;pair&lt;int, int&gt; &gt; component; // edge set
         bcnode(bool _isBlock, vector&lt;pair&lt;int, int&gt; &gt;&amp;&amp; _component)
             : isBlock(_isBlock), component(move(_component)){}
     };
@@ -176,6 +178,11 @@ public:
         vector&lt;int&gt; bcnode_id(V, -1); // bcnode_id[original vertex] = cut vertex;
         for(int i = 0; i &lt; V; ++i){
             if(ord[i] &lt; 0) dfs(i, -1, tm, used, st, bcnode_id);
+            if(G[i].empty()){
+                // isolated vertex
+                bctree.push_back(vector&lt;int&gt;());
+                bcnodes.emplace_back(true, vector&lt;pair&lt;int, int&gt; &gt;());
+            }
         }
         delete[] used;
         return (int)bctree.size();
