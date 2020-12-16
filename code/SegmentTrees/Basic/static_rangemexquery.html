@@ -79,7 +79,7 @@ $mid = (l + r) / 2$ としたとき $(x, y)$ を "$y = \min_{i \in [l, mid)}$ ($
 <input type="checkbox" id="label" class="csscode" />
 <label for="label"></label>
 <pre class="prettyprint linenums">
-class segtree {
+class RangeMexQuery {
 private:
     int n, m;
     vector&lt;array&lt;int, 3&gt; &gt; ptr;
@@ -117,7 +117,7 @@ private:
         else return query(ptr[cur][1], cri, mid, r);
     }
 public:
-    segtree(const vector&lt;int&gt;&amp; vec) : n((int)vec.size()), arr(2 * n + 1), st(n + 1){
+    RangeMexQuery(const vector&lt;int&gt;&amp; vec) : n((int)vec.size()), arr(2 * n + 1), st(n + 1){
         preprocessing(vec);
     }
     int query(const int l, const int r){
