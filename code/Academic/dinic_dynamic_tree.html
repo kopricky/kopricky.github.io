@@ -201,22 +201,22 @@ private:
             }
         }
     }
-    T block_flow_naive(const int s, int cur, T f){
-        if(s == cur) return f;
-        T flow = 0;
-        for(int&amp; i = iter[cur]; i &lt; (int)G[cur].size(); ++i){
-            edge&amp; e = G[cur][i];
-            if(e.rev_cap &gt; 0 &amp;&amp; level[e.to] &lt; level[cur]){
-                T d = block_flow_naive(s, e.to, min(f, e.rev_cap));
-                if(d &gt; 0){
-                    e.rev_cap -= d, G[e.to][e.rev].rev_cap += d;
-                    f -= d, flow += d;
-                    if(f == 0) break;
-                }
-            }
-        }
-        return flow;
-    }
+    // T block_flow_naive(const int s, int cur, T f){
+    //     if(s == cur) return f;
+    //     T flow = 0;
+    //     for(int&amp; i = iter[cur]; i &lt; (int)G[cur].size(); ++i){
+    //         edge&amp; e = G[cur][i];
+    //         if(e.rev_cap &gt; 0 &amp;&amp; level[e.to] &lt; level[cur]){
+    //             T d = block_flow_naive(s, e.to, min(f, e.rev_cap));
+    //             if(d &gt; 0){
+    //                 e.rev_cap -= d, G[e.to][e.rev].rev_cap += d;
+    //                 f -= d, flow += d;
+    //                 if(f == 0) break;
+    //             }
+    //         }
+    //     }
+    //     return flow;
+    // }
     T block_flow(const int s, const int t){
         T flow = 0;
         bool find = false;
