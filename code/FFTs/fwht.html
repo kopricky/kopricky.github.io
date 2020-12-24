@@ -62,8 +62,7 @@ $\newcommand{\O}{\mathrm{O}}$
 <p>
 高速 Walsh-Hadamrd 変換. 高速フーリエ変換の亜種で FFT が $c[k] = \underset{i+j=k}{\mathrm{sum}} a[i] \times b[j]$ を満たす $c$ を求めるのに対し,
 $c[k] = \underset{i \oplus j=k}{\mathrm{sum}} a[i] \times b[j]$ を満たす $c$ を求める(xor-convolution). <br>
-xor 以外にも係数行列を少し変えれば and, or についても求めることが可能(係数行列が各演算に対して体系的に決められるのかは知らない). <br>
-正確には高速 Walsh-Hadamrd 変換はこれらの演算をすべて含む FFT のもっと広い一般化だそう.
+xor 以外にも係数行列を少し変えれば and, or についても求めることが可能である. <br>
 </p>
 <p>
 時間計算量: $\O (n \log n)$
