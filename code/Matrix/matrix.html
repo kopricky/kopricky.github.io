@@ -76,11 +76,10 @@ mat&lt;int&gt; $A(n, n, val)$; で全要素が $val$ の $n \times n$ の行列�
 <label for="label"></label>
 <pre class="prettyprint linenums">
 #define EPS 1e-10
-#define MOD 1000000007
 
 template&lt;typename T&gt; class mat : public vector&lt;vector&lt;T&gt; &gt; {
 private:
-    int r,c;    //行,列
+    int r, c;    //行,列
 public:
     inline int row() const {
         return r;
@@ -88,10 +87,10 @@ public:
     inline int column() const {
         return c;
     }
-    mat(int n,int m,T val = 0){
+    mat(int n, int m, T val = 0){
         r = n, c = m;
         for(int i = 0; i &lt; n; i++){
-            this-&gt;push_back(vector&lt;T&gt;(m,val));
+            this-&gt;push_back(vector&lt;T&gt;(m, val));
         }
     }
     mat operator+(const mat&amp; another) const {
@@ -108,7 +107,7 @@ public:
         return X;
     }
     mat operator+(const T val) const {
-        mat&lt;T&gt; X(r,c);
+        mat&lt;T&gt; X(r, c);
         for(int i = 0; i &lt; r; i++){
             for(int j = 0; j &lt; c; j++){
                 X[i][j] = (*this)[i][j] + val;
@@ -121,7 +120,7 @@ public:
             cout &lt;&lt; &quot;引き算失敗(サイズ不一致)&quot; &lt;&lt; endl;
             exit(1);
         }
-        mat&lt;T&gt; X(r,c);
+        mat&lt;T&gt; X(r, c);
         for(int i = 0; i &lt; r; i++){
             for(int j = 0; j &lt; c; j++){
                 X[i][j] = (*this)[i][j] - another[i][j];
@@ -130,7 +129,7 @@ public:
         return X;
     }
     mat operator-(const T val) const {
-        mat&lt;T&gt; X(r,c);
+        mat&lt;T&gt; X(r, c);
         for(int i = 0; i &lt; r; i++){
             for(int j = 0; j &lt; c; j++){
                 X[i][j] = (*this)[i][j] - val;
@@ -156,18 +155,18 @@ public:
             cout &lt;&lt; &quot;掛け算失敗(サイズ不一致)&quot; &lt;&lt; endl;
             exit(1);
         }
-        mat&lt;T&gt; X(r,another.c);
+        mat&lt;T&gt; X(r, another.c);
         for(int i = 0; i &lt; r; i++){
             for(int k = 0; k &lt; c; k++){
                 for(int j = 0; j &lt; (another.c); j++){
-                    X[i][j] += (*this)[i][k]*another[k][j];
+                    X[i][j] += (*this)[i][k] * another[k][j];
                 }
             }
         }
         return X;
     }
     mat operator-() const {
-        mat&lt;T&gt; X(r,c);
+        mat&lt;T&gt; X(r, c);
         for(int i = 0; i &lt; r; i++){
             for(int j = 0; j &lt; c; j++){
                 X[i][j] = -(*this)[i][j];
@@ -257,7 +256,7 @@ public:
                 }
             }
             if(abs(B[pivot][i]) &lt; EPS){
-                cout &lt;&lt; &quot;解なしor不定&quot; &lt;&lt; endl;
+                cout &lt;&lt; &quot;正則でない&quot; &lt;&lt; endl;
                 exit(1);
             }
             swap(B[i],B[pivot]);
@@ -290,13 +289,13 @@ public:
     }
 };
 
-template&lt;typename T&gt; vector&lt;T&gt; eq_solve(const mat&lt;T&gt;&amp; A,const vector&lt;T&gt;&amp; b){
+template&lt;typename T&gt; vector&lt;T&gt; eq_solve(const mat&lt;T&gt;&amp; A, const vector&lt;T&gt;&amp; b){
     if(A.row() != A.column()){
         cout &lt;&lt; &quot;正方行列でない(解なしor不定)&quot; &lt;&lt; endl;
         exit(1);
     }
     int n = A.row();
-    mat&lt;T&gt; B(n,n+1);
+    mat&lt;T&gt; B(n, n+1);
     for(int i = 0; i &lt; n; i++){
         for(int j = 0; j &lt; n; j++){
             B[i][j] = A[i][j];
@@ -335,65 +334,397 @@ template&lt;typename T&gt; vector&lt;T&gt; eq_solve(const mat&lt;T&gt;&amp; A,co
     return res;
 }
 
-template&lt;typename T&gt; mat&lt;T&gt; pow(mat&lt;T&gt; A,long long cnt)
+template&lt;typename T&gt; mat&lt;T&gt; pow(mat&lt;T&gt; A, long long cnt)
 {
     if(A.row() != A.column()){
         cout &lt;&lt; &quot;累乗不可&quot; &lt;&lt; endl;
     }
     int n = A.row();
-    mat&lt;T&gt; B(n,n);
+    mat&lt;T&gt; B(n, n);
     for(int i = 0; i &lt; n; i++){
         B[i][i] = 1;
     }
-    while(cnt&gt;0){
-        if(cnt &amp; 1) B = B*A;
-        A = A*A;
-        cnt &gt;&gt;= 1;
-    }
-    return B;
-}
-
-template&lt;typename T&gt; mat&lt;T&gt; mod_mul(mat&lt;T&gt;&amp; A,mat&lt;T&gt;&amp; B)
-{
-    if(A.column() != B.row()){
-        cout &lt;&lt; &quot;掛け算失敗(サイズ不一致)&quot; &lt;&lt; endl;
-        exit(1);
-    }
-    mat&lt;T&gt; X(A.row(),B.column());
-    for(int i = 0; i &lt; A.row(); i++){
-        for(int k = 0; k &lt; A.column(); k++){
-            for(int j = 0; j &lt; B.column(); j++){
-                X[i][j] = (X[i][j] + (long long)A[i][k]*B[k][j]) % MOD;
-            }
-        }
-    }
-    return X;
-}
-
-template&lt;typename T&gt; mat&lt;T&gt; mod_pow(mat&lt;T&gt; A,long long cnt)
-{
-    if(A.row() != A.column()){
-        cout &lt;&lt; &quot;累乗不可&quot; &lt;&lt; endl;
-    }
-    int n = A.row();
-    mat&lt;T&gt; B(n,n);
-    for(int i = 0; i &lt; n; i++){
-        B[i][i] = 1;
-    }
-    while(cnt&gt;0){
-		if(cnt &amp; 1) B = mod_mul(B,A);
-        A = mod_mul(A,A);
+    while(cnt &gt; 0){
+        if(cnt &amp; 1) B = B * A;
+        A = A * A;
         cnt &gt;&gt;= 1;
     }
     return B;
 }
 </pre>
 </div>
+<h3>コード($F_p$ 上の行列)</h3>
+<div class="codebox">
+<input type="checkbox" id="label2" class="csscode" />
+<label for="label2"></label>
+<pre class="prettyprint linenums">
+#define MOD 1000000007
+
+template &lt;unsigned int mod&gt;
+class ModInt {
+private:
+    unsigned int v;
+    static unsigned int norm(const unsigned int&amp; x){ return x &lt; mod ? x : x - mod; }
+    static ModInt make(const unsigned int&amp; x){ ModInt m; return m.v = x, m; }
+    static ModInt inv(const ModInt&amp; x){ return make(inverse(x.v, mod)); }
+    static unsigned int inverse(int a, int m){
+        int u[] = {a, 1, 0}, v[] = {m, 0, 1}, t;
+        while(*v){
+            t = *u / *v;
+            swap(u[0] -= t * v[0], v[0]), swap(u[1] -= t * v[1], v[1]), swap(u[2] -= t * v[2], v[2]);
+        }
+        return (u[1] % m + m) % m;
+    }
+
+public:
+    ModInt() : v{0}{}
+    ModInt(const long long val) : v{norm(val % mod + mod)} {}
+    ModInt(const ModInt&lt;mod&gt;&amp; n) : v{n()} {}
+    explicit operator bool() const noexcept { return v != 0; }
+    bool operator!() const noexcept { return !static_cast&lt;bool&gt;(*this); }
+    ModInt&amp; operator=(const ModInt&amp; n){ return v = n(), (*this); }
+    ModInt&amp; operator=(const long long val){ return v = norm(val % mod + mod), (*this); }
+    ModInt operator+() const { return *this; }
+    ModInt operator-() const { return v == 0 ? make(0) : make(mod - v); }
+    ModInt operator+(const ModInt&amp; val) const { return make(norm(v + val())); }
+    ModInt operator-(const ModInt&amp; val) const { return make(norm(v + mod - val())); }
+    ModInt operator*(const ModInt&amp; val) const { return make((long long)v * val() % mod); }
+    ModInt operator/(const ModInt&amp; val) const { return *this * inv(val); }
+    ModInt&amp; operator+=(const ModInt&amp; val){ return *this = *this + val; }
+    ModInt&amp; operator-=(const ModInt&amp; val){ return *this = *this - val; }
+    ModInt&amp; operator*=(const ModInt&amp; val){ return *this = *this * val; }
+    ModInt&amp; operator/=(const ModInt&amp; val){ return *this = *this / val; }
+    ModInt operator+(const long long val) const { return ModInt{v + val}; }
+    ModInt operator-(const long long val) const { return ModInt{v - val}; }
+    ModInt operator*(const long long val) const { return ModInt{(long long)(v * (val % mod))}; }
+    ModInt operator/(const long long val) const { return ModInt{(long long)v * inv(val)}; }
+    ModInt&amp; operator+=(const long long val){ return *this = *this + val; }
+    ModInt&amp; operator-=(const long long val){ return *this = *this - val; }
+    ModInt&amp; operator*=(const long long val){ return *this = *this * val; }
+    ModInt&amp; operator/=(const long long val){ return *this = *this / val; }
+    bool operator==(const ModInt&amp; val) const { return v == val.v; }
+    bool operator!=(const ModInt&amp; val) const { return !(*this == val); }
+    bool operator==(const long long val) const { return v == norm(val % mod + mod); }
+    bool operator!=(const long long val) const { return !(*this == val); }
+    unsigned int operator()() const { return v; }
+    friend ModInt operator+(const long long val, const ModInt&amp; n) { return n + val; }
+    friend ModInt operator-(const long long val, const ModInt&amp; n) { return ModInt{val - n()}; }
+    friend ModInt operator*(const long long val, const ModInt&amp; n) { return n * val; }
+    friend ModInt operator/(const long long val, const ModInt&amp; n) { return ModInt{val} / n; }
+    friend bool operator==(const long long val, const ModInt&amp; n) { return n == val; }
+    friend bool operator!=(const long long val, const ModInt&amp; n) { return !(val == n); }
+    friend istream&amp; operator&gt;&gt;(istream&amp; is, ModInt&amp; n){
+        unsigned int v;
+        return is &gt;&gt; v, n = v, is;
+    }
+    friend ostream&amp; operator&lt;&lt;(ostream&amp; os, const ModInt&amp; n){ return (os &lt;&lt; n()); }
+    friend ModInt mod_pow(ModInt x, long long n){
+        ModInt ans = ((mod == 1) ? 0 : 1);
+        while(n){
+            if(n &amp; 1) ans *= x;
+            x *= x, n &gt;&gt;= 1;
+        }
+        return ans;
+    }
+};
+
+template&lt;typename T&gt; class mat : public vector&lt;vector&lt;T&gt; &gt; {
+private:
+    int r, c;    //行,列
+public:
+    inline int row() const {
+        return r;
+    }
+    inline int column() const {
+        return c;
+    }
+    mat(int n, int m, T val = 0){
+        r = n, c = m;
+        for(int i = 0; i &lt; n; i++){
+            this-&gt;push_back(vector&lt;T&gt;(m, val));
+        }
+    }
+    mat operator+(const mat&amp; another) const {
+        if(r != another.r &amp;&amp; c != another.c){
+            cout &lt;&lt; &quot;足し算失敗(サイズ不一致)&quot; &lt;&lt; endl;
+            exit(1);
+        }
+        mat&lt;T&gt; X(r, c);
+        for(int i = 0; i &lt; r; i++){
+            for(int j = 0; j &lt; c; j++){
+                X[i][j] = (*this)[i][j] + another[i][j];
+            }
+        }
+        return X;
+    }
+    mat operator+(const T val) const {
+        mat&lt;T&gt; X(r, c);
+        for(int i = 0; i &lt; r; i++){
+            for(int j = 0; j &lt; c; j++){
+                X[i][j] = (*this)[i][j] + val;
+            }
+        }
+        return X;
+    }
+    mat operator-(const mat&amp; another) const {
+        if(r != another.r &amp;&amp; c != another.c){
+            cout &lt;&lt; &quot;引き算失敗(サイズ不一致)&quot; &lt;&lt; endl;
+            exit(1);
+        }
+        mat&lt;T&gt; X(r, c);
+        for(int i = 0; i &lt; r; i++){
+            for(int j = 0; j &lt; c; j++){
+                X[i][j] = (*this)[i][j] - another[i][j];
+            }
+        }
+        return X;
+    }
+    mat operator-(const T val) const {
+        mat&lt;T&gt; X(r, c);
+        for(int i = 0; i &lt; r; i++){
+            for(int j = 0; j &lt; c; j++){
+                X[i][j] = (*this)[i][j] - val;
+            }
+        }
+        return X;
+    }
+    vector&lt;T&gt; operator*(const vector&lt;T&gt;&amp; another) const {
+        if(c != (int)another.size()){
+            cout &lt;&lt; &quot;掛け算失敗(サイズ不一致)&quot; &lt;&lt; endl;
+            exit(1);
+        }
+        vector&lt;T&gt; vec(r,0);
+        for(int i = 0; i &lt; r; i++){
+            for(int j = 0; j &lt; c; j++){
+                vec[i] += (*this)[i][j] * another[j];
+            }
+        }
+        return vec;
+    }
+    mat operator*(const mat&amp; another) const {
+        if(c != another.r){
+            cout &lt;&lt; &quot;掛け算失敗(サイズ不一致)&quot; &lt;&lt; endl;
+            exit(1);
+        }
+        mat&lt;T&gt; X(r, another.c);
+        for(int i = 0; i &lt; r; i++){
+            for(int k = 0; k &lt; c; k++){
+                for(int j = 0; j &lt; (another.c); j++){
+                    X[i][j] += (*this)[i][k] * another[k][j];
+                }
+            }
+        }
+        return X;
+    }
+    mat operator-() const {
+        mat&lt;T&gt; X(r, c);
+        for(int i = 0; i &lt; r; i++){
+            for(int j = 0; j &lt; c; j++){
+                X[i][j] = -(*this)[i][j];
+            }
+        }
+        return X;
+    }
+    int rank() const {
+        int res = 0;
+        mat B(r, c);
+        for(int i = 0; i &lt; r; i++){
+            for(int j = 0; j &lt; c; j++){
+                B[i][j] = (*this)[i][j];
+            }
+        }
+        for(int i = 0; i &lt; c; i++){
+            if(res == r) return res;
+            int pivot = res;
+            for(int j = res; j &lt; r; j++){
+                if(B[j][i]){
+                    pivot = j;
+                    break;
+                }
+            }
+            if(!B[pivot][i]) continue;
+            swap(B[pivot], B[res]);
+            const T d = (T)1 / B[res][i];
+            for(int j = i + 1; j &lt; c; j++){
+                B[res][j] *= d;
+            }
+            for(int j = res + 1; j &lt; r; j++){
+                if(!B[j][i]) continue;
+                for(int k = i + 1; k &lt; c; k++){
+                    B[j][k] -= B[res][k] * B[j][i];
+                }
+            }
+            ++res;
+        }
+        return res;
+    }
+    T det() const {
+        if(r != c){
+            cout &lt;&lt; &quot;正方行列でない(行列式定義不可)&quot; &lt;&lt; endl;
+            exit(1);
+        }
+        T ans = 1;
+        mat B(r, r);
+        for(int i = 0; i &lt; r; i++){
+            for(int j = 0; j &lt; c; j++){
+                B[i][j] = (*this)[i][j];
+            }
+        }
+        for(int i = 0; i &lt; c; i++){
+            int pivot = i;
+            for(int j = i; j &lt; r; j++){
+                if(B[j][i]){
+                    pivot = j;
+                    break;
+                }
+            }
+            if(!B[pivot][i]) return (T)0;
+            if(pivot != i) swap(B[i], B[pivot]), ans = -ans;
+            ans *= B[i][i];
+            const T d = (T)1 / B[i][i];
+            for(int j = i + 1; j &lt; c; j++){
+                B[i][j] *= d;
+            }
+            for(int j = i + 1; j &lt; r; j++){
+                if(!B[j][i]) continue;
+                for(int k = i + 1; k &lt; c; k++){
+                    B[j][k] -= B[i][k] * B[j][i];
+                }
+            }
+        }
+        return ans;
+    }
+    mat inverse() const {
+        if(r != c){
+            cout &lt;&lt; &quot;正方行列でない(逆行列定義不可)&quot; &lt;&lt; endl;
+            exit(1);
+        }
+        mat B(r, 2*r);
+        for(int i = 0; i &lt; r; i++){
+            for(int j = 0; j &lt; r; j++){
+                B[i][j] = (*this)[i][j];
+            }
+        }
+        for(int i = 0; i &lt; r; i++){
+            B[i][r+i] = 1;
+        }
+        for(int i = 0; i &lt; r; i++){
+            int pivot = i;
+            for(int j = i; j &lt; r; j++){
+                if(B[j][i]){
+                    pivot = j;
+                    break;
+                }
+            }
+            if(!B[pivot][i]){
+                cout &lt;&lt; &quot;正則でない&quot; &lt;&lt; endl;
+                exit(1);
+            }
+            swap(B[i], B[pivot]);
+            const T d = (T)1 / B[i][i];
+            for(int j = i + 1; j &lt; 2*r; j++){
+                B[i][j] *= d;
+            }
+            for(int j = 0; j &lt; r; j++){
+                if(j == i || !B[j][i]) continue;
+                for(int k = i + 1; k &lt; 2*r; k++){
+                    B[j][k] -= B[i][k] * B[j][i];
+                }
+            }
+        }
+        mat res(r, r);
+        for(int i = 0; i &lt; r; i++){
+            for(int j = 0; j &lt; r; j++){
+                res[i][j] = B[i][r+j];
+            }
+        }
+        return res;
+    }
+    inline void print() const {
+        for(int i = 0; i &lt; r; i++){
+            for(int j = 0; j &lt; (c-1); j++){
+                cout &lt;&lt; (*this)[i][j] &lt;&lt; &quot;,&quot;;
+            }
+            cout &lt;&lt; (*this)[i][c-1] &lt;&lt; endl;
+        }
+    }
+};
+
+template&lt;typename T&gt; vector&lt;T&gt; eq_solve(const mat&lt;T&gt;&amp; A, const vector&lt;T&gt;&amp; b){
+    if(A.row() != A.column()){
+        cout &lt;&lt; &quot;正方行列でない(解なしor不定)&quot; &lt;&lt; endl;
+        exit(1);
+    }
+    int n = A.row();
+    mat&lt;T&gt; B(n, n+1);
+    for(int i = 0; i &lt; n; i++){
+        for(int j = 0; j &lt; n; j++){
+            B[i][j] = A[i][j];
+        }
+    }
+    for(int i = 0; i &lt; n; i++){
+        B[i][n] = b[i];
+    }
+    for(int i = 0; i &lt; n; i++){
+        int pivot = i;
+        for(int j = i; j &lt; n; j++){
+            if(B[j][i]){
+                pivot = j;
+                break;
+            }
+        }
+        if(!B[pivot][i]){
+            cout &lt;&lt; &quot;解なしor不定&quot; &lt;&lt; endl;
+            exit(1);
+        }
+        swap(B[i], B[pivot]);
+        const T d = (T)1 / B[i][i];
+        for(int j = i + 1; j &lt;= n; j++){
+            B[i][j] *= d;
+        }
+        for(int j = 0; j &lt; n; j++){
+            if(i != j){
+                for(int k = i + 1; k &lt;= n; k++){
+                    B[j][k] -= B[i][k] * B[j][i];
+                }
+            }
+        }
+    }
+    vector&lt;T&gt; res(n);
+    for(int i = 0; i &lt; n; i++){
+        res[i] = B[i][n];
+    }
+    return res;
+}
+
+template&lt;typename T&gt; mat&lt;T&gt; pow(mat&lt;T&gt; A, long long cnt)
+{
+    if(A.row() != A.column()){
+        cout &lt;&lt; &quot;累乗不可&quot; &lt;&lt; endl;
+    }
+    int n = A.row();
+    mat&lt;T&gt; B(n, n);
+    for(int i = 0; i &lt; n; i++){
+        B[i][i] = 1;
+    }
+    while(cnt &gt; 0){
+        if(cnt &amp; 1) B = B * A;
+        A = A * A;
+        cnt &gt;&gt;= 1;
+    }
+    return B;
+}
+
+using mod = ModInt&lt;MOD&gt;;
+
+// 宣言 mat&lt;mod&gt; A(n, m); 
+</pre>
+</div>
 <h3>verify 用の問題</h3>
 <p>
 det の verify <br>
 Atcoder : <a href="https://beta.atcoder.jp/contests/arc054/tasks/arc054_c">鯛焼き</a>
-  <a href="https://beta.atcoder.jp/contests/arc054/submissions/3147285">提出コード</a><br>
+  <a href="https://atcoder.jp/contests/arc054/submissions/18987342">提出コード</a><br>
 AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2347">Sunny Graph</a>
   <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3537571#1">提出コード</a><br>
 eq_solve の verify <br>
@@ -401,11 +732,11 @@ AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2315">Sh
   <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3123478#1">提出コード</a><br>
 yukicoder : <a href="https://yukicoder.me/problems/no/463">魔法使いのすごろく</a>
   <a href="https://yukicoder.me/submissions/253449">提出コード</a><br>
-乗算, mod_pow の verify <br>
+乗算 の verify <br>
 Atcoder : <a href="https://atcoder.jp/contests/dp/tasks/dp_r">Walk</a>
     <a href="https://atcoder.jp/contests/dp/submissions/4060246">提出コード</a><br>
 yukicoder : <a href="https://yukicoder.me/problems/no/569">3 x N グリッドのパスの数</a>
-    <a href="https://yukicoder.me/submissions/283500">提出コード</a><br>
+    <a href="https://yukicoder.me/submissions/597519">提出コード</a><br>
 rank, inverse 等の verify <br>
 AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2624">Graph Automata Player</a>
   <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3230989#1">提出コード</a><br>
