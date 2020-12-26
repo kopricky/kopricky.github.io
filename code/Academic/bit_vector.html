@@ -84,12 +84,21 @@ private:
         }
     };
 
-    static constexpr int BIT_SIZE = SIZE, UNIT_SIZE = 32, SMALL_BLOCK_SIZE = ceil(log2(BIT_SIZE)/2.0), BLOCK_SIZE = 4*SMALL_BLOCK_SIZE*SMALL_BLOCK_SIZE,
-                            BIT_REST = BIT_SIZE%BLOCK_SIZE, BLOCK_COUNT = BIT_SIZE/BLOCK_SIZE+1, SMALL_BLOCK_COUNT = 4*SMALL_BLOCK_SIZE,
-                             REAL_BIT_SIZE = BLOCK_COUNT*BLOCK_SIZE, VECTOR_SIZE = REAL_BIT_SIZE/UNIT_SIZE+1, ALL_SMALL_BLOCK_COUNT = BLOCK_COUNT*SMALL_BLOCK_COUNT,
-                              BOUNDARY_INDEX = 3.5, BOUNDARY_LENGTH = ceil(pow(log2(BIT_SIZE),BOUNDARY_INDEX)), DESCENDANT_COUNT = ceil(sqrt(log2(BIT_SIZE)));
+    static constexpr unsigned int BIT_SIZE = SIZE;
+    static constexpr unsigned int UNIT_SIZE = 32;
+    static constexpr unsigned int SMALL_BLOCK_SIZE = ceil(log2(BIT_SIZE)/2.0);
+    static constexpr unsigned int BLOCK_SIZE = 4*SMALL_BLOCK_SIZE*SMALL_BLOCK_SIZE;
+    static constexpr unsigned int  BIT_REST = BIT_SIZE%BLOCK_SIZE;
+    static constexpr unsigned int BLOCK_COUNT = BIT_SIZE/BLOCK_SIZE+1;
+    static constexpr unsigned int SMALL_BLOCK_COUNT = 4*SMALL_BLOCK_SIZE;
+    static constexpr unsigned int REAL_BIT_SIZE = BLOCK_COUNT*BLOCK_SIZE;
+    static constexpr unsigned int VECTOR_SIZE = REAL_BIT_SIZE/UNIT_SIZE+1;
+    static constexpr unsigned int ALL_SMALL_BLOCK_COUNT = BLOCK_COUNT*SMALL_BLOCK_COUNT;
+    static constexpr double BOUNDARY_INDEX = 3.5;
+    static constexpr unsigned int BOUNDARY_LENGTH = ceil(pow(log2(BIT_SIZE),BOUNDARY_INDEX));
+    static constexpr unsigned int DESCENDANT_COUNT = ceil(sqrt(log2(BIT_SIZE)));
 
-    uint* bit_vector;
+    unsigned int* bit_vector;
     int* block_rank;
     short int* small_block_rank;
     char** lookup_table_rank;
@@ -101,7 +110,7 @@ public:
 
     void alloc_memory() {
         // bit は右から左(←)の向きであることに注意する
-        bit_vector = new uint[VECTOR_SIZE];
+        bit_vector = new unsigned int[VECTOR_SIZE];
         std::cerr &lt;&lt; &quot;bit vector: &quot; &lt;&lt; VECTOR_SIZE*4 &lt;&lt; &quot;bytes\n&quot;;
         // 本当は int(32bit) ではなく log(n)bit 長でなくてはならない
         block_rank = new int[BLOCK_COUNT+1];
@@ -124,7 +133,7 @@ public:
     }
 
     void init_() {
-        memset(bit_vector, 0, sizeof(uint)*VECTOR_SIZE);
+        memset(bit_vector, 0, sizeof(unsigned int)*VECTOR_SIZE);
     }
 
     BitVector() : select_small_block_memory(0), select_large_block_memory(0){
