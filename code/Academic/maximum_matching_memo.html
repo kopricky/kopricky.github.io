@@ -76,7 +76,7 @@ $\det (T) = \sum_{j=1}^n (-1)^{i+j} T_{1, j} \det (T_{\langle 1 \rangle, \langle
 あとは $\det (T_{ \langle 1 \rangle ,\langle j \rangle }) \neq 0$ となるような $j$ をどうやって見つけてくるかだが $(T^{-1})_{i, j} = (-1)^{i+j} \cdot \frac{\det \left( {T_{\langle i \rangle, \langle j \rangle}} \right)}{\det \left( T \right) }$ より, $\det (T_ { \langle 1 \rangle ,\langle j \rangle }) \neq 0 \Leftrightarrow \left( T^{-1} \right) _{1,j} \neq 0$ が得られるので $T$ の逆行列を計算することで $j$ を求めることができる. <br>
 これを再帰的に繰り返すことで $\O (n^4)$ で構築することが可能になった(正確には $\O (n^{ω+1})$ time). <br>
 ここで逆行列計算を毎回する必要はなく $T^{-1}$ から $\left( T_ { \langle 1,j \rangle ,\langle 1,j \rangle } \right) ^ {-1}$ を $\O \left( n^2 \right)$ 時間で計算することができる. <br>
-簡単のため $j = 2$ とする. ここで元の行列 $T$ での行置換や列置換は $T^{-1}$ の行置換および列置換と対応するので特に一般性を失うことなく議論が可能であることに注意する.
+簡単のため $j = 2$ とする. ここで元の行列 $T$ の行置換や列置換は $T^{-1}$ の行置換および列置換とそのまま対応するので特に一般性を失うことなく議論が可能であることに注意する.
 $T^{-1}$ を $(2, n-2) \times (2, n-2)$ ブロック行列 と見たとき右下の行列に関する Schur 補行列は $\left( T_ { \langle 1,2 \rangle ,\langle 1, 2 \rangle } \right) ^ {-1}$ と一致する.
 つまり頂点 $1$ および頂点 $2$ を取り除いた後の Tutte 行列の逆行列は $T^{-1}$ が求まっていると $\O (n^2)$ 時間で構築することができる.
 つまり全体で $\O (n^3)$ time で計算可能. ちなみにもっと頑張ると $\O (n^ω)$ まで落ちるらしい<br>
