@@ -57,32 +57,83 @@ $\newcommand{\O}{\mathrm{O}}$
 <div id="contents">
 
 <section>
-<h2>アルゴリズム名</h2>
+<h2>Enumerating $C_3$</h2>
 <h3>コードについての説明</h3>
 <p>
-元論文は <a href=""></a>
+単純無向グラフに含まれる $C_3$(三角形) をすべて列挙するアルゴリズムである. <br>
+各頂点をその次数が高々 $\sqrt{m}$ 程度であるもの(low degree), それより大きいもの(high degree) に分けて処理を行う
+(以下の実装では各頂点についてそれが最小添字の頂点となるような $C_3$ の列挙を行っている).
+ここで前者についてはその頂点に隣接する辺の数が $\O \left( \sqrt{m} \right)$ 本,
+後者についてはそのような頂点の数が $\O \left( \sqrt{m} \right)$ 個である性質を用いるとどちらの場合も
+$\O \left( m^{1.5} \right)$ 時間で処理できることが分かる. <br>
+また $n$ 頂点 $m$ 辺の単純無向グラフに含まれる $C_3$ の数は $\O \left( m^{1.5} \right)$ 個であることにも注意する.
 </p>
 <p>
-(関数)<br>
-add_edge(): 辺を追加する <br>
-</p>
-<p>
-時間計算量: $\O(m \log n)$
+時間計算量: $\O(m^{1.5})$
 </p>
 <h3>コード</h3>
 <div class="codebox">
 <input type="checkbox" id="label" class="csscode" />
 <label for="label"></label>
 <pre class="prettyprint linenums">
-あ
+// グラフは単純な無向グラフであることを仮定する
+class EnumeratingC3 {
+private:
+    int V, threshold;
+    vector&lt;vector&lt;int&gt; &gt; G;
+    vector&lt;vector&lt;array&lt;int, 2&gt; &gt; &gt; memo;
+    bool *flag;
+    void process_high_degree(){
+        for(int i = 0; i &lt; V; ++i){
+            if((int)G[i].size() &lt;= threshold) continue;
+            for(const int u : G[i]) flag[u] = true;
+            for(const int u : G[i]){
+                for(const int v : G[u]){
+                    if(flag[v]) ans.push_back({i, u, v});
+                }
+            }
+            for(const int u : G[i]) flag[u] = false;
+        }
+    }
+    void process_low_degree(){
+        for(int i = 0; i &lt; V; ++i){
+            if((int)G[i].size() &gt; threshold) continue;
+            for(const int u : G[i]){
+                for(const int v : G[i]){
+                    if(v &gt; u) memo[u].push_back({i, v});
+                }
+            }
+        }
+        for(int i = 0; i &lt; V; ++i){
+            for(const int u : G[i]) flag[u] = true;
+            for(const auto&amp; e : memo[i]){
+                if(flag[e[1]]) ans.push_back({e[0], i, e[1]});
+            }
+            for(const int u : G[i]) flag[u] = false;
+        }
+    }
+public:
+    // ans に三角形 (a, b, c) (a &lt; b &lt; c) が重複なく格納される
+    vector&lt;array&lt;int, 3&gt; &gt; ans;
+    EnumeratingC3(const int node_size)
+         : V(node_size), threshold(0), G(V), memo(V), flag(new bool[V]()){}
+    ~EnumeratingC3(){ delete[] flag; }
+    void add_edge(const int u, const int v){
+        if(u &lt; v) G[u].push_back(v);
+        else G[v].push_back(u);
+        ++threshold;
+    }
+    void solve(){
+        threshold = floor(sqrt(threshold)) / 2;
+        process_high_degree();
+        process_low_degree();
+    }
+};
 </pre>
 </div>
 <h3>verify 用の問題</h3>
-<p>
-verify していません(verify 問題を知らない)
-</p>
-<p>Atcoder : <a href=""></a>
-  <a href="">提出コード</a></p>
+<p>yosupo さんの library checker : <a href="https://judge.yosupo.jp/problem/enumerate_triangles">Enumerate Triangles</a>
+  <a href="https://judge.yosupo.jp/submission/33900">提出コード</a></p>
 </section>
 
 </div>
