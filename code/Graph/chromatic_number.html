@@ -72,13 +72,14 @@ $\newcommand{\O}{\mathrm{O}}$
 <input type="checkbox" id="label" class="csscode" />
 <label for="label"></label>
 <pre class="prettyprint linenums">
+// 頂点数は 32 以下であることを仮定
 class ChromaticrNumber {
 public:
     int V;
-    vector&lt;int&gt; adj;
-    const static int MOD = 1000000007;
+    vector&lt;unsigned int&gt; adj;
+    const static unsigned int MOD = 1000000007;
     ChromaticrNumber(int node_size) : V(node_size), adj(V, 0){
-        for(int i = 0; i &lt; V; i++){
+        for(int i = 0; i &lt; V; ++i){
             adj[i] = (1 &lt;&lt; i);
         }
     }
@@ -86,18 +87,18 @@ public:
         adj[u] |= (1 &lt;&lt; v), adj[v] |= (1 &lt;&lt; u);
     }
     int solve(){
-        vector&lt;int&gt; t(1 &lt;&lt; V, 0), I(1 &lt;&lt; V, 0);
+        vector&lt;unsigned int&gt; t(1 &lt;&lt; V, 0), I(1 &lt;&lt; V, 0);
         t[(1 &lt;&lt; V) - 1] = I[0] = 1;
-        for(int i = 1; i &lt; (1 &lt;&lt; V); i++){
-            int v = __builtin_ctz(i);
+        for(int i = 1; i &lt; (1 &lt;&lt; V); ++i){
+            const int v = __builtin_ctz(i);
             I[i] = I[i ^ (1 &lt;&lt; v)] + I[i &amp; (~adj[v])];
-            I[i] = (I[i] &gt;= MOD)?(I[i] - MOD) : I[i];
+            I[i] = (I[i] &gt;= MOD) ? (I[i] - MOD) : I[i];
             t[i-1] = (((V - __builtin_popcount(i - 1)) % 2) ? (MOD - 1) : 1);
         }
-        for(int k = 1; k &lt; V; k++){
-            long long res = 0;
-            for(int i = 0; i &lt; (1 &lt;&lt; V); i++){
-                res += (t[i] = (long long)t[i] * I[i] % MOD);
+        for(int k = 1; k &lt; V; ++k){
+            unsigned long long res = 0;
+            for(int i = 0; i &lt; (1 &lt;&lt; V); ++i){
+                res += (t[i] = (unsigned long long)t[i] * I[i] % MOD);
             }
             if(res % MOD) return k;
         }
@@ -107,9 +108,8 @@ public:
 </pre>
 </div>
 <h3>verify 用の問題</h3>
-<p>
-verify していません(verify 問題を知らない)
-</p>
+<p>Atcooder : <a href="https://atcoder.jp/contests/abc187/tasks/abc187_f">Close Group</a>
+<a href="https://atcoder.jp/contests/abc187/submissions/19205348">提出コード</a></p>
 </section>
 
 </div>
