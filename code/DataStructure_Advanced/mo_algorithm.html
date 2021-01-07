@@ -60,10 +60,13 @@ $\newcommand{\O}{\mathrm{O}}$
 <h2>Mo's algorithm</h2>
 <h3>コードについての説明</h3>
 <p>
-Segment Tree ではうまく処理できない($2$ つの範囲の結果を結合することが難しい)ような範囲に関するクエリで, オフラインかつ今の範囲を $1$ つ伸ばしたり, $1$ つ縮めたりという操作は簡単にできるという場合に用いることのできる手法. <br>
-配列の長さ $n$ を $\sqrt{n}$ 個のブロックに分け, すべてのクエリをその範囲の左端に注目して対応するブロックに振り分ける(各ブロック内では右端が昇順(偶数ブロック)または降順(奇数ブロック)になるようにクエリを並び替える). <br>
+Segment Tree ではうまく処理できない($2$ つの範囲の結果を結合することが難しい)ような範囲に関するクエリで, 更新がなくまた今の範囲を $1$ つ伸ばしたり, $1$ つ縮めたりという操作は簡単にできるという場合に用いることのできる手法. <br>
+配列の長さ $n$ を $\sqrt{n}$ 個のブロックに分け, すべてのクエリをその範囲の左端に注目して対応するブロックに振り分ける(各ブロック内では右端が昇順(偶数ブロック)または降順(奇数ブロック)になるようにクエリを並び替える).
 そのようにクエリを並び替えてあとは順番にクエリを伸縮させながら処理していくと, 結局範囲の伸縮の回数が $\O ((n+q) \sqrt{n})$ 回で抑えられるという寸法. <br>
-<a href="https://ei1333.hateblo.jp/entry/2017/09/11/211011">こちら</a> を参考に実装しました.
+<a href="https://ei1333.hateblo.jp/entry/2017/09/11/211011">こちら</a> を参考に実装しました. <br>
+原理上このアルゴリズムは $n(\ge 3)$ 次元にも拡張でき, 特に更新がある場合の範囲クエリは $3$ 次元に Mo's algorithm を拡張することで処理が可能である.
+更新および範囲クエリの数が $\Theta \left( n \right)$ であるときブロック幅を $n^{2 / 3}$ として $xy$ 平面を $n^{1/3} \times n^{1/3}$ のブロックに分割して $z$ 方向にたどることで全体で
+$\O \left( n^{5/3} \ast K \right)$ 時間($K$ は範囲の伸縮一回にかかる計算量) ですべてのクエリを処理することが可能である(<a href="https://codeforces.com/contest/940/problem/F">参考問題</a>).
 </p>
 <p>
 (関数)<br>
@@ -116,9 +119,9 @@ public:
         ans.resize(sz);
         for(const int id : ord){
             while(nl &gt; left[id]) add(--nl);
-            while(nr &lt; right[id]) add(nr++);  //add
+            while(nr &lt; right[id]) add(nr++);
             while(nl &lt; left[id]) del(nl++);
-            while(nr &gt; right[id]) del(--nr);  //del
+            while(nr &gt; right[id]) del(--nr);
             ans[id] = res;
         }
     }
@@ -140,7 +143,7 @@ void Mo::del(const int id)
 </div>
 <h3>verify 用の問題</h3>
 <p>Atcoder : <a href="https://beta.atcoder.jp/contests/dwacon2017-honsen/tasks/dwango2017final_b">ニワンゴくんの約数</a>
-  <a href="https://atcoder.jp/contests/dwacon2017-honsen/submissions/6753031">提出コード</a> (愚直なので TL が厳しめ) <br>
+  <a href="https://atcoder.jp/contests/dwacon2017-honsen/submissions/19250948">提出コード</a> (愚直なので TL が厳しめ) <br>
 Atcoder : <a href="https://atcoder.jp/contests/abc174/tasks/abc174_f">Range Set Query</a>
   <a href="https://atcoder.jp/contests/abc174/submissions/15889969">提出コード</a></p>
 </section>
