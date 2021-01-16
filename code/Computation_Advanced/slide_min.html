@@ -76,13 +76,14 @@ SilideMin$(Array, sz)$ : $res[i] = \underset{i \le j < i+sz}{\min} Array[j]\ (0 
 <input type="checkbox" id="label" class="csscode" />
 <label for="label"></label>
 <pre class="prettyprint linenums">
+//長さnのArrayから連続k個の最小値の配列をresに格納
 template &lt;typename T&gt; class SlideMin
 {
 public:
     vector&lt;int&gt; deq;
     vector&lt;T&gt; res;
     int n,k;
-    SlideMin(vector&lt;T&gt; Array, int sz) : n((int)Array.size()), k(sz), deq(n), res(n-k+1){
+    SlideMin(const vector&lt;T&gt;&amp; Array, int sz) : n((int)Array.size()), k(sz), deq(n), res(n-k+1){
         int s = 0, t = 0;
         for(int i = 0; i &lt; n; i++){
             //iを追加した場合に添字deq[t-1]の値がa[i]以上のときdeqから削除されるまで採用されることはないので
