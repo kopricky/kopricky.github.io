@@ -61,10 +61,11 @@ $\newcommand{\O}{\mathrm{O}}$
 <h3>コードについての説明</h3>
 <p>
 静的 RMQ(更新のない区間最小値クエリ) に $\O (1)$ で答えるデータ構造を $\O (n \log n)$ 時間で構築するアルゴリズム. <br>
-「$table[i][k]$ : インデックス $i$ から始まる $2^k$ 個の要素の中の最小値」 という配列を $\O (n \log n)$ かけて前計算しておけば区間 $[l,r)$ のクエリに対して
-$k = \lfloor r-l \rfloor$ とすると $\min (table[l][k], table[r-2^k][k])$ のように $\O (1)$ で答えることができる. <br>
+「$table[k][i]$ : インデックス $i$ から始まる $2^k$ 個の要素の中の最小値」 という配列を $\O (n \log n)$ かけて前計算しておけば区間 $[l,r)$ のクエリに対して
+$k = \lfloor \log_2 (r-l) \rfloor$ とすると $\min (table[k][i], table[k][r-2^k])$ のようにして $\O (1)$ で答えることができる.
+ここでテーブルの添字は前計算の際にキャッシュに乗りやすいように $k$, $i$ の順の方が良い. <br>
 ちなみに和や xor などもう少し広いクラス(半群をなすもの) に対してもクエリの計算時間 $\O (1)$ を達成するデータ構造を考えることができ,
-本アルゴリズムと異なり, クエリで呼び出される区間が重ならないことから disjoint sparse table と呼ばれています(参考 <a href="http://noshi91.hatenablog.com/entry/2018/05/08/183946#f-8405daed">noshi さんのブログ</a>).
+本アルゴリズムと異なりクエリで呼び出される区間が重ならないことから disjoint sparse table と呼ばれている(参考 <a href="http://noshi91.hatenablog.com/entry/2018/05/08/183946#f-8405daed">noshi さんのブログ</a>).
 </p>
 <p>
 時間計算量: 構築 $\O (n \log n)$, クエリ $\O (1)$
@@ -77,26 +78,26 @@ $k = \lfloor r-l \rfloor$ とすると $\min (table[l][k], table[r-2^k][k])$ の
 template&lt;typename T&gt; class SparseTable {
 private:
     int sz;
-    vector&lt;int&gt; logTable;
-    vector&lt;vector&lt;pair&lt;T, int&gt; &gt; &gt; table; //最小値のインデックスを保持
+    vector&lt;int&gt; LogTable;
+    vector&lt;vector&lt;T&gt; &gt; Table; //最小値を保持
 public:
-    SparseTable(vector&lt;T&gt;&amp; v) : sz((int)v.size()), logTable(sz+1){
+    SparseTable(const vector&lt;T&gt;&amp; v) : sz((int)v.size()), LogTable(sz + 1){
         for(int i = 2; i &lt; sz + 1; i++){
-            logTable[i] = logTable[i &gt;&gt; 1] + 1;
+            LogTable[i] = LogTable[i &gt;&gt; 1] + 1;
         }
-        table.resize(sz, vector&lt;pair&lt;T, int&gt; &gt;(logTable[sz]+1));
+        Table.resize(LogTable[sz]+1, vector&lt;T&gt;(sz));
         for(int i = 0; i &lt; sz; i++){
-            table[i][0] = make_pair(v[i], i);
+            Table[0][i] = v[i];
         }
         for(int k = 1; (1 &lt;&lt; k) &lt;= sz; k++){
             for(int i = 0; i + (1 &lt;&lt; k) &lt;= sz; i++){
-                table[i][k] = min(table[i][k-1], table[i + (1 &lt;&lt; (k-1))][k-1]);
+                Table[k][i] = min(Table[k-1][i], Table[k-1][i + (1 &lt;&lt; (k-1))]);
             }
         }
     }
-    pair&lt;T, int&gt; query(int l,int r){
-        int k = logTable[r-l];
-        return min(table[l][k], table[r-(1&lt;&lt;k)][k]);
+    T query(const int l, const int r){
+        const int k = LogTable[r-l];
+        return min(Table[k][l], Table[k][r-(1&lt;&lt;k)]);
     }
 };
 </pre>
