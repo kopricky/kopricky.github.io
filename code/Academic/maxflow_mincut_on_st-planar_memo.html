@@ -60,7 +60,7 @@ $\newcommand{\O}{\mathrm{O}}$
 <h2>Maximum Flow Algorithm on st-Planar Graph</h2>
 <h3>個人的メモ</h3>
 <p>
-st-planar graph の最小 st-カット問題は双対グラフの最短経路問題として解くことができる(以下に無向グラフの場合を例に示す). <br>
+st-planar graph の $(s, t)$-最小カット問題は双対グラフの最短経路問題として解くことができる(以下に無向グラフの場合を例に示す). <br>
 <br>
 <img src="./st-planar_graph.png" height="200" width="1000">
 <br>
@@ -71,7 +71,7 @@ st-planar graph の最小 st-カット問題は双対グラフの最短経路問
 よって双対グラフを構築し, そのグラフ上で最短経路問題を解くことで $(s, t)$-最小カットを求めることができる.
 また [Hassin 1981] の結果から距離ラベルを用いることで実際に最大流を構築することも可能である. 
 ちなみに平面グラフ上の最短経路問題には線形アルゴリズムが知られているため, この問題は理論的には線形時間で解くことができる([Henzinger, Rao, Subramanian 1997]). <br>
-st-planar graph 上の最大流問題にういては別に Ford, Fulkerson によるアルゴリズムが前から知られている(Berge アルゴリズムとも呼ばれている).<br>
+st-planar graph 上の最大流問題にういては別に Ford, Fulkerson によるアルゴリズムが以前から知られている(Berge アルゴリズムとも呼ばれている).<br>
 <br>
 <img src="./augmenting_path.png" height="150" width="1000">
 <br>
