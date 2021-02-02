@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-131511873-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-131511873-1');
+</script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
+
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<link rel="shortcut icon" type="image/x-icon" href="../../favicon.ico">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>Constructing Dual Graph</h2>
+<h3>コードについての説明</h3>
+<p>
+平面グラフが与えられた場合に双対グラフを構築するアルゴリズム. <br>
+以下の実装で入力の平面グラフは $2$ 次元平面上の点とそれを結ぶ直線を用いて埋め込まれていることを仮定している
+(単純グラフを仮定した場合は Fary の定理より一般性を失っていないことに注意する).
+またグラフが連結であることも仮定している.
+</p>
+<p>
+(関数) <br>
+DualGraph($points$) : 頂点集合の座標を与える(コンストラクタ). <br>
+add_edge($u, v$) : 頂点 $u$, $v$ を結ぶ辺を加える.
+</p>
+<p>
+時間計算量: $\O(n \log n)$ (単純平面グラフの辺数は $\O (n)$ であるという事実を暗に用いている.)
+</p>
+<h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
+<pre class="prettyprint linenums">
+// 入力のグラフは連結であることを仮定
+// 平面グラフは 2 次元座標に埋め込んだ形で与える
+// 点が重なったり, 辺が交差したり, 辺が重なったりしないものとする.
+class DualGraph {
+private:
+    struct info {
+        int x, y, z;
+        info(const int _x, const int _y, const int _z) : x(_x), y(_y), z(_z){}
+        bool operator&lt;(const info&amp; s) const {
+            if((long long)y * s.y &lt;= 0){
+                if(y == 0 &amp;&amp; s.y == 0) return (x &gt;= 0 &amp;&amp; s.x &lt; 0);
+                if(y == 0 &amp;&amp; s.y &gt; 0) return (x &gt;= 0);
+                if(y &gt; 0 &amp;&amp; s.y == 0)  return (s.x &lt; 0);
+                return (y &lt; s.y);
+            }else if(((long long)x * s.x &lt;= 0)){
+                return (x == s.x) ? false : ((y &gt; 0) ? (x &gt; s.x) : (x &lt; s.x));
+            }else{
+                return ((long long)y * s.x &lt; (long long)x * s.y);
+            }
+        }
+    };
+    struct eda {
+        int to, rev, face;
+        eda(const int _to, const int _rev) : to(_to), rev(_rev), face(-1){}
+    };
+    int V;
+    vector&lt;vector&lt;info&gt; &gt; pos;
+    vector&lt;vector&lt;eda&gt; &gt; G;
+    vector&lt;pair&lt;int, int&gt; &gt; pts;
+    void sort_edges(){
+        for(int i = 0; i &lt; V; ++i) sort(pos[i].begin(), pos[i].end());
+        for(int i = 0; i &lt; V; ++i){
+            for(int j = 0; j &lt; (int)pos[i].size(); ++j){
+                const info&amp; e = pos[i][j];
+                const info arg(pts[i].first - pts[e.z].first, pts[i].second - pts[e.z].second, -1);
+                const int rev = (int)(lower_bound(pos[e.z].begin(), pos[e.z].end(), arg) - pos[e.z].begin());
+                G[i].emplace_back(e.z, rev);
+            }
+        }
+    }
+    void search_outside_face(){
+        int mxy = numeric_limits&lt;int&gt;::min(), mnx = numeric_limits&lt;int&gt;::max(), id = -1;
+        for(int i = 0; i &lt; V; ++i){
+            if(mxy &lt; pts[i].second){
+                mxy = pts[i].second, mnx = pts[i].first, id = i;
+            }else if(mxy == pts[i].second &amp;&amp; pts[i].first &lt; mnx){
+                mnx = pts[i].first, id = i;
+            }
+        }
+        search(G[id][0].to, G[id][0].rev, 0, {id, 0});
+    }
+    void search(int cur, int id, const int f, const pair&lt;int, int&gt;&amp; goal){
+        while(true){
+            id = (id &lt; (int)G[cur].size() - 1) ? (id + 1) : (0);
+            auto&amp; e = G[cur][id];
+            faces[e.face = f].push_back(cur);
+           if(cur == goal.first &amp;&amp; id == goal.second) break;
+           cur = e.to, id = e.rev;
+        }
+    }
+    void construct_dgraph(const int node_size){
+        DG.resize(node_size);
+        for(int i = 0; i &lt; V; ++i){
+            for(const eda&amp; e : G[i]){
+                DG[e.face].emplace_back(G[e.to][e.rev].face, make_pair(i, e.to));
+            }
+        }
+    }
+public:
+    // vector&lt;vector&lt;edge&gt; &gt; DG: 双対グラフ
+    // faces[u]: 双対グラフの頂点 u に対応する元のグラフの面(点集合は右回りにならぶ)
+    // faces[0] は外側の面に対応する(見た目上は左回りに並んでいるように見える).
+    struct edge {
+        int to;
+        // 元のグラフ上での対応する辺 e = (u, v) を格納
+        // 正確に u → v のベクトルの右側が from の面, 左側が to の面に対応する
+        pair&lt;int, int&gt; e;
+        edge(const int _to, const pair&lt;int, int&gt;&amp; _e) : to(_to), e(_e){}
+    };
+    vector&lt;vector&lt;edge&gt; &gt; DG;
+    vector&lt;vector&lt;int&gt; &gt; faces;
+    DualGraph(const vector&lt;pair&lt;int, int&gt; &gt;&amp; points)
+        : V((int)points.size()), pos(V), G(V), pts(points){}
+    void add_edge(const int u, const int v){
+        pos[u].emplace_back(pts[v].first - pts[u].first, pts[v].second - pts[u].second, v);
+        pos[v].emplace_back(pts[u].first - pts[v].first, pts[u].second - pts[v].second, u);
+    }
+    // 双対グラフの頂点数を返す.
+    int build(){
+        sort_edges();
+        faces.push_back(vector&lt;int&gt;());
+        search_outside_face();
+        int cnt = 1;
+        for(int i = 0; i &lt; V; ++i){
+            for(int j = 0; j &lt; (int)G[i].size(); ++j){
+                const eda&amp; e = G[i][j];
+                if(e.face &lt; 0){
+                    faces.push_back(vector&lt;int&gt;());
+                    search(e.to, e.rev, cnt++, {i, j});
+                }
+            }
+        }
+        construct_dgraph(cnt);
+        return cnt;
+    }
+};
+</pre>
+</div>
+<h3>verify 用の問題</h3>
+<p>
+verify していません(verify 問題を知らない)
+</p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>

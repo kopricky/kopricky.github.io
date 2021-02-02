@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-131511873-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-131511873-1');
+</script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
+
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<link rel="shortcut icon" type="image/x-icon" href="../../favicon.ico">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>Fully Retroactive Deque</h2>
+<h3>コードについての説明(<a href="fully_retroactive_deque_memo.html">個人的メモ</a>)</h3>
+<p>
+fully retroactive deque の実装である. fully retroactive とは過去のすべてのバージョンについて参照および更新ができるデータ構造である.
+完全永続のように聞こえるが, 完全永続は過去のバージョンを更新した際にその更新を行わなかった世界と更新を行う世界を同時に保持するが,
+fully retroactive の方は更新を行った場合の $1$ つの世界のみを保持するという違いがある(更新は不可逆操作となる).
+完全永続において更新は枝の分岐で表されるのに対して, fully retroactive において更新は過去の時刻での枝の挿入で表され, 常にバージョンは $1$ 本のパスをなす. <br>
+ちなみに partial retroactive は過去のすべてのバージョンの更新及び現在のバージョンの参照ができるデータ構造のことを言う.
+</p>
+<p>
+(関数)<br>
+size, front, back$(\_time)$ : 時刻 $\_ time$ におけるデックのサイズ, 先頭要素, 末尾要素を返す. <br>
+push_front, push_back$(value, \_time)$ : 時刻 $\_ time$ において要素 $value$ をデックの先頭(末尾)に追加する. <br>
+pop_front, pop_back$(\_time)$ : 時刻 $\_ time$ において要素をデックの先頭(末尾)から削除する. <br>
+query$(index, \_time)$ : 時刻 $\_ time$ におけるデックの $index$ 番目(0_indexed) の要素を返す.
+</p>
+<p>
+上記の各関数の時間計算量 : $\O(\log n)$ (厳密に以下の実装ではならし $\O(\log n)$)
+</p>
+<h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
+<pre class="prettyprint linenums">
+template&lt;typename _Tp&gt; class node {
+public:
+    const int key;
+    int val, sum, pmin, pmax;
+    _Tp data;
+    node *left, *right, *par;
+    node(const int _key, _Tp&amp;&amp; _data, int _val) noexcept
+         : key(_key), val(_val), sum(val), pmin(min(val, 0)), pmax(max(val, 0)),
+            data(move(_data)), left(nullptr), right(nullptr), par(nullptr){}
+    inline bool isRoot() const { return !par; }
+    void eval(){
+        sum = pmin = pmax = 0;
+        if(left) sum += left-&gt;sum, pmin = min(pmin, left-&gt;pmin), pmax = max(pmax, left-&gt;pmax);
+        sum += val, pmin = min(pmin, sum), pmax = max(pmax, sum);
+        if(right){
+            pmin = min(pmin, sum + right-&gt;pmin), pmax = max(pmax, sum + right-&gt;pmax);
+            sum += right-&gt;sum;
+        }
+    }
+    void rotate(bool right_){
+        node&lt;_Tp&gt; *p = par, *g = p-&gt;par;
+        if(right_){
+            if((p-&gt;left = right)) right-&gt;par = p;
+            right = p, p-&gt;par = this;
+        }else{
+            if((p-&gt;right = left)) left-&gt;par = p;
+            left = p, p-&gt;par = this;
+        }
+        p-&gt;eval(), eval();
+        if(!(par = g)) return;
+        if(g-&gt;left == p) g-&gt;left = this;
+        if(g-&gt;right == p) g-&gt;right = this;
+        g-&gt;eval();
+    }
+};
+
+template&lt;typename _Tp&gt;
+node&lt;_Tp&gt;* splay(node&lt;_Tp&gt;* u) noexcept {
+    if(!u) return nullptr;
+    while(!(u-&gt;isRoot())){
+        node&lt;_Tp&gt; *p = u-&gt;par, *gp = p-&gt;par;
+        if(p-&gt;isRoot()){
+            u-&gt;rotate((u == p-&gt;left));
+        }else{
+            bool flag = (u == p-&gt;left);
+            if((u == p-&gt;left) == (p == gp-&gt;left)){
+                p-&gt;rotate(flag), u-&gt;rotate(flag);
+            }else{
+                u-&gt;rotate(flag), u-&gt;rotate(!flag);
+            }
+        }
+    }
+    return u;
+}
+
+template&lt;typename _Tp&gt;
+pair&lt;node&lt;_Tp&gt;*, bool&gt; get(const int _key, node&lt;_Tp&gt;* root){
+    node&lt;_Tp&gt; *cur = nullptr, *nx = root, *res = nullptr;
+    while(nx){
+        cur = nx;
+        if(cur-&gt;key &lt;= _key) nx = cur-&gt;right, res = cur;
+        else nx = cur-&gt;left;
+    }
+    node&lt;_Tp&gt;* tmp = splay(cur);
+    return res ? make_pair(splay(res), true) : make_pair(tmp, false);
+}
+
+template&lt;typename _Tp&gt;
+node&lt;_Tp&gt;* insert(node&lt;_Tp&gt;* ver, node&lt;_Tp&gt;* root) noexcept {
+    if(!root) return ver;
+    node&lt;_Tp&gt; *cur = nullptr, *nx = root;
+    while(nx){
+        cur = nx;
+        if(cur-&gt;key &gt; ver-&gt;key) nx = cur-&gt;left;
+        else nx = cur-&gt;right;
+    }
+    if(cur-&gt;key &gt; ver-&gt;key) cur-&gt;left = ver, ver-&gt;par = cur;
+    else cur-&gt;right = ver, ver-&gt;par = cur;
+    cur-&gt;eval();
+    return splay(ver);
+}
+
+template&lt;typename _Tp&gt; class RetroactiveDeque {
+private:
+    node&lt;_Tp&gt; *lroot, *rroot;
+    int left_pos(const int _time){
+        pair&lt;node&lt;_Tp&gt;*, bool&gt; lres = get(_time, lroot);
+        lroot = lres.first;
+        int l = 0;
+        if(lres.second) l = (lroot-&gt;left ? lroot-&gt;left-&gt;sum : 0) + lroot-&gt;val;
+        return l;
+    }
+    int right_pos(const int _time){
+        pair&lt;node&lt;_Tp&gt;*, bool&gt; rres = get(_time, rroot);
+        rroot = rres.first;
+        int r = 0;
+        if(rres.second) r = (rroot-&gt;left ? rroot-&gt;left-&gt;sum : 0) + rroot-&gt;val;
+        return r;
+    }
+    template&lt;typename Data&gt;
+    void push_front_impl(Data&amp;&amp; data, const int _time){
+        _Tp new_data = forward&lt;Data&gt;(data);
+        node&lt;_Tp&gt; *new_node = new node&lt;_Tp&gt;(_time, move(new_data), 1);
+        lroot = insert(new_node, lroot);
+    }
+    void pop_front_impl(const int _time){
+        node&lt;_Tp&gt; *new_node = new node&lt;_Tp&gt;(_time, _Tp(), -1);
+        lroot = insert(new_node, lroot);
+    }
+    template&lt;typename Data&gt;
+    void push_back_impl(Data&amp;&amp; data, const int _time){
+        _Tp new_data = forward&lt;Data&gt;(data);
+        node&lt;_Tp&gt; *new_node = new node&lt;_Tp&gt;(_time, move(new_data), 1);
+        rroot = insert(new_node, rroot);
+    }
+    void pop_back_impl(const int _time){
+        node&lt;_Tp&gt; *new_node = new node&lt;_Tp&gt;(_time, _Tp(), -1);
+        rroot = insert(new_node, rroot);
+    }
+    pair&lt;node&lt;_Tp&gt;*, bool&gt; find(int index, node&lt;_Tp&gt;* root){
+        if(!root) return make_pair(nullptr, false);
+        node&lt;_Tp&gt; *cur = root, *nx = root-&gt;left, *res = nullptr;
+        if(!nx &amp;&amp; index == 0) return make_pair(root, true);
+        if(!nx || index &lt; nx-&gt;pmin || nx-&gt;pmax &lt; index) return make_pair(root, false);
+        while(nx){
+            cur = nx;
+            int cur_sum = (cur-&gt;left ? cur-&gt;left-&gt;sum : 0) + cur-&gt;val;
+            if(cur-&gt;right){
+                if(cur_sum + cur-&gt;right-&gt;pmin &lt;= index &amp;&amp; index &lt;= cur_sum + cur-&gt;right-&gt;pmax){
+                    nx = cur-&gt;right, index -= cur_sum;
+                    continue;
+                }
+            }
+            if(cur_sum == index){
+                res = cur;
+                break;
+            }else nx = cur-&gt;left;
+        }
+        node&lt;_Tp&gt; *tmp = splay(cur);
+        if(!res) return make_pair(tmp, true);
+        cur = splay(res), nx = cur-&gt;right;
+        while(nx) cur = nx, nx = cur-&gt;left;
+        return make_pair(splay(cur), true);
+    }
+    _Tp&amp; query_impl(int index, const int _time, bool back){
+        const int lpos = left_pos(_time), rpos = right_pos(_time);
+        assert(index &lt; lpos + rpos);
+        if(back) index = lpos + rpos - 1;
+        const int lid = lpos - index, rid = index + 1 - lpos;
+        pair&lt;node&lt;_Tp&gt;*, bool&gt; lres = find(lid - 1, lroot);
+        pair&lt;node&lt;_Tp&gt;*, bool&gt; rres = find(rid - 1, rroot);
+        lroot = lres.first, rroot = rres.first;
+        if(lres.second){
+            if(rres.second) return (lroot-&gt;key &lt; rroot-&gt;key) ? rroot-&gt;data : lroot-&gt;data;
+            else return lroot-&gt;data;
+        }else{
+            return rroot-&gt;data;
+        }
+    }
+public:
+    RetroactiveDeque() : lroot(nullptr), rroot(nullptr){}
+    size_t size(const int _time){ return left_pos(_time) + right_pos(_time); }
+    _Tp&amp; front(const int _time){ return query_impl(0, _time, false); }
+    _Tp&amp; back(const int _time){ return query_impl(0, _time, true); }
+    void push_front(const _Tp&amp; value, const int _time){ push_front_impl(value, _time); }
+    void push_front(_Tp&amp;&amp; value, const int _time){ push_front_impl(move(value), _time); }
+    void pop_front(const int _time){ pop_front_impl(_time); }
+    void push_back(const _Tp&amp; value, const int _time){ push_back_impl(value, _time); }
+    void push_back(_Tp&amp;&amp; value, const int _time){ push_back_impl(move(value), _time); }
+    void pop_back(const int _time){ pop_back_impl(_time); }
+    _Tp&amp; query(const size_t index, const int _time){ return query_impl(index, _time, false); }
+};
+</pre>
+</div>
+<h3>verify 用の問題</h3>
+<p>Codeforces : <a href="https://codeforces.com/gym/100451/problem/H">Polycarpus VS Dequeue</a>
+  <a href="https://codeforces.com/gym/100451/submission/98189516">提出コード</a></p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>

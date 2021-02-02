@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-131511873-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-131511873-1');
+</script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
+
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<link rel="shortcut icon" type="image/x-icon" href="../../favicon.ico">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>Maximum Flow Algorithm on st-Planar Graph</h2>
+<h3>コードについての説明(<a href="./maxflow_mincut_on_st-planar.memo.html">個人的メモ</a>)</h3>
+<p>
+st-planar graph 上の最大流問題を解くアルゴリズム. <br>
+ここで st-planar graph とは平面グラフで source $s$ および sink $t$ が同じ面上にあるようなグラフのことをいう.
+以下の実装では特に頂点 $s$, $t$ が外面上にあることを仮定している.
+外面上にない場合は例えば立体射影の逆で平面グラフを単位球面上に射影し,
+$s$, $t$ を含む面の内点が北極に来るように回転させたあと立体射影で戻してあげることで $s$, $t$ を含む面を外面にできる(実際は誤差などが乗るのでより良い方法があるかもしれない). <br>
+以下の実装で入力の平面グラフは $2$ 次元平面上の点とそれを結ぶ直線を用いて埋め込まれていることを仮定している(単純グラフを仮定した場合は Fary の定理より一般性を失っていないことに注意する).
+またグラフが連結であることを仮定している.<br>
+$s$, $t$ が同一面上にあるとは限らないような一般の平面グラフの場合に対しても効率的なアルゴリズムが知られている(<a href="http://www.cs.tau.ac.il/~haimk/adv-alg-2012/MaximumFlowPlanar.pdf">無向平面グラフの場合の参考スライド</a>).<br>
+元論文は "Maximum flow in (s, t) planar networks" [Hassin 1981].
+</p>
+<p>
+(関数) <br>
+MaxFlowMinCut_on_STPlanar($points$) : 頂点集合の座標を与える(コンストラクタ). <br>
+add_undirected_edge($u, v, cap1$) : 頂点 $u$, $v$ を結ぶ容量 $w (\ge 0)$ の辺を加える. <br>
+add_directed_edge($u, v, cap1, cap2=0$) : 頂点 $u$ から $v$ への容量 $cap1$ の辺および頂点 $v$ から $u$ への容量 $cap2$ の辺を加える. 
+</p>
+<p>
+時間計算量: $\O(n \log n)$ ((単純平面グラフの辺数が $\O (n)$ であるという事実を暗に用いている.)
+</p>
+<h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
+<pre class="prettyprint linenums">
+template&lt;typename T&gt; class MaxFlowMinCut_on_STPlanar {
+private:
+    struct info {
+        int x, y, z;
+        T cap;
+        info(const int _x, const int _y, const int _z, const T _cap)
+             : x(_x), y(_y), z(_z), cap(_cap){}
+        bool operator&lt;(const info&amp; s) const {
+            if((long long)y * s.y &lt;= 0){
+                if(y == 0 &amp;&amp; s.y == 0) return (x &gt;= 0 &amp;&amp; s.x &lt; 0);
+                if(y == 0 &amp;&amp; s.y &gt; 0) return (x &gt;= 0);
+                if(y &gt; 0 &amp;&amp; s.y == 0)  return (s.x &lt; 0);
+                return (y &lt; s.y);
+            }else if(((long long)x * s.x &lt;= 0)){
+                return (x == s.x) ? false : ((y &gt; 0) ? (x &gt; s.x) : (x &lt; s.x));
+            }else{
+                return ((long long)y * s.x &lt; (long long)x * s.y);
+            }
+        }
+    };
+    struct dual_edge {
+        int to;
+        T cost;
+        pair&lt;int, int&gt; memo;
+        dual_edge(const int _to, const T _cost, const pair&lt;int, int&gt;&amp; _memo)
+             : to(_to), cost(_cost), memo(_memo){}
+    };
+    int V;
+    vector&lt;vector&lt;info&gt; &gt; pos;
+    vector&lt;vector&lt;dual_edge&gt; &gt; DG;
+    vector&lt;pair&lt;int, int&gt; &gt; pts;
+    void sort_dual_edges(){
+        for(int i = 0; i &lt; V; ++i) sort(pos[i].begin(), pos[i].end());
+        for(int i = 0; i &lt; V; ++i){
+            for(int j = 0; j &lt; (int)pos[i].size(); ++j){
+                const info&amp; e = pos[i][j];
+                const info arg(pts[i].first - pts[e.z].first, pts[i].second - pts[e.z].second, -1, T());
+                const int rev = (int)(lower_bound(pos[e.z].begin(), pos[e.z].end(), arg) - pos[e.z].begin());
+                G[i].emplace_back(e.z, rev, e.cap);
+            }
+        }
+    }
+    void search_outside_face(const int s, const int t){
+        int mxy = numeric_limits&lt;int&gt;::min(), mnx = numeric_limits&lt;int&gt;::max(), id = -1;
+        for(int i = 0; i &lt; V; ++i){
+            if(mxy &lt; pts[i].second) mxy = pts[i].second, mnx = pts[i].first, id = i;
+            else if(mxy == pts[i].second &amp;&amp; pts[i].first &lt; mnx) mnx = pts[i].first, id = i;
+        }
+        pair&lt;int, int&gt; goal(id, 0);
+        int cur = G[id][0].to, index = G[id][0].rev;
+        while(cur != s){
+                index = (index &lt; (int)G[cur].size() - 1) ? (index + 1) : (0);
+            const auto&amp; e = G[cur][index];
+            goal = {cur, index}, cur = e.to, index = e.rev;
+        }
+        while(cur != t){
+                index = (index &lt; (int)G[cur].size() - 1) ? (index + 1) : (0);
+            auto&amp; e = G[cur][index];
+            e.face = 0, cur = e.to, index = e.rev;
+        }
+        search(cur, index, 1, goal);
+    }
+    void search(int cur, int id, const int f, const pair&lt;int, int&gt;&amp; goal){
+        while(true){
+            id = (id &lt; (int)G[cur].size() - 1) ? (id + 1) : (0);
+            auto&amp; e = G[cur][id];
+            e.face = f;
+            if(cur == goal.first &amp;&amp; id == goal.second) break;
+            cur = e.to, id = e.rev;
+        }
+    }
+    void construct_dgraph(const int node_size){
+        DG.resize(node_size);
+        for(int i = 0; i &lt; V; ++i){
+            for(int j = 0; j &lt; (int)G[i].size(); ++j){
+                const flow_edge&amp; e = G[i][j];
+                DG[e.face].emplace_back(G[e.to][e.rev].face, e.flow, make_pair(i, j));
+            }
+        }
+    }
+    pair&lt;T, vector&lt;pair&lt;int, int&gt; &gt; &gt; solve(vector&lt;T&gt;&amp; dist){
+        const int N = (int)DG.size();
+        vector&lt;array&lt;int, 3&gt; &gt; prev(N);
+        priority_queue&lt;pair&lt;T, int&gt;, vector&lt;pair&lt;T, int&gt; &gt;, greater&lt;pair&lt;T, int&gt; &gt; &gt; que;
+        dist[0] = 0, que.emplace(0, 0);
+        while(!que.empty()){
+            pair&lt;T, int&gt; p = que.top();
+            que.pop();
+            const int v = p.second;
+            if(dist[v] &lt; p.first) continue;
+            for(const auto&amp; e : DG[v]){
+                if(dist[e.to] &gt; dist[v] + e.cost){
+                    dist[e.to] = dist[v] + e.cost;
+                    prev[e.to][0] = v, prev[e.to][1] = (e.memo).first, prev[e.to][2] = (e.memo).second;
+                    que.emplace(dist[e.to], e.to);
+                }
+            }
+        }
+        vector&lt;pair&lt;int, int&gt; &gt; res;
+        for(int cur = 1; cur &gt; 0; cur = prev[cur][0]){
+            res.emplace_back(prev[cur][1], G[prev[cur][1]][prev[cur][2]].to);
+        }
+        return make_pair(dist[1], res);
+    }
+    void construct_flow_graph(vector&lt;T&gt;&amp; dist){
+            for(int i = 0; i &lt; (int)dist.size(); ++i){
+                for(const auto&amp; e : DG[i]){
+                    G[(e.memo).first][(e.memo).second].flow = max(dist[e.to] - dist[i], (T)0);
+            }
+        }
+    }
+
+public:
+    struct flow_edge {
+        // face:右側の面
+        int to, rev, face;
+        T flow;
+        flow_edge(const int _to, const int _rev, const T _flow)
+             : to(_to), rev(_rev), face(-1), flow(_flow){}
+    };
+
+    vector&lt;vector&lt;flow_edge&gt; &gt; G;
+
+    MaxFlowMinCut_on_STPlanar(const vector&lt;pair&lt;int, int&gt; &gt;&amp; points)
+        : V((int)points.size()), pos(V), pts(points), G(V){}
+    void add_undirected_edge(const int u, const int v, const T cap1){
+        pos[u].emplace_back(pts[v].first - pts[u].first, pts[v].second - pts[u].second, v, cap1);
+        pos[v].emplace_back(pts[u].first - pts[v].first, pts[u].second - pts[v].second, u, cap1);
+    }
+    void add_directed_edge(const int u, const int v, const T cap1, const T cap2){
+        pos[u].emplace_back(pts[v].first - pts[u].first, pts[v].second - pts[u].second, v, cap1);
+        pos[v].emplace_back(pts[u].first - pts[v].first, pts[u].second - pts[v].second, u, cap2);
+    }
+    // (最小カットのコスト, 最小カットを構成する辺集合)
+    // flow graph G を構築する場合はコメントアウトを外す
+    pair&lt;T, vector&lt;pair&lt;int, int&gt; &gt; &gt; minimum_cut(const int s, const int t){
+        sort_dual_edges();
+        search_outside_face(s, t);
+        int cnt = 2;
+        for(int i = 0; i &lt; V; ++i){
+            for(int j = 0; j &lt; (int)G[i].size(); ++j){
+                const flow_edge&amp; e = G[i][j];
+                if(e.face &lt; 0) search(e.to, e.rev, cnt++, {i, j});
+            }
+        }
+        construct_dgraph(cnt);
+        vector&lt;T&gt; dist(cnt, numeric_limits&lt;T&gt;::max());
+        const auto res = solve(dist);
+        // construct_flow_graph(dist);
+        return res;
+    }
+};
+</pre>
+</div>
+<h3>verify 用の問題</h3>
+<p>
+verify していません(verify 問題を知らない)
+</p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>

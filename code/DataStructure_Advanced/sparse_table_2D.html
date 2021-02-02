@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-131511873-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-131511873-1');
+</script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
+
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<link rel="shortcut icon" type="image/x-icon" href="../../favicon.ico">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>Sparse Table 2D</h2>
+<h3>コードについての説明</h3>
+<p>
+2 次元静的 RMQ(更新のない $2$ 次元矩形領域最小値クエリ) に $\O (1)$ で答えるデータ構造を $\O (n^2 \log^2 n)$ 時間で構築するアルゴリズム. <br>
+<a href= "../DataStructure_Basic/sparse_table.html">$1$ 次元の場合</a> を拡張し, 各座標 $(i, j)$ および $0 \le k, l \le \lfloor \log_2 n \rfloor$ について $(i, j)$, $(i + 2^k, j)$, $(i, j + 2^l)$, $(i + 2^k, j + 2^l)$ の
+$4$ 点からなる矩形領域内の最小値を前計算して保持しておくことで各矩形領域クエリを前計算した $4$ つの矩形領域の $\min$ として $\O (1)$ 時間で答えることが可能になる.
+</p>
+<p>
+(関数) <br>
+query$(lx, ly, rx, ry)$ : $[lx,rx) \times [ly,ry)$ で表される矩形領域の最小値を返す
+</p>
+<p>
+($n \times n$ 正方領域について) <br>
+時間計算量: 前処理 $\O(n^2 \log^2 n)$, クエリ $\O (1)$ <br>
+空間計算量: $\O(n^2 \log^2 n)$
+</p>
+<h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
+<pre class="prettyprint linenums">
+template&lt;typename T&gt; class SparseTable_2D {
+private:
+    const int R, C;
+    vector&lt;int&gt; LogTable;
+    T**** Table;
+public:
+    SparseTable_2D(const vector&lt;vector&lt;T&gt; &gt;&amp; v) : R((int)v.size()), C((int)v[0].size()), LogTable(max(R, C) + 1){
+        for(int i = 2; i &lt;= max(R, C); ++i){
+            LogTable[i] = LogTable[i &gt;&gt; 1] + 1;
+        }
+        Table = new T***[LogTable[R] + 1];
+        for(int k = 0; k &lt;= LogTable[R] ; ++k){
+            Table[k] = new T**[LogTable[C] + 1];
+            for(int l = 0; l &lt;= LogTable[C]; ++l){
+                Table[k][l] = new T*[R];
+                for(int i = 0; i &lt; R; ++i){
+                    Table[k][l][i] = new T[C];
+                }
+            }
+        }
+        for(int i = 0; i &lt; R; ++i){
+            for(int j = 0; j &lt; C; ++j){
+                Table[0][0][i][j] = v[i][j];
+            }
+        }
+        for(int k = 1; (1 &lt;&lt; k) &lt;= R; ++k){
+            for(int i = 0; i + (1 &lt;&lt; k) &lt;= R; ++i){
+                for(int j = 0; j &lt; C; ++j){
+                    Table[k][0][i][j] = min(Table[k - 1][0][i][j], Table[k - 1][0][i + (1 &lt;&lt; (k - 1))][j]);
+                }
+            }
+        }
+        for(int k = 0; (1 &lt;&lt; k) &lt;= R; ++k){
+            for(int l = 1; (1 &lt;&lt; l) &lt;= C; ++l){
+                for(int i = 0; i + (1 &lt;&lt; k) &lt;= R; ++i){
+                    for(int j = 0; j + (1 &lt;&lt; l) &lt;= C; ++j){
+                        Table[k][l][i][j] = min(Table[k][l - 1][i][j], Table[k][l - 1][i][j + (1 &lt;&lt; (l - 1))]);
+                    }
+                }
+            }
+        }
+    }
+    ~SparseTable_2D(){
+        for(int i = 0; i &lt;= LogTable[R]; ++i){
+            for(int j = 0; j &lt;= LogTable[C]; ++j){
+                for(int k = 0; k &lt; R; ++k){
+                    delete[] Table[i][j][k];
+                }
+                delete[] Table[i][j];
+            }
+            delete[] Table[i];
+        }
+        delete[] Table;
+    }
+    T query(const int lx, const int ly, const int rx, const int ry){
+        const int kx = LogTable[rx - lx];
+        const int ky = LogTable[ry - ly];
+        return min({Table[kx][ky][lx][ly], Table[kx][ky][rx - (1 &lt;&lt; kx)][ly], Table[kx][ky][lx][ry - (1 &lt;&lt; ky)], Table[kx][ky][rx - (1 &lt;&lt; kx)][ry - (1 &lt;&lt; ky)]});
+    }
+};
+</pre>
+</div>
+<h3>verify 用の問題</h3>
+<p>Codeforces : <a href="https://codeforces.com/problemset/problem/713/D">Animals and Puzzle</a>
+  <a href="https://codeforces.com/contest/713/submission/104573415">提出コード</a></p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>

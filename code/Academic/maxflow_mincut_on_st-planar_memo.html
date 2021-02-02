@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-131511873-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-131511873-1');
+</script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
+
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<link rel="shortcut icon" type="image/x-icon" href="../../favicon.ico">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>Maximum Flow Algorithm on st-Planar Graph</h2>
+<h3>個人的メモ</h3>
+<p>
+st-planar graph の最小 st-カット問題は双対グラフの最短経路問題として解くことができる(以下に無向グラフの場合を例に示す). <br>
+<br>
+<img src="./st-planar_graph.png" height="200" width="1000">
+<br>
+<br>
+上図で黒のグラフが元の st-planar graph, 青のグラフがその双対グラフ(+ $1$ 点) である.
+双対グラフの各辺のコストはそれと交差する元のグラフの辺のコストとする.
+このとき元のグラフの $(s, t)$-最小カットは $(s', t')$-最短経路に対応する.
+よって双対グラフを構築し, そのグラフ上で最短経路問題を解くことで $(s, t)$-最小カットを求めることができる.
+また [Hassin 1981] の結果から距離ラベルを用いることで実際に最大流を構築することも可能である. 
+ちなみに平面グラフ上の最短経路問題には線形アルゴリズムが知られているため, この問題は理論的には線形時間で解くことができる([Henzinger, Rao, Subramanian 1997]). <br>
+st-planar graph 上の最大流問題にういては別に Ford, Fulkerson によるアルゴリズムが前から知られている(Berge アルゴリズムとも呼ばれている).<br>
+<br>
+<img src="./augmenting_path.png" height="150" width="1000">
+<br>
+<br>
+例えば $s$ を上, $t$ を下にして上記のように st-planar graph を描画したとき現在飽和していない辺で最も左の辺を貪欲にたどって増加道を選ぶというものである.
+このようにして見つけた増加道に沿ってフローを流せるだけ流すと少なくとも $1$ つの辺が飽和し, 以降増加道が存在しなくなるまでこの操作を繰り返す.
+そして操作が終了したときに最大流が得られる. この増加道探索を動的木を使って高速化することで全体で $\O (m \log n)$ のアルゴリズムを設計することができる.<br>
+正当性の証明は [Ford, Fulkerson 1956] や [Itai, Shiloach 1979] など. 結局 
+"貪欲にたどって選ばれた増加道に沿って目一杯流したフローを含むような最大流が存在するかどうか"
+ということが問題になるがそのようなフローを流さない方が真にうれしい場合というのがグラフの辺が交差しないという条件の下ではありえないことが言える.
+<br>
+(余談) <br>
+例えば最近コドフォで見かけた問題として次の問題がある. <br>
+"$1$ 以上 $k$ 以下の数字 $n$ 個からなる数列 $a$ が与えられるので最長増加列の長さを $k$ 未満にするために削除すべき数字の最小個数を答えよ."  <br>
+この問題の想定解は $dp[i] =$ "$a_1, \dots, a_i$ を見たときに最長増加列の長さを $a_i$ 未満とするために削除すべき数字の最小個数"
+の動的計画法であったが上記の知識を用いると次のように別解法を与えることができる. <br>
+この問題は最小カット問題として定式化でき, ネットワークは平面的である.
+そこでネットワーク上で飽和していない辺で最も左の辺を貪欲にたどって増加道を選ぶという上記のアルゴリズムを考えてみる.
+するとこれは数列 $a$ を前から見てまだ使っていない $1$, $2$, $\dots$, $k$ を貪欲に取っていることに対応していることが分かる.
+よって前から貪欲に数字を選んでいって長さ $k$ の増加列が何個作れるかという問題になりこれは set などを使って簡単に解くことができる.
+このように一見自明ではない貪欲解法をアルゴリズムから導くことができる.
+</p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>
