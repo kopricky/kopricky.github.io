@@ -68,10 +68,10 @@ fully retroactive の方は更新を行った場合の $1$ つの世界のみを
 </p>
 <p>
 (関数)<br>
-size, front, back$(\_time)$ : 時刻 $\_ time$ におけるデックのサイズ, 先頭要素, 末尾要素を返す. <br>
+size, front, back$(\_time)$ : 時刻 $\_ time$ の直後におけるデックのサイズ, 先頭要素, 末尾要素を返す. <br>
 push_front, push_back$(value, \_time)$ : 時刻 $\_ time$ において要素 $value$ をデックの先頭(末尾)に追加する. <br>
 pop_front, pop_back$(\_time)$ : 時刻 $\_ time$ において要素をデックの先頭(末尾)から削除する. <br>
-query$(index, \_time)$ : 時刻 $\_ time$ におけるデックの $index$ 番目(0_indexed) の要素を返す.
+query$(index, \_time)$ : 時刻 $\_ time$ の直後におけるデックの $index$ 番目(0_indexed) の要素を返す.
 </p>
 <p>
 上記の各関数の時間計算量 : $\O(\log n)$ (厳密に以下の実装ではならし $\O(\log n)$)
