@@ -250,12 +250,211 @@ public:
 };
 </pre>
 </div>
+<h3>コード(部分木クエリを備えたパス加算総和)</h3>
+<div class="codebox">
+<input type="checkbox" id="label2" class="csscode" />
+<label for="label2"></label>
+<pre class="prettyprint linenums">
+template&lt;typename T&gt; class LinkCutTree {
+public:
+    struct node {
+        int sz, sub1, sub2;
+        T val, al, lazy, sum1, sum2;
+        node *left, *right, *par;
+        bool rev;
+        node(const T _val) : sz(1), sub1(1), sub2(0), val(_val), al(_val), lazy(0), sum1(_val), sum2(0),
+            left(nullptr), right(nullptr), par(nullptr), rev(false){}
+        bool isRoot() const {
+            return (!par) || (par-&gt;left != this &amp;&amp; par-&gt;right != this);
+        }
+        void push(){
+            if(lazy != 0){
+                val += lazy, al += lazy * sz;
+                if(left) left-&gt;lazy += lazy;
+                if(right) right-&gt;lazy += lazy;
+                lazy = 0;
+            }
+            if(!rev) return;
+            swap(left, right);
+            if(left) left-&gt;rev = !(left-&gt;rev);
+            if(right) right-&gt;rev = !(right-&gt;rev);
+            rev = false;
+        }
+        void eval(){
+            sz = 1, sub1 = sub2 + 1, al = val, sum1 = sum2 + val;
+            if(left) left-&gt;push(), sz += left-&gt;sz, sub1 += left-&gt;sub1, al += left-&gt;al, sum1 += left-&gt;sum1;
+            if(right) right-&gt;push(), sz += right-&gt;sz, sub1 += right-&gt;sub1, al += right-&gt;al, sum1 += right-&gt;sum1;
+        }
+    };
+
+private:
+    // 回転
+    void rotate(node* u, bool right){
+        node *p = u-&gt;par, *g = p-&gt;par;
+        if(right){
+            if((p-&gt;left = u-&gt;right)) u-&gt;right-&gt;par = p;
+            u-&gt;right = p, p-&gt;par = u;
+        }else{
+            if((p-&gt;right = u-&gt;left)) u-&gt;left-&gt;par = p;
+            u-&gt;left = p, p-&gt;par = u;
+        }
+        p-&gt;eval(), u-&gt;eval(), u-&gt;par = g;
+        if(!g) return;
+        if(g-&gt;left == p) g-&gt;left = u;
+        if(g-&gt;right == p) g-&gt;right = u;
+        g-&gt;eval();
+    }
+    // u を splay 木の根にする
+    void splay(node* u){
+        while(!(u-&gt;isRoot())){
+            node *p = u-&gt;par, *gp = p-&gt;par;
+            if(p-&gt;isRoot()){ // zig
+                p-&gt;push(), u-&gt;push();
+                rotate(u, (u == p-&gt;left));
+            }else{
+                gp-&gt;push(), p-&gt;push(), u-&gt;push();
+                bool flag = (u == p-&gt;left);
+                if((u == p-&gt;left) == (p == gp-&gt;left)){ // zig-zig
+                    rotate(p, flag), rotate(u, flag);
+                }else{ // zig-zag
+                    rotate(u, flag), rotate(u, !flag);
+                }
+            }
+        }
+        u-&gt;push();
+    }
+    node* access(node* u){
+        node* last = nullptr;
+        for(node* v = u; v; v = v-&gt;par){
+            splay(v);
+            if(v-&gt;right) v-&gt;sub2 += v-&gt;right-&gt;sub1, v-&gt;sum2 += v-&gt;right-&gt;sum1;
+            v-&gt;right = last;
+            if(v-&gt;right) v-&gt;sub2 -= v-&gt;right-&gt;sub1, v-&gt;sum2 -= v-&gt;right-&gt;sum1;
+            v-&gt;eval();
+            last = v;
+        }
+        splay(u);
+        return last;
+    }
+    bool connected(node* u, node* v){
+        access(u), access(v);
+        return u == v || u-&gt;par;
+    }
+    void link(node* u, node* v){
+        evert(u), access(v);
+        u-&gt;par = v, v-&gt;sub2 += u-&gt;sub1, v-&gt;sum2 += u-&gt;sum1;
+    }
+    void cut(node* u){
+        access(u);
+        u-&gt;left-&gt;par = nullptr, u-&gt;left = nullptr, u-&gt;eval();
+    }
+    void cut(node* u, node* v){
+        access(u), access(v);
+        if(u-&gt;isRoot()) v-&gt;sub2 -= u-&gt;sub1, v-&gt;sum2 -= u-&gt;sum1, u-&gt;par = nullptr;
+        else v-&gt;left-&gt;par = nullptr, v-&gt;left = nullptr, v-&gt;eval();
+    }
+    node* lca(node* u, node* v){
+        access(u);
+        return access(v);
+    }
+    void evert(node* u){
+        access(u);
+        u-&gt;rev = !(u-&gt;rev), u-&gt;push();
+    }
+    int depth(node* u){
+        access(u);
+        return u-&gt;sz - 1;
+    }
+    void toRoot_range(node* u, const T x){
+        access(u);
+        u-&gt;lazy += x, u-&gt;push();
+    }
+    T toRoot_query(node* u){
+        access(u);
+        return u-&gt;al;
+    }
+    void range(node* u, node* v, const T x){
+        evert(u), access(v);
+        v-&gt;lazy += x, v-&gt;push();
+    }
+    T query(node* u, node* v){
+        evert(u), access(v);
+        return v-&gt;al;
+    }
+    int component_size(node* u){
+        evert(u);
+        return u-&gt;sub1;
+    }
+    int subtree_size(node* u){
+        access(u);
+        return u-&gt;sub2 + 1;
+    }
+    T component_query(node* u){
+        evert(u);
+        return u-&gt;sum1;
+    }
+    T subtree_query(node* u){
+        access(u);
+        return u-&gt;sum2 + u-&gt;val;
+    }
+
+public:
+    const int V;
+    node** arr;
+    LinkCutTree(const vector&lt;T&gt;&amp; init_node_value)
+     : V((int)init_node_value.size()){
+        arr = new node*[V];
+        for(int i = 0; i &lt; V; ++i){
+            arr[i] = new node(init_node_value[i]);
+        }
+    }
+    // ~LinkCutTree(){
+    //     for(int i = 0; i &lt; V; ++i){
+    //         delete arr[i];
+    //     }
+    //     delete[] arr;
+    // }
+    // id1 と id2 が同じ木(連結成分)に属するか
+    bool connected(int id1, int id2){ return connected(arr[id1], arr[id2]); }
+    // id1 を id2 の non-preferred edge にする
+    void link(int id1, int id2){ return link(arr[id1], arr[id2]); }
+    // id とその親の間の辺を削除する
+    void cut(int id){ return cut(arr[id]); }
+    // id と id2 の間の辺を削除する
+    void cut(int id1, int id2){ return cut(arr[id1], arr[id2]); }
+    // id1 と id2 の LCA を求める
+    int lca(int id1, int id2){ return static_cast&lt;size_t&gt;(lca(arr[id1], arr[id2]) - arr[0]); }
+    // 元の木の根を id にする
+    void evert(int id){ return evert(arr[id]); }
+    // id の深さを求める
+    int depth(int id){ return depth(arr[id]); }
+    // id から根までの間にある頂点すべてに x を足す
+    void toRoot_range(int id, const T x){ return toRoot_range(arr[id], x); }
+    // id から根までの間にある頂点すべてのコストの総和を求める
+    T toRoot_query(int id){ return toRoot_query(arr[id]); }
+    // id1 と id2 の間にある頂点すべてに x を足す
+    void range(int id1, int id2, const T x){ return range(arr[id1], arr[id2], x); }
+    // id1 と id2 の間にある頂点すべてのコストの総和を求める
+    T query(int id1, int id2){ return query(arr[id1], arr[id2]); }
+    // id の属する連結成分のサイズを返す
+    int component_size(int id){ return component_size(arr[id]); }
+    // id を根とする部分木のサイズを返す
+    int subtree_size(int id){ return subtree_size(arr[id]); }
+    // id の属する連結成分内のコストの総和を返す
+    T component_query(int id){ return component_query(arr[id]); }
+    // id を根とする部分木内のコストの総和を返す
+    T subtree_query(int id){ return subtree_query(arr[id]); }
+};
+</pre>
+</div>
 <h3>verify 用の問題</h3>
 <p>
 Atcoder : <a href="https://beta.atcoder.jp/contests/njpc2017/tasks/njpc2017_h">白黒ツリー</a>
   <a href="https://atcoder.jp/contests/njpc2017/submissions/4644290">提出コード</a><br>
 yukicoder : <a href="https://yukicoder.me/problems/no/399">動的な領主</a>
-  <a href="https://yukicoder.me/submissions/326667">提出コード</a>
+  <a href="https://yukicoder.me/submissions/326667">提出コード</a><br>
+yosupo さんの library checker : <a href="https://judge.yosupo.jp/problem/dynamic_tree_vertex_add_subtree_sum">Dynamic Tree Vertex Add Subtree Sum</a>
+  <a href="https://judge.yosupo.jp/submission/37883">提出コード</a>
 </p>
 </section>
 
