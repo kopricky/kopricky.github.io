@@ -367,8 +367,7 @@ public:
             return query((it-&gt;second).first, (it-&gt;second).second);
         }
     }
-
-private:
+    // DEBUG 用
     void check_dfs(const BSTNode&lt;T&gt;* cur) const noexcept {
         cur-&gt;push();
         if(cur-&gt;left) check_dfs(cur-&gt;left);
@@ -977,8 +976,7 @@ public:
             return query(((*it).second).first, ((*it).second).second);
         }
     }
-
-private:
+    // DEBUG 用
     void check_dfs(const BSTNode&lt;T&gt;* cur) const noexcept {
         cur-&gt;push();
         if(cur-&gt;left) check_dfs(cur-&gt;left);
