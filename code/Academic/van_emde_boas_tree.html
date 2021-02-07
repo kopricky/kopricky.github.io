@@ -78,7 +78,7 @@ $2$ つ目のコードは競プロなどでよくある $10^9$ 以下の非負�
 vanEmdeBoasTree(const uint32_t $U$) : $[0, U)$ の数を管理する順序付き集合を構築
 </p>
 <p>
-時間計算量: insert, erase, predecessor, successor $\O (\log \log U)$ ($U$ は値の上限)<br>
+時間計算量: insert, erase(値が存在することを仮定), predecessor, successor $\O (\log \log U)$ ($U$ は値の上限)<br>
 predecessor / successor クエリについては返すべき要素が存在しない場合はそれぞれ -1 および $U$ を返す.
 </p>
 <h3>コード(愚直版)</h3>
@@ -329,8 +329,7 @@ public:
 class vanEmdeBoasTree
 {
 private:
-    static const uint32_t LENGTH = 1073741824;
-    uint32_t _size;
+    uint32_t  _size;
     #define msb(u) (63 - __builtin_clzll(u))
     #define lsb(u) (__builtin_ctzll(u))
     struct first_layer;
@@ -392,13 +391,16 @@ private:
                 return true;
             }
         }
-        void erase(int32_t value) noexcept {
-            if(_max == _min){
-                _max = -1, _min = 1073741824;
-                return;
-            }else if(value == _min){
+        size_t erase(int32_t value) noexcept {
+            if(value == _min){
+                if(_max == _min){
+                    _max = -1, _min = 1073741824;
+                    return 1;
+                }
                 const int32_t id = summary-&gt;min();
-                 _min = value = (id &lt;&lt; 6) + lsb(data[id]);
+                _min = value = (id &lt;&lt; 6) + lsb(data[id]);
+            }else if(!((data[value &gt;&gt; 6] &gt;&gt; (value &amp; 63)) &amp; 1ULL)){
+                return 0;
             }
             const int32_t id = (value &gt;&gt; 6);
             data[id] ^= (1ULL &lt;&lt; (value &amp; 63));
@@ -410,6 +412,7 @@ private:
                     _max = (id &lt;&lt; 6) + msb(data[id]);
                 }
             }
+            return 1;
         }
         int32_t predecessor(const int32_t value) const noexcept {
             if(_min &gt;= value) return -1;
@@ -598,6 +601,7 @@ private:
     };
     first_layer base_layer;
 public:
+    static const uint32_t  LENGTH = 1073741824;
     vanEmdeBoasTree() : _size(0), base_layer(){}
     vanEmdeBoasTree(const vanEmdeBoasTree&amp;) = default;
     vanEmdeBoasTree(vanEmdeBoasTree&amp;&amp;) = default;
@@ -609,24 +613,26 @@ public:
         return os;
     }
     bool empty() const noexcept { return (_size == 0); }
-    uint32_t size() const noexcept { return _size; }
-    uint32_t max_size() const noexcept { return LENGTH; }
+    uint32_t  size() const noexcept { return _size; }
+    uint32_t  max_size() const noexcept { return LENGTH; }
     bool find(const uint32_t value) const noexcept {
         if(value &gt;= LENGTH) return false;
         return base_layer.find(value);
     }
-    uint32_t count(const uint32_t value) const noexcept {
+    uint32_t  count(const uint32_t value) const noexcept {
         return find(value);
     }
     int32_t max() const noexcept { return base_layer.max(); }
     int32_t min() const noexcept { return base_layer.min(); }
-    void insert(const uint32_t value){
+    bool insert(const uint32_t value){
         assert(value &lt; LENGTH);
-        _size += base_layer.insert(value);
+        bool res = base_layer.insert(value);
+        return _size += res, res;
     }
-    void erase(const uint32_t value){
+    size_t erase(const uint32_t value){
         assert(value &lt; LENGTH);
-        base_layer.erase(value), --_size;
+        size_t res = base_layer.erase(value);
+        return _size -= res, res;
     }
     int32_t predecessor(const int32_t value) const noexcept {
         return base_layer.predecessor(value);
