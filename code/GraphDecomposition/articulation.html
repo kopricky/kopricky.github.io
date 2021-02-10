@@ -57,7 +57,7 @@ $\newcommand{\O}{\mathrm{O}}$
 <div id="contents">
 
 <section>
-<h2>Articulation Node Find Algorithm</h2>
+<h2>Articulation Node Find Algorithm(Constructing Block Cut Tree)</h2>
 <h3>コードについての説明</h3>
 <p>
 関節点を求めるアルゴリズム. 加えて block cut tree の構築(二重頂点連結成分分解) も行う.<br>
@@ -65,8 +65,16 @@ $\newcommand{\O}{\mathrm{O}}$
 割ととっつきにくい概念だと思うので<a href="http://kagamiz.hatenablog.com/entry/2013/10/05/005213">この記事</a>や<a href="https://www.slideshare.net/chokudai/arc045">このスライド</a>を見るとわかりやすいかもしれない. <br>
 発展として lowpt1(高々1個の後退辺を通ってたどり着けるノードの行きがけ順の最小値)だけでなく, lowpt2(高々1個の後退辺を通ってたどり着けるノードの行きがけ順の2番目の値) も合わせて計算しておくことで
 3(点)連結成分のようなものを求めることができ, この考えが Hopcroft, Tarjan の線形時間でのグラフの平面性判定アルゴリズム("Efficient Planarity Testing" [Hopcroft, Tarjan 1974]) に用いられている.<br>
-(追記) <br>
-スタック領域をかなり食っているっぽくグラフのサイズが大きいと stack overflow に注意が必要.
+(補足) <br>
+(block cut tree の特徴) <br>
+(1) cut node はグラフの関節点と対応する. <br>
+(2) block node はグラフの $2$ 点連結成分と対応する($1$ 本の辺のみからなるグラフを $2$ 点連結と考えた場合). <br>
+(3) 各辺はちょうど $1$ つの block node に含まれる. <br>
+(4) block cut tree の辺の両端点は片方が block node $b$, もう片方が cut node $c$ であり, その cut node $c$ は block node $b$ に対応する $2$ 点連結成分に含まれる. <br>
+(5) 元のグラフにおける次数 $1$ の頂点は関節点ではないため対応する cut node は存在しない. そのため block cut tree の葉はすべて block node である. <br>
+(block cut tree の例) <br>
+左が元のグラフで右がその block cut tree である.<br>
+<img src="./bctree.png" height="150" width="1000">
 </p>
 <p>
 (関数)<br>
@@ -74,7 +82,7 @@ add_edge$(u, v)$: $u, v$ の間に無向辺を追加する <br>
 solve(): 関節点を求めて($art$ に true/false が入る), さらに block cut tree(forest) の構築を行いそのサイズを返す. <br>
 具体的に bctree が block cut tree の隣接リスト表現, bcnodes がその頂点集合で bcnode 型は isBlock(各頂点が block か cut か) と
 component(block なら辺集合, cut ならサイズ 1 で要素は {関節点のインデックス, 関節点のインデックス}) から成る(いずれも元のグラフ上でのインデックス).<br>
-ここでは 1 頂点 0 辺からなる連結成分は block node でも cut node でもないと考えています.
+ここでは 1 頂点 0 辺からなる連結成分は block node でも cut node でもないと考える.
 </p>
 <p>
 時間計算量: $\O (n+m)$
@@ -191,10 +199,10 @@ public:
 </pre>
 </div>
 <h3>verify 用の問題</h3>
-<p>Codeforces : <a href="https://codeforces.com/contest/962/problem/F">Simple Cycles Edges</a>
-  <a href="https://codeforces.com/contest/962/submission/71371701">提出コード</a>(あまり本質的な verify にはなっていない気もする)<br>
+<p>Codeforces : <a href="https://codeforces.com/contest/487/problem/E">Tourists</a>
+  <a href="https://codeforces.com/contest/487/submission/107061754">提出コード</a><br>
   yukicoder : <a href="https://yukicoder.me/problems/no/1326">ふたりのDominator</a>
-    <a href="https://yukicoder.me/submissions/596715">提出コード</a>    
+    <a href="https://yukicoder.me/submissions/596715">提出コード</a>
 </p>
 </section>
 
