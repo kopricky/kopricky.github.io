@@ -82,17 +82,13 @@ minimum_vertex_cover(): (solve() を呼び出した後に呼び出すことで)�
 <input type="checkbox" id="label" class="csscode" />
 <label for="label"></label>
 <pre class="prettyprint linenums">
-//二部グラフの頂点数がそれぞれn,m
-//BM bm(n,m);
-//適宜add_edge(２つの集合間のedgeのみaddする)
-//BM.solve() で最大マッチングの数を計算
 class BM {
 private:
     const int U, V;
     vector&lt;vector&lt;int&gt; &gt; G;
     vector&lt;int&gt; level, que, prv, rasg;
     int bfs(){
-        int last = -1, dist = numeric_limits&lt;int&gt;::max();
+        int last = -1;
         fill(level.begin(), level.end(), -1);
         int qh = 0, qt = 0;
         for(int i = 0; i &lt; U; ++i){
@@ -103,7 +99,7 @@ private:
             if(u &gt;= U){
                 const int v = rasg[u - U];
                 if(v &gt;= 0) level[v] = level[u] + 1, que[qt++] = v, prv[v] = u;
-                else if(dist &gt; level[u]) dist = level[u], last = u;
+                else last = u;
             }else{
                 for(const int v : G[u]){
                     if(level[v] &lt; 0) level[v] = level[u] + 1, que[qt++] = v, prv[v] = u;
@@ -174,7 +170,7 @@ public:
 </div>
 <h3>verify 用の問題</h3>
 <p>yosupo さんの Library-Checker : <a href="https://judge.yosupo.jp/problem/bipartitematching">Matching on Bipartite Graph</a>
-  <a href="https://judge.yosupo.jp/submission/38610">提出コード</a></p>
+  <a href="https://judge.yosupo.jp/submission/17282">提出コード</a></p>
 </section>
 
 </div>
