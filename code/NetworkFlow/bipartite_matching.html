@@ -84,11 +84,11 @@ minimum_vertex_cover(): (solve() を呼び出した後に呼び出すことで)�
 <pre class="prettyprint linenums">
 class BM {
 private:
-    const int U, V;
+    int U, V;
     vector&lt;vector&lt;int&gt; &gt; G;
     vector&lt;int&gt; level, que, prv, rasg;
-    int bfs(){
-        int last = -1;
+    pair&lt;int, int&gt; bfs(){
+        int last = -1, dist = numeric_limits&lt;int&gt;::max();
         fill(level.begin(), level.end(), -1);
         int qh = 0, qt = 0;
         for(int i = 0; i &lt; U; ++i){
@@ -99,25 +99,26 @@ private:
             if(u &gt;= U){
                 const int v = rasg[u - U];
                 if(v &gt;= 0) level[v] = level[u] + 1, que[qt++] = v, prv[v] = u;
-                else last = u;
+                else if(dist &gt; level[u]) dist = level[u], last = u;
             }else{
                 for(const int v : G[u]){
                     if(level[v] &lt; 0) level[v] = level[u] + 1, que[qt++] = v, prv[v] = u;
                 }
             }
         }
-        return last;
+        return {last, dist};
     }
-    bool dfs(const int u){
+    bool dfs(const int u, const int dist){
         const int tmp = level[u];
         level[u] = -1;
+        if(tmp &gt; dist) return false;
         if(u &gt;= U){
             if(rasg[u - U] &lt; 0) return true;
-            else return dfs(rasg[u - U]);
+            else return dfs(rasg[u - U], dist);
         }else{
             for(const int v : G[u]){
                 if(tmp &lt; level[v]){
-                    if(dfs(v)){
+                    if(dfs(v, dist)){
                         asg[u] = v - U, rasg[v - U] = u;
                         return true;
                     }
@@ -145,11 +146,11 @@ public:
     int solve(){
         int flow = 0;
         for(;;){
-            const int cur = bfs();
-            if(cur &lt; 0) break;
-            hint_search(cur, flow);
+            const pair&lt;int, int&gt; p = bfs();
+            if(p.first &lt; 0) break;
+            hint_search(p.first, flow);
             for(int i = 0; i &lt; U; ++i){
-                if(asg[i] &lt; 0) flow += dfs(i);
+                if(asg[i] &lt; 0) flow += dfs(i, p.second);
             }
         }
         return flow;
@@ -170,7 +171,7 @@ public:
 </div>
 <h3>verify 用の問題</h3>
 <p>yosupo さんの Library-Checker : <a href="https://judge.yosupo.jp/problem/bipartitematching">Matching on Bipartite Graph</a>
-  <a href="https://judge.yosupo.jp/submission/17282">提出コード</a></p>
+  <a href="https://judge.yosupo.jp/submission/38634">提出コード</a></p>
 </section>
 
 </div>
