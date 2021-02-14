@@ -64,7 +64,12 @@ $\newcommand{\O}{\mathrm{O}}$
 このとき最大いくつの仕事を行うことができるか？ というような問題をこのアルゴリズムを用いて高速に解くことができます. <br>
 人と仕事に対応する $n + m$ 個の頂点と仕事ができるできないに対応する 人 → 仕事 の有向辺からなる二部グラフを考える. ここで超頂点 $s,t$ を source と sink として $s$ → 人, 仕事 → $t$ の辺を先ほどの二部グラフに加えた有向グラフ上で
 $s$ → $t$ の最大流問題を解く. このときの答えが問題の答えと一致している. <br>
-最大流の計算に <a href="../NetworkFlow/dinic.html">Dinic 法</a> を用いると時間計算量は普通に考えると $\O (n^2 m)$ であるがこの問題に対しては $\O(m \sqrt{n})$ と高速に動作することが分かっている.
+最大流の計算に <a href="../NetworkFlow/dinic.html">Dinic 法</a> を用いると時間計算量は普通に考えると $\O (n^2 m)$ であるがこの問題に対しては $\O(m \sqrt{n})$ と高速に動作することが分かっている. <br>
+(注) <br>
+以下の実装で $t$ に向かう辺のみは level の下がる向きに進んでおり厳密には最短とは限らない増加道を通って更新をしているがそのような辺が
+saturated した後にできる逆辺はそれ以降の $s$ -> $t$ 増加道に関与しないため "増加道がフェーズごとに狭義単調増加すること"
+および
+"同じフェーズで saturated されてできた逆辺を通る最短の増加道は存在しないこと" が保たれ正当である.
 </p>
 <p>
 (コンストラクタ) <br>
@@ -84,11 +89,11 @@ minimum_vertex_cover(): (solve() を呼び出した後に呼び出すことで)�
 <pre class="prettyprint linenums">
 class BM {
 private:
-    int U, V;
+    const int U, V;
     vector&lt;vector&lt;int&gt; &gt; G;
     vector&lt;int&gt; level, que, prv, rasg;
-    pair&lt;int, int&gt; bfs(){
-        int last = -1, dist = numeric_limits&lt;int&gt;::max();
+    int bfs(){
+        int last = -1;
         fill(level.begin(), level.end(), -1);
         int qh = 0, qt = 0;
         for(int i = 0; i &lt; U; ++i){
@@ -99,26 +104,25 @@ private:
             if(u &gt;= U){
                 const int v = rasg[u - U];
                 if(v &gt;= 0) level[v] = level[u] + 1, que[qt++] = v, prv[v] = u;
-                else if(dist &gt; level[u]) dist = level[u], last = u;
+                else last = u;
             }else{
                 for(const int v : G[u]){
                     if(level[v] &lt; 0) level[v] = level[u] + 1, que[qt++] = v, prv[v] = u;
                 }
             }
         }
-        return {last, dist};
+        return last;
     }
-    bool dfs(const int u, const int dist){
+    bool dfs(const int u){
         const int tmp = level[u];
         level[u] = -1;
-        if(tmp &gt; dist) return false;
         if(u &gt;= U){
             if(rasg[u - U] &lt; 0) return true;
-            else return dfs(rasg[u - U], dist);
+            else return dfs(rasg[u - U]);
         }else{
             for(const int v : G[u]){
                 if(tmp &lt; level[v]){
-                    if(dfs(v, dist)){
+                    if(dfs(v)){
                         asg[u] = v - U, rasg[v - U] = u;
                         return true;
                     }
@@ -146,11 +150,11 @@ public:
     int solve(){
         int flow = 0;
         for(;;){
-            const pair&lt;int, int&gt; p = bfs();
-            if(p.first &lt; 0) break;
-            hint_search(p.first, flow);
+            const int cur = bfs();
+            if(cur &lt; 0) break;
+            hint_search(cur, flow);
             for(int i = 0; i &lt; U; ++i){
-                if(asg[i] &lt; 0) flow += dfs(i, p.second);
+                if(asg[i] &lt; 0) flow += dfs(i);
             }
         }
         return flow;
@@ -171,7 +175,7 @@ public:
 </div>
 <h3>verify 用の問題</h3>
 <p>yosupo さんの Library-Checker : <a href="https://judge.yosupo.jp/problem/bipartitematching">Matching on Bipartite Graph</a>
-  <a href="https://judge.yosupo.jp/submission/38634">提出コード</a></p>
+  <a href="https://judge.yosupo.jp/submission/17282">提出コード</a></p>
 </section>
 
 </div>
