@@ -60,7 +60,7 @@ $\newcommand{\O}{\mathrm{O}}$
 <h2>Bit Vector</h2>
 <h3>個人的メモ</h3>
 <p>
-ここでいう bit vector とは長さ $n$ のビット列を簡潔($n + o(n)$ ビット) にかつ rank($i$ ビット以下に $1$ がいくつあるか) select($i$ 番目の $1$ は何 ビット目にあるか) を高速に処理することのできるデータ構造のことである.<br>
+ここでいう bit vector とは長さ $n$ のビット列を簡潔(空間計算量 $n + o(n)$ ビット) にかつ rank($i$ ビット以下に $1$ がいくつあるか) select($i$ 番目の $1$ は何 ビット目にあるか) を高速に処理することのできるデータ構造のことである.<br>
 <a href="https://researchmap.jp/mujkz01di-1587/?action=multidatabase_action_main_filedownload&download_flag=1&upload_id=157005&metadata_id=993">このスライド</a> を参考に理論自体は理解できたが, 実装を行う上でいくつかの問題が生じた. <br>
 rank はある程度省メモリで $\O (1)$ time で処理できるが select の方で少々問題が生じる. select では全体を $\lceil \log^2 n \rceil$ 個の $1$ を持つ block に分ける. このとき block のサイズが $\log^c n$ ($c$ はある定数) 以下の小さいものについては $\sqrt {\log n}$ 分木を構築して効率よく処理する. <br>
 この際に木の親から子へ $\O (1)$ でたどれるようにするために表引きを持っておく必要があり, 木のすべての子についての情報は $\sqrt{\log n} \times 2 \log \log n = \O (\log n)$ bit で表される(子の数 $\times$ $\log$ ($1$ の数)) から $2^{\sqrt {\log n} \times 2 \log \log n} = \O (n(\log \log n / \log n))$ bit で表引きが持てると書かれている.<br>
