@@ -61,7 +61,7 @@ $\newcommand{\O}{\mathrm{O}}$
 <h3>コードについての説明</h3>
 <p>
 高速 Walsh-Hadamrd 変換. 高速フーリエ変換の亜種で FFT が $c[k] = \underset{i+j=k}{\mathrm{sum}} a[i] \times b[j]$ を満たす $c$ を求めるのに対し,
-$c[k] = \underset{i \oplus j=k}{\mathrm{sum}} a[i] \times b[j]$ を満たす $c$ を求める(xor-convolution). <br>
+$c[k] = \underset{i \oplus j=k}{\mathrm{sum}} a[i] \times b[j]$ を満たす $c$ を求めるアルゴリズム(xor-convolution). <br>
 xor 以外にも係数行列を少し変えれば and, or についても求めることが可能である. <br>
 </p>
 <p>
@@ -172,9 +172,12 @@ vector&lt;int&gt; mul(vector&lt;int&gt; a, vector&lt;int&gt; b){
 </pre>
 </div>
 <h3>verify 用の問題</h3>
-<p>xor-convolution のみ verify <br>
-CSAcademy : <a href="https://csacademy.com/contest/archive/task/random_nim_generator/">Random Nim Generator</a>
-  <a href="https://csacademy.com/submission/86563/">提出コード</a></p>
+<p>
+yosupo さんの library checker : <a href="https://judge.yosupo.jp/problem/bitwise_xor_convolution"> Bitwise Xor Convolution </a>
+<a href="https://judge.yosupo.jp/submission/39262">提出コード</a> (xor convolution の verify) <br>
+yosupo さんの library checker : <a href="https://judge.yosupo.jp/problem/bitwise_and_convolution"> Bitwise And Convolution </a>
+  <a href="https://judge.yosupo.jp/submission/39263">提出コード</a> (and convolution の verify)
+</p>
 </section>
 
 </div>
