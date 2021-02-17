@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-131511873-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-131511873-1');
+</script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
+
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<link rel="shortcut icon" type="image/x-icon" href="../../favicon.ico">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>Path Query / Subtree Query + Ball Query</h2>
+<h3>コードについての説明</h3>
+<p>
+木上の頂点の値を (加算 / 更新), パスからの距離が $d$ 以内の頂点の値の (総和 / 最小値), 頂点 $u$ を根とする部分木内の頂点で $u$ からの距離が $d$ 以下であるものの値の (総和 / 最小値) などを処理するアルゴリズム.<br>
+yosupo さんのアイデア(<a href="https://yosupo.hatenablog.com/entry/2015/10/02/233244">参考 URL</a>) を参考にさせていただき $1$ 層目に weighted balanced な木を用いた. <br>
+各クエリ $\O ( \log^2 n)$ 時間で処理するものの定数が重く, また空間計算量も $\O( n \log n)$ であるもののかなり大きくなる.
+特に頂点更新 + 範囲最小値の方はオフラインの場合には事前に値を座圧し int 型の値として処理した方が空間計算量的に良い
+(空間計算量削減のためセグ木の代わりに BIT $2$ つで RMQ を処理するテクを用いてみたが実測が遅くなってしまった).
+</p>
+<p>
+(関数)<br>
+vertex_add($u$, $x$) / vertex_update($u$, $x$): 頂点 $u$ の値に $x$ を加算する / 頂点 $u$ の値を $x$ に更新する. <br>
+path_query($u$, $v$, $d$): 頂点 $u$, $v$ を結ぶパスからの距離が $d$ 以内の頂点についてクエリに答える. <br>
+subtree_query($u$, $d$): 頂点 $u$ を根とする部分木内の頂点で $u$ からの距離が $d$ 以下であるものについてクエリに答える. <br>
+例えば path_query($u$, $v$, 0) は path query, path_query($u$, $u$, $d$) は ball query に対応する.
+</p>
+<p>
+時間計算量: 構築 $\O( n \log n)$, 各クエリ $\O(\log^2 n)$, 空間計算量 $\O( n \log n)$
+</p>
+<h3>コード(頂点加算 + 範囲総和)</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
+<pre class="prettyprint linenums">
+template&lt;typename T&gt; class BIT {
+private:
+  int n;
+  vector&lt;T&gt; bit;
+    T sm;
+public:
+    void init(const vector&lt;T&gt;&amp; v){
+        n = (int)v.size() + 1, bit.resize(n, 0);
+        sm = accumulate(v.begin(), v.end(), (T)0);
+        int j;
+        for(int i = 1; i &lt; n; ++i){
+            bit[i] += v[i - 1], j = i + (i &amp; -i);
+            if(j &lt; n) bit[j] += bit[i];
+        }
+    }
+    void add(int i, const T x){
+        ++i, sm += x;
+        while(i &lt; n) bit[i] += x, i += i &amp; -i;
+    }
+    T sum(int i) const {
+        if(i == -1) return 0;
+        else if(i == n - 2) return sm;
+        else{
+            ++i;
+            T s = 0;
+            while(i &gt; 0) s += bit[i], i -= i &amp; -i;
+            return s;
+        }
+    }
+};
+
+template&lt;typename T&gt; class HLdecomposition {
+private:
+    struct node {
+        int left, right, lb, rb;
+        BIT&lt;T&gt; bt[3];
+        vector&lt;pair&lt;int, int&gt; &gt; pvec[3];
+    };
+    int V;
+    vector&lt;vector&lt;int&gt; &gt; G;
+    vector&lt;node&gt; nodes;
+    vector&lt;T&gt; value;
+    vector&lt;int&gt; sz, depth, pathup, path_id, node_id, wbt_root;
+    void predfs(const int u, const int p, const int d){
+        sz[u] = 1, depth[u] = d;
+        for(int&amp; v : G[u]){
+            if(v == p){
+                if(v == G[u].back()) break;
+                else swap(v, G[u].back());
+            }
+            predfs(v, u, d + 1);
+            sz[u] += sz[v];
+            if(sz[v] &gt; sz[G[u][0]]) swap(v, G[u][0]);
+        }
+    }
+    void dfs(const int u, const int p, const int par, int&amp; tm, vector&lt;vector&lt;int&gt; &gt;&amp; hpath){
+        for(const int v : G[u]){
+            if(v == p) continue;
+            if(v == G[u][0]){
+                pathup[v] = par, path_id[v] = tm, hpath[tm].push_back(v);
+                dfs(v, u, par, tm, hpath);
+            }else{
+                pathup[v] = u, path_id[v] = ++tm, hpath.push_back({v});
+                dfs(v, u, u, tm, hpath);
+            }
+        }
+    }
+    void node_merge(BIT&lt;T&gt;&amp; bt, vector&lt;pair&lt;int, int&gt; &gt;&amp; p, const vector&lt;pair&lt;int, int&gt; &gt;&amp; q, const vector&lt;pair&lt;int, int&gt; &gt;&amp; r){
+        const int n = (int)q.size() + (int)r.size();
+        p.resize(n);
+        merge(q.begin(), q.end(), r.begin(), r.end(), p.begin());
+        vector&lt;T&gt; val(n);
+        for(int i = 0; i &lt; n; ++i) val[i] = value[p[i].second];
+        bt.init(val);
+    }
+    int build_rec(const int l, const int r, const vector&lt;int&gt;&amp; vers, const vector&lt;long long&gt;&amp; sm, const vector&lt;vector&lt;vector&lt;int&gt; &gt; &gt;&amp; info, int&amp; id){
+        const int k = id++;
+        nodes[k].lb = l, nodes[k].rb = r;
+        if(r - l == 1){
+            const int u = vers[l];
+            for(int i = 0; i &lt; 3; ++i) nodes[k].pvec[i].resize(sz[u]);
+            vector&lt;T&gt; val(sz[u]);
+            int id = 0;
+            for(int i = 0; i &lt; (int)info[u].size(); ++i){
+                for(const int v : info[u][i]){
+                    nodes[k].pvec[0][id] = {i - l, v}, nodes[k].pvec[1][id] = {i, v}, nodes[k].pvec[2][id] = {i + l, v};
+                    val[id++] = value[v];
+                }
+            }
+            for(int i = 0; i &lt; 3; ++i) nodes[k].bt[i].init(val);
+            return node_id[u] = k;
+        }
+        int mid = l + 1;
+        long long cri = min(sm[mid] - sm[l], sm[r] - sm[mid]);
+        for(int i = l + 2; i &lt; r; ++i){
+            if(cri &lt; min(sm[i] - sm[l], sm[r] - sm[i])){
+                mid = i, cri = min(sm[mid] - sm[l], sm[r] - sm[mid]);
+            }
+        }
+        const int left = build_rec(l, mid, vers, sm, info, id), right = build_rec(mid, r, vers, sm, info, id);
+        nodes[k].left = left, nodes[k].right = right;
+        for(int i = 0; i &lt; 3; ++i) node_merge(nodes[k].bt[i], nodes[k].pvec[i], nodes[left].pvec[i], nodes[right].pvec[i]);
+        return k;
+    }
+    int build_wbt(const vector&lt;int&gt;&amp; vers, int&amp; id, const vector&lt;vector&lt;vector&lt;int&gt; &gt; &gt;&amp; info){
+        int n = (int)vers.size();
+        vector&lt;long long&gt; sm(n + 1, 0);
+        for(int i = 0; i &lt; n; ++i) sm[i + 1] = sm[i] + sz[vers[i]];
+        return build_rec(0, (int)vers.size(), vers, sm, info, id);
+    }
+    void build_impl(const int root){
+        predfs(root, -1, 0);
+        int tm = 0;
+        vector&lt;vector&lt;int&gt; &gt; hpath;
+        pathup[root] = -1, path_id[root] = 0, hpath.push_back({root});
+        dfs(root, -1, -1, tm, hpath);
+        vector&lt;vector&lt;vector&lt;int&gt; &gt; &gt; info(V);
+        for(int i = 0; i &lt; V; ++i){
+            const int d = depth[i];
+            for(int u = i; u &gt;= 0; u = pathup[u]){
+                if((int)info[u].size() &lt;= d - depth[u]) info[u].resize(d - depth[u] + 1);
+                info[u][d - depth[u]].push_back(i);
+            }
+        }
+        int id = 0;
+        for(const vector&lt;int&gt;&amp; path : hpath){
+            for(int i = 0; i &lt; (int)path.size() - 1; ++i) sz[path[i]] -= sz[path[i + 1]];
+            wbt_root.push_back(build_wbt(path, id, info));
+        }
+    }
+    void vertex_add_impl(const int u, const T x){
+        for(int v = u; v &gt;= 0; v = pathup[v]){
+            const int d = depth[u] - depth[v];
+            const int id = nodes[node_id[v]].lb;
+            int w = wbt_root[path_id[v]];
+            while(true){
+                node&amp; cur = nodes[w];
+                cur.bt[0].add((int)(lower_bound(cur.pvec[0].begin(), cur.pvec[0].end(), make_pair(d - id, u)) - cur.pvec[0].begin()), x);
+                cur.bt[1].add((int)(lower_bound(cur.pvec[1].begin(), cur.pvec[1].end(), make_pair(d, u)) - cur.pvec[1].begin()), x);
+                cur.bt[2].add((int)(lower_bound(cur.pvec[2].begin(), cur.pvec[2].end(), make_pair(d + id, u)) - cur.pvec[2].begin()), x);
+                if(nodes[w].rb - nodes[w].lb == 1) break;
+                else if(id &lt; nodes[nodes[w].left].rb) w = nodes[w].left;
+                else w = nodes[w].right;
+            }
+        }
+    }
+    T query(int a, int b, const int x, const node&amp; cur, int t) const {
+        const int l = cur.lb, r = cur.rb;
+        if(r &lt;= a || b &lt;= l) return 0;
+        if(a &lt;= l &amp;&amp; r &lt;= b){
+            return cur.bt[t].sum((int)(upper_bound(cur.pvec[t].begin(), cur.pvec[t].end(), make_pair(x, V)) - cur.pvec[t].begin()) - 1);
+        }else{
+            return query(a, b, x, nodes[cur.left], t) + query(a, b, x, nodes[cur.right], t);
+        }
+    }
+    T path_query_impl(int u, int v, const int d) const {
+        T res = 0;
+        while(path_id[u] != path_id[v]){
+            if(path_id[u] &lt; path_id[v]){
+                const int id = nodes[node_id[v]].lb;
+                const node&amp; wroot = nodes[wbt_root[path_id[v]]];
+                res += query(0, id + 1, d, wroot, 1) + query(id + 1, wroot.rb, d + id, wroot, 2) - query(0, wroot.rb, d - 1, wroot, 2);
+                v = pathup[v];
+            }else{
+                const int id = nodes[node_id[u]].lb;
+                const node&amp; wroot = nodes[wbt_root[path_id[u]]];
+                res += query(0, id + 1, d, wroot, 1) + query(id + 1, wroot.rb, d + id, wroot, 2) - query(0, wroot.rb, d - 1, wroot, 2);
+                u = pathup[u];
+            }
+        }
+        if(depth[u] &gt; depth[v]) swap(u, v);
+        const int L = nodes[node_id[u]].lb, R = nodes[node_id[v]].lb;
+        const node&amp; wroot = nodes[wbt_root[path_id[u]]];
+        res += query(0, L, d - L, wroot, 0) + query(L, R + 1, d, wroot, 1) + query(R + 1, wroot.rb, d + R, wroot, 2);
+        const int lca = depth[u];
+        int prev_wbt_root = wbt_root[path_id[u]];
+        for(u = pathup[u]; u &gt;= 0 &amp;&amp; depth[u] &gt;= lca - d; prev_wbt_root = wbt_root[path_id[u]], u = pathup[u]){
+            const int id = nodes[node_id[u]].lb;
+            const node&amp; wroot = nodes[wbt_root[path_id[u]]];
+            res += query(0, id + 1, d - lca + depth[u] - id, wroot, 0) + query(id + 1, wroot.rb, d - lca + depth[u] + id, wroot, 2);
+            const node&amp; prev_wroot = nodes[prev_wbt_root];
+            res -= query(0, prev_wroot.rb, d - lca + depth[u] - 1, prev_wroot, 2);
+        }
+        return res;
+    }
+    T subtree_query_impl(const int u, const int d) const {
+        const int id = nodes[node_id[u]].lb;
+        const node&amp; wroot = nodes[wbt_root[path_id[u]]];
+        return query(id, wroot.rb, d + id, wroot, 2);
+    }
+public:
+    HLdecomposition(const vector&lt;T&gt;&amp; _value)
+         : V((int)_value.size()), G(V), nodes(2 * V - 1), value(_value),
+             sz(V), depth(V), pathup(V), path_id(V), node_id(V){}
+    void add_edge(const int u, const int v){
+        G[u].push_back(v), G[v].push_back(u);
+    }
+    void build(const int root=0){
+        build_impl(root);
+    }
+    void vertex_add(const int u, const T x){
+        vertex_add_impl(u, x);
+    }
+    T path_query(const int u, const int v, const int d) const {
+        assert(d &gt;= 0);
+        return path_query_impl(u, v, d);
+    }
+    T subtree_query(const int u, const int d) const {
+        assert(d &gt;= 0);
+        return subtree_query_impl(u, d);
+    }
+};
+</pre>
+</div>
+<h3>コード(頂点更新 + 範囲最小値)</h3>
+<div class="codebox">
+<input type="checkbox" id="label2" class="csscode" />
+<label for="label2"></label>
+<pre class="prettyprint linenums">
+template&lt;typename T&gt; class segtree {
+private:
+    int n, sz;
+    vector&lt;T&gt; node;
+public:
+    void init(const vector&lt;T&gt;&amp; v){
+        n = 1, sz = (int)v.size();
+        while(n &lt; sz) n *= 2;
+        node.assign(2 * n, numeric_limits&lt;T&gt;::max());
+        for(int i = 0; i &lt; sz; ++i) node[i + n] = v[i];
+        for(int i = n - 1; i &gt;= 1; --i) node[i] = min(node[i &lt;&lt; 1], node[(i &lt;&lt; 1) | 1]);
+    }
+    void update(int k, const T a){
+        const T old = node[k += n];
+        if(old == a) return;
+        node[k] = a;
+        while(k &gt;&gt;= 1){
+            if(node[k] &gt; a) node[k] = a;
+            else if(node[k] == old) node[k] = min(node[k &lt;&lt; 1], node[(k &lt;&lt; 1) | 1]);
+            else break;
+        }
+    }
+    T query(int a, int b) const {
+        if(a == 0 &amp;&amp; b == sz) return node[1];
+        T res1 = numeric_limits&lt;T&gt;::max(), res2 = numeric_limits&lt;T&gt;::max();
+        a += n, b += n;
+        while(a != b){
+            if(a &amp; 1) res1 = min(res1, node[a++]);
+            if(b &amp; 1) res2 = min(node[--b], res2);
+            a &gt;&gt;= 1, b &gt;&gt;= 1;
+        }
+        return min(res1, res2);
+    }
+};
+
+template&lt;typename T&gt; class HLdecomposition {
+private:
+    struct node {
+        int left, right, lb, rb;
+        segtree&lt;T&gt; seg[3];
+        vector&lt;pair&lt;int, int&gt; &gt; pvec[3];
+    };
+    int V;
+    vector&lt;vector&lt;int&gt; &gt; G;
+    vector&lt;node&gt; nodes;
+    vector&lt;T&gt; value;
+    vector&lt;int&gt; sz, depth, pathup, path_id, node_id, wbt_root;
+    void predfs(const int u, const int p, const int d){
+        sz[u] = 1, depth[u] = d;
+        for(int&amp; v : G[u]){
+            if(v == p){
+                if(v == G[u].back()) break;
+                else swap(v, G[u].back());
+            }
+            predfs(v, u, d + 1);
+            sz[u] += sz[v];
+            if(sz[v] &gt; sz[G[u][0]]) swap(v, G[u][0]);
+        }
+    }
+    void dfs(const int u, const int p, const int par, int&amp; tm, vector&lt;vector&lt;int&gt; &gt;&amp; hpath){
+        for(const int v : G[u]){
+            if(v == p) continue;
+            if(v == G[u][0]){
+                pathup[v] = par, path_id[v] = tm, hpath[tm].push_back(v);
+                dfs(v, u, par, tm, hpath);
+            }else{
+                pathup[v] = u, path_id[v] = ++tm, hpath.push_back({v});
+                dfs(v, u, u, tm, hpath);
+            }
+        }
+    }
+    void node_merge(segtree&lt;T&gt;&amp; sg, vector&lt;pair&lt;int, int&gt; &gt;&amp; p, const vector&lt;pair&lt;int, int&gt; &gt;&amp; q, const vector&lt;pair&lt;int, int&gt; &gt;&amp; r){
+        const int n = (int)q.size() + (int)r.size();
+        p.resize(n);
+        merge(q.begin(), q.end(), r.begin(), r.end(), p.begin());
+        vector&lt;T&gt; val(n);
+        for(int i = 0; i &lt; n; ++i) val[i] = value[p[i].second];
+        sg.init(val);
+    }
+    int build_rec(const int l, const int r, const vector&lt;int&gt;&amp; vers, const vector&lt;long long&gt;&amp; sm, const vector&lt;vector&lt;vector&lt;int&gt; &gt; &gt;&amp; info, int&amp; id){
+        const int k = id++;
+        nodes[k].lb = l, nodes[k].rb = r;
+        if(r - l == 1){
+            const int u = vers[l];
+            for(int i = 0; i &lt; 3; ++i) nodes[k].pvec[i].resize(sz[u]);
+            vector&lt;T&gt; val(sz[u]);
+            int id = 0;
+            for(int i = 0; i &lt; (int)info[u].size(); ++i){
+                for(const int v : info[u][i]){
+                    nodes[k].pvec[0][id] = {i - l, v}, nodes[k].pvec[1][id] = {i, v}, nodes[k].pvec[2][id] = {i + l, v};
+                    val[id++] = value[v];
+                }
+            }
+            for(int i = 0; i &lt; 3; ++i) nodes[k].seg[i].init(val);
+            return node_id[u] = k;
+        }
+        int mid = l + 1;
+        long long cri = min(sm[mid] - sm[l], sm[r] - sm[mid]);
+        for(int i = l + 2; i &lt; r; ++i){
+            if(cri &lt; min(sm[i] - sm[l], sm[r] - sm[i])){
+                mid = i, cri = min(sm[mid] - sm[l], sm[r] - sm[mid]);
+            }
+        }
+        const int left = build_rec(l, mid, vers, sm, info, id), right = build_rec(mid, r, vers, sm, info, id);
+        nodes[k].left = left, nodes[k].right = right;
+        for(int i = 0; i &lt; 3; ++i) node_merge(nodes[k].seg[i], nodes[k].pvec[i], nodes[left].pvec[i], nodes[right].pvec[i]);
+        return k;
+    }
+    int build_wbt(const vector&lt;int&gt;&amp; vers, int&amp; id, const vector&lt;vector&lt;vector&lt;int&gt; &gt; &gt;&amp; info){
+        int n = (int)vers.size();
+        vector&lt;long long&gt; sm(n + 1, 0);
+        for(int i = 0; i &lt; n; ++i) sm[i + 1] = sm[i] + sz[vers[i]];
+        return build_rec(0, (int)vers.size(), vers, sm, info, id);
+    }
+    void build_impl(const int root){
+        predfs(root, -1, 0);
+        int tm = 0;
+        vector&lt;vector&lt;int&gt; &gt; hpath;
+        pathup[root] = -1, path_id[root] = 0, hpath.push_back({root});
+        dfs(root, -1, -1, tm, hpath);
+        vector&lt;vector&lt;vector&lt;int&gt; &gt; &gt; info(V);
+        for(int i = 0; i &lt; V; ++i){
+            const int d = depth[i];
+            for(int u = i; u &gt;= 0; u = pathup[u]){
+                if((int)info[u].size() &lt;= d - depth[u]) info[u].resize(d - depth[u] + 1);
+                info[u][d - depth[u]].push_back(i);
+            }
+        }
+        int id = 0;
+        for(const vector&lt;int&gt;&amp; path : hpath){
+            for(int i = 0; i &lt; (int)path.size() - 1; ++i) sz[path[i]] -= sz[path[i + 1]];
+            wbt_root.push_back(build_wbt(path, id, info));
+        }
+    }
+    void vertex_update_impl(const int u, const T x){
+        for(int v = u; v &gt;= 0; v = pathup[v]){
+            const int d = depth[u] - depth[v];
+            const int id = nodes[node_id[v]].lb;
+            int w = wbt_root[path_id[v]];
+            while(true){
+                node&amp; cur = nodes[w];
+                cur.seg[0].update((int)(lower_bound(cur.pvec[0].begin(), cur.pvec[0].end(), make_pair(d - id, u)) - cur.pvec[0].begin()), x);
+                cur.seg[1].update((int)(lower_bound(cur.pvec[1].begin(), cur.pvec[1].end(), make_pair(d, u)) - cur.pvec[1].begin()), x);
+                cur.seg[2].update((int)(lower_bound(cur.pvec[2].begin(), cur.pvec[2].end(), make_pair(d + id, u)) - cur.pvec[2].begin()), x);
+                if(nodes[w].rb - nodes[w].lb == 1) break;
+                else if(id &lt; nodes[nodes[w].left].rb) w = nodes[w].left;
+                else w = nodes[w].right;
+            }
+        }
+    }
+    T query(int a, int b, const int x, const node&amp; cur, int t) const {
+        const int l = cur.lb, r = cur.rb;
+        if(r &lt;= a || b &lt;= l) return numeric_limits&lt;T&gt;::max();
+        if(a &lt;= l &amp;&amp; r &lt;= b){
+            return cur.seg[t].query(0, (int)(upper_bound(cur.pvec[t].begin(), cur.pvec[t].end(), make_pair(x, V)) - cur.pvec[t].begin()));
+        }else{
+            return min(query(a, b, x, nodes[cur.left], t), query(a, b, x, nodes[cur.right], t));
+        }
+    }
+    T path_query_impl(int u, int v, const int d) const {
+        T res = numeric_limits&lt;T&gt;::max();
+        while(path_id[u] != path_id[v]){
+            if(path_id[u] &lt; path_id[v]){
+                const int id = nodes[node_id[v]].lb;
+                const node&amp; wroot = nodes[wbt_root[path_id[v]]];
+                res = min({res, query(0, id + 1, d, wroot, 1), query(id + 1, wroot.rb, d + id, wroot, 2)});
+                v = pathup[v];
+            }else{
+                const int id = nodes[node_id[u]].lb;
+                const node&amp; wroot = nodes[wbt_root[path_id[u]]];
+                res = min({res, query(0, id + 1, d, wroot, 1), query(id + 1, wroot.rb, d + id, wroot, 2)});
+                u = pathup[u];
+            }
+        }
+        if(depth[u] &gt; depth[v]) swap(u, v);
+        const int L = nodes[node_id[u]].lb, R = nodes[node_id[v]].lb;
+        const node&amp; wroot = nodes[wbt_root[path_id[u]]];
+        res = min({res, query(0, L, d - L, wroot, 0), query(L, R + 1, d, wroot, 1), query(R + 1, wroot.rb, d + R, wroot, 2)});
+        const int lca = depth[u];
+        for(u = pathup[u]; u &gt;= 0 &amp;&amp; depth[u] &gt;= lca - d; u = pathup[u]){
+            const int id = nodes[node_id[u]].lb;
+            const node&amp; wroot = nodes[wbt_root[path_id[u]]];
+            res = min({res, query(0, id + 1, d - lca + depth[u] - id, wroot, 0), query(id + 1, wroot.rb, d - lca + depth[u] + id, wroot, 2)});
+        }
+        return res;
+    }
+    T subtree_query_impl(const int u, const int d) const {
+        const int id = nodes[node_id[u]].lb;
+        const node&amp; wroot = nodes[wbt_root[path_id[u]]];
+        return query(id, wroot.rb, d + id, wroot, 2);
+    }
+public:
+    HLdecomposition(const vector&lt;T&gt;&amp; _value)
+         : V((int)_value.size()), G(V), nodes(2 * V - 1), value(_value),
+             sz(V), depth(V), pathup(V), path_id(V), node_id(V){}
+    void add_edge(const int u, const int v){
+        G[u].push_back(v), G[v].push_back(u);
+    }
+    void build(const int root=0){
+        build_impl(root);
+    }
+    void vertex_update(const int u, const T x){
+        vertex_update_impl(u, x);
+    }
+    T path_query(const int u, const int v, const int d) const {
+        assert(d &gt;= 0);
+        return path_query_impl(u, v, d);
+    }
+    T subtree_query(const int u, const int d) const {
+        assert(d &gt;= 0);
+        return subtree_query_impl(u, d);
+    }
+};
+</pre>
+</div>
+<h3>verify 用の問題</h3>
+<p>
+手元でかなりテストはした.
+</p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>

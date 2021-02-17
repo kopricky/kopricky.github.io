@@ -62,7 +62,7 @@ $\newcommand{\O}{\mathrm{O}}$
 <p>
 二部グラフにおいて左側の $1$ つの頂点と右側のある連続範囲内の頂点集合との間に張られた辺集合のことを "範囲辺" ということにする. <br>
 入力の二部グラフの左側および右側の頂点数が $\O(n)$, その間を結ぶ範囲辺の本数が $\O(m)$ である場合に最大マッチングを $\O(m \sqrt{n} \log n)$ で求めるアルゴリズム. <br>
-セグメント木を用いて区間辺を処理する手法では $\O(m n \log n)$ より良い最悪計算量を得ることが難しそうでありまた実測もおそらくこちらのほうが速い.
+セグメント木を用いて区間辺を処理する手法では $\O(m n \log n)$ より良い最悪計算量を得ることが難しそうでありまた実測もおそらくこちらのほうが速いと思う.
 </p>
 <p>
 (関数) <br>
@@ -76,7 +76,7 @@ add_edge($from$, $l$, $r$): 右側頂点の $from$ から左側頂点の添字�
 <input type="checkbox" id="label" class="csscode" />
 <label for="label"></label>
 <pre class="prettyprint linenums">
-// 左側の各頂点から出る範囲辺は disjoint でなくても正しく動く(はず)
+// 左側の各頂点から出る範囲辺は disjoint でなくても正しく動く
 class BM {
 private:
     struct edge {
@@ -171,10 +171,8 @@ public:
 </pre>
 </div>
 <h3>verify 用の問題</h3>
-<p>yosupo さんの library checker : <a href="https://judge.yosupo.jp/problem/bipartitematching"> Matching on Bipartite Graph </a>
-    <a href="https://judge.yosupo.jp/submission/38754">提出コード</a>(範囲の長さがすべて $1$ の場合)<br>
-Codeforces : <a href="https://codeforces.com/problemset/problem/981/F">Round Marriage</a>
-    <a href="https://codeforces.com/contest/981/submission/107295560">提出コード</a> (想定解法ではないため TLE しているがそれまでは通っている).
+<p>
+手元でかなりテストはした.
 </p>
 </section>
 
