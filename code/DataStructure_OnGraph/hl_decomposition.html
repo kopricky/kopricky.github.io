@@ -109,7 +109,7 @@ public:
     void add_edge(int u, int v){
         G[u].push_back(v), G[v].push_back(u);
     }
-    void build(int _root){
+    void build(int _root=0){
         root = _root;
         int tm = 0;
         BuildStsize(root, -1);

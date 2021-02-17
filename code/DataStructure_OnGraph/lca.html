@@ -84,7 +84,7 @@ private:
     int n,sz;
     vector&lt;pair&lt;T, int&gt; &gt; node;
 public:
-    void resize(vector&lt;T&gt;&amp; v){
+    void resize(const vector&lt;T&gt;&amp; v){
         sz = (int)v.size();
         n = 1;
         while(n &lt; sz){
@@ -97,13 +97,6 @@ public:
         for(int i=n-1; i&gt;=1; i--){
             node[i] = min(node[2*i], node[2*i+1]);
         }
-    }
-    void update(int k, T a)
-    {
-    	node[k+=n] = make_pair(a, k);
-    	while(k&gt;&gt;=1){
-            node[k] = min(node[2*k], node[2*k+1]);
-    	}
     }
     pair&lt;T, int&gt; query(int a,int b)
     {

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-131511873-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-131511873-1');
+</script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+<meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+$\newcommand{\O}{\mathrm{O}}$
+
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title> My Algorithm : kopricky アルゴリズムライブラリ </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="競技プログラミングで使われるアルゴリズムのコード集">
+<meta name="keywords" content="競技プログラミング,競プロ,アルゴリズム,コード,kopricky,computation,datastructure,geometry,graph,networkflow,string,icpc,Atcoder">
+<link rel="stylesheet" href="../../css/style.css">
+<script type="text/javascript" src="../../js/openclose.js"></script>
+<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="../../css/prettify.css" type="text/css">
+<link rel="shortcut icon" type="image/x-icon" href="../../favicon.ico">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div id="container">
+
+<header>
+<h1 id="logo"><a href="../../index.html"><img src="../../images/logo.png" alt="kopricky アルゴリズムライブラリ"></a></h1>
+</header>
+
+
+<nav id="menubar">
+<ul>
+<li><a href="../../index.html">Home</a></li>
+<li><a href="../../guide.html">Guide</a></li>
+<li class="current"><a href="../../code.html">Code</a></li>
+<li><a href="../../link.html">Link</a></li>
+</ul>
+</nav>
+
+<div id="contents">
+
+<section>
+<h2>Bipartite Matching under Range Edges</h2>
+<h3>コードについての説明</h3>
+<p>
+二部グラフにおいて左側の $1$ つの頂点と右側のある連続範囲内の頂点集合との間に張られた辺集合のことを "範囲辺" ということにする. <br>
+入力の二部グラフの左側および右側の頂点数が $\O(n)$ その間を結ぶ範囲辺の本数が $\O(m)$ である場合に最大マッチングを $\O(m \sqrt{n} \log n)$ で求めるアルゴリズム. <br>
+セグメント木を用いて区間辺を処理する手法では $\O(m n \log n)$ より良い最悪計算量を得ることが難しそうでありまた実測もおそらくこちらのほうが速い.
+</p>
+<p>
+(関数) <br>
+
+</p>
+<p>
+時間計算量: $\O(m \sqrt{n} \log n)$
+</p>
+<h3>コード</h3>
+<div class="codebox">
+<input type="checkbox" id="label" class="csscode" />
+<label for="label"></label>
+<pre class="prettyprint linenums">
+// 左側の各頂点から出る範囲辺は disjoint でなくても正しく動く(はず)
+class BM {
+private:
+    struct edge {
+        int l, r;
+        edge(const int _l, const int _r) : l(_l), r(_r){}
+    };
+    const int U, V;
+    vector&lt;vector&lt;edge&gt; &gt; G;
+    vector&lt;set&lt;int&gt; &gt; layer;
+    vector&lt;int&gt; level, que, prv, rasg;
+    set&lt;int&gt; st, pst;
+    int bfs(){
+        int last = -1, qh = 0, qt = 0;
+        for(int i = 0; i &lt; U + V; ++i){
+            layer[i].clear(), level[i] = -1;
+        }
+        for(int i = 0; i &lt; U; ++i){
+            if(asg[i] &lt; 0) level[i] = 0, que[qt++] = i, prv[i] = -1;
+        }
+        st = pst;
+        while(qh &lt; qt){
+            const int u = que[qh++];
+            if(u &gt;= U){
+                const int v = rasg[u - U];
+                if(v &gt;= 0) level[v] = level[u] + 1, que[qt++] = v, prv[v] = u;
+                else last = u;
+            }else{
+                for(const edge&amp; e : G[u]){
+                    for(auto it = st.lower_bound(e.l); it != st.end() &amp;&amp; *it &lt; e.r;){
+                        const int v = *it;
+                        layer[level[u]].insert(v), level[U + v] = level[u] + 1;
+                        que[qt++] = U + v, prv[U + v] = u, it = st.erase(it);
+                    }
+                }
+            }
+        }
+        return last;
+    }
+    bool dfs(const int u){
+        if(u &gt;= U){
+            if(rasg[u - U] &lt; 0) return true;
+            else return dfs(rasg[u - U]);
+        }else{
+            auto&amp; vers = layer[level[u]];
+            for(const edge&amp; e : G[u]){
+                for(auto it = vers.lower_bound(e.l); it != vers.end() &amp;&amp; *it &lt; e.r;){
+                    const int v = *it;
+                    it = vers.erase(it);
+                    if(dfs(U + v)){
+                        asg[u] = v, rasg[v] = u;
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+    void hint_search(int cur, int&amp; flow){
+        ++flow;
+        while(cur &gt;= 0){
+            level[cur] = -1;
+            if(cur &gt;= U){
+                layer[level[prv[cur]]].erase(cur - U);
+                asg[prv[cur]] = cur - U, rasg[cur - U] = prv[cur];
+            }
+            cur = prv[cur];
+        }
+    }
+public:
+    BM(const int u, const int v)
+         : U(u), V(v), G(U + V), layer(U + V), level(U + V), que(U + V), prv(U + V), rasg(V, -1), asg(U, -1){
+        for(int i = 0; i &lt; V; ++i) pst.insert(i);
+    }
+    void add_edge(const int from, const int l, const int r){
+        G[from].emplace_back(l, r);
+    }
+    // asg に左側頂点がどの右側頂点とマッチングされるかが格納される
+    vector&lt;int&gt; asg;
+    int solve(){
+        int flow = 0;
+        for(;;){
+            const int cur = bfs();
+            if(cur &lt; 0) break;
+            hint_search(cur, flow);
+            for(int i = 0; i &lt; U; ++i){
+                if(asg[i] &lt; 0) flow += dfs(i);
+            }
+        }
+        return flow;
+    }
+};
+</pre>
+</div>
+<h3>verify 用の問題</h3>
+<p>yosupo さんの library checker : <a href="https://judge.yosupo.jp/problem/bipartitematching"> Matching on Bipartite Graph </a>
+    <a href="https://judge.yosupo.jp/submission/38754">提出コード</a>(範囲の長さがすべて $1$ の場合)<br>
+Codeforces : <a href="https://codeforces.com/problemset/problem/981/F">Round Marriage</a>
+    <a href="https://codeforces.com/contest/981/submission/107295560">提出コード</a> (想定解法ではないため TLE しているがそれまでは通っている).
+</p>
+</section>
+
+</div>
+<!--/contents-->
+
+<footer>
+<small>Copyright&copy; <a href="../../index.html"> My Algorithm : kopricky アルゴリズムライブラリ </a> All Rights Reserved.</small>
+<span class="pr">《<a href="https://template-party.com/" target="_blank">Web Design:Template-Party</a>》</span>
+</footer>
+
+<script src="../../js/prettify.js"></script>
+<script src="../../js/lang-css.js"></script>
+<!-- prettyPrint()関数を実行するため追加↓ -->
+<script>prettyPrint();</script>
+
+</div>
+<!--/container-->
+
+</body>
+</html>
