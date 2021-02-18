@@ -90,7 +90,7 @@ arXiv に $\O (n^{\mathrm{o(1)}})$ worst-case update time アルゴリズムが�
 また更新時間(link, cut) とクエリに応答する時間(connected) の間に存在する trade-off 関係も示している.
 具体的に update time を $t_u$, query time を $t_q$ とすると <img src="./texclip20190808090008.png" height="100" width="350"> という関係が成り立つ. また trade-off の lower bound をオーダーの意味で達成するアルゴリズムとして [Thorup 2000] や [Holm, Lichtenberg, Thorup 2001] がある. <br>
 より詳しい内容は論文もしくは <a href="https://courses.csail.mit.edu/6.851/fall17/scribe/L21.pdf">Demaine 先生の講義</a> が参考になると思うが, 少々とっつきにくい. <br>
-ちなみに worst case はパスの集合で構成できるため森の動的連結性クエリの lower bound も $\Omega (\log n)$ であることが言え, Link Cut Tree や Euler Tour Tree は漸近的に最適であることが分かる. <br>
+ちなみに lower bound はパスの集合からなるグラフの動的連結性を介して証明されるため森の動的連結性クエリの lower bound も $\Omega (\log n)$ であることが言え, Link Cut Tree や Euler Tour Tree は漸近的に最適であることが分かる. <br>
 <br>
 (補足 2) <br>
 上記の Thorup のアルゴリズムはクエリを処理するのに最悪 $\Theta(n)$ の計算量がかかってしまう.
