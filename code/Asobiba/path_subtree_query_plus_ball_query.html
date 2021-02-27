@@ -71,7 +71,7 @@ yosupo さんのアイデア(<a href="https://yosupo.hatenablog.com/entry/2015/1
 vertex_add($u$, $x$) / vertex_update($u$, $x$): 頂点 $u$ の値に $x$ を加算する / 頂点 $u$ の値を $x$ に更新する. <br>
 path_query($u$, $v$, $d$): 頂点 $u$, $v$ を結ぶパスからの距離が $d$ 以内の頂点についてクエリに答える. <br>
 subtree_query($u$, $d$): 頂点 $u$ を根とする部分木内の頂点で $u$ からの距離が $d$ 以下であるものについてクエリに答える. <br>
-例えば path_query($u$, $v$, 0) は path query, path_query($u$, $u$, $d$) は ball query に対応する.
+例えば path_query($u$, $v$, $0$) は path query, path_query($u$, $u$, $d$) は ball query に対応する.
 </p>
 <p>
 時間計算量: 構築 $\O( n \log n)$, 各クエリ $\O(\log^2 n)$, 空間計算量 $\O( n \log n)$
