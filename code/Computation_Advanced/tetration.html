@@ -102,9 +102,10 @@ unsigned int mod_pow(unsigned long long a, unsigned int b, unsigned int mod, boo
     unsigned long long res = 1;
     while(b){
         if(b &amp; 1){
+            // Note: condition is true if a &gt;= mod and flag = false
             if((res *= a) &gt;= mod) res %= mod, flag = true;
         }
-        if((a *= a) &gt;= mod) a %= mod, flag = true;
+        if((a *= a) &gt;= mod) a = a % mod + mod;
         b &gt;&gt;= 1;
     }
     return res + (flag ? mod : 0);
@@ -112,18 +113,18 @@ unsigned int mod_pow(unsigned long long a, unsigned int b, unsigned int mod, boo
 
 unsigned int rec(unsigned int a, unsigned int b, unsigned int mod)
 {
-    if(a == 0) return !(b &amp; 1);
-    if(a == 1 || mod == 1) return 1;
-    if(b == 1) return (a &gt;= mod) ? (a % mod + mod) : a;
-    if(b == 2) return mod_pow(a % mod, a, mod, (a &gt;= mod));
+    if(b == 2) return mod_pow(a, a, mod, false);
     const unsigned int phi_val = phi(mod);
-    const unsigned int res = rec(a, b-1, phi_val);
-    return mod_pow(a % mod, res, mod, (res &gt;= phi_val));
+    const unsigned int res = ((phi_val == 1) ? 1 : rec(a, b - 1, phi_val));
+    return mod_pow(a, res, mod, (res &gt;= phi_val));
 }
 
 unsigned int tetration(unsigned int a, unsigned int b, unsigned int mod)
 {
-    if(b == 0) return (mod != 1);
+    if(mod == 1) return 0;
+    if(a == 0) return !(b &amp; 1);
+    if(a == 1 || b == 0) return 1;
+    if(b == 1) return (a &gt;= mod) ? (a % mod) : a;
     const unsigned int res = rec(a, b, mod);
     return (res &gt;= mod) ? (res - mod) : res;
 }
@@ -131,9 +132,9 @@ unsigned int tetration(unsigned int a, unsigned int b, unsigned int mod)
 </div>
 <h3>verify 用の問題</h3>
 <p>Atcoder : <a href="https://atcoder.jp/contests/summerfes2018-div1/tasks/summerfes2018_f">冪冪ゲーム (Powerful Fever!)</a>
-  <a href="https://atcoder.jp/contests/summerfes2018-div1/submissions/10978310">提出コード</a><br>
+  <a href="https://atcoder.jp/contests/summerfes2018-div1/submissions/23930708">提出コード</a><br>
 yosupo さんの library checker : <a href="https://judge.yosupo.jp/problem/tetration_mod">Tetration Mod</a>
-  <a href="https://judge.yosupo.jp/submission/5995">提出コード</a>
+  <a href="https://judge.yosupo.jp/submission/52311">提出コード</a>
 </p>
 </section>
 
