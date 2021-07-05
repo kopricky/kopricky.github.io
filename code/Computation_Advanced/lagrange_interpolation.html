@@ -66,7 +66,7 @@ $\newcommand{\O}{\mathrm{O}}$
 実際に $o(n^2)$ 時間で $f$ の係数まで決定するアルゴリズムについては<a href="./polynomial_interpolation.html">こちらの実装</a>を参考にされたい.
 </p>
 <p>
-時間計算量: $\O (n \log (MOD))$ ($n$ は多項式の次数)
+時間計算量: $\O (n)$ ($n$ は多項式の次数)
 </p>
 <h3>コード</h3>
 <div class="codebox">
@@ -76,83 +76,51 @@ $\newcommand{\O}{\mathrm{O}}$
 #define MAX_N 100005
 #define MOD 1000000007
 
-int inv[MAX_N],fac[MAX_N],finv[MAX_N];
+unsigned inv[MAX_N], fac[MAX_N], finv[MAX_N];
+
+unsigned int add(unsigned int x, unsigned int y){
+	return (x + y &gt;= MOD) ? (x + y - MOD) : (x + y);
+}
+
+unsigned int sub(unsigned int x, unsigned int y){
+	return (x &lt; y) ? (x + MOD - y) : (x - y);
+}
+
+unsigned int mul(unsigned int x, unsigned int y){
+	return (unsigned long long)x * y % MOD;
+}
 
 void make()
 {
 	fac[0] = fac[1] = 1;
 	finv[0] = finv[1] = 1;
 	inv[1] = 1;
-	for(int i=2;i&lt;MAX_N;i++){
-		inv[i] = MOD - (long long)inv[MOD%i] * (MOD/i) % MOD;
-		fac[i] = (long long)fac[i-1] * i % MOD;
-		finv[i] = (long long)finv[i-1] * inv[i] % MOD;
+	for(int i = 2; i &lt; MAX_N; ++i){
+		inv[i] = MOD - mul(inv[MOD % i], (MOD / i));
+		fac[i] = mul(fac[i - 1], i);
+		finv[i] = mul(finv[i - 1], inv[i]);
 	}
 }
 
-inline int mod_pow(int a, int b)
-{
-	int res = 1;
-	while(b){
-		if(b &amp; 1){
-			res = (long long)res * a % MOD;
-		}
-		a = (long long)a * a % MOD;
-		b &gt;&gt;= 1;
-	}
-	return res;
-}
-
-inline int add(int x,int y)
-{
-	return (x + y)%MOD;
-}
-
-inline int sub(int x,int y)
-{
-	return (x+MOD-y)%MOD;
-}
-
-inline int mul(int x,int y)
-{
-	return (long long)x*y%MOD;
-}
-
-void extgcd(int a,int b, int&amp; x,int&amp; y)
-{
-	if(b != 0){
-		extgcd(b,a%b,y,x);
-		y -= (a/b)*x;
-	}else{
-		x = 1;
-		y = 0;
-	}
-}
-
-int mod_inverse(int a,int m)
-{
-	int x,y;
-	extgcd(a,m,x,y);
-	return (m + x % m) % m;
-}
-
+// solve() を呼び出す前に必ず make() を行っておく！！
 // deg + 1 個の f(i) = val[i] (i = 0,..., deg) の情報から関数 f を復元し, f(num) を返す
 // すべて MOD を法として考えていることに注意
-int solve(int deg, long long num, vector&lt;int&gt;&amp; val)
+unsigned int solve(int deg, long long num, vector&lt;int&gt;&amp; val)
 {
+	if((num %= MOD) &lt; 0) num += MOD;
 	if(num &lt;= deg) return val[num];
-	int ue = 1;
-	for(int i = 0; i &lt; deg + 1; i++){
-		ue = mul(ue, sub(num % MOD, i));
+	unsigned int ue = 1;
+	vector&lt;unsigned int&gt; lf(deg + 2), rg(deg + 2);
+	lf[0] = rg[deg + 1] = 1;
+	for(int i = deg; i &gt;= 0; --i){
+		rg[i] = mul(rg[i + 1], num - i);
 	}
-	int ans = 0;
-	for(int i = 0; i &lt; deg + 1; i++){
-		int r1 = mul(ue, mul(mod_inverse(sub(num % MOD, i), MOD), val[i]));
-		int r2 = mul(finv[deg-i], finv[i]);
-		if((deg - i) % 2){
-			r2 = MOD - r2;
-		}
-		ans = add(ans, mul(r1, r2));
+	unsigned int ans = 0;
+	for(int i = 0; i &lt;= deg; ++i){
+		unsigned int r = mul(finv[deg-i], finv[i]);
+		if((deg - i) % 2) r = MOD - r;
+		ans = add(ans, mul(mul(lf[i], rg[i + 1]), mul(r, val[i])));
+		lf[i + 1] = mul(lf[i], num - i);
 	}
 	return ans;
 }
@@ -160,7 +128,10 @@ int solve(int deg, long long num, vector&lt;int&gt;&amp; val)
 </div>
 <h3>verify 用の問題</h3>
 <p>Codeforces : <a href="http://codeforces.com/contest/622/problem/F">The Sum of the k-th Powers</a>
-  <a href="http://codeforces.com/contest/622/submission/43588668">提出コード</a></p>
+  <a href="http://codeforces.com/contest/622/submission/121365178">提出コード</a><br>
+Atcoder : <a href="https://atcoder.jp/contests/arc033/tasks/arc033_4">見たことのない多項式</a>
+	<a href="https://atcoder.jp/contests/arc033/submissions/24003726">提出コード</a>
+</p>
 </section>
 
 </div>
