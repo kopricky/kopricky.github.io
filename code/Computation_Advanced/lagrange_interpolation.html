@@ -108,7 +108,6 @@ unsigned int solve(int deg, long long num, vector&lt;int&gt;&amp; val)
 {
 	if((num %= MOD) &lt; 0) num += MOD;
 	if(num &lt;= deg) return val[num];
-	unsigned int ue = 1;
 	vector&lt;unsigned int&gt; lf(deg + 2), rg(deg + 2);
 	lf[0] = rg[deg + 1] = 1;
 	for(int i = deg; i &gt;= 0; --i){
