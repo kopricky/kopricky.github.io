@@ -69,7 +69,7 @@ $\newcommand{\O}{\mathrm{O}}$
 <p>
 (関数)<br>
 add_edge() : 辺を追加する <br>
-perfect_matchching() : 完全マッチングがどうかの判定 <br>
+perfect_matching() : 完全マッチングがどうかの判定 <br>
 maximum_matching() : 最大マッチングの数を返す <br>
 find_maximum_matching() : 最大マッチングの数を計算し, その組を返す <br>
 </p>
@@ -81,14 +81,14 @@ find_maximum_matching() : 最大マッチングの数を計算し, その組を�
 <input type="checkbox" id="label" class="csscode" />
 <label for="label"></label>
 <pre class="prettyprint linenums">
-template &lt;unsigned int mod&gt;
+template &lt;uint mod&gt;
 class ModInt {
 private:
-    unsigned int v;
-    static unsigned int norm(const unsigned int&amp; x){ return x &lt; mod ? x : x - mod; }
-    static ModInt make(const unsigned int&amp; x){ ModInt m; return m.v = x, m; }
+    uint v;
+    static uint norm(const uint&amp; x){ return x &lt; mod ? x : x - mod; }
+    static ModInt make(const uint&amp; x){ ModInt m; return m.v = x, m; }
     static ModInt inv(const ModInt&amp; x){ return make(inverse(x.v, mod)); }
-    static unsigned int inverse(int a, int m){
+    static uint inverse(int a, int m){
         int u[] = {a, 1, 0}, v[] = {m, 0, 1}, t;
         while(*v){
             t = *u / *v;
@@ -99,47 +99,47 @@ private:
 
 public:
     ModInt() : v{0}{}
-    ModInt(const long long val) : v{norm(val % mod + mod)} {}
+    ModInt(const ll val) : v{norm(val % mod + mod)} {}
     ModInt(const ModInt&lt;mod&gt;&amp; n) : v{n()} {}
     explicit operator bool() const noexcept { return v != 0; }
     bool operator!() const noexcept { return !static_cast&lt;bool&gt;(*this); }
     ModInt&amp; operator=(const ModInt&amp; n){ return v = n(), (*this); }
-    ModInt&amp; operator=(const long long val){ return v = norm(val % mod + mod), (*this); }
+    ModInt&amp; operator=(const ll val){ return v = norm(val % mod + mod), (*this); }
     ModInt operator+() const { return *this; }
     ModInt operator-() const { return v == 0 ? 0 : mod - v; }
     ModInt operator+(const ModInt&amp; val) const { return make(norm(v + val())); }
     ModInt operator-(const ModInt&amp; val) const { return make(norm(v + mod - val())); }
-    ModInt operator*(const ModInt&amp; val) const { return make((long long)v * val() % mod); }
+    ModInt operator*(const ModInt&amp; val) const { return make((ll)v * val() % mod); }
     ModInt operator/(const ModInt&amp; val) const { return *this * inv(val); }
     ModInt&amp; operator+=(const ModInt&amp; val){ return *this = *this + val; }
     ModInt&amp; operator-=(const ModInt&amp; val){ return *this = *this - val; }
     ModInt&amp; operator*=(const ModInt&amp; val){ return *this = *this * val; }
     ModInt&amp; operator/=(const ModInt&amp; val){ return *this = *this / val; }
-    ModInt operator+(const long long val) const { return ModInt{v + val}; }
-    ModInt operator-(const long long val) const { return ModInt{v - val}; }
-    ModInt operator*(const long long val) const { return ModInt{(long long)v * (val % mod)}; }
-    ModInt operator/(const long long val) const { return ModInt{(long long)v * inv(val)}; }
-    ModInt&amp; operator+=(const long long val){ return *this = *this + val; }
-    ModInt&amp; operator-=(const long long val){ return *this = *this - val; }
-    ModInt&amp; operator*=(const long long val){ return *this = *this * val; }
-    ModInt&amp; operator/=(const long long val){ return *this = *this / val; }
+    ModInt operator+(const ll val) const { return ModInt{v + val}; }
+    ModInt operator-(const ll val) const { return ModInt{v - val}; }
+    ModInt operator*(const ll val) const { return ModInt{(ll)v * (val % mod)}; }
+    ModInt operator/(const ll val) const { return ModInt{(ll)v * inv(val)}; }
+    ModInt&amp; operator+=(const ll val){ return *this = *this + val; }
+    ModInt&amp; operator-=(const ll val){ return *this = *this - val; }
+    ModInt&amp; operator*=(const ll val){ return *this = *this * val; }
+    ModInt&amp; operator/=(const ll val){ return *this = *this / val; }
     bool operator==(const ModInt&amp; val) const { return v == val.v; }
     bool operator!=(const ModInt&amp; val) const { return !(*this == val); }
-    bool operator==(const long long val) const { return v == norm(val % mod + mod); }
-    bool operator!=(const long long val) const { return !(*this == val); }
-    unsigned int operator()() const { return v; }
-    friend ModInt operator+(const long long val, const ModInt&amp; n) { return n + val; }
-    friend ModInt operator-(const long long val, const ModInt&amp; n) { return ModInt{val - n()}; }
-    friend ModInt operator*(const long long val, const ModInt&amp; n) { return n * val; }
-    friend ModInt operator/(const long long val, const ModInt&amp; n) { return ModInt{val} / n; }
-    friend bool operator==(const long long val, const ModInt&amp; n) { return n == val; }
-    friend bool operator!=(const long long val, const ModInt&amp; n) { return !(val == n); }
+    bool operator==(const ll val) const { return v == norm(val % mod + mod); }
+    bool operator!=(const ll val) const { return !(*this == val); }
+    uint operator()() const { return v; }
+    friend ModInt operator+(const ll val, const ModInt&amp; n) { return n + val; }
+    friend ModInt operator-(const ll val, const ModInt&amp; n) { return ModInt{val - n()}; }
+    friend ModInt operator*(const ll val, const ModInt&amp; n) { return n * val; }
+    friend ModInt operator/(const ll val, const ModInt&amp; n) { return ModInt{val} / n; }
+    friend bool operator==(const ll val, const ModInt&amp; n) { return n == val; }
+    friend bool operator!=(const ll val, const ModInt&amp; n) { return !(val == n); }
     friend istream&amp; operator&gt;&gt;(istream&amp; is, ModInt&amp; n){
-        unsigned int v;
+        uint v;
         return is &gt;&gt; v, n = v, is;
     }
     friend ostream&amp; operator&lt;&lt;(ostream&amp; os, const ModInt&amp; n){ return (os &lt;&lt; n()); }
-    friend ModInt power(ModInt x, long long n){
+    friend ModInt power(ModInt x, ll n){
         ModInt ans = 1;
         while(n){
             if(n &amp; 1) ans *= x;
@@ -294,12 +294,12 @@ class Matching {
 private:
     const int V;
     vector&lt;pair&lt;int, int&gt; &gt; es;
-    vector&lt;int&gt; index, cnt;
+    vector&lt;int&gt; index;
     random_device rnd;
     mt19937 mt;
     uniform_int_distribution&lt;&gt; randval;
     static constexpr int LOOP = 1;
-    static constexpr unsigned int mod = 1000000007;
+    static constexpr uint mod = 1000000007;
     mat&lt;ModInt&lt;mod&gt; &gt; inverse_22(const int id, const mat&lt;ModInt&lt;mod&gt; &gt;&amp; invT){
         ModInt&lt;mod&gt; invdev = (ModInt&lt;mod&gt;)1 / (invT[0][0]*invT[id][id] - invT[0][id]*invT[id][0]);
         mat&lt;ModInt&lt;mod&gt; &gt; invN_3n_3n(2, 2);
@@ -322,7 +322,8 @@ private:
         }
         invT = N_12_12 - N_12_3n * inverse_22(id, invT) * N_3n_12;
     }
-    void find_matching(const mat&lt;ModInt&lt;mod&gt; &gt;&amp; T){
+    vector&lt;pair&lt;int, int&gt; &gt; find_matching(const mat&lt;ModInt&lt;mod&gt; &gt;&amp; T){
+        vector&lt;pair&lt;int, int&gt; &gt; ans;
         int sz = T.row();
         mat&lt;ModInt&lt;mod&gt; &gt; invT = T.inverse();
         vector&lt;int&gt; vset(sz); iota(vset.begin(), vset.end(), 0);
@@ -336,15 +337,13 @@ private:
                 }
             }
         }
+        return ans;
     }
 
 public:
-    vector&lt;pair&lt;int, int&gt; &gt; ans;
-
-    Matching(const int node_size)
-        : V(node_size), cnt(V + 1, 0), mt(rnd()), randval(1, mod - 1){}
+    Matching(const int node_size) : V(node_size), mt(rnd()), randval(1, mod - 1){}
     void add_edge(const int u, const int v){ es.emplace_back(u, v); }
-    bool perfect_matchching(){
+    bool perfect_matching(){
         for(int i = 0; i &lt; LOOP; i++){
             mat&lt;ModInt&lt;mod&gt; &gt; A(V);
             for(auto e : es){
@@ -355,7 +354,8 @@ public:
         }
         return false;
     }
-    int maximum_matchching(){
+    int maximum_matching(){
+        int mx = 0;
         for(int i = 0; i &lt; LOOP; i++){
             mat&lt;ModInt&lt;mod&gt; &gt; A(V);
             for(auto e : es){
@@ -363,32 +363,32 @@ public:
                 A[e.first][e.second] = r, A[e.second][e.first] = -r;
             }
             vector&lt;int&gt; res = A.rank();
-            ++cnt[res.size()];
-            if((size_t)(max_element(cnt.begin(), cnt.end()) - cnt.begin()) == res.size()){
-                index = move(res);
-            }
+            mx = max(mx, (int)res.size());
         }
-        return (int)(max_element(cnt.begin(), cnt.end()) - cnt.begin()) / 2;
+        return mx / 2;
     }
-    int find_maximum_matching(){
-        const int sz = maximum_matchching();
-        vector&lt;pair&lt;int, int&gt; &gt; ans_tmp;
-        vector&lt;int&gt; unzip(V, -1);
-        for(int i = 0; i &lt; 2 * sz; ++i) unzip[index[i]] = i;
+    vector&lt;pair&lt;int, int&gt; &gt;  find_maximum_matching(){
+        mat&lt;ModInt&lt;mod&gt; &gt; X(V);
+        vector&lt;pair&lt;int, int&gt; &gt; ans;
         for(int i = 0; i &lt; LOOP; i++){
-            mat&lt;ModInt&lt;mod&gt; &gt; A(2 * sz);
+            mat&lt;ModInt&lt;mod&gt; &gt; A(V);
             for(auto e : es){
-                const int u = unzip[e.first], v = unzip[e.second];
-                if(u &lt; 0 || v &lt; 0) continue;
                 int r = randval(mt);
-                A[u][v] = r, A[v][u] = -r;
+                A[e.first][e.second] = r, A[e.second][e.first] = -r;
             }
-            if(!A.det_zero()){
-                find_matching(A);
-                break;
-            }
+            vector&lt;int&gt; res = A.rank();
+            if((int)res.size() &gt; (int)index.size()) index = res, X = A;
         }
-        return sz;
+        const int sz = (int)index.size();
+        vector&lt;int&gt; unzip(V, -1);
+        for(int i = 0; i &lt; sz; ++i) unzip[index[i]] = i;
+        mat&lt;ModInt&lt;mod&gt; &gt; A(sz);
+        for(auto e : es){
+            const int u = unzip[e.first], v = unzip[e.second];
+            if(u &lt; 0 || v &lt; 0) continue;
+            A[u][v] = X[e.first][e.second], A[v][u] = X[e.second][e.first];
+        }
+        return find_matching(A);
     }
 };
 </pre>
@@ -400,9 +400,9 @@ AOJ : <a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2347">Su
   <a href="http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3804014#1">提出コード</a><br>
 最大マッチングの判定および構築の verify<br>
 Atcoder : <a href="https://joisc2016matching.contest.atcoder.jp/tasks/joisc2016matching_a">一般最大マッチング</a>
-  <a href="https://joisc2016matching.contest.atcoder.jp/submissions/8208685">提出コード</a><br>
+  <a href="https://atcoder.jp/contests/joisc2016matching/submissions/30294654">提出コード</a><br>
 yosupo さんの library checker : <a href="https://judge.yosupo.jp/problem/general_matching">Matching on General Graph</a>
-  <a href="https://judge.yosupo.jp/submission/1211">提出コード</a>
+  <a href="https://judge.yosupo.jp/submission/83056">提出コード</a>
 </p>
 </section>
 
