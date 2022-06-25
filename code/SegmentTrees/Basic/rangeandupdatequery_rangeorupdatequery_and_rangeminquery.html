@@ -63,7 +63,7 @@ $\newcommand{\O}{\mathrm{O}}$
 区間 and 更新 $a_i \leftarrow a_i \& val (i \in [l, r))$, 区間 or 更新 $a_i \leftarrow a_i | val (i \in [l, r))$, 区間最小値 $\underset{l \le i < r}{\min} a_i$ のクエリを効率的に処理できる. <br>
 CSAcademy の <a href="https://csacademy.com/contest/round-70/task/and-or-max/">And or Max</a> で出てきたデータ構造. ならしの解析は <a href="./rangemaxupdatequery_and_rangesumquery.html">これ</a> と同じように行う.<br>
 以下では CSAcademy の解説とは異なり, ハミング距離をポテンシャルとしてならし計算量を解析する(このように解析すると計算量が落ちるので). <br>
-セグ木が保持するノード($2n$ 個ぐらいある) に対応する区間 $[l, r)$ について $D(l, r)$ を区間 $[l, r)$ に含まれる数の全要素の and と全要素の or の 2 つの間のハミング距離とする. またすべてのノードの $D(l, r)$ の和を $C$ とする. ここで $C = \O (n \log \mathrm{MAX \_ VAL})$ であることに注意する. <br>
+セグ木が保持するノード($2n$ 個ぐらいある) に対応する区間 $[l, r)$ について $D(l, r)$ を区間 $[l, r)$ に含まれる数の全要素の and と全要素の or の間のハミング距離とする. またすべてのノードの $D(l, r)$ の和を $C$ とする. ここで $C = \O (n \log \mathrm{MAX \_ VAL})$ であることに注意する. <br>
 range_and の "$({\scriptsize \sim}x \& \_ and[k]) = ({\scriptsize \sim}x \& \_ or[k])$" の意味は $\& x$ を取ることによって消えるビットが $\_ and[k]$ と $\_ or[k]$ で等しいということを意味していて言い換えると, $\& x$ を区間減算と見ることのできるような区間という意味になります(区間内のすべての数から一様に立っていたビットが消えるので). <br>
 同様に range_or の "$(x \& {\scriptsize \sim}\_ or[k]) = (x \& {\scriptsize \sim}\_ and[k])$" の意味は $| x$ を取ることによって増えるビットが $\_ and[k]$ と $\_ or[k]$ で等しいということを意味していて言い換えると, $| x$ を区間加算と見ることのできるような区間という意味になります(区間内のすべての数に一様にビットを立てるので). <br>
 このとき range_and で "$({\scriptsize \sim}x \& \_ and[k]) \neq ({\scriptsize \sim}x \& \_ or[k])$" となる場合つまり余分に探索する場合は探索後 ${\scriptsize \sim}x \& \_ and[k] と {\scriptsize \sim}x \& \_ or[k]$ が等しくなるので少なくともその区間の $D(l,r)$ は $1$ 小さくなる. 同様に range_or で
