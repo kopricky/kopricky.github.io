@@ -142,7 +142,7 @@ public:
         if(r &lt; 0) r = n;
         eval(k, l, r);
         if(b &lt;= l || r &lt;= a){
-            return 0;
+            return numeric_limits&lt;T&gt;::max();
         }
         if(a &lt;= l &amp;&amp; r &lt;= b){
             return node[k];
