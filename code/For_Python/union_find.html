@@ -108,7 +108,7 @@ class UnionFind:
         self.size_[ver1] += self.size_[ver2]
 
     def size(self, ver):
-        ver = self.find(ver);
+        ver = self.find(ver)
         return self.size_[ver]
 
     def same(self, ver1, ver2):
